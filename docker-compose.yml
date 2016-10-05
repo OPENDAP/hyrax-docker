@@ -1,0 +1,18 @@
+---
+olfs:
+  image: olfs:latest
+  ports:
+   - "8080:8080"
+  links:
+   - besd
+  tty: true
+#  volumes:
+#   - /var/log/opendap/nginx:/var/log/nginx/
+#   - /var/log/opendap/tomcat:/var/log/tomcat/
+besd:
+  image: besd:latest
+#  volumes:
+#   - /ftp:/ftp:ro
+#   - /share:/share:ro
+#   - /share/apps/opendap/DATASETS:/usr/local/share/hyrax/DATASETS:ro
+#   - /var/log/opendap/bes:/var/log/bes/
