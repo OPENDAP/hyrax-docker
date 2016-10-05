@@ -1,0 +1,30 @@
+---
+- hosts: localhost
+  tasks:
+  - name: build olfs
+    docker_image:
+      name: olfs
+      tag: latest
+      path: olfs
+      state: present
+  - name: build besd
+    docker_image:
+      name: besd
+      tag: latest
+      path: besd
+      state: present
+  - name: run hyrax
+    docker_service:
+      project_name: hyrax
+      definition:
+        version: '2'
+        services:
+          besd:
+            image: besd
+          olfs:
+            image: olfs
+            ports:
+              - "8080:8080"
+            depends_on:
+              - besd
+

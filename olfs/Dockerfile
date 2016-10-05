@@ -32,7 +32,7 @@ RUN curl -fSL ${OLFS_WAR_URL} | tar -C /dev/shm -xzf -  && \
 # Default olfs config
 ###
 
-RUN mkdir -p ${CATALINA_HOME}/content/opendap
+RUN mkdir -p ${CATALINA_HOME}/content/opendap /etc/olfs
 
 #COPY files/threddsConfig.xml ${CATALINA_HOME}/content/thredds/threddsConfig.xml
 
@@ -67,6 +67,9 @@ EXPOSE 8080 8443
 RUN chown -R tomcat:tomcat ${CATALINA_HOME} && \
     chmod 400 ${CATALINA_HOME}/conf/* && \
     chmod 300 ${CATALINA_HOME}/logs/.
+
+RUN chown -R tomcat:tomcat /etc/olfs && \
+    chmod 700 /etc/olfs
 
 USER tomcat
 
