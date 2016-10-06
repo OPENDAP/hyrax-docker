@@ -12,10 +12,10 @@ MAINTAINER Gareth.Williams@csiro.au
 
 USER root
 
-RUN \
-    apt-get install -y unzip && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+#RUN \
+#    apt-get install -y unzip && \
+#    apt-get clean && \
+#    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 ###
 # Grab and unzip the OLFS
@@ -27,6 +27,7 @@ ENV OLFS_WAR_URL=https://www.opendap.org/pub/olfs/olfs-${OLFS_VERSION}-webapp.tg
 RUN curl -fSL ${OLFS_WAR_URL} | tar -C /dev/shm -xzf -  && \
     unzip -o /dev/shm/olfs-${OLFS_VERSION}-webapp/opendap.war -d ${CATALINA_HOME}/webapps/opendap/ && \
     rm -rf /dev/shm/*
+RUN sed -i 's/localhost/besd/' ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/olfs.xml
 
 ###
 # Default olfs config
