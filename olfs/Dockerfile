@@ -33,7 +33,9 @@ RUN sed -i 's/localhost/besd/' ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/olf
 RUN curl -fSL ${NCWMS_WAR_URL} -o /dev/shm/ncWMS.war && \
     unzip -o /dev/shm/ncWMS.war -d ${CATALINA_HOME}/webapps/ncWMS/ && \
     rm -rf /dev/shm/*
-#RUN sed -i 's/localhost/besd/' ${CATALINA_HOME}/webapps/ncWMS/WEB-INF/conf/olfs.xml
+RUN sed -i 'sX</tomcat-users>X<role rolename="ncWMS-admin"/> <user username="admin" password="admin" roles="ncWMS-admin"/> </tomcat-users>X' ${CATALINA_HOME}/conf/tomcat-users.xml 
+COPY config.xml ${CATALINA_HOME}/.ncWMS2/config.xml
+COPY viewers.xml ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml
 
 ###
 # Default olfs config

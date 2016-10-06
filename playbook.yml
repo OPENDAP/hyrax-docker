@@ -7,12 +7,14 @@
       tag: latest
       path: olfs
       state: present
+      force: yes
   - name: build besd
     docker_image:
       name: besd
       tag: latest
       path: besd
       state: present
+      force: yes
   - name: run hyrax
     docker_service:
       project_name: hyrax
