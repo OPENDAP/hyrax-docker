@@ -23,19 +23,23 @@ USER root
 
 ENV HYRAX_VERSION=1.13.1 OLFS_VERSION=1.16.0
 ENV OLFS_WAR_URL=https://www.opendap.org/pub/olfs/olfs-${OLFS_VERSION}-webapp.tgz
+ENV NCWMS_WAR_URL=http://search.maven.org/remotecontent?filepath=uk/ac/rdg/resc/ncWMS/2.2.2/ncWMS-2.2.2.war
 
 RUN curl -fSL ${OLFS_WAR_URL} | tar -C /dev/shm -xzf -  && \
     unzip -o /dev/shm/olfs-${OLFS_VERSION}-webapp/opendap.war -d ${CATALINA_HOME}/webapps/opendap/ && \
     rm -rf /dev/shm/*
 RUN sed -i 's/localhost/besd/' ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/olfs.xml
 
+RUN curl -fSL ${NCWMS_WAR_URL} -o /dev/shm/ncWMS.war && \
+    unzip -o /dev/shm/ncWMS.war -d ${CATALINA_HOME}/webapps/ncWMS/ && \
+    rm -rf /dev/shm/*
+#RUN sed -i 's/localhost/besd/' ${CATALINA_HOME}/webapps/ncWMS/WEB-INF/conf/olfs.xml
+
 ###
 # Default olfs config
 ###
 
-RUN mkdir -p ${CATALINA_HOME}/content/opendap /etc/olfs
-
-#COPY files/threddsConfig.xml ${CATALINA_HOME}/content/thredds/threddsConfig.xml
+RUN mkdir -p /etc/olfs
 
 ###
 # Tomcat users
