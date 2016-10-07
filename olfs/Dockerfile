@@ -24,6 +24,7 @@ USER root
 ENV HYRAX_VERSION=1.13.1 OLFS_VERSION=1.16.0
 ENV OLFS_WAR_URL=https://www.opendap.org/pub/olfs/olfs-${OLFS_VERSION}-webapp.tgz
 ENV NCWMS_WAR_URL=http://search.maven.org/remotecontent?filepath=uk/ac/rdg/resc/ncWMS/2.2.2/ncWMS-2.2.2.war
+# or get from https://github.com/Reading-eScience-Centre/edal-java/releases
 
 RUN curl -fSL ${OLFS_WAR_URL} | tar -C /dev/shm -xzf -  && \
     unzip -o /dev/shm/olfs-${OLFS_VERSION}-webapp/opendap.war -d ${CATALINA_HOME}/webapps/opendap/ && \
