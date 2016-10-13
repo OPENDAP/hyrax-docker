@@ -36,7 +36,8 @@ RUN curl -fSL ${NCWMS_WAR_URL} -o /dev/shm/ncWMS.war && \
     rm -rf /dev/shm/*
 RUN sed -i 'sX</tomcat-users>X<role rolename="ncWMS-admin"/> <user username="admin" password="admin" roles="ncWMS-admin"/> </tomcat-users>X' ${CATALINA_HOME}/conf/tomcat-users.xml 
 COPY config.xml ${CATALINA_HOME}/.ncWMS2/config.xml
-COPY viewers.xml ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml
+COPY fix_viewers.xml.pl /tmp/fix_viewers.xml.pl
+RUN perl -pi /tmp/fix_viewers.xml.pl ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml
 
 ###
 # Default olfs config
