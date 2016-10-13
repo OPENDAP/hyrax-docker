@@ -22,9 +22,8 @@ my $diff = '
 65d64
 < 
 ';
-my $FQDN = $ARGV[0]
 
   s/\<\!-- WebServiceHandler /<WebServiceHandler /;
   s/\<\/WebServiceHandler --\>/<\/WebServiceHandler>/;
-  s/localhost:8080/$FQDN:8080/g;
+  s/localhost:8080/$HOSTPORT/ if "$HOSTPORT";
   s/godiva2/Godiva3/g;
