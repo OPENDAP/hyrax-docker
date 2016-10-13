@@ -8,6 +8,7 @@
       path: olfs
       state: present
       force: yes
+      buildargs: fqdn={{ fqdn }}
   - name: build besd
     docker_image:
       name: besd

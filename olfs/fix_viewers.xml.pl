@@ -22,7 +22,7 @@ my $diff = '
 65d64
 < 
 ';
-my $FQDN = 'ci-01-cdc.it.csiro.au';
+my $FQDN = $ARGV[0]
 
   s/\<\!-- WebServiceHandler /<WebServiceHandler /;
   s/\<\/WebServiceHandler --\>/<\/WebServiceHandler>/;
