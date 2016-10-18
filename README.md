@@ -6,8 +6,10 @@ The bes(d) has minimal alterations from the default centos rpm setup
 The olfs has minor tweaks to find the besd, and a minimal ncWMS2 setup
 
 There is duplicate setup for making it run. It can be driven by docker-compose
-or ansible.  With docker-compose.yml in the current form, the images need to be
-built before docker-compose can be used.  That makes using ansible attractive.
+or ansible.
+
+An entrytpoint script is used to alter the bas.conf on startup based on
+environment variables. 
 
 As the viewers.xml configuration for ncWMS2 requires specifying a client
 accessible host:port combination, there is a script prime.sh which must be run
@@ -25,6 +27,7 @@ ansible-playbook -i "localhost," -c local playbook.yml
 
 or To run docker-compose:
 ```
+docker-compose build
 docker-compose up
 ```
 
