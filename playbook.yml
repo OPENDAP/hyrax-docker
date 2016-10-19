@@ -23,8 +23,10 @@
         services:
           besd:
             image: besd
+            env_file: ${PWD}/local.env
           olfs:
             image: olfs
+            env_file: ${PWD}/local.env
             ports:
               - "8080:8080"
             depends_on:
