@@ -3,6 +3,7 @@ version: '2'
 services:
   olfs:
     build: ./olfs
+    env_file: ${PWD}/local.env
     image: olfs:latest
     ports:
      - "8080:8080"
@@ -14,6 +15,7 @@ services:
   #   - /var/log/opendap/tomcat:/var/log/tomcat/
   besd:
     build: ./besd
+    env_file: ${PWD}/local.env
     image: besd:latest
   #  volumes:
   #   - /ftp:/ftp:ro
