@@ -54,7 +54,7 @@ ToDo:
 License: The original author considers the content in this project to be
 recipes/data intended to be shared, so a cc-by license is applied.
 Embedded sed and perl code for manipulation of config data is not considered 
-to be of no particular novel value.
+to be of particular novel value.
 
 ```
 hyrax-docker (c) by contributors:
