@@ -91,29 +91,47 @@ additional mapping for the symbolic link targets.
 Adding ssl support
 ------------------
 
-ssl support can be added to the tomcat config or as an additional proxy layer (say with an nginx docker container).
+ssl support can be added to the tomcat config or as an additional proxy layer
+(say with an nginx docker container).
 
 ToDo
 ----
 
   * [ ] feedback to opendap.org (and Reading and TPAC?) - started
-    * [ ] how to run beslistener in the foreground and are all those options needed
+    * [ ] how to run beslistener in the foreground and are all those 
+      options needed
     * [ ] link for current rpm was/is broken...
     * [ ] contribute this back
   * [ ] avoid duplication of docker-compose config if possible
-  * [ ] devise a versioning/tagging scheme to meet both upstream and docker needs
+  * [ ] devise a versioning/tagging scheme to meet both upstream and docker 
+    needs
   * [ ] establish a branch/merge strategy and guidance for contributors
+  * [ ] introduce gosu to enable enrtypoints to be run as root and then drop to
+    a regular user for the service. Currently key config files are left
+    writeble by the service user which is less than best proactice.
 
-License: The original author (GW) considers the content in this project to be
-recipes/data intended to be shared, so a cc-by license is applied.  Embedded
+License 
+-------
+
+The original author (Gareth Williams) considers the content in this project to
+be recipes/data intended to be shared, so a cc-by license is applied.  Embedded
 bash, sed and perl code for manipulation of config data is not considered to be
-of particular novel value.
+of particular novel value. If you want to contribute under th esame license
+terms, simply do so and add your name to the list of contributors. If you wish
+to use the work and license it differently, you can do so but are obliged to
+acknowledge this work. At time of writing, a dated reference to
+https://bitbucket.csiro.au/projects/ASC/repos/hyrax-docker/ would suffice.
 
-```
 hyrax-docker (c) by contributors:
 gareth.williams@csiro.au
 
 This work is licensed under a
 [Creative Commons Attribution 4.0 International License.](http://creativecommons.org/licenses/by/4.0/)
 !{cc-by logo](https://i.creativecommons.org/l/by/4.0/88x31.png)
-```
+
+Acknowledgements
+----------------
+
+Ideas have been drawn from https://github.com/Unidata/thredds-docker and
+various other contributions on dockerhub, including the official postgre
+container.
