@@ -1,20 +1,22 @@
 Hyrax docker
 ============
 
-Build and run docker containers for the hyrax bes and olfs.
+Build and run docker containers for the Hyrax bes and olfs.
 
-overview
+Overview
 --------
 
-A generic hyrax setup is provided with separate docker containers for the olfs
-and besd components.
+A generic Hyrax setup is provided with separate docker containers for the olfs
+and besd componentsi to run OPeNDAP services. See: https://www.opendap.org/software
 
 The bes(d) is built on a centos container using the the default centos rpm
 setup, with minimal alterations. Any data in /usr/share/hyrax will be served,
 including vis symlinks.
 
 The olfs is built on a hardened tomcat container from unidata, has minor tweaks
-to find the besd, and a minimal ncWMS2 setup.
+to find the besd. A minimal OGC WMS setup is included by incorporating
+https://github.com/Reading-eScience-Centre/ncwms (ncWMS2) with minimal
+configuration.
 
 The containers should run without further customisation to serve test data that
 is shipped with the bes. Additional customisation can be made via entrypoint
@@ -26,10 +28,10 @@ into the bes container at run time.
 Using Hyrax docker
 ------------------
 
-There is duplicate setup for making it run. It can be driven by docker-compose
-or ansible (with duplicate embedded docker-compose syntax). The containers 
-could be run separately but the olfs service would need to be reconfigured 
-to find a bes.
+There is duplicate setup for making the containers build and  run. It can be
+driven by docker-compose or ansible (with duplicate embedded docker-compose
+syntax). The containers could be run separately but the olfs service would need
+to be reconfigured to find a bes.
 
 Environment variables
 ---------------------
@@ -116,10 +118,14 @@ License
 The original author (Gareth Williams) considers the content in this project to
 be recipes/data intended to be shared, so a cc-by license is applied.  Embedded
 bash, sed and perl code for manipulation of config data is not considered to be
-of particular novel value. If you want to contribute under th esame license
-terms, simply do so and add your name to the list of contributors. If you wish
-to use the work and license it differently, you can do so but are obliged to
-acknowledge this work. At time of writing, a dated reference to
+of particular novel value. Hyrax and ncWMS2 packages are sourced by the
+Dockerfiles but not distributed as part of this project. This may need to be
+revisited if a container is published, say via dockerhub, 
+
+If you want to contribute under the same license terms, simply do so and add
+your name to the list of contributors. If you wish to use the work and license
+it differently, you can do so but are obliged to acknowledge this work. At time
+of writing, a dated reference to
 https://bitbucket.csiro.au/projects/ASC/repos/hyrax-docker/ would suffice.
 
 hyrax-docker (c) by contributors:
@@ -134,5 +140,5 @@ Acknowledgements
 ----------------
 
 Ideas have been drawn from https://github.com/Unidata/thredds-docker and
-various other contributions on dockerhub, including the official postgre
+various other contributions on dockerhub, including the official postgres
 container.
