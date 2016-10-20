@@ -1,40 +1,77 @@
-build and run docker containers for the hyrax bes and olfs
-----------------------------------------------------------
+Hyrax docker
+============
 
-The bes(d) has minimal alterations from the default centos rpm setup
+Build and run docker containers for the hyrax bes and olfs.
 
-The olfs has minor tweaks to find the besd, and a minimal ncWMS2 setup
+overview
+--------
+
+A generic hyrax setup is provided with separate docker containers for the olfs
+and besd components.
+
+The bes(d) is built on a centos container using the the default centos rpm
+setup, with minimal alterations. Any data in /usr/share/hyrax will be served,
+including vis symlinks.
+
+The olfs is built on a hardened tomcat container from unidata, has minor tweaks
+to find the besd, and a minimal ncWMS2 setup.
+
+The containers should run without further customisation to serve test data that
+is shipped with the bes. Additional customisation can be made via entrypoint
+scripts. The entrypoint scripts are used to alter the key conf files on startup
+based on environment variables which will be described below. Further local
+customisation (and adding your own data) can be acheived by mapping volumes
+into the bes container at run time.
+
+Using Hyrax docker
+------------------
 
 There is duplicate setup for making it run. It can be driven by docker-compose
-or ansible (with duplicate embedded docker-compose syntax).
+or ansible (with duplicate embedded docker-compose syntax). The containers 
+could be run separately but the olfs service would need to be reconfigured 
+to find a bes.
 
-Entrytpoint scripts are used to alter the key conf files on startup based on
-environment variables, described below: 
-
-The viewers.xml configuration for ncWMS2 requires specifying a client
-accessible host:port combination, The default setting will result in godiva 
-only working for clients on the localhost. 
+Environment variables
+---------------------
 
 OLFS_WMS_VIEWERS_HOSTPORT=localhost:8080
 
-Key tunable parameters from /etc/bes/bes.conf can be altered with environment variables.
-This could readily be extended for other tunables like cache size.
+> The viewers.xml configuration for ncWMS2 requires specifying a client
+  accessible host:port combination, The default setting will result in godiva 
+  only working for clients on the localhost. 
 
 BES_HELP_EMAIL=help@replaceme
 
 BES_SYMLINKS=Yes # No is the alternative option
 
+> Key tunable parameters from /etc/bes/bes.conf can be altered with environment
+  variables.  This could readily be extended for other tunables like cache size.
+
 To get environment variables to docker-compose (or the docker-compose settings
-duplicated in the ansible playbook), an environment file names local.env must
+duplicated in the ansible playbook), an environment file named local.env must
 be provided. There is a starting point in the repository at local.env.orig and
 .gitignore is set to exclude local.env from the repository.
+```
+cp local.env.orig local.env # and edit ...
+```
+
+Running the containers
+----------------------
 
 To run ansible:
 ```
 ansible-playbook -i "localhost," -c local playbook.yml
 ```
 
-or To run docker-compose:
+In the ansible case, the running containers (hyrax_olfs_1 and hyrax_besd_1)
+should be stopped, removed and images cleaned up with separate docker commands:
+```
+docker stop hyrax_olfs_1 hyrax_besd_1
+docker rm hyrax_olfs_1 hyrax_besd_1
+docker rmi olfs besd # optional
+```
+
+or, To run docker-compose (containers will be hyraxdocker_besd_1, hyraxdocker_olfs_1):
 ```
 docker-compose build
 docker-compose up
@@ -43,26 +80,40 @@ docker-compose up -d
 docker-compose down
 ```
 
-ToDo:
+Adding your own data
+--------------------
 
-  * feedback to opendap.org (and Reading and TPAC?) - started
-    * how to run beslistener in the foreground and are all those options needed
-    * link for current rpm was/is broken...
-    * contribute this back
-  * avoid duplication of docker-compose config if possible
+Any directories mapped to /usr/share/hyrax will be served. One option to make
+this work for a specific site is to have a directory of symbolic links to
+specific collection directories and map that to /usr/share/hyrax, with
+additional mapping for the symbolic link targets.
 
-License: The original author considers the content in this project to be
-recipes/data intended to be shared, so a cc-by license is applied.
-Embedded sed and perl code for manipulation of config data is not considered 
-to be of particular novel value.
+Adding ssl support
+------------------
+
+ssl support can be added to the tomcat config or as an additional proxy layer (say with an nginx docker container).
+
+ToDo
+----
+
+  * [ ] feedback to opendap.org (and Reading and TPAC?) - started
+    * [ ] how to run beslistener in the foreground and are all those options needed
+    * [ ] link for current rpm was/is broken...
+    * [ ] contribute this back
+  * [ ] avoid duplication of docker-compose config if possible
+  * [ ] devise a versioning/tagging scheme to meet both upstream and docker needs
+  * [ ] establish a branch/merge strategy and guidance for contributors
+
+License: The original author (GW) considers the content in this project to be
+recipes/data intended to be shared, so a cc-by license is applied.  Embedded
+bash, sed and perl code for manipulation of config data is not considered to be
+of particular novel value.
 
 ```
 hyrax-docker (c) by contributors:
 gareth.williams@csiro.au
 
-hyrax-docker is licensed under a
-Creative Commons Attribution 4.0 International License.
-
-You should have received a copy of the license along with this
-work.  If not, see <http://creativecommons.org/licenses/by/4.0/>.
+This work is licensed under a
+[Creative Commons Attribution 4.0 International License.](http://creativecommons.org/licenses/by/4.0/)
+!{cc-by logo](https://i.creativecommons.org/l/by/4.0/88x31.png)
 ```
