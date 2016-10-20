@@ -120,12 +120,14 @@ be recipes/data intended to be shared, so a cc-by license is applied.  Embedded
 bash, sed and perl code for manipulation of config data is not considered to be
 of particular novel value. Hyrax and ncWMS2 packages are sourced by the
 Dockerfiles but not distributed as part of this project. This may need to be
-revisited if a container is published, say via dockerhub, 
+revisited if a container is published, say via dockerhub, but as the packes are
+installed from rpm and jar, the included permissive licenses are expected to be
+sufficient. 
 
-If you want to contribute under the same license terms, simply do so and add
-your name to the list of contributors. If you wish to use the work and license
-it differently, you can do so but are obliged to acknowledge this work. At time
-of writing, a dated reference to
+If you want to contribute to this project under the same cc-by license terms,
+simply do so and add your name to the list of contributors. If you wish to use
+the work and license it differently, you can do so but are obliged to
+acknowledge this work. At time of writing, a dated reference to
 https://bitbucket.csiro.au/projects/ASC/repos/hyrax-docker/ would suffice.
 
 hyrax-docker (c) by contributors:
