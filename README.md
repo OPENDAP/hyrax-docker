@@ -123,10 +123,11 @@ acknowledge this work. At time of writing, a dated reference to
 https://bitbucket.csiro.au/projects/ASC/repos/hyrax-docker/ would suffice.
 
 hyrax-docker (c) by contributors:
-gareth.williams@csiro.au
+  * gareth.williams@csiro.au
 
 This work is licensed under a
 [Creative Commons Attribution 4.0 International License.](http://creativecommons.org/licenses/by/4.0/)
+
 ![cc-by logo](https://i.creativecommons.org/l/by/4.0/88x31.png)
 
 Acknowledgements
