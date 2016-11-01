@@ -46,30 +46,10 @@ ENV OLFS_WMS_VIEWERS_HOSTPORT=localhost:8080
 RUN mkdir -p /etc/olfs
 
 ###
-# Tomcat Java Options
-###
-
-#COPY files/setenv.sh $CATALINA_HOME/bin/setenv.sh
-
-#COPY files/javaopts.sh $CATALINA_HOME/bin/javaopts.sh
-
-#RUN chmod 755 $CATALINA_HOME/bin/*.sh
-
-###
 # Expose ports
 ###
 
 EXPOSE 8080 8443
-
-###
-# Reasserting ownership and permissions from parent container
-# https://github.com/docker/docker/issues/6119
-# https://github.com/docker/docker/issues/7390
-###
-
-RUN chown -R tomcat:tomcat ${CATALINA_HOME} && \
-    chmod 400 ${CATALINA_HOME}/conf/* && \
-    chmod 300 ${CATALINA_HOME}/logs/.
 
 RUN chown -R tomcat:tomcat /etc/olfs && \
     chmod 700 /etc/olfs
