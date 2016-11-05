@@ -51,8 +51,8 @@ RUN mkdir -p /etc/olfs
 
 EXPOSE 8080 8443
 
-RUN chown -R tomcat:tomcat /etc/olfs && \
-    chmod 700 /etc/olfs
+RUN chown -R tomcat:tomcat /etc/olfs ${CATALINA_HOME}/.ncWMS2 /etc/.java && \
+    chmod 700 /etc/olfs ${CATALINA_HOME}/.ncWMS2 /etc/.java
 
 
 COPY entrypoint.sh /
