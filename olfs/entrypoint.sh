@@ -14,7 +14,7 @@ if [ "$1" = 'catalina.sh' ]; then
 		sed -i "s/OLFS_WMS_VIEWERS_HOSTPORT/$OLFS_WMS_VIEWERS_HOSTPORT/" ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml
 	fi
 
-	#exec gosu tomcat "$@"
+	exec gosu tomcat "$@"
 fi
 
 exec "$@"

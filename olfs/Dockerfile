@@ -59,6 +59,7 @@ COPY entrypoint.sh /
 RUN  chmod +x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
 
-USER tomcat
+# leave setting ser to gosu
+#USER tomcat
 
 CMD ["catalina.sh", "run"]
