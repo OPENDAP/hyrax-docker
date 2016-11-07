@@ -43,7 +43,6 @@ COPY fix_viewers.xml.pl /tmp/fix_viewers.xml.pl
 RUN perl -pi /tmp/fix_viewers.xml.pl ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml
 ENV OLFS_WMS_VIEWERS_HOSTPORT=localhost:8080
 
-RUN mkdir -p /etc/olfs
 
 ###
 # Expose ports
@@ -51,7 +50,8 @@ RUN mkdir -p /etc/olfs
 
 EXPOSE 8080 8443
 
-RUN chown -R tomcat:tomcat /etc/olfs ${CATALINA_HOME}/.ncWMS2 /etc/.java && \
+RUN mkdir -p /etc/olfs && \
+    chown -R tomcat:tomcat /etc/olfs ${CATALINA_HOME}/.ncWMS2 /etc/.java && \
     chmod 700 /etc/olfs ${CATALINA_HOME}/.ncWMS2 /etc/.java
 
 

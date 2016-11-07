@@ -7,14 +7,15 @@ Overview
 --------
 
 A generic Hyrax setup is provided with separate docker containers for the olfs
-and besd componentsi to run OPeNDAP services. See: https://www.opendap.org/software
+and besd components to run OPeNDAP services. See:
+https://www.opendap.org/software
 
-The bes(d) is built on a centos container using the the default centos rpm
-setup, with minimal alterations. Any data in /usr/share/hyrax will be served,
-including vis symlinks.
+The bes(d) is built on a centos container using the default centos rpm setup,
+with minimal alterations. Any data in /usr/share/hyrax will be served,
+including via symlinks.
 
-The olfs is built on a hardened tomcat container from unidata, has minor tweaks
-to find the besd. A minimal OGC WMS setup is included by incorporating
+The olfs is built on a hardened tomcat container from unidata and has minor
+tweaks to find the besd. A minimal OGC WMS setup is included by incorporating
 https://github.com/Reading-eScience-Centre/ncwms (ncWMS2) with minimal
 configuration.
 
@@ -85,10 +86,9 @@ docker-compose down
 Adding your own data
 --------------------
 
-Any directories mapped to /usr/share/hyrax will be served. One option to make
-this work for a specific site is to have a directory of symbolic links to
-specific collection directories and map that to /usr/share/hyrax, with
-additional mapping for the symbolic link targets.
+Any directories mapped to /usr/share/hyrax will be served. If symbolic links
+are enabled, this directory can contain links to other directories that are
+mapped.
 
 Adding ssl support
 ------------------
@@ -108,9 +108,10 @@ ToDo
   * [ ] devise a versioning/tagging scheme to meet both upstream and docker 
     needs
   * [ ] establish a branch/merge strategy and guidance for contributors
-  * [ ] introduce gosu to enable enrtypoints to be run as root and then drop to
+  * [x] introduce gosu to enable entrypoints to be run as root and then drop to
     a regular user for the service. Currently key config files are left
     writeble by the service user which is less than best proactice.
+  * [ ] remove need for /etc/.java to be writeable by tomcat
 
 License 
 -------
@@ -120,9 +121,9 @@ be recipes/data intended to be shared, so a cc-by license is applied.  Embedded
 bash, sed and perl code for manipulation of config data is not considered to be
 of particular novel value. Hyrax and ncWMS2 packages are sourced by the
 Dockerfiles but not distributed as part of this project. This may need to be
-revisited if a container is published, say via dockerhub, but as the packes are
-installed from rpm and jar, the included permissive licenses are expected to be
-sufficient. 
+revisited if a container is published, say via dockerhub, but as the packages
+are installed from rpm and jar, the included permissive licenses are expected
+to be sufficient. 
 
 If you want to contribute to this project under the same cc-by license terms,
 simply do so and add your name to the list of contributors. If you wish to use
@@ -143,4 +144,4 @@ Acknowledgements
 
 Ideas have been drawn from https://github.com/Unidata/thredds-docker and
 various other contributions on dockerhub, including the official postgres
-container.
+container's exemplar use of variables with an entrypoint.
