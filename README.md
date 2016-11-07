@@ -102,15 +102,16 @@ ToDo
   * [ ] feedback to opendap.org (and Reading and TPAC?) - started
     * [ ] how to run beslistener in the foreground and are all those 
       options needed
-    * [ ] link for current rpm was/is broken...
+    * [x] link for current rpm was/is broken...
     * [ ] contribute this back
   * [ ] avoid duplication of docker-compose config if possible
   * [ ] devise a versioning/tagging scheme to meet both upstream and docker 
     needs
   * [ ] establish a branch/merge strategy and guidance for contributors
   * [x] introduce gosu to enable entrypoints to be run as root and then drop to
-    a regular user for the service. Currently key config files are left
-    writeble by the service user which is less than best proactice.
+    a regular user for the service. - done for olfs via gosu in underlying 
+    unidata/tomcat-docker:8 container and custom entrypoint (overriding the 
+    unidata one). Using a tomcat security manager might be useful later.
   * [ ] remove need for /etc/.java to be writeable by tomcat
 
 License 
