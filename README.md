@@ -118,27 +118,26 @@ License
 -------
 
 The original author (Gareth Williams) considers the content in this project to
-be recipes/data intended to be shared, so a cc-by license is applied.  Embedded
-bash, sed and perl code for manipulation of config data is not considered to be
-of particular novel value. Hyrax and ncWMS2 packages are sourced by the
-Dockerfiles but not distributed as part of this project. This may need to be
-revisited if a container is published, say via dockerhub, but as the packages
-are installed from rpm and jar, the included permissive licenses are expected
-to be sufficient. 
+be recipes/data intended to be shared, so a permissive license is applied.
+Embedded bash, sed and perl code for manipulation of config data is not
+considered to be of particular novel value. Hyrax and ncWMS2 packages are
+sourced by the Dockerfiles but not distributed as part of this project. This
+may need to be revisited if a container is published, say via dockerhub, but as
+the packages are installed from rpm and jar, the included permissive licenses
+are expected to be sufficient. 
 
-If you want to contribute to this project under the same cc-by license terms,
+If you want to contribute to this project under compatible license terms,
 simply do so and add your name to the list of contributors. If you wish to use
 the work and license it differently, you can do so but are obliged to
-acknowledge this work. At time of writing, a dated reference to
+acknowledge this work and any acknowledged works that require so. At time of
+writing, a dated reference to
 https://bitbucket.csiro.au/projects/ASC/repos/hyrax-docker/ would suffice.
 
 hyrax-docker (c) by contributors:
   * gareth.williams@csiro.au
 
-This work is licensed under a
-[Creative Commons Attribution 4.0 International License.](http://creativecommons.org/licenses/by/4.0/)
-
-![cc-by logo](https://i.creativecommons.org/l/by/4.0/88x31.png)
+This work is licensed under a CSIRO variation of a MIT / BSD Open Source
+License.  The license text is in the file CSIRO_MIT_LICENSE
 
 Acknowledgements
 ----------------
