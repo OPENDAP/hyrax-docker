@@ -4,7 +4,7 @@
 
 FROM centos:6.8
 
-MAINTAINER Gareth.Williams@csiro.au
+MAINTAINER ndp@opendap.org
 
 USER root
 
@@ -13,10 +13,12 @@ RUN \
     yum -y update && \
     yum clean all
 
-ENV HYRAX_VERSION=1.13.1
+ENV HYRAX_VERSION=1.13.4
 
-RUN yum -y install https://www.opendap.org/pub/binary/hyrax-1.13.1/centos6.6/libdap-3.18.0-1.el6.x86_64.rpm \
-                https://www.opendap.org/pub/binary/hyrax-1.13.1/centos6.6/bes-3.17.2-2.static.el6.x86_64.rpm
+
+
+RUN yum -y install https://www.opendap.org/pub/binary/hyrax-1.13.4/centos-6.x/libdap-3.19.0-1.el6.x86_64.rpm \
+                https://www.opendap.org/pub/binary/hyrax-1.13.4/centos-6.x/bes-3.18.0-1.static.el6.x86_64.rpm
 
 COPY entrypoint.sh /
 RUN  chmod +x /entrypoint.sh
