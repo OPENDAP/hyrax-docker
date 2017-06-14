@@ -4,7 +4,7 @@
 
 FROM unidata/tomcat-docker:8
 
-MAINTAINER Gareth.Williams@csiro.au
+MAINTAINER support@opendap.org
 
 USER root
 
@@ -18,7 +18,7 @@ USER root
 # Grab and unzip the OLFS
 ###
 
-ENV HYRAX_VERSION=1.13.1 OLFS_VERSION=1.16.0
+ENV HYRAX_VERSION=1.13.4 OLFS_VERSION=1.16.3
 ENV OLFS_WAR_URL=https://www.opendap.org/pub/olfs/olfs-${OLFS_VERSION}-webapp.tgz
 ENV NCWMS_WAR_URL=http://search.maven.org/remotecontent?filepath=uk/ac/rdg/resc/ncWMS/2.2.2/ncWMS-2.2.2.war
 # or get from https://github.com/Reading-eScience-Centre/edal-java/releases

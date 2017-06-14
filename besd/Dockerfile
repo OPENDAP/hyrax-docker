@@ -4,7 +4,7 @@
 
 FROM centos:6.8
 
-MAINTAINER ndp@opendap.org
+MAINTAINER support@opendap.org
 
 USER root
 
