@@ -1,5 +1,9 @@
 #!/bin/bash
-
+#
+#
+# Super simple launcher script for hyrax-docker that relies on the "prefix" environment variable
+# to locate log file output and data inputs for the BES.
+#
 
 # Run the besd container 
 docker run -itd -p 10022:10022 -v $prefix/share/hyrax:/usr/share/hyrax --name=besd bes-3.18.0-static
