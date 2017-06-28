@@ -2,7 +2,7 @@
 # Dockerfile for Hyrax BES
 ###
 
-FROM centos:6.8
+FROM centos:7
 
 MAINTAINER support@opendap.org
 
@@ -17,9 +17,8 @@ ENV HYRAX_VERSION=1.13.4
 
 
 
-RUN yum -y install https://www.opendap.org/pub/binary/hyrax-1.13.4/centos-6.x/libdap-3.19.0-1.el6.x86_64.rpm \
-                https://www.opendap.org/pub/binary/hyrax-1.13.4/centos-6.x/bes-3.18.0-1.static.el6.x86_64.rpm
-
+RUN yum -y install https://www.opendap.org/pub/binary/hyrax-1.13.4/centos-7.x/libdap-3.19.0-1.el7.centos.x86_64.rpm \
+                   https://www.opendap.org/pub/binary/hyrax-1.13.4/centos-7.x/bes-3.18.0-1.static.el7.centos.x86_64.rpm
 COPY entrypoint.sh /
 RUN  chmod +x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
