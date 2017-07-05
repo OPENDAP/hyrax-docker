@@ -1,68 +1,63 @@
 #!/bin/bash
 # This is the entrypoint.sh file for the single container Hyrax.
 #set -exv
-set -e
+#set -e
 echo "$@"
 
-echo "My username is: "`whoami`;  ls -l /var/log/bes
+echo "My username is: "`whoami`;  
 
-
-# ls -la /etc/init.d/*
-# more /etc/init.d/README
-# ls -la $CATALINA_HOME  $CATALINA_HOME/bin $CATALINA_HOME/webapps
-
-
-# Start the first process
+# Start the BES daemon process
 # /usr/bin/besdaemon -i /usr -c /etc/bes/bes.conf -r /var/run/bes.pid
 /usr/bin/besctl start; 
 status=$?
 if [ $status -ne 0 ]; then
     echo "Failed to start BES: $status"
     exit $status
-else 
-    echo "The BES is UP!"
 fi
 besd_pid=`ps aux | grep /usr/bin/besdaemon | grep -v grep | awk '{print $2;}' - `;
-echo "besd_pid:   $besd_pid";
+echo "The BES is UP! pid: $besd_pid";
 
 
-# Start Tomcat 
-/usr/libexec/tomcat/server start > /usr/share/tomcat/logs/console.log 2>&1 &
+# Start Tomcat process
+/usr/libexec/tomcat/server start > /var/log/tomcat/console.log 2>&1 &
 status=$?
 tomcat_pid=$!
 if [ $status -ne 0 ]; then
     echo "Failed to start Tomcat: $status"
     exit $status
-else
-    echo "Tomcat is UP!"
 fi
-echo "tomcat_pid: $tomcat_pid";
-echo "Hyrax Has Been Started.";
-
-
-#tomcat_pid=`ps aux`; #| grep /usr/libexec/tomcat/server`; #| awk '{print $2;}' - `;
-
+#echo "-------------------------------------------------------------------"
+#ps aux;
+#echo "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
+echo "Tomcat is UP! pid: $tomcat_pid";
+echo "Hyrax Has Arrived...";
 
 while /bin/true; do
     sleep 60
-    echo "------------------------------------------------------------------"
-    # ps aux | grep besdaemon | grep -v grep;
-    besd=`ps aux | grep /usr/bin/besdaemon | grep -v grep | awk '{print $2;}' - `;
+    echo "-------------------------------------------------------------------"
+    #ps aux;
+    #echo "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
+    besd_ps=`ps -f $besd_pid`;
     BESD_STATUS=$?
-    echo "BESD_STATUS: $BESD_STATUS besd:$besd besd_pid:$besd_pid"
-    tomcat=`ps aux | grep /usr/share/tomcat/bin/bootstrap.jar | grep -v grep | awk '{print $2;}' - `;
+    echo "BESD_STATUS: $BESD_STATUS  besd_pid:$besd_pid"
+    
+    tomcat_ps=`ps -f $tomcat_pid`;
+    #ps aux | grep tomcat | grep -v grep;
     TOMCAT_STATUS=$?
-    echo "TOMCAT_STATUS: $TOMCAT_STATUS tomcat:$tomcat tomcat_pid:$tomcat_pid"
+    echo "TOMCAT_STATUS: $TOMCAT_STATUS tomcat_pid:$tomcat_pid"
 
-    if [    $BESD_STATUS -ne 0 
-         -o $TOMCAT_STATUS -ne 0 
-         -o $besd -ne $besd_pid 
-         -o $tomcat -ne $tomcat_pid
-         ]; then
-        echo "BESD_STATUS: $BESD_STATUS besd:$besd bes_pid:$bes_pid"
-        echo "TOMCAT_STATUS: $TOMCAT_STATUS tomcat:$tomcat tomcat_pid:$tomcat_pid"
-        echo "Somebody died! Exiting..."
-        exit -1
+    if [ $BESD_STATUS -ne 0 ]; then
+        echo "BESD_STATUS: $BESD_STATUS bes_pid:$bes_pid"
+        echo "The BES daemon appears to have died! Exiting."
+        exit -1;
+    fi
+    if [ $TOMCAT_STATUS -ne 0 ]; then
+        echo "TOMCAT_STATUS: $TOMCAT_STATUS tomcat_pid:$tomcat_pid"
+        echo "Tomcat appears to have died! Exiting."
+        echo "Tomcat Console Log [BEGIN]"
+        cat /usr/share/tomcat/logs/console.log;
+        echo "Tomcat Console Log [END]"
+        exit -2;
     fi
 done
  
