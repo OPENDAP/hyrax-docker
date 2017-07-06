@@ -1,6 +1,90 @@
 Hyrax docker
 ============
 
+Build a docker container that holds a complete hyrax server instance
+in a single container.
+
+> NOTE: This code is based on work started by *** at *** and contributed
+to OPeNDAP. We are grateful for their support.
+
+Overview
+--------
+
+Building and Running
+--------------------
+
+To build the container, clone this project
+```
+git clone https://github.com/opendap/hyrax-docker
+git checkout trials
+```
+and use `docker build`
+```
+docker build -t hyrax-1.13.4 hyrax
+```
+
+To run the container:
+```
+docker run -h hyrax -p 8080:8080 --name=hyrax-1.13.4 hyrax-1.13.4
+```
+
+However, you can use different port numbers so that several Hyrax
+instances can run on one host (e.g., you can have a development server
+running on port 8080 on the native OS and then use `-p 9090:8080` to
+bind the Hyrax in the docker container to the localhost:9090.
+
+To run the Dockerized Hyrax on port 80, use
+```
+sudo docker run -h hyrax -p 80:8080 --name=hyrax-1.13.4 hyrax-1.13.4
+```
+
+To stop the container
+```
+docker stop hyrax-1.13.4
+```
+where the argument to `docker stop` is the value passed in for the
+`--name` parameter with `docker run`
+
+Acknowledgements
+----------------
+
+Based on https://bitbucket.csiro.au/projects/ASC/repos/hyrax-docker/,
+Dec 19, 2016, by gareth.williams@csiro.au. That project was licensed
+under a CSIRO variation of a MIT / BSD Open Source License. The
+license text is in the file CSIRO_MIT_LICENSE
+
+Ideas have been drawn from https://github.com/Unidata/thredds-docker and
+various other contributions on dockerhub, including the official postgres
+container's exemplar use of variables with an entrypoint.
+
+License
+-------
+
+Copyright (c) 2017 OPeNDAP, Inc.
+Author: Nathan David Potter <ndp@OPeNDAP.org>
+        Dan Holloway <dholloway@OPeNDAP.org>
+	James Gallagher <jgallagher@OPeNDAP.org>
+
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation; either
+version 2.1 of the License, or (at your option) any later version.
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with this library; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+
+You can contact OPeNDAP, Inc. at PO Box 112, Saunderstown, RI. 02874-0112.
+
+
+ORIGINAL README FOLLOWS HERE
+----------------------------
+
 Build and run docker containers for the Hyrax bes and olfs.
 
 Overview
