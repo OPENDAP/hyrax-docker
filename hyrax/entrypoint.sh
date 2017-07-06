@@ -1,7 +1,11 @@
 #!/bin/bash
 # This is the entrypoint.sh file for the single container Hyrax.
-#set -exv
-#set -e
+
+# set -f # "set -o noglob"  Disable file name generation using metacharacters (globbing).
+# set -v # "set -o verbose" Prints shell input lines as they are read.
+# set -x # "set -o xtrace"  Print command traces before executing command.
+# set -e #  Exit on error.
+
 echo "$@"
 
 echo "My username is: "`whoami`;  
