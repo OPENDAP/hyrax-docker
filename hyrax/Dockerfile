@@ -53,25 +53,22 @@ RUN set -e \
     && echo "Retrieving, verifying, and installing libdap. rpm: $LIBDAP_RPM" \
     && curl -s $LIBDAP_RPM > ./libdap.rpm \
     && curl -s $LIBDAP_RPM.sig > ./libdap.rpm.sig \
-    && df -h \
     && gpg -v --verify ./libdap.rpm.sig ./libdap.rpm \
     && ls -l ./libdap* \
     && yum -y install ./libdap.rpm 
+    # rm -f libdap.*
 
 # Install BES
 RUN set -e \
     && echo "Retrieving, verifying, and installing besd. rpm: $BES_RPM" \
     && curl -s ${BES_RPM} > ./bes.rpm \
     && curl -s ${BES_RPM}.sig > ./bes.rpm.sig \
-    && df -h \
     && gpg -v --verify ./bes.rpm.sig ./bes.rpm \
     && ls -l ./bes* \
-    && yum -y install ./bes.rpm
-    
-    # rm -f libdap.* bes.*
+    && yum -y install ./bes.rpm 
+    # rm -f bes.*
 
 RUN echo "besdaemon is here: "`which besdaemon`
-
 
 # Retrieve, verify, and install the OLFS web application
 RUN set -e \
@@ -114,9 +111,9 @@ ENV BES_SYMLINKS=Yes
 # Yes (hyrax docker default overrides rpm default) or No, for symlinks in /usr/share/hyrax
 
 
-RUN echo "############################" && \
-    ls -l /usr/bin/besdaemon /usr/share/tomcat /usr/share/tomcat/webapps && \
-    echo "############################" 
+#RUN echo "############################" && \
+#    ls -l /usr/bin/besdaemon /usr/share/tomcat /usr/share/tomcat/webapps && \
+#    echo "############################" 
 
 CMD ["-"]
 
