@@ -71,9 +71,10 @@ License
 -------
 
 Copyright (c) 2017 OPeNDAP, Inc.
-Author: Nathan David Potter <ndp@OPeNDAP.org>
-        Dan Holloway <dholloway@OPeNDAP.org>
-	James Gallagher <jgallagher@OPeNDAP.org>
+
+Authors: Nathan David Potter <ndp@opendap.org>,
+Dan Holloway <dholloway@opendap.org>,
+James Gallagher <jgallagher@opendap.org>
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
