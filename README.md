@@ -4,11 +4,20 @@ Hyrax docker
 Build a docker container that holds a complete hyrax server instance
 in a single container.
 
-> NOTE: This code is based on work started by *** at *** and contributed
-to OPeNDAP. We are grateful for their support.
-
 Overview
 --------
+
+A generic Hyrax setup is provided with the entire Hyrax server running
+in a single container. See: https://www.opendap.org/software
+
+The OLFS and BES run in a container based on the DockerHub CentOS-7
+image.
+
+The container starts up serving the default data shipped with Hyrax,
+but can easily be started to serve data from the host machine.
+
+> NOTE: This code is based on work started by Gareth Williams at CSIRO and contributed
+to OPeNDAP. We are grateful for their support.
 
 Building and Running
 --------------------
@@ -41,21 +50,22 @@ sudo docker run -h hyrax -p 80:8080 --name=hyrax-1.13.4 hyrax-1.13.4
 To stop the container
 ```
 docker stop hyrax-1.13.4
+docker rm hyrax-1.13.4
 ```
 where the argument to `docker stop` is the value passed in for the
-`--name` parameter with `docker run`
+`--name` parameter with `docker run`. `docker rm` is needed to start
+the container again if you change any of the `docker run` parameters.
 
-Acknowledgements
-----------------
+Using Hyrax docker
+------------------
 
-Based on https://bitbucket.csiro.au/projects/ASC/repos/hyrax-docker/,
-Dec 19, 2016, by gareth.williams@csiro.au. That project was licensed
-under a CSIRO variation of a MIT / BSD Open Source License. The
-license text is in the file CSIRO_MIT_LICENSE
+To serve data other than the default data included with Hyrax, use the
+'volume' option with `docker run` to map the path to data on your host
+to `/usr/share/hyrax` in the Hyrax docker container.
 
-Ideas have been drawn from https://github.com/Unidata/thredds-docker and
-various other contributions on dockerhub, including the official postgres
-container's exemplar use of variables with an entrypoint.
+```
+docker run -h hyrax -p 8080:8080 -v <your path>:/usr/share/hyrax --name=hyrax-1.13.4 hyrax-1.13.4
+```
 
 License
 -------
@@ -80,6 +90,18 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 You can contact OPeNDAP, Inc. at PO Box 112, Saunderstown, RI. 02874-0112.
+
+Acknowledgements
+----------------
+
+Based on https://bitbucket.csiro.au/projects/ASC/repos/hyrax-docker/,
+Dec 19, 2016, by gareth.williams@csiro.au. That project was licensed
+under a CSIRO variation of a MIT / BSD Open Source License. The
+license text is in the file CSIRO_MIT_LICENSE
+
+Ideas have been drawn from https://github.com/Unidata/thredds-docker and
+various other contributions on dockerhub, including the official postgres
+container's exemplar use of variables with an entrypoint.
 
 
 ORIGINAL README FOLLOWS HERE
