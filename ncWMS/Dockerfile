@@ -34,8 +34,8 @@ RUN sed -i 'sX</tomcat-users>X<role rolename="ncWMS-admin"/> <user username="adm
 # make ncWMS work without further configuration
 COPY config.xml ${CATALINA_HOME}/.ncWMS2/config.xml
 RUN  chmod +r ${CATALINA_HOME}/.ncWMS2/config.xml
-COPY cors.properties ${CATALINA_HOME}/webapps/ncWMS/WEB-INF/classes
-RUN  chmod +r ${CATALINA_HOME}/webapps/ncWMS/WEB-INF/classes
+#COPY cors.properties ${CATALINA_HOME}/webapps/ncWMS/WEB-INF/classes
+#RUN  chmod +r ${CATALINA_HOME}/webapps/ncWMS/WEB-INF/classes
 
 #
 # first step to enable ncWMS and godiva
