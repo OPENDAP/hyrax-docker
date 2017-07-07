@@ -1,5 +1,6 @@
-###
-# Dockerfile for Hyrax BES
+###############################################################################################
+# 
+# Dockerfile for single container Hyrax
 #
 #
 # Some shell state reference:
@@ -8,8 +9,8 @@
 # set -x # "set -o xtrace"  Print command traces before executing command.
 # set -e #  Exit on error.
 #
-# In general use "set -e" when running commands that matter and don;t use
-# it for debug stuff.
+# In general use "set -e" when running commands that matter and don't use
+# it for debugging stuff.
 
 FROM centos:7
 
@@ -48,7 +49,7 @@ ENV LIBDAP_RPM="https://www.opendap.org/pub/binary/hyrax-${HYRAX_VERSION}/centos
 ENV BES_RPM="https://www.opendap.org/pub/binary/hyrax-${HYRAX_VERSION}/centos-7.x/bes-${BES_VERSION}.static.el7.centos.x86_64.rpm"
 ENV OLFS_WAR_URL="https://www.opendap.org/pub/olfs/olfs-${OLFS_VERSION}-webapp.tgz"
 
-# Install Libdap
+# Retrieve, verify, and install Libdap
 RUN set -e \
     && echo "Retrieving, verifying, and installing libdap. rpm: $LIBDAP_RPM" \
     && curl -s $LIBDAP_RPM > ./libdap.rpm \
@@ -58,7 +59,10 @@ RUN set -e \
     && yum -y install ./libdap.rpm 
     # rm -f libdap.*
 
-# Install BES
+# gpg --keyserver certserver.pgp.com --recv-keys 
+
+
+# Retrieve, verify, and install the BES
 RUN set -e \
     && echo "Retrieving, verifying, and installing besd. rpm: $BES_RPM" \
     && curl -s ${BES_RPM} > ./bes.rpm \
