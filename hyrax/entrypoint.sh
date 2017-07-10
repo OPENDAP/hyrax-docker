@@ -39,6 +39,7 @@ echo "Hyrax Has Arrived...";
 while /bin/true; do
     sleep 60
     echo "-------------------------------------------------------------------"
+    date
     #ps aux;
     #echo "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
     besd_ps=`ps -f $besd_pid`;

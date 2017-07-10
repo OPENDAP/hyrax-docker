@@ -95,6 +95,58 @@ RUN set -e \
     && chmod 700 ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs 
 
 
+
+
+###############################################################
+# retrieve and install the ncWMS web application
+#
+ENV NCWMS_WAR_URL=http://search.maven.org/remotecontent?filepath=uk/ac/rdg/resc/ncWMS/2.2.2/ncWMS-2.2.2.war
+
+RUN curl -sfSL ${NCWMS_WAR_URL} -o /dev/shm/ncWMS.war && \
+    unzip -o /dev/shm/ncWMS.war -d ${CATALINA_HOME}/webapps/ncWMS2/ && \
+    rm -rf /dev/shm/*
+
+#
+# set an ncWMS admin even though it is not needed given a custom config.xml will be used
+RUN sed -i 'sX</tomcat-users>X<role rolename="ncWMS-admin"/> <user username="admin" password="admin" roles="ncWMS-admin"/> </tomcat-users>X' ${CATALINA_HOME}/conf/tomcat-users.xml 
+#
+# make ncWMS work without further configuration
+COPY ncWMS_config.xml /root/.ncWMS2/config.xml
+RUN  chmod +r /root/.ncWMS2/config.xml
+
+#
+# first step to enable ncWMS and godiva
+# entrypoint will take second step to set the client visible host:port
+ENV NCWMS_HOST=http://localhost:8080
+COPY olfs_viewers.xml /tmp/olfs_viewers.xml
+RUN set -e \
+    && echo "---------------------------------------------------------------------------"\
+    && ls -la /tmp/olfs_viewers.xml \
+    && sed "s+@NCWMS_PUBLIC_HOST_AND_PORT@+${NCWMS_HOST}+g" /tmp/olfs_viewers.xml \
+    |  tee ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml \
+    && echo "---------------------------------------------------------------------------"\
+    && echo "${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml "\
+    && cat ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml \
+    && echo "---------------------------------------------------------------------------"
+    
+    
+###############################################################
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 COPY entrypoint.sh /
 RUN  set -e && chmod +x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
