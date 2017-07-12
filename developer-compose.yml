@@ -1,0 +1,34 @@
+---
+version: '3'
+services:
+  olfs:
+    build: ./olfs
+    env_file: ${PWD}/local.env
+    image: olfs:latest
+    ports:
+     - "80:8080"
+    tty: true
+    volumes:
+     - ./dev-log/olfs_tomcat:/usr/local/tomcat/logs
+     - ./dev-log:/usr/local/tomcat/webapps/opendap/WEB-INF/conf/logs
+  besd:
+    build: ./besd
+    env_file: ${PWD}/local.env
+    image: besd:latest
+    ports:
+     - "10022:10022"
+    volumes:
+      - ./dev-log:/var/log/bes/
+  #   - /ftp:/ftp:ro
+  #   - /share:/share:ro
+  #   - /share/apps/opendap/DATASETS:/usr/local/share/hyrax/DATASETS:ro
+  ncwms:
+    build: ./ncWMS
+    env_file: ${PWD}/local.env
+    image: ncwms:latest
+    ports:
+     - "8080:8080"
+    tty: true
+    volumes:
+     - ./dev-log/ncwms_tomcat:/usr/local/tomcat/logs
+     - ./dev-log/ncwms:/root/.ncWMS2/logs
