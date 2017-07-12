@@ -11,6 +11,12 @@
 #
 # In general use "set -e" when running commands that matter and don't use
 # it for debugging stuff.
+#
+# Set one or more individual labels
+LABEL vendor="OPeNDAP Incorporated"
+LABEL org.opendap.hyrax.version="1.13.4"
+LABEL org.opendap.hyrax.release-date="2017-06-05"
+LABEL org.opendap.hyrax.version.is-production="true"
 
 FROM centos:7
 
@@ -19,10 +25,13 @@ MAINTAINER support@opendap.org
 USER root
 
 # Update and install the needful.
-RUN \
-    yum -y install which unzip tomcat && \
-    yum -y update && \
-    yum clean all 
+RUN set -e \
+    && yum -y install \
+       tomcat \
+       unzip  \
+       which \
+    && yum -y update \
+    && yum clean all 
 
 # Tomcat environment (Tomcat installed above by via yum)
 ENV CATALINA_HOME /usr/share/tomcat
@@ -49,6 +58,7 @@ ENV LIBDAP_RPM="https://www.opendap.org/pub/binary/hyrax-${HYRAX_VERSION}/centos
 ENV BES_RPM="https://www.opendap.org/pub/binary/hyrax-${HYRAX_VERSION}/centos-7.x/bes-${BES_VERSION}.static.el7.centos.x86_64.rpm"
 ENV OLFS_WAR_URL="https://www.opendap.org/pub/olfs/olfs-${OLFS_VERSION}-webapp.tgz"
 
+###############################################################
 # Retrieve, verify, and install Libdap
 RUN set -e \
     && echo "Retrieving, verifying, and installing libdap. rpm: $LIBDAP_RPM" \
@@ -56,12 +66,13 @@ RUN set -e \
     && curl -s $LIBDAP_RPM.sig > ./libdap.rpm.sig \
     && gpg -v --verify ./libdap.rpm.sig ./libdap.rpm \
     && ls -l ./libdap* \
-    && yum -y install ./libdap.rpm 
-    # rm -f libdap.*
+    && yum -y install ./libdap.rpm \
+    && rm -f libdap.*
 
 # gpg --keyserver certserver.pgp.com --recv-keys 
 
 
+###############################################################
 # Retrieve, verify, and install the BES
 RUN set -e \
     && echo "Retrieving, verifying, and installing besd. rpm: $BES_RPM" \
@@ -69,11 +80,12 @@ RUN set -e \
     && curl -s ${BES_RPM}.sig > ./bes.rpm.sig \
     && gpg -v --verify ./bes.rpm.sig ./bes.rpm \
     && ls -l ./bes* \
-    && yum -y install ./bes.rpm 
-    # rm -f bes.*
+    && yum -y install ./bes.rpm \
+    && rm -f bes.*
 
 RUN echo "besdaemon is here: "`which besdaemon`
 
+###############################################################
 # Retrieve, verify, and install the OLFS web application
 RUN set -e \
     && echo "Retrieving And Installing OLFS-${OLFS_VERSION}" \
@@ -86,7 +98,7 @@ RUN set -e \
     && echo "Unpacking warfile..." \
     && unzip -o /dev/shm/olfs-${OLFS_VERSION}-webapp/opendap.war -d ${CATALINA_HOME}/webapps/opendap/ \
     && echo "Cleaning up." \
-    && rm -rf /dev/shm/*
+    && rm -rf /dev/shm/* olfs-${OLFS_VERSION}.tgz*
 
 # Fix ownership and access permissions
 RUN set -e \
@@ -100,21 +112,19 @@ RUN set -e \
 ###############################################################
 # retrieve and install the ncWMS web application
 #
+# This is ncWMS-2.2.2
 ENV NCWMS_WAR_URL=http://search.maven.org/remotecontent?filepath=uk/ac/rdg/resc/ncWMS/2.2.2/ncWMS-2.2.2.war
 
-RUN curl -sfSL ${NCWMS_WAR_URL} -o /dev/shm/ncWMS.war && \
-    unzip -o /dev/shm/ncWMS.war -d ${CATALINA_HOME}/webapps/ncWMS2/ && \
-    rm -rf /dev/shm/*
+RUN set -e \
+    && curl -sfSL ${NCWMS_WAR_URL} -o /dev/shm/ncWMS.war \
+    && unzip -o /dev/shm/ncWMS.war -d ${CATALINA_HOME}/webapps/ncWMS2/ \
+    && rm -rf /dev/shm/*
 
 #
 # set an ncWMS admin even though it is not needed given a custom config.xml will be used
-RUN sed -i 'sX</tomcat-users>X<role rolename="ncWMS-admin"/> <user username="admin" password="admin" roles="ncWMS-admin"/> </tomcat-users>X' ${CATALINA_HOME}/conf/tomcat-users.xml 
-#
-# make ncWMS work without further configuration 
-# @TODO We will need to adjust this target if we 
-# decide to a different (not root) user.
-COPY ncWMS_config.xml /root/.ncWMS2/config.xml
-RUN  chmod +r /root/.ncWMS2/config.xml
+RUN set -e \
+    && sed -i 'sX</tomcat-users>X<role rolename="ncWMS-admin"/> <user username="admin" password="admin" roles="ncWMS-admin"/> </tomcat-users>X' ${CATALINA_HOME}/conf/tomcat-users.xml 
+
 
 #
 # Setting NCWMS_HOST to the protocol, host, and port 

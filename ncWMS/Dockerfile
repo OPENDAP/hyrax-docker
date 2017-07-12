@@ -9,6 +9,7 @@ MAINTAINER support@opendap.org
 
 USER root
 
+
 # underlying debian container instructions recommend not updating
 #RUN \
 #    apt-get install -y unzip && \
@@ -25,31 +26,30 @@ ENV NCWMS_WAR_URL=http://search.maven.org/remotecontent?filepath=uk/ac/rdg/resc/
 # retrieve and install the ncWMS web application
 #
 RUN curl -sfSL ${NCWMS_WAR_URL} -o /dev/shm/ncWMS.war && \
-    unzip -o /dev/shm/ncWMS.war -d ${CATALINA_HOME}/webapps/ncWMS/ && \
+    unzip -o /dev/shm/ncWMS.war -d ${CATALINA_HOME}/webapps/ncWMS2/ && \
     rm -rf /dev/shm/*
 #
 # set an ncWMS admin even though it is not needed given a custom config.xml will be used
 RUN sed -i 'sX</tomcat-users>X<role rolename="ncWMS-admin"/> <user username="admin" password="admin" roles="ncWMS-admin"/> </tomcat-users>X' ${CATALINA_HOME}/conf/tomcat-users.xml 
 #
-# make ncWMS work without further configuration
-COPY config.xml ${CATALINA_HOME}/.ncWMS2/config.xml
-RUN  chmod +r ${CATALINA_HOME}/.ncWMS2/config.xml
+
+#
+# make ncWMS work without further configuration 
+# @TODO We will need to adjust this target if we 
+# decide to run as a different (not root) user.
+COPY ncWMS_config.xml /root/.ncWMS2/config.xml
+RUN  chmod +r /root/.ncWMS2/config.xml
+#
 #COPY cors.properties ${CATALINA_HOME}/webapps/ncWMS/WEB-INF/classes
 #RUN  chmod +r ${CATALINA_HOME}/webapps/ncWMS/WEB-INF/classes
 
-#
-# first step to enable ncWMS and godiva
-# entrypoint will take second step to set the client visible host:port
-#COPY fix_viewers.xml.pl /tmp/fix_viewers.xml.pl
-#RUN set -e && perl -pi /tmp/fix_viewers.xml.pl ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml
-#ENV OLFS_WMS_VIEWERS_HOSTPORT=localhost:8080
-###############################################################
 
 ###
 # Expose ports
 ###
 
-EXPOSE 8080 8443
+EXPOSE 8080 
+EXPOSE 8443
 
 # Fix ownership and access permissions
 # RUN chown -R tomcat:tomcat ${CATALINA_HOME}/.ncWMS2 /etc/.java && \

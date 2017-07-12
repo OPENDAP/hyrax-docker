@@ -18,37 +18,37 @@ USER root
 # Grab and unzip the OLFS
 ###
 
+RUN echo "CATALINA_HOME: ${CATALINA_HOME}"
+
 ENV HYRAX_VERSION=1.13.4 OLFS_VERSION=1.16.3
 ENV OLFS_WAR_URL=https://www.opendap.org/pub/olfs/olfs-${OLFS_VERSION}-webapp.tgz
-ENV NCWMS_WAR_URL=http://search.maven.org/remotecontent?filepath=uk/ac/rdg/resc/ncWMS/2.2.2/ncWMS-2.2.2.war
-# or get from https://github.com/Reading-eScience-Centre/edal-java/releases
 
 # Retrieve and intsall the OLFS web application
-RUN curl -fSL ${OLFS_WAR_URL} | tar -C /dev/shm -xzf -  && \
+RUN curl -sfSL ${OLFS_WAR_URL} | tar -C /dev/shm -xzf -  && \
     unzip -o /dev/shm/olfs-${OLFS_VERSION}-webapp/opendap.war -d ${CATALINA_HOME}/webapps/opendap/ && \
     rm -rf /dev/shm/*
 # set host for bes that olfs will contact - this is expected to be over docker's internal network
 RUN sed -i 's/localhost/besd/' ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/olfs.xml
 
-###############################################################
-# retrieve and install the ncWMS web application
+
 #
-#RUN curl -fSL ${NCWMS_WAR_URL} -o /dev/shm/ncWMS.war && \
-#    unzip -o /dev/shm/ncWMS.war -d ${CATALINA_HOME}/webapps/ncWMS/ && \
-#    rm -rf /dev/shm/*
+# Setting NCWMS_HOST to the protocol, host, and port 
+# section of the publicly acessible URL of the 
+# ncWMS service. Using localhost is all well and good
+# for testing but this needs to be settable at 
+# build time for sure and maybe even docker runtime? 
 #
-# set an ncWMS admin even though it is not needed given a custom config.xml will be used
-#RUN sed -i 'sX</tomcat-users>X<role rolename="ncWMS-admin"/> <user username="admin" password="admin" roles="ncWMS-admin"/> </tomcat-users>X' ${CATALINA_HOME}/conf/tomcat-users.xml 
-#
-# make ncWMS work without further configuration
-#COPY config.xml ${CATALINA_HOME}/.ncWMS2/config.xml
-#
-# first step to enable ncWMS and godiva
-# entrypoint will take second step to set the client visible host:port
-#COPY fix_viewers.xml.pl /tmp/fix_viewers.xml.pl
-#RUN perl -pi /tmp/fix_viewers.xml.pl ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml
-#ENV OLFS_WMS_VIEWERS_HOSTPORT=localhost:8080
-###############################################################
+ENV NCWMS_HOST=http://localhost:8080
+COPY olfs_viewers.xml /tmp/olfs_viewers.xml
+RUN set -e \
+    && echo "---------------------------------------------------------------------------"\
+    && ls -la /tmp/olfs_viewers.xml \
+    && sed "s+@NCWMS_PUBLIC_HOST_AND_PORT@+${NCWMS_HOST}+g" /tmp/olfs_viewers.xml \
+    |  tee ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml \
+    && echo "---------------------------------------------------------------------------"\
+    && echo "${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml "\
+    && cat ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml \
+    && echo "---------------------------------------------------------------------------"
 
 ###
 # Expose ports
