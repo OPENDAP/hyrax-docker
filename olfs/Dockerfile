@@ -94,22 +94,29 @@ RUN mkdir -p ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs && \
     chown -R tomcat:tomcat ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs && \
     chmod 700 ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs
 
-COPY logging_config.policy /tmp/policy
-RUN set -e \
-    && lines=`cat ${CATALINA_HOME}/conf/catalina.policy | wc -l` \
-    && insert=`grep -n 'grant codeBase \"file:\${catalina.home}/bin/tomcat-juli.jar' ${CATALINA_HOME}/conf/catalina.policy \
-    | awk '{split($0,s,":"); print s[1];}' -` \
-    && muh_tail=`expr $lines - $insert + 1` \
-    && echo "lines: $lines insert: $insert muh_tail: $muh_tail" \
-    && head -$insert ${CATALINA_HOME}/conf/catalina.policy > /tmp/catalina.policy \
-    && cat /tmp/policy >> /tmp/catalina.policy \
-    && tail -n $muh_tail ${CATALINA_HOME}/conf/catalina.policy >> /tmp/catalina.policy \
-    && cp /tmp/catalina.policy ${CATALINA_HOME}/conf/catalina.policy \
-    && chown -R tomcat:tomcat ${CATALINA_HOME}/conf/catalina.policy \
-    && echo "" \
-    && echo "Updated catalina.policy: " \
-    && cat ${CATALINA_HOME}/conf/catalina.policy
-    
+##########################################################################################
+# The following is an effort to tweak the security policy to allow the JULI code to
+# to look at webapps/opendap/WEB-INF/classes/logging.properties Even though this
+# file does not exist and the code will move on to other locations the fact that 
+# it trys to look at it is enough to alert the security manager.
+#
+# COPY logging_config.policy /tmp/policy
+# RUN set -e \
+#    && lines=`cat ${CATALINA_HOME}/conf/catalina.policy | wc -l` \
+#    && insert=`grep -n 'grant codeBase \"file:\${catalina.home}/bin/tomcat-juli.jar' ${CATALINA_HOME}/conf/catalina.policy \
+#    | awk '{split($0,s,":"); print s[1];}' -` \
+#    && muh_tail=`expr $lines - $insert + 1` \
+#    && echo "lines: $lines insert: $insert muh_tail: $muh_tail" \
+#    && head -$insert ${CATALINA_HOME}/conf/catalina.policy > /tmp/catalina.policy \
+#    && cat /tmp/policy >> /tmp/catalina.policy \
+#    && tail -n $muh_tail ${CATALINA_HOME}/conf/catalina.policy >> /tmp/catalina.policy \
+#    && cp /tmp/catalina.policy ${CATALINA_HOME}/conf/catalina.policy \
+#    && chown -R tomcat:tomcat ${CATALINA_HOME}/conf/catalina.policy \
+#    && echo "" \
+#    && echo "Updated catalina.policy: " \
+#    && cat ${CATALINA_HOME}/conf/catalina.policy
+##########################################################################################
+ 
 
 COPY entrypoint.sh /entrypoint.sh
 RUN  chmod +x /entrypoint.sh && cat /entrypoint.sh
