@@ -13,16 +13,40 @@
 # it for debugging stuff.
 #
 # Set one or more individual labels
+FROM centos:7
+
 LABEL vendor="OPeNDAP Incorporated"
 LABEL org.opendap.hyrax.version="1.13.4"
 LABEL org.opendap.hyrax.release-date="2017-06-05"
 LABEL org.opendap.hyrax.version.is-production="true"
 
-FROM centos:7
-
 MAINTAINER support@opendap.org
 
 USER root
+
+#
+# The --build-arg USE_NCWMS can be set to "true" in order to 
+# add the ncWMS application to the build.
+ARG USE_NCWMS
+ENV USE_NCWMS ${USE_NCWMS:-"false"}
+RUN set -e && \
+    if [ $USE_NCWMS = "true" ];then echo "NCWMS: ENABLED"; else echo "NCWMS: DISABLED"; fi
+
+#
+# Setting NCWMS_HOST to the protocol, host, and port 
+# section of the publicly acessible URL of the 
+# ncWMS service. Using localhost is all well and good
+# for testing but this needs to be settable at 
+# build time for sure and maybe even docker runtime? 
+#
+ARG NCWMS_HOST
+ENV NCWMS_HOST ${NCWMS_HOST:-http://localhost:8080}
+
+ARG DEVELOPER_MODE
+ENV DEVELOPER_MODE ${DEVELOPER_MODE:-"false"}
+RUN set -e && \
+    if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else echo "DEVELOPER_MODE: DISABLED"; fi
+
 
 # Update and install the needful.
 RUN set -e \
@@ -116,15 +140,30 @@ RUN set -e \
 ENV NCWMS_WAR_URL=http://search.maven.org/remotecontent?filepath=uk/ac/rdg/resc/ncWMS/2.2.2/ncWMS-2.2.2.war
 
 RUN set -e \
-    && curl -sfSL ${NCWMS_WAR_URL} -o /dev/shm/ncWMS.war \
-    && unzip -o /dev/shm/ncWMS.war -d ${CATALINA_HOME}/webapps/ncWMS2/ \
-    && rm -rf /dev/shm/*
+    && if [ $USE_NCWMS = "true" ]; then \
+        echo "Installing ncWMS..."; \
+        curl -sfSL ${NCWMS_WAR_URL} -o /dev/shm/ncWMS.war; \
+        unzip -o /dev/shm/ncWMS.war -d ${CATALINA_HOME}/webapps/ncWMS2/; \
+        rm -rf /dev/shm/*; \
+    else \
+        echo "ncWMS will NOT be installed."; \
+    fi
 
-#
-# set an ncWMS admin even though it is not needed given a custom config.xml will be used
+# set a default ncWMS admin if DEVELOPER_MODE is enabled.
 RUN set -e \
-    && sed -i 'sX</tomcat-users>X<role rolename="ncWMS-admin"/> <user username="admin" password="admin" roles="ncWMS-admin"/> </tomcat-users>X' ${CATALINA_HOME}/conf/tomcat-users.xml 
-
+    && if [ ${DEVELOPER_MODE} = "true" ] && [ $USE_NCWMS = "true" ]; then \
+        echo "DEVELOPER MODE: Adding ncWMS admin credentials"; \
+        sed -i 'sX</tomcat-users>X<role rolename="ncWMS-admin"/> <user username="admin" password="admin" roles="ncWMS-admin"/> </tomcat-users>X' ${CATALINA_HOME}/conf/tomcat-users.xml; \
+    else \
+        echo "No ncWMS admin credentials installed."; \
+    fi
+    
+#
+# make ncWMS work without further configuration 
+# @TODO We will need to adjust this target if we 
+# decide to run as a different (not root) user.
+COPY ncWMS_config.xml /root/.ncWMS2/config.xml
+RUN  chmod +r /root/.ncWMS2/config.xml
 
 #
 # Setting NCWMS_HOST to the protocol, host, and port 
@@ -133,17 +172,14 @@ RUN set -e \
 # for testing but this needs to be settable at 
 # build time for sure and maybe even docker runtime? 
 #
-ENV NCWMS_HOST=http://localhost:8080
 COPY olfs_viewers.xml /tmp/olfs_viewers.xml
 RUN set -e \
-    && echo "---------------------------------------------------------------------------"\
-    && ls -la /tmp/olfs_viewers.xml \
-    && sed "s+@NCWMS_PUBLIC_HOST_AND_PORT@+${NCWMS_HOST}+g" /tmp/olfs_viewers.xml \
-    |  tee ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml \
-    && echo "---------------------------------------------------------------------------"\
-    && echo "${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml "\
-    && cat ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml \
-    && echo "---------------------------------------------------------------------------"
+    && if [ $USE_NCWMS = "true" ]; then \
+        mv /tmp/olfs_viewers.xml ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml; \
+    else \
+        echo "Skipping OLFS/ncWMS confguration installation."; \
+    fi
+    
     
     
 ###############################################################

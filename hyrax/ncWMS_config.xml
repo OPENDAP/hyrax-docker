@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <config>
-    <datasets/>
+    <datasets>
+        <!--dataset id="coads_climatology" title="COADS via DAP2" location="http://localhost:8080/opendap/data/nc/coads_climatology.nc" queryable="true" downloadable="false" dataReaderClass="" copyrightStatement="" moreInfo="" disabled="false" updateInterval="-1">
+            <variables/>
+        </dataset -->
+    </datasets>
     <cache enabled="true">
         <inMemorySizeMB>256</inMemorySizeMB>
         <elementLifetimeMinutes>10.0</elementLifetimeMinutes>

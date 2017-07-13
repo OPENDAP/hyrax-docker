@@ -9,12 +9,12 @@ ls -l "$CATALINA_HOME"
 ls -l "$CATALINA_HOME/logs"
 
 set -e
-set -x
+# set -x
 
 trap "echo TRAPed signal" HUP INT QUIT KILL TERM
 
 # startup.sh -security
-startup.sh # Without --security makes ncWMS because the CORS filter get's tangled up with the security manager.
+startup.sh # Without --security makes ncWMS work because the CORS filter get's tangled up with the security manager.
 
 # tail -f /usr/local/tomcat/logs/catalina.out
 # never exit

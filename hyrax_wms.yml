@@ -1,0 +1,40 @@
+---
+version: '3'
+services:
+  olfs:
+    build: ./olfs
+    build: 
+        context: ./olfs
+        args:
+            USE_NCWMS: "true"
+    env_file: ${PWD}/local.env
+    image: olfs:latest
+    ports:
+     - "80:8080"
+    tty: true
+    volumes:
+     - ./logs/olfs_tomcat:/usr/local/tomcat/logs
+     - ./logs:/usr/local/tomcat/webapps/opendap/WEB-INF/conf/logs
+    command: -n http://localhost:8080 # This will be the publicly accessible host for ncWMS
+  besd:
+    build: ./besd
+    env_file: ${PWD}/local.env
+    image: besd:latest
+    ports:
+     - "10022:10022"
+    volumes:
+      - ./logs:/var/log/bes/
+    command: -e admin_contact@email.org -s 
+  ncwms:
+    build: 
+        context: ./ncWMS
+        args:
+            DEVELOPER_MODE: "true"
+    env_file: ${PWD}/local.env
+    image: ncwms:latest
+    ports:
+     - "8080:8080"
+    tty: true
+    volumes:
+     - ./logs/ncwms_tomcat:/usr/local/tomcat/logs
+     - ./logs/ncwms:/root/.ncWMS2/logs

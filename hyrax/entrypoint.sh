@@ -6,20 +6,64 @@
 # set -x # "set -o xtrace"  Print command traces before executing command.
 # set -e #  Exit on error.
 
-echo "$@"
+#echo "entrypoint.sh  command line: \"$@\""
+echo "############################## HYRAX ##################################";   >&2
+echo "Greetings, I am "`whoami`".";   >&2
+set -e
+#set -x
 
-echo "My username is: "`whoami`;  
+NCWMS_BASE="http://localhost:8080"
+debug=false;
+
+while getopts "n:" opt; do
+  case $opt in
+    n)
+      echo "Setting ncWMS public facing service base to : $OPTARG" >&2
+      NCWMS_BASE=$OPTARG
+      ;;
+    d)
+      debug=true;
+      echo "Debug is enabled" >&2;
+      ;;
+    \?)
+      echo "Invalid option: -$OPTARG" >&2
+      echo "options: [-n ncwms_base_url] [-d] "  >&2
+      echo " -n xxx where xxx is the protocol, server and port part "  >&2
+      echo "    of the ncWMS service (for example http://foo.com:8090)."  >&2
+      echo " -d Enables debugging output for this script."  >&2
+      echo "EXITING NOW"  >&2
+      exit 2;
+      ;;
+  esac
+done
+
+if [ $debug = true ];then
+    echo "CATALINA_HOME: ${CATALINA_HOME}";  >&2
+    ls -l "$CATALINA_HOME" "$CATALINA_HOME/bin"  >&2
+fi
+
+if [ $debug = true ];then
+    echo "NCWMS_BASE: ${NCWMS_BASE}"  >&2
+    echo "Setting ncWMS access URLs in viewers.xml (if needed).";  >&2
+fi
+
+sed -i "s+@NCWMS_BASE@+$NCWMS_BASE+g" ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml;
+if [ $debug = true ];then
+    echo "${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml";  >&2
+    cat ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml; >&2
+fi
+
 
 # Start the BES daemon process
 # /usr/bin/besdaemon -i /usr -c /etc/bes/bes.conf -r /var/run/bes.pid
 /usr/bin/besctl start; 
 status=$?
 if [ $status -ne 0 ]; then
-    echo "Failed to start BES: $status"
+    echo "Failed to start BES: $status" >&2
     exit $status
 fi
 besd_pid=`ps aux | grep /usr/bin/besdaemon | grep -v grep | awk '{print $2;}' - `;
-echo "The BES is UP! pid: $besd_pid";
+echo "The BES is UP! pid: $besd_pid"; >&2
 
 
 # Start Tomcat process
@@ -27,42 +71,42 @@ echo "The BES is UP! pid: $besd_pid";
 status=$?
 tomcat_pid=$!
 if [ $status -ne 0 ]; then
-    echo "Failed to start Tomcat: $status"
+    echo "Failed to start Tomcat: $status" >&2
     exit $status
 fi
-#echo "-------------------------------------------------------------------"
-#ps aux;
-#echo "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
-echo "Tomcat is UP! pid: $tomcat_pid";
-echo "Hyrax Has Arrived...";
+echo "Tomcat is UP! pid: $tomcat_pid"; >&2
+
+echo "Hyrax Has Arrived..."; >&2
 
 while /bin/true; do
     sleep 60
-    echo "-------------------------------------------------------------------"
-    date
-    #ps aux;
-    #echo "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
     besd_ps=`ps -f $besd_pid`;
     BESD_STATUS=$?
-    echo "BESD_STATUS: $BESD_STATUS  besd_pid:$besd_pid"
     
     tomcat_ps=`ps -f $tomcat_pid`;
-    #ps aux | grep tomcat | grep -v grep;
     TOMCAT_STATUS=$?
-    echo "TOMCAT_STATUS: $TOMCAT_STATUS tomcat_pid:$tomcat_pid"
 
     if [ $BESD_STATUS -ne 0 ]; then
-        echo "BESD_STATUS: $BESD_STATUS bes_pid:$bes_pid"
-        echo "The BES daemon appears to have died! Exiting."
+        echo "BESD_STATUS: $BESD_STATUS bes_pid:$bes_pid" >&2
+        echo "The BES daemon appears to have died! Exiting." >&2
         exit -1;
     fi
     if [ $TOMCAT_STATUS -ne 0 ]; then
-        echo "TOMCAT_STATUS: $TOMCAT_STATUS tomcat_pid:$tomcat_pid"
-        echo "Tomcat appears to have died! Exiting."
-        echo "Tomcat Console Log [BEGIN]"
-        cat /usr/share/tomcat/logs/console.log;
-        echo "Tomcat Console Log [END]"
+        echo "TOMCAT_STATUS: $TOMCAT_STATUS tomcat_pid:$tomcat_pid" >&2
+        echo "Tomcat appears to have died! Exiting." >&2
+        echo "Tomcat Console Log [BEGIN]" >&2
+        cat /usr/share/tomcat/logs/console.log >&2
+        echo "Tomcat Console Log [END]" >&2
         exit -2;
     fi
+    
+    if [ $debug = true ];then
+        echo "-------------------------------------------------------------------"  >&2
+        date >&2
+        echo "BESD_STATUS: $BESD_STATUS  besd_pid:$besd_pid" >&2
+        echo "TOMCAT_STATUS: $TOMCAT_STATUS tomcat_pid:$tomcat_pid" >&2
+    fi
+
+    
 done
  

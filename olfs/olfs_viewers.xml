@@ -51,13 +51,13 @@
 
     <WebServiceHandler className="opendap.viewers.NcWmsService" serviceId="ncWms" >
         <applicationName>Web Mapping Service</applicationName>
-        <NcWmsService href="@NCWMS_PUBLIC_HOST_AND_PORT@/ncWMS2/wms" base="@NCWMS_PUBLIC_HOST_AND_PORT@/ncWMS2/wms" ncWmsDynamicServiceId="lds" />
+        <NcWmsService href="@NCWMS_BASE@/ncWMS2/wms" base="@NCWMS_BASE@/ncWMS2/wms" ncWmsDynamicServiceId="lds" />
     </WebServiceHandler>
 
     <WebServiceHandler className="opendap.viewers.GodivaWebService" serviceId="godiva" >
         <applicationName>Godiva WMS GUI</applicationName>
-        <NcWmsService href="@NCWMS_PUBLIC_HOST_AND_PORT@/ncWMS2/wms" base="/ncWMS2/wms" ncWmsDynamicServiceId="lds"/>
-        <Godiva href="@NCWMS_PUBLIC_HOST_AND_PORT@/ncWMS2/Godiva3.html" base="@NCWMS_PUBLIC_HOST_AND_PORT@/ncWMS2/Godiva3.html"/>
+        <NcWmsService href="@NCWMS_BASE@/ncWMS2/wms" base="/ncWMS2/wms" ncWmsDynamicServiceId="lds"/>
+        <Godiva href="@NCWMS_BASE@/ncWMS2/Godiva3.html" base="@NCWMS_BASE@/ncWMS2/Godiva3.html"/>
     </WebServiceHandler>
 
 

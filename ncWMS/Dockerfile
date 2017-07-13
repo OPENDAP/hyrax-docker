@@ -9,6 +9,11 @@ MAINTAINER support@opendap.org
 
 USER root
 
+ARG DEVELOPER_MODE
+ENV DEVELOPER_MODE ${DEVELOPER_MODE:-"false"}
+RUN set -e && \
+    if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else echo "DEVELOPER_MODE: DISABLED"; fi
+
 
 # underlying debian container instructions recommend not updating
 #RUN \
@@ -30,7 +35,14 @@ RUN curl -sfSL ${NCWMS_WAR_URL} -o /dev/shm/ncWMS.war && \
     rm -rf /dev/shm/*
 #
 # set an ncWMS admin even though it is not needed given a custom config.xml will be used
-RUN sed -i 'sX</tomcat-users>X<role rolename="ncWMS-admin"/> <user username="admin" password="admin" roles="ncWMS-admin"/> </tomcat-users>X' ${CATALINA_HOME}/conf/tomcat-users.xml 
+RUN if [ ${DEVELOPER_MODE} = "true" ]; then \
+        echo "DEVELOPER MODE: Adding ncWMS admin credentials"; \
+        sed -i 'sX</tomcat-users>X<role rolename="ncWMS-admin"/> <user username="admin" password="admin" roles="ncWMS-admin"/> </tomcat-users>X' ${CATALINA_HOME}/conf/tomcat-users.xml; \
+    else \
+        echo "No ncWMS admin credentials installed."; \
+    fi
+    
+     
 #
 
 #
