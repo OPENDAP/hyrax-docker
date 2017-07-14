@@ -14,7 +14,7 @@ The hyrax-docker project can build the following images:
 * **hyrax**- A complete Hyrax server in a single container. It may be built with or without a bundled ncWMS.
 * **besd** - The BackEndServer (BES) component of Hyrax.  
 * **olfs** - The OLFS component of Hyrax, a Java Web Application deployed in Apache Tomcat.
-* **ncwms** - The ncWMS appliction from our friends at ((**Names and link NEEDED**).
+* **ncwms** - The ncWMS application from our friends at the [Reading e-Science Centre](http://www.met.reading.ac.uk/resc/home/).
 
 Each of these images can be run standalone or, combined via docker compose or ansible.
 
@@ -28,7 +28,7 @@ to OPeNDAP. We are grateful for their support.
 ## Images
 
 ### hyrax
-Manifests a complete Hyrax server in a single image. Currently based on CentOS-7 and Tomcat-7 installed via yum.
+This image contains a complete Hyrax server. Currently based on **CentOS-7** and _yum_ installed **Tomcat-7**.
 #### build arguments
 * **USE_NCMWS** - Setting the value of the argument to "true" (_--build-arg USE_NCWMS=true_) will cause the ncWMS application to be included in the container. 
 * **DEVELOPER_MODE** - Setting the value of the argument to "true"
@@ -42,12 +42,37 @@ Manifests a complete Hyrax server in a single image. Currently based on CentOS-7
 http://yourhost:8080 If all you want is to test it on your local system 
 then the default value of http://localhost:8080 will suffice.
 
+#### Commandline Examples:
+Launch Hyrax using commandline switches to set the admin email to \(_-e support@erehwon.edu_\), enable symbolic link traversal \(_-s_\), and set the ncWMS service base to \(_-n http://foo.bar.com:8080_\)
+
+```docker run --name besd -p 10022:10022 besd -e support@erehwon.edu -s -n http://foo.bar.com:8080```
+
+Launch Hyrax using command line defined environment variables to set the  admin email to \(_-e SERVER_HELP_EMAIL=support@foo.com_\), enable symbolic link traversal \(_-s_\), and set the ncWMS service base to \(_-e NCWMS_BASE=http://foo.bar.com_\)
+
+`docker run --name besd -p 10022:10022 -e FOLLOW_SYMLINKS=true -e SERVER_HELP_EMAIL=support@foo.com -e NCWMS_BASE=http://foo.bar.com besd
+`
+
+**NOTE:** _The environment variables are set to the left of the image name. The commandline switches occur AFTER the image name._
+
 ### besd
 Manifests just the BES service part of the Hyrax server.
 #### build arguments (_none_)
 #### ENV and Commandline arguments
 * **SERVER_HELP_EMAIL (-e)** - The email address of the support person for the service. This will be returned in error and help pages.
 * **FOLLOW_SYMLINKS (-s)** - Instructs the server to follow symbolic links in the file system.
+
+#### Commandline Examples:
+Launch besd using commandline switches to set the admin email to \(_-e support@erehwon.edu_\)and enabling symbolic link traversal \(_-s_\)
+
+```docker run --name besd -p 10022:10022 besd -e support@erehwon.edu -s ```
+
+Launch Hyrax using command line defined environment envariables to set the  admin email to \(_-e SERVER_HELP_EMAIL=support@foo.com_\) and enable symbolic link traversal \(_-s_\)
+
+`docker run --name besd -p 10022:10022 -e FOLLOW_SYMLINKS=true -e SERVER_HELP_EMAIL=support@foo.com besd
+`
+
+**NOTE:** _The environment variables are set to the left of the image name. The commandline switches occur AFTER the image name._
+
 ### olfs
 #### build arguments
 * **USE_NCMWS** - Setting the value of the argument to "true"
@@ -57,6 +82,19 @@ Manifests just the BES service part of the Hyrax server.
 * **NCWMS_BASE (-n)** - The system needs to know the public accessible service base for the ncWMS, this will be something like 
 http://yourhost:8080 If all you want is to test it on your local system ### ncwms
 then the default value of http://localhost:8080 will suffice.
+
+#### Commandline Examples:
+Launch the olfs using commandline switches to set the ncWMS service base to \(_-n http://foo.bar.com:8080_\)
+
+```docker run --name besd -p 10022:10022 besd -n http://foo.bar.com:8080```
+
+Launch the olfs using command line defined environment variables to set the ncWMS service base to \(_-e NCWMS_BASE=http://foo.bar.com_\)
+
+`docker run --name besd -p 10022:10022 -e NCWMS_BASE=http://foo.bar.com besd
+`
+
+**NOTE:** _The environment variables are set to the left of the image name. The commandline switches occur AFTER the image name._
+
 ## Compose 
 We provide the following YAML files for docker-compose:
 
