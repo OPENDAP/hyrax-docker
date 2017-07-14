@@ -46,11 +46,11 @@ then the default value of http://localhost:8080 will suffice.
 #### Commandline Examples:
 Launch Hyrax using commandline switches to set the admin email to \(_-e support@erehwon.edu_\), enable symbolic link traversal \(_-s_\), and set the ncWMS service base to _\(-n http://foo.bar.com:8080\)_
 
-```docker run --name besd -p 10022:10022 hyrax -e support@erehwon.edu -s -n http://foo.bar.com:8080```
+```docker run --name besd -p 10022:10022 hyrax_image -e support@erehwon.edu -s -n http://foo.bar.com:8080```
 
 Launch Hyrax using command line defined environment variables to set the  admin email to \(_-e SERVER_HELP_EMAIL=support@foo.com_\), enable symbolic link traversal \(_-s_\), and set the ncWMS service base to \(_-e NCWMS_BASE=http://foo.bar.com_\)
 
-`docker run --name besd -p 10022:10022 -e FOLLOW_SYMLINKS=true -e SERVER_HELP_EMAIL=support@foo.com -e NCWMS_BASE=http://foo.bar.com hyrax
+`docker run --name besd -p 10022:10022 -e FOLLOW_SYMLINKS=true -e SERVER_HELP_EMAIL=support@foo.com -e NCWMS_BASE=http://foo.bar.com hyrax_image
 `
 
 **NOTE:** _The environment variables are set to the left of the image name. The commandline switches occur AFTER the image name._
@@ -65,11 +65,11 @@ Manifests just the BES service part of the Hyrax server.
 #### Commandline Examples:
 Launch besd using commandline switches to set the admin email to \(_-e support@erehwon.edu_\)and enabling symbolic link traversal \(_-s_\)
 
-```docker run --name besd -p 10022:10022 besd -e support@erehwon.edu -s ```
+```docker run --name besd -p 10022:10022 besd_image -e support@erehwon.edu -s ```
 
 Launch Hyrax using command line defined environment envariables to set the  admin email to \(_-e SERVER_HELP_EMAIL=support@foo.com_\) and enable symbolic link traversal \(_-s_\)
 
-`docker run --name besd -p 10022:10022 -e FOLLOW_SYMLINKS=true -e SERVER_HELP_EMAIL=support@foo.com besd
+`docker run --name besd -p 10022:10022 -e FOLLOW_SYMLINKS=true -e SERVER_HELP_EMAIL=support@foo.com besd_image
 `
 
 **NOTE:** _The environment variables are set to the left of the image name. The commandline switches occur AFTER the image name._
@@ -87,11 +87,11 @@ then the default value of http://localhost:8080 will suffice.
 #### Commandline Examples:
 Launch the olfs using commandline switches to set the ncWMS service base to \(_-n http://foo.bar.com:8080_\)
 
-```docker run --name besd -p 10022:10022 besd -n http://foo.bar.com:8080```
+```docker run --name olfs -p 8080:8080 olfs_image -n http://foo.bar.com:8080```
 
 Launch the olfs using command line defined environment variables to set the ncWMS service base to \(_-e NCWMS_BASE=http://foo.bar.com_\)
 
-`docker run --name besd -p 10022:10022 -e NCWMS_BASE=http://foo.bar.com besd
+`docker run --name besd -p 8080:8080 -e NCWMS_BASE=http://foo.bar.com olfs_image
 `
 
 **NOTE:** _The environment variables are set to the left of the image name. The commandline switches occur AFTER the image name._
