@@ -32,15 +32,6 @@ ENV USE_NCWMS ${USE_NCWMS:-"false"}
 RUN set -e && \
     if [ $USE_NCWMS = "true" ];then echo "NCWMS: ENABLED"; else echo "NCWMS: DISABLED"; fi
 
-#
-# Setting NCWMS_HOST to the protocol, host, and port 
-# section of the publicly acessible URL of the 
-# ncWMS service. Using localhost is all well and good
-# for testing but this needs to be settable at 
-# build time for sure and maybe even docker runtime? 
-#
-ARG NCWMS_HOST
-ENV NCWMS_HOST ${NCWMS_HOST:-http://localhost:8080}
 
 ARG DEVELOPER_MODE
 ENV DEVELOPER_MODE ${DEVELOPER_MODE:-"false"}
@@ -165,16 +156,13 @@ RUN set -e \
 COPY ncWMS_config.xml /root/.ncWMS2/config.xml
 RUN  chmod +r /root/.ncWMS2/config.xml
 
-#
-# Setting NCWMS_HOST to the protocol, host, and port 
-# section of the publicly acessible URL of the 
-# ncWMS service. Using localhost is all well and good
-# for testing but this needs to be settable at 
-# build time for sure and maybe even docker runtime? 
-#
 COPY olfs_viewers.xml /tmp/olfs_viewers.xml
 RUN set -e \
     && if [ $USE_NCWMS = "true" ]; then \
+        # If we're installing ncWMS then we copy 
+        # to the server a viewers.xml which has
+        # been templated so that the ncWMS host can be installed 
+        # at startup.        
         mv /tmp/olfs_viewers.xml ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml; \
     else \
         echo "Skipping OLFS/ncWMS confguration installation."; \
@@ -198,16 +186,6 @@ EXPOSE 11002
 # use gosu or, as done, enable bes user write so the entrypoint does not need root
 RUN  set -e && chown -R bes /etc/bes
 USER root
-
-# tunables - to be overridden on command line or in docker-compose or ansible
-ENV SERVER_HELP_EMAIL=help@replace.me
-ENV FOLLOW_SYMLINKS=Yes
-# Yes (hyrax docker default overrides rpm default) or No, for symlinks in /usr/share/hyrax
-
-
-#RUN echo "############################" && \
-#    ls -l /usr/bin/besdaemon /usr/share/tomcat /usr/share/tomcat/webapps && \
-#    echo "############################" 
 
 CMD ["-"]
 

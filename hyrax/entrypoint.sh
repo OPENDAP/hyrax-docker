@@ -12,6 +12,19 @@ echo "Greetings, I am "`whoami`".";   >&2
 set -e
 #set -x
 
+if [ $SERVER_HELP_EMAIL ] && [ -n $SERVER_HELP_EMAIL ] ; then    
+    echo "Found exisiting SERVER_HELP_EMAIL: $SERVER_HELP_EMAIL"  
+else 
+    SERVER_HELP_EMAIL="not_set"
+     echo "SERVER_HELP_EMAIL is $SERVER_HELP_EMAIL"  
+fi
+if [ $FOLLOW_SYMLINKS ] && [ -n $FOLLOW_SYMLINKS ] ; then    
+    echo "Found exisiting FOLLOW_SYMLINKS: $FOLLOW_SYMLINKS"  
+else 
+    FOLLOW_SYMLINKS="not_set";
+     echo "FOLLOW_SYMLINKS is $FOLLOW_SYMLINKS"  
+fi
+
 if [ $NCWMS_BASE ] && [ -n $NCWMS_BASE ] ; then    
     echo "Found exisiting NCWMS_BASE: $NCWMS_BASE"  
 else 
@@ -20,8 +33,16 @@ else
 fi
 debug=false;
 
-while getopts "n:" opt; do
+while getopts "de:sn:" opt; do
   case $opt in
+    e)
+      #echo "Setting server admin contact email to: $OPTARG" >&2
+      SERVER_HELP_EMAIL=$OPTARG
+      ;;
+    s)
+      #echo "Setting FollowSymLinks to: Yes" >&2
+      FOLLOW_SYMLINKS="Yes"
+      ;;
     n)
       echo "Setting ncWMS public facing service base to : $OPTARG" >&2
       NCWMS_BASE=$OPTARG
@@ -33,6 +54,8 @@ while getopts "n:" opt; do
     \?)
       echo "Invalid option: -$OPTARG" >&2
       echo "options: [-n ncwms_base_url] [-d] "  >&2
+      echo " -e xxx where xxx is the email address of the admin contact for the server."
+      echo " -s When present causes the BES to follow symbolic links."
       echo " -n xxx where xxx is the protocol, server and port part "  >&2
       echo "    of the ncWMS service (for example http://foo.com:8090)."  >&2
       echo " -d Enables debugging output for this script."  >&2
@@ -56,6 +79,17 @@ sed -i "s+@NCWMS_BASE@+$NCWMS_BASE+g" ${CATALINA_HOME}/webapps/opendap/WEB-INF/c
 if [ $debug = true ];then
     echo "${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml";  >&2
     cat ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml; >&2
+fi
+
+# modify bes.conf based on environment variables before startup.
+#
+if [ $SERVER_HELP_EMAIL != "not_set" ]; then
+    echo "Setting Admin Contact To: $SERVER_HELP_EMAIL"
+    sed -i "s/admin.email.address@your.domain.name/$SERVER_HELP_EMAIL/" /etc/bes/bes.conf
+fi
+if [ $FOLLOW_SYMLINKS != "not_set" ]; then
+    echo "Setting BES FollowSymLinks to YES."
+    sed -i "s/^BES.Catalog.catalog.FollowSymLinks=No/BES.Catalog.catalog.FollowSymLinks=Yes/" /etc/bes/bes.conf
 fi
 
 

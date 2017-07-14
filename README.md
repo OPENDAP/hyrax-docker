@@ -1,40 +1,98 @@
-Hyrax docker
-============
+# Hyrax docker
 
-Build a docker container that holds a complete hyrax server instance
-in a single container.
+Current Version:
+ 
+ **Hyrax-1.13.4**
+ libdap-3.19.0 : 
+ besd-3.18.0 : 
+ olfs-1.16.3 : 
+ ncWMS-2.2.2  
 
-Overview
---------
+ 
+## Overview
 
-A generic Hyrax setup is provided with the entire Hyrax server running
-in a single container. See: https://www.opendap.org/software
+The hyrax-docker project can build the following images:
+* **hyrax**- A complete Hyrax server in a single container. It may be built with or without a bundled ncWMS.
+* **besd** - The BackEndServer (BES) component of Hyrax.  
+* **olfs** - The OLFS component of Hyrax, a Java Web Application deployed in Apache Tomcat.
+* **ncwms** - The ncWMS appliction from our friends at ((**Names and link NEEDED**).
 
-The OLFS and BES run in a container based on the DockerHub CentOS-7
-image.
+Each of these images can be run standalone or, combined via docker compose or ansible.
 
-The container starts up serving the default data shipped with Hyrax,
-but can easily be started to serve data from the host machine.
+The by default the service starts up providing access to the default 
+data shipped with Hyrax, but can easily be started to serve data from 
+the host machine.
 
 > NOTE: This code is based on work started by Gareth Williams at CSIRO and contributed
 to OPeNDAP. We are grateful for their support.
 
-Building and Running
---------------------
+## Images
 
-To build the container, clone this project
+### hyrax
+Manifests a complete Hyrax server in a single image. Currently based on CentOS-7 and Tomcat-7 installed via yum.
+#### build arguments
+* **USE_NCMWS** - Setting the value of the argument to "true" (_--build-arg USE_NCWMS=true_) will cause the ncWMS application to be included in the container. 
+* **DEVELOPER_MODE** - Setting the value of the argument to "true"
+ (--build-arg DEVELOPER_MODE=true) instructs the build to insert default 
+ authentication credentials into the ncWMS admin interface so that it 
+ maybe be accessed. Otherwise the ncWMS admin page is unreachable as its configuration copied into the build.
+#### ENV and Commandline arguments
+* **SERVER_HELP_EMAIL (-e)** - The email address of the support person for the service. This will be returned in error and help pages.
+* **FOLLOW_SYMLINKS (-s)** - Instructs the server to follow symbolic links in the file system.
+* **NCWMS_BASE (-n)** - The system needs to know the public accessible service base for the ncWMS, this will be something like 
+http://yourhost:8080 If all you want is to test it on your local system 
+then the default value of http://localhost:8080 will suffice.
+
+### besd
+Manifests just the BES service part of the Hyrax server.
+#### build arguments (_none_)
+#### ENV and Commandline arguments
+* **SERVER_HELP_EMAIL (-e)** - The email address of the support person for the service. This will be returned in error and help pages.
+* **FOLLOW_SYMLINKS (-s)** - Instructs the server to follow symbolic links in the file system.
+### olfs
+#### build arguments
+* **USE_NCMWS** - Setting the value of the argument to "true"
+ (_--build-arg USE_NCWMS=true_) will cause the OLFS to be configured to
+  provide  ncWMS links, but will not include the ncWMS application in the image.
+#### ENV and Commandline arguments
+* **NCWMS_BASE (-n)** - The system needs to know the public accessible service base for the ncWMS, this will be something like 
+http://yourhost:8080 If all you want is to test it on your local system ### ncwms
+then the default value of http://localhost:8080 will suffice.
+## Compose 
+We provide the following YAML files for docker-compose:
+
+### hyrax.yml     
+This builds and launches a composed Hyrax made up of a single **besd** and a single **olfs** container.
+
+### hyrax_wms.yml
+This builds and launches a composed Hyrax made up of a single **besd**, a single **olfs**, and a single **ncWMS* container.
+
+### developer.yml 
+This builds and launches a hyrax_wms, but in developer mode.
+
+## Ansible
+It's possible that the exisiting **playbook.yml** file will work, but it has not been tested.
+
+
+## Building and Running
+
+To build the single container, clone this project
 ```
 git clone https://github.com/opendap/hyrax-docker
 git checkout trials
 ```
 and use `docker build`
 ```
-docker build -t hyrax-1.13.4 hyrax
+docker build -t hyrax_image hyrax
+```    
+include ncWMS do this:
+```
+docker build -t hyrax_image --build-arg USE_NCWMS=true hyrax
 ```
 
 To run the container:
 ```
-docker run -h hyrax -p 8080:8080 --name=hyrax-1.13.4 hyrax-1.13.4
+docker run -h hyrax -p 8080:8080 --name=hyrax_container hyrax_image
 ```
 
 However, you can use different port numbers so that several Hyrax
@@ -44,20 +102,19 @@ bind the Hyrax in the docker container to the localhost:9090.
 
 To run the Dockerized Hyrax on port 80, use
 ```
-sudo docker run -h hyrax -p 80:8080 --name=hyrax-1.13.4 hyrax-1.13.4
+sudo docker run -h hyrax -p 80:8080 --name=hyrax_container hyrax_image
 ```
 
 To stop the container
 ```
-docker stop hyrax-1.13.4
-docker rm hyrax-1.13.4
+docker stop hyrax_container
+docker rm hyrax_container
 ```
 where the argument to `docker stop` is the value passed in for the
 `--name` parameter with `docker run`. `docker rm` is needed to start
 the container again if you change any of the `docker run` parameters.
 
-Using Hyrax docker
-------------------
+## Using Hyrax docker
 
 To serve data other than the default data included with Hyrax, use the
 'volume' option with `docker run` to map the path to data on your host
@@ -67,8 +124,7 @@ to `/usr/share/hyrax` in the Hyrax docker container.
 docker run -h hyrax -p 8080:8080 -v <your path>:/usr/share/hyrax --name=hyrax-1.13.4 hyrax-1.13.4
 ```
 
-License
--------
+# License
 
 Copyright (c) 2017 OPeNDAP, Inc.
 
@@ -92,8 +148,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 You can contact OPeNDAP, Inc. at PO Box 112, Saunderstown, RI. 02874-0112.
 
-Acknowledgements
-----------------
+# Acknowledgements
 
 Based on https://bitbucket.csiro.au/projects/ASC/repos/hyrax-docker/,
 Dec 19, 2016, by gareth.williams@csiro.au. That project was licensed

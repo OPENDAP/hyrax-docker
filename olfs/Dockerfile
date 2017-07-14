@@ -73,8 +73,6 @@ RUN sed -i "s/localhost/${BES_HOST}/" ${CATALINA_HOME}/webapps/opendap/WEB-INF/c
 # for testing but this needs to be settable at 
 # build time for sure and maybe even docker runtime? 
 #
-#ARG NCWMS_HOST
-#ENV NCWMS_HOST ${NCWMS_HOST:-http://localhost:8080}
 COPY olfs_viewers.xml /tmp/olfs_viewers.xml
 RUN set -e \
     && if [ $USE_NCWMS = "true" ]; then \
