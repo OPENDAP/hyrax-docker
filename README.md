@@ -158,7 +158,7 @@ To serve data other than the default data included with Hyrax, use the
 to `/usr/share/hyrax` in the Hyrax docker container.
 
 ```
-docker run -h hyrax -p 8080:8080 -v <your path>:/usr/share/hyrax --name=hyrax-1.13.4 hyrax-1.13.4
+docker run --hostname hyrax --port 8080:8080 --volume <your path>:/usr/share/hyrax --name=hyrax_container hyrax_image
 ```
 
 # License
