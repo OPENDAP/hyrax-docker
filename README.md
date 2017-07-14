@@ -114,7 +114,7 @@ This builds and launches a composed Hyrax made up of a single **besd**, a single
 **Stop:** `docker-compose -f hyrax_wms.yml down --remove-orphans`
 
 ### developer.yml 
-This builds and launches a hyrax_wms, but in developer mode. Log directories for olfs, tomcat, and besd are mapped to the `./logs` directory.
+This builds and launches a hyrax_wms, but in developer mode. Log directories the OLFS, Tomcat, and the BES are mapped to the `./logs` directory.
 
 **Start:** `docker-compose -f developer.yml up`
 
