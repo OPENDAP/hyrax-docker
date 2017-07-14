@@ -36,7 +36,7 @@ This image contains a complete Hyrax server. Currently based on **CentOS-7** and
  authentication credentials into the ncWMS admin interface so that it 
  maybe be accessed in the running container. Otherwise the ncWMS admin 
  page is unreachable and not required as its configuration is copied into the image during the build.
-#### ENV and Commandline arguments
+#### Environment Variables and Commandline arguments
 * **SERVER_HELP_EMAIL (-e)** - The email address of the support person for the service. This will be returned in error and help pages.
 * **FOLLOW_SYMLINKS (-s)** - Instructs the server to follow symbolic links in the file system.
 * **NCWMS_BASE (-n)** - The system needs to know the public accessible service base for the ncWMS, this will be something like 
@@ -58,7 +58,7 @@ Launch Hyrax using command line defined environment variables to set the  admin 
 ### besd
 Manifests just the BES service part of the Hyrax server.
 #### build arguments (_none_)
-#### ENV and Commandline arguments
+#### Environment Variables and Commandline arguments
 * **SERVER_HELP_EMAIL (-e)** - The email address of the support person for the service. This will be returned in error and help pages.
 * **FOLLOW_SYMLINKS (-s)** - Instructs the server to follow symbolic links in the file system.
 
@@ -79,7 +79,7 @@ Launch Hyrax using command line defined environment envariables to set the  admi
 * **USE_NCMWS** - Setting the value of the argument to "true"
  (_--build-arg USE_NCWMS=true_) will cause the OLFS to be configured to
   provide  ncWMS links, but will not include the ncWMS application in the image.
-#### ENV and Commandline arguments
+#### Environment Variables and Commandline arguments
 * **NCWMS_BASE (-n)** - The system needs to know the public accessible service base for the ncWMS, this will be something like 
 http://yourhost:8080 If all you want is to test it on your local system ### ncwms
 then the default value of http://localhost:8080 will suffice.
