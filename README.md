@@ -43,7 +43,7 @@ http://yourhost:8080 If all you want is to test it on your local system
 then the default value of http://localhost:8080 will suffice.
 
 #### Commandline Examples:
-Launch Hyrax using commandline switches to set the admin email to \(_-e support@erehwon.edu_\), enable symbolic link traversal \(_-s_\), and set the ncWMS service base to \(_-n http://foo.bar.com:8080_\)
+Launch Hyrax using commandline switches to set the admin email to \(_-e support@erehwon.edu_\), enable symbolic link traversal \(_-s_\), and set the ncWMS service base to _\(-n http://foo.bar.com:8080\)_
 
 ```docker run --name besd -p 10022:10022 besd -e support@erehwon.edu -s -n http://foo.bar.com:8080```
 
