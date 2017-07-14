@@ -101,11 +101,24 @@ We provide several YAML files for docker-compose. All of the files are written t
 ### hyrax.yml     
 This builds and launches a composed Hyrax made up of a single **besd** and a single **olfs** container. Log directories for olfs, tomcat, and besd are mapped to ./logs
 
+**Start:** `docker-compose -f hyrax.yml up`
+
+**Stop:** `docker-compose -f hyrax.yml down --remove-orphans`
+
 ### hyrax_wms.yml
 This builds and launches a composed Hyrax made up of a single **besd**, a single **olfs**, and a single **ncWMS* container. Log directories for olfs, tomcat, and besd are mapped to ./logs
 
+**Start:** `docker-compose -f hyrax_wms.yml up`
+
+**Stop:** `docker-compose -f hyrax_wms.yml down --remove-orphans`
+
 ### developer.yml 
 This builds and launches a hyrax_wms, but in developer mode. Log directories for olfs, tomcat, and besd are mapped to ./logs
+
+**Start:** `docker-compose -f developer.yml up`
+
+**Stop:** `docker-compose -f developer.yml down --remove-orphans`
+
 
 ## Ansible
 It's possible that the exisiting **playbook.yml** file will work, but it has not been tested.
