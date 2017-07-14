@@ -2,11 +2,10 @@
 
 Current Version:
  
- **Hyrax-1.13.4**
- libdap-3.19.0 : 
+ **Hyrax-1.13.4** \[libdap-3.19.0 : 
  besd-3.18.0 : 
  olfs-1.16.3 : 
- ncWMS-2.2.2  
+ ncWMS-2.2.2\]  
 
  
 ## Overview
@@ -76,7 +75,7 @@ It's possible that the exisiting **playbook.yml** file will work, but it has not
 
 ## Building and Running
 
-To build the single container, clone this project
+To build the single container hyrax, clone this project
 ```
 git clone https://github.com/opendap/hyrax-docker
 git checkout trials
@@ -85,7 +84,7 @@ and use `docker build`
 ```
 docker build -t hyrax_image hyrax
 ```    
-include ncWMS do this:
+to include ncWMS in the image, do this:
 ```
 docker build -t hyrax_image --build-arg USE_NCWMS=true hyrax
 ```
