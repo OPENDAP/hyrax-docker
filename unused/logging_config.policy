@@ -1,0 +1,4 @@
+
+        permission java.io.FilePermission 
+        "${catalina.base}${file.separator} webapps${file.separator}opendap${file.separator}WEB-INF${file.separator}classes${file.separator}logging.properties", "read";
+
