@@ -18,7 +18,7 @@ The hyrax-docker project can build the following images:
 
 Each of these images can be run standalone or, combined via docker compose or ansible.
 
-The by default the service starts up providing access to the default 
+By default the service starts up providing access to the default 
 data shipped with Hyrax, but can easily be started to serve data from 
 the host machine.
 
