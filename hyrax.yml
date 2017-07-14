@@ -19,4 +19,4 @@ services:
      - "10022:10022"
     volumes:
       - ./logs:/var/log/bes/
-    command: -e admin_contact@email.org -s
+    # command: -e admin_contact@email.org -s

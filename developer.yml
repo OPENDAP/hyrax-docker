@@ -16,7 +16,7 @@ services:
     volumes:
      - ./logs/olfs_tomcat:/usr/local/tomcat/logs
      - ./logs:/usr/local/tomcat/webapps/opendap/WEB-INF/conf/logs
-    command: -n http://localhost:8080 # This is the publicly accessible host for ncWMS
+    # command: -n http://localhost:8080 # This is the publicly accessible host for ncWMS
   besd:
     build: ./besd
     env_file: ${PWD}/local.env
@@ -25,7 +25,7 @@ services:
      - "10022:10022"
     volumes:
       - ./logs:/var/log/bes/
-    command: -e admin_contact@email.org -s
+    # command: -e admin_contact@email.org -s
   ncwms:
     build: 
         context: ./ncWMS

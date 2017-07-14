@@ -95,8 +95,8 @@ Launch the olfs using command line defined environment variables to set the ncWM
 
 **NOTE:** _The environment variables are set to the left of the image name. The commandline switches occur AFTER the image name._
 
-## Compose 
-We provide the following YAML files for docker-compose:
+## Docker-Compose 
+We provide several YAML files for docker-compose. All of the files are written to utilize a local.env file to load the environment variables described above. A template for this file may be found in ./local.env.org to configure your Hyrax instance.
 
 ### hyrax.yml     
 This builds and launches a composed Hyrax made up of a single **besd** and a single **olfs** container. Log directories for olfs, tomcat, and besd are mapped to ./logs
