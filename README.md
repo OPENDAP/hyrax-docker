@@ -34,7 +34,8 @@ This image contains a complete Hyrax server. Currently based on **CentOS-7** and
 * **DEVELOPER_MODE** - Setting the value of the argument to "true"
  (--build-arg DEVELOPER_MODE=true) instructs the build to insert default 
  authentication credentials into the ncWMS admin interface so that it 
- maybe be accessed. Otherwise the ncWMS admin page is unreachable as its configuration copied into the build.
+ maybe be accessed in the running container. Otherwise the ncWMS admin 
+ page is unreachable and not required as its configuration is copied into the image during the build.
 #### ENV and Commandline arguments
 * **SERVER_HELP_EMAIL (-e)** - The email address of the support person for the service. This will be returned in error and help pages.
 * **FOLLOW_SYMLINKS (-s)** - Instructs the server to follow symbolic links in the file system.
