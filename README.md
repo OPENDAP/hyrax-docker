@@ -62,13 +62,13 @@ then the default value of http://localhost:8080 will suffice.
 We provide the following YAML files for docker-compose:
 
 ### hyrax.yml     
-This builds and launches a composed Hyrax made up of a single **besd** and a single **olfs** container.
+This builds and launches a composed Hyrax made up of a single **besd** and a single **olfs** container. Log directories for olfs, tomcat, and besd are mapped to ./logs
 
 ### hyrax_wms.yml
-This builds and launches a composed Hyrax made up of a single **besd**, a single **olfs**, and a single **ncWMS* container.
+This builds and launches a composed Hyrax made up of a single **besd**, a single **olfs**, and a single **ncWMS* container. Log directories for olfs, tomcat, and besd are mapped to ./logs
 
 ### developer.yml 
-This builds and launches a hyrax_wms, but in developer mode.
+This builds and launches a hyrax_wms, but in developer mode. Log directories for olfs, tomcat, and besd are mapped to ./logs
 
 ## Ansible
 It's possible that the exisiting **playbook.yml** file will work, but it has not been tested.
