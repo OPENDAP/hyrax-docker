@@ -12,7 +12,12 @@ echo "Greetings, I am "`whoami`".";   >&2
 set -e
 #set -x
 
-NCWMS_BASE="http://localhost:8080"
+if [ $NCWMS_BASE ] && [ -n $NCWMS_BASE ] ; then    
+    echo "Found exisiting NCWMS_BASE: $NCWMS_BASE"  
+else 
+    NCWMS_BASE="https://localhost:8080"
+     echo "Assigning default NCWMS_BASE: $NCWMS_BASE"  
+fi
 debug=false;
 
 while getopts "n:" opt; do

@@ -200,8 +200,8 @@ RUN  set -e && chown -R bes /etc/bes
 USER root
 
 # tunables - to be overridden on command line or in docker-compose or ansible
-ENV BES_HELP_EMAIL=help@replace.me
-ENV BES_SYMLINKS=Yes
+ENV SERVER_HELP_EMAIL=help@replace.me
+ENV FOLLOW_SYMLINKS=Yes
 # Yes (hyrax docker default overrides rpm default) or No, for symlinks in /usr/share/hyrax
 
 

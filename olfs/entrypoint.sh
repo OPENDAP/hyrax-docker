@@ -10,12 +10,15 @@
 #echo "entrypoint.sh  command line: \"$@\""
 echo "############################## OLFS ##################################";   >&2
 echo "Greetings, I am "`whoami`".";   >&2
-echo "CATALINA_HOME: ${CATALINA_HOME}"; >&2
-ls -l "$CATALINA_HOME" "$CATALINA_HOME/bin"  >&2
 set -e
 #set -x
 
-NCWMS_BASE="http://localhost:8080"
+if [ $NCWMS_BASE ] && [ -n $NCWMS_BASE ] ; then    
+    echo "Found exisiting NCWMS_BASE: $NCWMS_BASE"  
+else 
+    NCWMS_BASE="https://localhost:8080"
+     echo "Assigning default NCWMS_BASE: $NCWMS_BASE"  
+fi
 debug=false;
 
 while getopts "n:d" opt; do
@@ -41,6 +44,8 @@ while getopts "n:d" opt; do
 done
 
 if [ $debug = true ];then
+    echo "CATALINA_HOME: ${CATALINA_HOME}"; >&2
+    ls -l "$CATALINA_HOME" "$CATALINA_HOME/bin"  >&2
     echo "NCWMS_BASE: ${NCWMS_BASE}" >&2
     echo "Setting ncWMS access URLs in viewers.xml (if needed)." >&2
 fi
@@ -88,6 +93,11 @@ while /bin/true; do
         cat /usr/local/tomcat/logs/catalina.out >&2
         echo "Tomcat Console Log [END]" >&2
         exit -2;
+    fi
+    if [ $debug = true ];then 
+        echo "-------------------------------------------------------------------"
+        date
+        echo "TOMCAT_STATUS: $TOMCAT_STATUS  tomcat_pid:$tomcat_pid"
     fi
 done
 

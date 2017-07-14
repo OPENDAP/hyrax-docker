@@ -144,15 +144,15 @@ to be reconfigured to find a bes.
 Environment variables
 ---------------------
 
-OLFS_WMS_VIEWERS_HOSTPORT=localhost:8080
+NCWMS_BASE=localhost:8080
 
 > The viewers.xml configuration for ncWMS2 requires specifying a client
   accessible host:port combination, The default setting will result in godiva 
   only working for clients on the localhost. 
 
-BES_HELP_EMAIL=help@replaceme
+SERVER_HELP_EMAIL=help@replaceme
 
-BES_SYMLINKS=Yes # No is the alternative option
+FOLLOW_SYMLINKS=Yes # No is the alternative option
 
 > Key tunable parameters from /etc/bes/bes.conf can be altered with environment
   variables.  This could readily be extended for other tunables like cache size.

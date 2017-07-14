@@ -2,7 +2,6 @@
 version: '3'
 services:
   olfs:
-    build: ./olfs
     build: 
         context: ./olfs
         args:
