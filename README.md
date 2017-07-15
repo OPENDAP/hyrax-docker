@@ -93,8 +93,20 @@ Launch the olfs using command line defined environment variables to set the ncWM
 
 `docker run --name besd -p 8080:8080 -e NCWMS_BASE=http://foo.bar.com olfs_image
 `
+### ncwms
+#### build arguments
+* **DEVELOPER_MODE** - Setting the value of the argument to "true"
+ (--build-arg DEVELOPER_MODE=true) instructs the build to insert default 
+ authentication credentials into the ncWMS admin interface so that it 
+ maybe be accessed in the running container. Otherwise the ncWMS admin 
+ page is unreachable and not required as its configuration is copied into the image during the build.
+#### Environment Variables and Commandline arguments 
+_None_
 
-**NOTE:** _The environment variables are set to the left of the image name. The commandline switches occur AFTER the image name._
+#### Commandline Examples:
+Launch the ncwms using commandline switches to set the ncWMS service base to \(_-n http://foo.bar.com:8080_\)
+
+```docker run --name ncwms -p 8080:8080 ncwms_image```
 
 ## Docker-Compose 
 We provide several YAML files for docker-compose. All of the files are written to load the file `./local.env` in order to set the environment variables described above. A template for this file may be found in `./local.env.org`, copy it to `./local.env` and edit that to configure your Hyrax instance.
