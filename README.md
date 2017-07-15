@@ -30,25 +30,25 @@ to OPeNDAP. We are grateful for their support.
 ### hyrax
 This image contains a complete Hyrax server. Currently based on **CentOS-7** and _yum_ installed **Tomcat-7**.
 #### build arguments
-* **USE_NCMWS** - Setting the value of the argument to "true" (_--build-arg USE_NCWMS=true_) will cause the ncWMS application to be included in the container. 
+* **USE_NCMWS** - Setting the value of the argument to "true" (`--build-arg USE_NCWMS=true`) will cause the ncWMS application to be included in the container. 
 * **DEVELOPER_MODE** - Setting the value of the argument to "true"
- (--build-arg DEVELOPER_MODE=true) instructs the build to insert default 
+ (`--build-arg DEVELOPER_MODE=true`) instructs the build to insert default 
  authentication credentials into the ncWMS admin interface so that it 
  maybe be accessed in the running container. Otherwise the ncWMS admin 
  page is unreachable and not required as its configuration is copied into the image during the build.
 #### Environment Variables and Commandline arguments
-* **SERVER_HELP_EMAIL (-e)** - The email address of the support person for the service. This will be returned in error and help pages.
-* **FOLLOW_SYMLINKS (-s)** - Instructs the server to follow symbolic links in the file system.
-* **NCWMS_BASE (-n)** - The system needs to know the public accessible service base for the ncWMS, this will be something like 
+* **SERVER_HELP_EMAIL (`-e`)** - The email address of the support person for the service. This will be returned in error and help pages.
+* **FOLLOW_SYMLINKS (`-s`)** - Instructs the server to follow symbolic links in the file system.
+* **NCWMS_BASE (`-n`)** - The system needs to know the public accessible service base for the ncWMS, this will be something like 
 http://yourhost:8080 If all you want is to test it on your local system 
 then the default value of http://localhost:8080 will suffice.
 
 #### Commandline Examples:
-Launch Hyrax using commandline switches to set the admin email to \(_-e support@erehwon.edu_\), enable symbolic link traversal \(_-s_\), and set the ncWMS service base to _\(-n http://foo.bar.com:8080\)_
+Launch Hyrax using commandline switches to set the admin email to \(`-e support@erehwon.edu`\), enable symbolic link traversal (`-s`), and set the ncWMS service base to \(`-n http://foo.bar.com:8080`\)
 
 ```docker run --name hyrax -p 10022:10022 hyrax_image -e support@erehwon.edu -s -n http://foo.bar.com:8080```
 
-Launch Hyrax using command line defined environment variables to set the  admin email to \(_-e SERVER_HELP_EMAIL=support@foo.com_\), enable symbolic link traversal \(_-s_\), and set the ncWMS service base to \(_-e NCWMS_BASE=http://foo.bar.com_\)
+Launch Hyrax using command line defined environment variables to set the  admin email to \(`-e SERVER_HELP_EMAIL=support@foo.com`\), enable symbolic link traversal \(`-s`\), and set the ncWMS service base to \(`-e NCWMS_BASE=http://foo.bar.com`\)
 
 `docker run --name hyrax -p 10022:10022 -e FOLLOW_SYMLINKS=true -e SERVER_HELP_EMAIL=support@foo.com -e NCWMS_BASE=http://foo.bar.com hyrax_image
 `
@@ -59,15 +59,15 @@ Launch Hyrax using command line defined environment variables to set the  admin 
 Manifests just the BES service part of the Hyrax server.
 #### build arguments (_none_)
 #### Environment Variables and Commandline arguments
-* **SERVER_HELP_EMAIL (-e)** - The email address of the support person for the service. This will be returned in error and help pages.
-* **FOLLOW_SYMLINKS (-s)** - Instructs the server to follow symbolic links in the file system.
+* **SERVER_HELP_EMAIL (`-e`)** - The email address of the support person for the service. This will be returned in error and help pages.
+* **FOLLOW_SYMLINKS (`-s`)** - Instructs the server to follow symbolic links in the file system.
 
 #### Commandline Examples:
-Launch besd using commandline switches to set the admin email to \(_-e support@erehwon.edu_\)and enabling symbolic link traversal \(_-s_\)
+Launch besd using commandline switches to set the admin email to \(`-e support@erehwon.edu`\)and enabling symbolic link traversal \(`-s`\)
 
 ```docker run --name besd -p 10022:10022 besd_image -e support@erehwon.edu -s ```
 
-Launch Hyrax using command line defined environment envariables to set the  admin email to \(_-e SERVER_HELP_EMAIL=support@foo.com_\) and enable symbolic link traversal \(_-s_\)
+Launch Hyrax using command line defined environment envariables to set the  admin email to \(`-e SERVER_HELP_EMAIL=support@foo.com`\) and enable symbolic link traversal \(`-s`\)
 
 `docker run --name besd -p 10022:10022 -e FOLLOW_SYMLINKS=true -e SERVER_HELP_EMAIL=support@foo.com besd_image
 `
@@ -77,34 +77,36 @@ Launch Hyrax using command line defined environment envariables to set the  admi
 ### olfs
 #### build arguments
 * **USE_NCMWS** - Setting the value of the argument to "true"
- (_--build-arg USE_NCWMS=true_) will cause the OLFS to be configured to
+ (`--build-arg USE_NCWMS=true`) will cause the OLFS to be configured to
   provide  ncWMS links, but will not include the ncWMS application in the image.
 #### Environment Variables and Commandline arguments
-* **NCWMS_BASE (-n)** - The system needs to know the public accessible service base for the ncWMS, this will be something like 
-http://yourhost:8080 If all you want is to test it on your local system ### ncwms
-then the default value of http://localhost:8080 will suffice.
+* **NCWMS_BASE (`-n`)** - The system needs to know the public accessible service base 
+for the ncWMS, this will be something like  http://yourhost:8080 If all you want is 
+to test it on your local system ### ncwms then the default value of 
+http://localhost:8080 will suffice.
 
 #### Commandline Examples:
-Launch the olfs using commandline switches to set the ncWMS service base to \(_-n http://foo.bar.com:8080_\)
+Launch the olfs using commandline switches to set the ncWMS service base to \(`-n http://foo.bar.com:8080`\)
 
 ```docker run --name olfs -p 8080:8080 olfs_image -n http://foo.bar.com:8080```
 
-Launch the olfs using command line defined environment variables to set the ncWMS service base to \(_-e NCWMS_BASE=http://foo.bar.com_\)
+Launch the olfs using command line defined environment variables to set the ncWMS service base to \(`-e NCWMS_BASE=http://foo.bar.com`\)
 
 `docker run --name besd -p 8080:8080 -e NCWMS_BASE=http://foo.bar.com olfs_image
 `
 ### ncwms
 #### build arguments
 * **DEVELOPER_MODE** - Setting the value of the argument to "true"
- (--build-arg DEVELOPER_MODE=true) instructs the build to insert default 
+ (`--build-arg DEVELOPER_MODE=true`) instructs the build to insert default 
  authentication credentials into the ncWMS admin interface so that it 
  maybe be accessed in the running container. Otherwise the ncWMS admin 
- page is unreachable as it is not required at runtime. Its configuration is copied into the image during the build.
+ page is unreachable as it is not required at runtime. Its configuration is 
+ copied into the image during the build.
 #### Environment Variables and Commandline arguments 
 _None_
 
 #### Commandline Examples:
-Launch the ncwms using commandline switches to set the ncWMS service base to \(_-n http://foo.bar.com:8080_\)
+Launch the ncwms using commandline switches to set the ncWMS service base to \(`-n http://foo.bar.com:8080`ß\)
 
 ```docker run --name ncwms -p 8080:8080 ncwms_image```
 
