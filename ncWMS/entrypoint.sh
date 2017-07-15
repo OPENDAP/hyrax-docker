@@ -24,7 +24,7 @@ while getopts "d" opt; do
       ;;
     \?)
       echo "Invalid option: -$OPTARG" >&2
-      echo "options: [-n ncwms_base_url] [-d] " >&2
+      echo "options: [-d] " >&2
       echo " -d Enables debugging output for this script." >&2
       echo "EXITING NOW" >&2
       exit 2;

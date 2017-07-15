@@ -53,10 +53,10 @@ while getopts "de:sn:" opt; do
       ;;
     \?)
       echo "Invalid option: -$OPTARG" >&2
-      echo "options: [-n ncwms_base_url] [-d] "  >&2
+      echo "options: [-e xxx] [-s] [-n yyy] [-d] "  >&2
       echo " -e xxx where xxx is the email address of the admin contact for the server."
       echo " -s When present causes the BES to follow symbolic links."
-      echo " -n xxx where xxx is the protocol, server and port part "  >&2
+      echo " -n yyy where yyy is the protocol, server and port part "  >&2
       echo "    of the ncWMS service (for example http://foo.com:8090)."  >&2
       echo " -d Enables debugging output for this script."  >&2
       echo "EXITING NOW"  >&2

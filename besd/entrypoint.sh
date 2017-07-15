@@ -45,7 +45,7 @@ while getopts "e:sd" opt; do
       ;;
     \?)
       echo "Invalid option: -$OPTARG" >&2
-      echo "options: [-a email_address] [-s] [-d] "
+      echo "options: [-e email_address] [-s] [-d] "
       echo " -e xxx where xxx is the email address of the admin contact for the server."
       echo " -s When present causes the BES to follow symbolic links."
       echo " -d Enables debugging output for this script."
