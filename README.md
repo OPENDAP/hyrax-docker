@@ -99,7 +99,7 @@ Launch the olfs using command line defined environment variables to set the ncWM
  (--build-arg DEVELOPER_MODE=true) instructs the build to insert default 
  authentication credentials into the ncWMS admin interface so that it 
  maybe be accessed in the running container. Otherwise the ncWMS admin 
- page is unreachable and not required as its configuration is copied into the image during the build.
+ page is unreachable as it is not required at runtime. Its configuration is copied into the image during the build.
 #### Environment Variables and Commandline arguments 
 _None_
 
