@@ -56,7 +56,7 @@ Launch Hyrax using command line defined environment variables to set the  admin 
 **NOTE:** _The environment variables are set to the left of the image name. The commandline switches occur AFTER the image name._
 
 ### besd
-Manifests just the BES service part of the Hyrax server.
+This CentOS-7 based image contains just the BES component of the Hyrax server.
 #### build arguments (_none_)
 #### Environment Variables and Commandline arguments
 * **SERVER_HELP_EMAIL (`-e`)** - The email address of the support person for the service. This will be returned in error and help pages.
@@ -75,6 +75,11 @@ Launch Hyrax using command line defined environment envariables to set the  admi
 **NOTE:** _The environment variables are set to the left of the image name. The commandline switches occur AFTER the image name._
 
 ### olfs
+This image, based on UNIDATA's security hardened Tomcat, contains just the OLFS web aplication. 
+
+**NOTE: _This image does not run Tomcat in security mode_** 
+
+
 #### build arguments
 * **USE_NCMWS** - Setting the value of the argument to "true"
  (`--build-arg USE_NCWMS=true`) will cause the OLFS to be configured to
@@ -95,6 +100,10 @@ Launch the olfs using command line defined environment variables to set the ncWM
 `docker run --name besd -p 8080:8080 -e NCWMS_BASE=http://foo.bar.com olfs_image
 `
 ### ncwms
+This image, based on the official Tomcat:8 image, contains just the ncWMS-2.2.2 web application.
+
+**NOTE: _This image does not run Tomcat in security mode_** 
+
 #### build arguments
 * **DEVELOPER_MODE** - Setting the value of the argument to "true"
  (`--build-arg DEVELOPER_MODE=true`) instructs the build to insert default 
