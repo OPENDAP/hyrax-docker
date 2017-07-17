@@ -96,6 +96,13 @@ to `/usr/share/hyrax` in the Hyrax or BES container (`--volume <your path>:/usr/
 docker run --hostname hyrax --port 8080:8080 --volume /home/mydata:/usr/share/hyrax --name=hyrax_container hyrax_image
 ```
 
+## Server Logs
+If the server logs are desired their locations are identified in the docker-compose YML files:
+ * developer.yml 
+ * hyrax.yml     
+ * hyrax_wms.yml 
+
+
 ## Images
 
 ### hyrax
