@@ -40,7 +40,7 @@ fi
 trap "echo TRAPed signal" HUP INT QUIT KILL TERM
 
 # startup.sh -security
-startup.sh # Without --security makes ncWMS work because the CORS filter get's tangled up with the security manager.
+startup.sh -security # Without --security makes ncWMS work because the CORS filter get's tangled up with the security manager.
 
 tomcat_info=`ps -f | grep ${tomcat_key} - `;
 status=$?
