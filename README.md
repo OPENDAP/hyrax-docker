@@ -17,12 +17,12 @@ The hyrax-docker project can build the following Docker images:
 * **ncwms** - The ncWMS application from our friends at the [Reading
     e-Science Centre](http://www.met.reading.ac.uk/resc/home/).
 
-Each of these images can be run standalone or; the last three can be
+Each of these images can be run standalone; the last three can be
 combined via docker compose or ansible.
 
-The service starts up providing access to the default data shipped
-with Hyrax, but can easily be started to serve data from the host
-machine.
+The Hyrax service starts up providing access to the default (test)
+data, but can easily be configured to serve data from the host machine
+(see **_Using Hyrax docker to serve your data_**).
 
 > NOTE: This code is based on work started by Gareth Williams at CSIRO
 and contributed to OPeNDAP. We are grateful for their support.
@@ -93,26 +93,41 @@ _volume_ option with `docker run` to map the path to data on your host
 to `/usr/share/hyrax` in the Hyrax or BES container (`--volume <your path>:/usr/share/hyrax`).
 
 ```
-docker run --hostname hyrax --port 8080:8080 --volume <your path>:/usr/share/hyrax --name=hyrax_container hyrax_image
+docker run --hostname hyrax --port 8080:8080 --volume /home/mydata:/usr/share/hyrax --name=hyrax_container hyrax_image
 ```
 
 ## Images
 
 ### hyrax
-This image contains a complete Hyrax server. Currently based on **CentOS-7** and _yum_ installed **Tomcat-7**.
+
+This image contains a complete Hyrax server. Currently based on
+**CentOS-7** and **Tomcat-7** installed using _yum_.
+
 #### build arguments
-* **USE_NCMWS** - Setting the value of the argument to "true" (`--build-arg USE_NCWMS=true`) will cause the ncWMS application to be included in the container. 
+
+* **USE_NCMWS** - Setting the value of the argument to "true"
+(`--build-arg USE_NCWMS=true`) will cause the ncWMS application to be
+included in the container.
+
 * **DEVELOPER_MODE** - Setting the value of the argument to "true"
- (`--build-arg DEVELOPER_MODE=true`) instructs the build to insert default 
- authentication credentials into the ncWMS admin interface so that it 
- maybe be accessed in the running container. Otherwise the ncWMS admin 
- page is unreachable and not required as its configuration is copied into the image during the build.
+(`--build-arg DEVELOPER_MODE=true`) instructs the build to insert
+default authentication credentials into the ncWMS admin interface so
+that it maybe be accessed in the running container. Otherwise the
+ncWMS admin page is unreachable and not required as its configuration
+is copied into the image during the build.
+
 #### Environment Variables and Command Line Arguments
-* **SERVER_HELP_EMAIL (`-e`)** - The email address of the support person for the service. This will be returned in error and help pages.
-* **FOLLOW_SYMLINKS (`-s`)** - Instructs the server to follow symbolic links in the file system.
-* **NCWMS_BASE (`-n`)** - The system needs to know the public accessible service base for the ncWMS, this will be something like 
-http://yourhost:8080 If all you want is to test it on your local system 
-then the default value of http://localhost:8080 will suffice.
+
+* **SERVER_HELP_EMAIL (`-e`)** - The email address of the support
+person for the service. This will be returned in error and help pages.
+
+* **FOLLOW_SYMLINKS (`-s`)** - Instructs the server to follow symbolic
+  links in the file system.
+
+* **NCWMS_BASE (`-n`)** - The system needs to know the publicly
+accessible service base for the ncWMS (something like
+http://yourhost:8080). If all you want is to test it on your local
+system then the default value of http://localhost:8080 will suffice.
 
 #### Command Line Examples:
 
@@ -133,8 +148,8 @@ symbolic link traversal (`-s`), and set the ncWMS service base to
 docker run --name hyrax -p 10022:10022 -e FOLLOW_SYMLINKS=true -e SERVER_HELP_EMAIL=support@foo.com -e NCWMS_BASE=http://foo.bar.com hyrax_image
 ```
 
-**NOTE:** _The environment variables are set to the left of the image
-  name. The command line switches occur AFTER the image name._
+> NOTE: The environment variables are set to the left of the image
+name. The command line switches occur AFTER the image name.
 
 ### besd
 
@@ -147,16 +162,20 @@ This CentOS-7 based image contains just the BES component of the Hyrax server.
 * **SERVER_HELP_EMAIL (`-e`)** - The email address of the support
   person for the service. This will be returned in error and help
   pages.
-* **FOLLOW_SYMLINKS (`-s`)** - Instructs the server to follow symbolic links in the file system.
+
+* **FOLLOW_SYMLINKS (`-s`)** - Instructs the server to follow symbolic
+  links in the file system.
 
 #### Command Line Examples:
 
 Launch besd using command line switches to set the admin email to (`-e
 support@erehwon.edu`) and enabling symbolic link traversal (`-s`)
 
-```docker run --name besd -p 10022:10022 besd_image -e support@erehwon.edu -s ```
+```
+docker run --name besd -p 10022:10022 besd_image -e support@erehwon.edu -s
+```
 
-Launch Hyrax using command line defined environment variables to set
+Launch besd using command line defined environment variables to set
 the admin email to (`-e SERVER_HELP_EMAIL=support@foo.com`) and enable
 symbolic link traversal (`-s`)
 
@@ -164,13 +183,15 @@ symbolic link traversal (`-s`)
 docker run --name besd -p 10022:10022 -e FOLLOW_SYMLINKS=true -e SERVER_HELP_EMAIL=support@foo.com besd_image
 ```
 
-**NOTE:** _The environment variables are set to the left of the image
-  name. The command line switches occur AFTER the image name._
+> NOTE: The environment variables are set to the left of the image
+name. The command line switches occur AFTER the image name.
 
 ### olfs
-This image, based on UNIDATA's security hardened Tomcat, contains just the OLFS web application. 
 
-**NOTE: _This image does not run Tomcat in security mode_** 
+This image, based on UNIDATA's security hardened Tomcat, contains just
+the OLFS web application.
+
+> NOTE: _This image does not run Tomcat in its 'security' mode_
 
 #### build arguments
 
@@ -181,11 +202,10 @@ This image, based on UNIDATA's security hardened Tomcat, contains just the OLFS 
 
 #### Environment Variables and Command Line arguments
 
-* **NCWMS_BASE (`-n`)** - The system needs to know the public
-accessible service base for the ncWMS, this will be something like
-http://yourhost:8080 If all you want is to test it on your local
-system ### ncwms then the default value of http://localhost:8080 will
-suffice.
+* **NCWMS_BASE (`-n`)** - The system needs to know the publicly
+accessible service base for ncWMS (something like
+http://yourhost:8080). If all you want is to test it on your local
+system then the default value of http://localhost:8080 will suffice.
 
 #### Command Line Examples:
 
@@ -208,7 +228,7 @@ docker run --name besd -p 8080:8080 -e NCWMS_BASE=http://foo.bar.com olfs_image
 This image, based on the official Tomcat:8 image, contains just the
 ncWMS-2.2.2 web application.
 
-**NOTE: _This image does not run Tomcat in security mode_** 
+> NOTE: _This image does not run Tomcat in its 'security' mode_
 
 #### build arguments
 
@@ -217,8 +237,10 @@ ncWMS-2.2.2 web application.
  default authentication credentials into the ncWMS admin interface so
  that it maybe be accessed in the running container. Otherwise the
  ncWMS admin page is unreachable as it is not required at runtime. Its
- configuration is copied into the image during the build. ####
- Environment Variables and Command Line arguments _None_
+ configuration is copied into the image during the build.
+
+#### Environment Variables and Command Line arguments
+_None_
 
 #### Command Line Examples:
 
@@ -284,7 +306,7 @@ James Gallagher <jgallagher@opendap.org>
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
 License as published by the Free Software Foundation; either
-version 2.1 of the License, or (at your option) any later version.
+version 3.0 of the License, or (at your option) any later version.
 
 This library is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -302,9 +324,9 @@ You can contact OPeNDAP, Inc. at PO Box 112, Saunderstown, RI. 02874-0112.
 Based on https://bitbucket.csiro.au/projects/ASC/repos/hyrax-docker/,
 Dec 19, 2016, by gareth.williams@csiro.au. That project was licensed
 under a CSIRO variation of a MIT / BSD Open Source License. The
-license text is in the file CSIRO_MIT_LICENSE
+license text is in the file CSIRO\_MIT\_LICENSE
 
-Gareth notes: Ideas have been drawn from
+> NOTE: Gareth wrote: Ideas have been drawn from
 https://github.com/Unidata/thredds-docker and various other
 contributions on _dockerhub_, including the official _postgres_
 container's exemplar use of variables with an entrypoint.
