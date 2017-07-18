@@ -105,6 +105,14 @@ If the server logs are desired their locations are identified in the docker-comp
 
 ## Images
 
+**_Performance Note:_**_We performed a rudimentary speed check comparing the single container Hyrax with the two container version launched by using docker-compose and the hyrax.yml file. Our results (below) indicated that, for our test, there was no significant performance difference between the two. YMMV._
+
+````
+one_container_times:  n=100, min=  129.96,  mean=  131.41 +/-  0.54,  max=  133.07
+    
+two_container_times   n=100, min=   82.90,  mean=  126.42 +/- 13.23,  max=  133.03
+````
+
 ### hyrax
 
 This image contains a complete Hyrax server. Currently based on
