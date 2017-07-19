@@ -171,7 +171,7 @@ and set the ncWMS service base to (`-n http://foo.bar.com:8080`)
 ```
 docker run                      \
     --name hyrax                \
-    --port 8080:8080            \
+    --publish 8080:8080            \
     hyrax_image                 \
     -e support@erehwon.edu      \
     -s                          \
@@ -187,7 +187,7 @@ symbolic link traversal (`-s`), and set the ncWMS service base to
 ```
 docker run \
     --name hyrax \
-    --port 8080:8080 \
+    --publish 8080:8080 \
     --env FOLLOW_SYMLINKS=true \
     --env SERVER_HELP_EMAIL=support@foo.com \
     --env NCWMS_BASE=http://foo.bar.com \
@@ -202,18 +202,34 @@ In this example we use the command line parameters to condition the server. We s
 ```
 docker run \
     --name hyrax \
-    --port 8080:8080 \
-    --volume  /your/local/data:/usr/share/hyrax:ro  \
-    --volume ./logs/tomcat:/var/log/tomcat \
-    --volume ./logs:/var/lib/tomcat/webappss/opendap/WEB-INF/conf/logs \
-    --volume ./logs:/var/log/bes \
-    hyrax_image \
+    --publish 8080:8080 \
+    --volume  /usr/share/data:/usr/share/hyrax:ro  \
+    --volume /tmp/logs/tomcat:/var/log/tomcat \
+    --volume /tmp/logs:/var/lib/tomcat/webappss/opendap/WEB-INF/conf/logs \
+    --volume /tmp/logs:/var/log/bes \
+    hyrax \
     -e support@erehwon.edu \
     -s \
-    -n http://foo.bar.com:8080
+    -n http://localhost:8080
 ```
 
+And again but this time using command line set enironment variables. Same result as just above.
 
+```
+docker run \
+    --name hyrax \
+    --publish 8080:8080 \
+    --volume  /usr/share/data:/usr/share/hyrax:ro  \
+    --volume /tmp/logs/tomcat:/var/log/tomcat \
+    --volume /tmp/logs:/var/lib/tomcat/webappss/opendap/WEB-INF/conf/logs \
+    --volume /tmp/logs:/var/log/bes \
+    --env FOLLOW_SYMLINKS=true \
+    --env SERVER_HELP_EMAIL=support@foo.com \
+    --env NCWMS_BASE=http://foo.bar.com \
+    hyrax_image
+```
+
+    
 
 ### besd
 
