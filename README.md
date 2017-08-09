@@ -97,13 +97,38 @@ docker run --hostname hyrax --port 8080:8080 --volume /home/mydata:/usr/share/hy
 ```
 
 ## Server Logs
-If the server logs are desired their locations are identified in the docker-compose YML files:
+
+### docker run 
+
+We can use volume mounts on the command line of the `docker run` command to cllect the server logs on the local file system.
+
+
+### docker-compose
+The docker compose files contain volume mounts thatcollect the various server logs onto the local file system. 
+
+For example, this YML snippet:
+```
+    volumes:
+     - ./logs/olfs_tomcat:/usr/local/tomcat/logs
+     - ./logs:/usr/local/tomcat/webapps/opendap/WEB-INF/conf/logs
+```
+Maps the tomcat logs to `./logs/olfs_tomcat` and the various OLFS log files to `./logs`
+
+See the project YML for more:
  * developer.yml 
  * hyrax.yml     
  * hyrax_wms.yml 
 
 
 ## Images
+
+**_Performance Note:_**_We performed a rudimentary speed check comparing the single container Hyrax with the two container version launched by using docker-compose and the hyrax.yml file. Our results (below) indicated that, for our test, there was no significant performance difference between the two. YMMV._
+
+````
+one_container_times:  n=100, min=  129.96,  mean=  131.41 +/-  0.54,  max=  133.07
+    
+two_container_times   n=100, min=   82.90,  mean=  126.42 +/- 13.23,  max=  133.03
+````
 
 ### hyrax
 
@@ -138,25 +163,73 @@ system then the default value of http://localhost:8080 will suffice.
 
 #### Command Line Examples:
 
+##### Command Line Options Example
 Launch Hyrax using command line switches to set the admin email to
 (`-e support@erehwon.edu`), enable symbolic link traversal (`-s`),
 and set the ncWMS service base to (`-n http://foo.bar.com:8080`)
 
 ```
-docker run --name hyrax -p 10022:10022 hyrax_image -e support@erehwon.edu -s -n http://foo.bar.com:8080
+docker run                      \
+    --name hyrax                \
+    --publish 8080:8080            \
+    hyrax_image                 \
+    -e support@erehwon.edu      \
+    -s                          \
+    -n http://foo.bar.com:8080
 ```
 
+##### Environment Variables Example
 Launch Hyrax using command line defined environment variables to set
 the admin email to (`-e SERVER_HELP_EMAIL=support@foo.com`), enable
 symbolic link traversal (`-s`), and set the ncWMS service base to
 (`-e NCWMS_BASE=http://foo.bar.com`)
 
 ```
-docker run --name hyrax -p 10022:10022 -e FOLLOW_SYMLINKS=true -e SERVER_HELP_EMAIL=support@foo.com -e NCWMS_BASE=http://foo.bar.com hyrax_image
+docker run \
+    --name hyrax \
+    --publish 8080:8080 \
+    --env FOLLOW_SYMLINKS=true \
+    --env SERVER_HELP_EMAIL=support@foo.com \
+    --env NCWMS_BASE=http://foo.bar.com \
+    hyrax_image
 ```
 
 > NOTE: The environment variables are set to the left of the image
 name. The command line switches occur AFTER the image name.
+
+##### The Whole Enchilada
+In this example we use the command line parameters to condition the server. We specify a read-only volume for data and 3 read-write  volumes for collecting logs on the local disk.
+```
+docker run \
+    --name hyrax \
+    --publish 8080:8080 \
+    --volume  /usr/share/data:/usr/share/hyrax:ro  \
+    --volume /tmp/logs/tomcat:/var/log/tomcat \
+    --volume /tmp/logs:/var/lib/tomcat/webappss/opendap/WEB-INF/conf/logs \
+    --volume /tmp/logs:/var/log/bes \
+    hyrax \
+    -e support@erehwon.edu \
+    -s \
+    -n http://localhost:8080
+```
+
+And again but this time using command line set enironment variables. Same result as just above.
+
+```
+docker run \
+    --name hyrax \
+    --publish 8080:8080 \
+    --volume  /usr/share/data:/usr/share/hyrax:ro  \
+    --volume /tmp/logs/tomcat:/var/log/tomcat \
+    --volume /tmp/logs:/var/lib/tomcat/webappss/opendap/WEB-INF/conf/logs \
+    --volume /tmp/logs:/var/log/bes \
+    --env FOLLOW_SYMLINKS=true \
+    --env SERVER_HELP_EMAIL=support@foo.com \
+    --env NCWMS_BASE=http://foo.bar.com \
+    hyrax_image
+```
+
+    
 
 ### besd
 
