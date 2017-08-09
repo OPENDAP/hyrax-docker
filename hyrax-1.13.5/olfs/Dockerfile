@@ -34,8 +34,8 @@ RUN set -e \
     && gpg --import $OPENDAP_PUBLIC_KEY_FILE
 
 # HYRAX VERSION INFO
-ENV HYRAX_VERSION=1.13.4 
-ENV OLFS_VERSION=1.16.3
+ENV HYRAX_VERSION=1.13.5 
+ENV OLFS_VERSION=1.16.4
 
 ENV OLFS_WAR_URL="https://www.opendap.org/pub/olfs/olfs-${OLFS_VERSION}-webapp.tgz"
 

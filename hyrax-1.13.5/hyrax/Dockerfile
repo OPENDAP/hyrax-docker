@@ -16,7 +16,7 @@
 FROM centos:7
 
 LABEL vendor="OPeNDAP Incorporated"
-LABEL org.opendap.hyrax.version="1.13.4"
+LABEL org.opendap.hyrax.version="1.13.5"
 LABEL org.opendap.hyrax.release-date="2017-06-05"
 LABEL org.opendap.hyrax.version.is-production="true"
 
@@ -63,10 +63,13 @@ RUN set -e \
     && gpg --import $OPENDAP_PUBLIC_KEY_FILE
 
 # HYRAX VERSION INFO
+# Note: for Hyrax-1.13.5 only the OLFS changed from 1.13.4
+# This means for the sake of this download we need to get 
+# the RPM's from the old location, 1.13.4
 ENV HYRAX_VERSION=1.13.4 
 ENV LIBDAP_VERSION=3.19.0-1
 ENV BES_VERSION=3.18.0-1
-ENV OLFS_VERSION=1.16.3
+ENV OLFS_VERSION=1.16.4
 
 # RELEASE URLs
 ENV LIBDAP_RPM="https://www.opendap.org/pub/binary/hyrax-${HYRAX_VERSION}/centos-7.x/libdap-${LIBDAP_VERSION}.el7.centos.x86_64.rpm"
