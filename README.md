@@ -96,7 +96,7 @@ to `/usr/share/hyrax` in the Hyrax or BES container (`--volume <your path>:/usr/
 docker run --hostname hyrax --port 8080:8080 --volume /home/mydata:/usr/share/hyrax --name=hyrax_container hyrax_image
 ```
 
-## Server Logs
+## Server Logs & Serving Your Data
 
 ### docker run 
 
