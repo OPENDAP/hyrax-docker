@@ -100,7 +100,7 @@ docker run --hostname hyrax --port 8080:8080 --volume /home/mydata:/usr/share/hy
 
 ### docker run 
 
-We can use volume mounts on the command line of the `docker run` command to cllect the server logs on the local file system.
+We can use volume mounts on the command line of the `docker run` command to collect the server logs on the local file system.
 
 #### Example - Run Hyrax & collect logs.
 ```
@@ -119,6 +119,7 @@ docker run \
    -n http://localhost:8080
 ```
 
+And we can use the mounts to serve data local on the host filesystem.
 #### Example - Run Hyrax, collect logs, and serve local data.
 ```
 cd hyrax-docker/hyrax-1.13.5
