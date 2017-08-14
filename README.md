@@ -119,8 +119,8 @@ docker run \
    -n http://localhost:8080
 ```
 
-And we can use the mounts to serve data local on the host filesystem.
-#### Example - Run Hyrax, collect logs, and serve local data.
+And we can use the mounts to serve data from the Docker host filesystem.
+#### Example - Run Hyrax, and serve local data.
 ```
 cd hyrax-docker/hyrax-1.13.5
 docker build -t hyrax --no-cache hyrax
@@ -129,9 +129,6 @@ docker run \
    --name hyrax \
    --publish 8080:8080 \
    --volume $prefix/local_data:/usr/share/hyrax \
-   --volume $prefix/logs:/var/log/tomcat \
-   --volume $prefix/logs:/var/lib/tomcat/webapps/opendap/WEB-INF/conf/logs \
-   --volume $prefix/logs:/var/log/bes \
    hyrax \
    -e support@erehwon.edu \
    -s \
