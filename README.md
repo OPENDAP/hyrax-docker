@@ -94,11 +94,65 @@ to `/usr/share/hyrax` in the Hyrax or BES container (`--volume <your path>:/usr/
 docker run --hostname hyrax --port 8080:8080 --volume /home/mydata:/usr/share/hyrax --name=hyrax_container hyrax_image
 ```
 
-## Server Logs
+## Server Logs & Serving Your Data
 
 ### docker run 
 
-We can use volume mounts on the command line of the `docker run` command to cllect the server logs on the local file system.
+We can use volume mounts on the command line of the `docker run` command to collect the server logs on the local file system.
+
+#### Example - Run Hyrax & collect logs.
+```
+cd hyrax-docker/hyrax-1.13.5
+docker build -t hyrax --no-cache hyrax
+prefix=`pwd`
+docker run \
+   --name hyrax \
+   --publish 8080:8080 \
+   --volume $prefix/logs:/var/log/tomcat \
+   --volume $prefix/logs:/var/lib/tomcat/webapps/opendap/WEB-INF/conf/logs \
+   --volume $prefix/logs:/var/log/bes \
+   hyrax \
+   -e support@erehwon.edu \
+   -s \
+   -n http://localhost:8080
+```
+
+And we can use the mounts to serve data from the Docker host filesystem.
+#### Example - Run Hyrax, and serve local data.
+```
+cd hyrax-docker/hyrax-1.13.5
+docker build -t hyrax --no-cache hyrax
+prefix=`pwd`
+docker run \
+   --name hyrax \
+   --publish 8080:8080 \
+   --volume $prefix/local_data:/usr/share/hyrax \
+   hyrax \
+   -e support@erehwon.edu \
+   -s \
+   -n http://localhost:8080
+```
+
+#### Example - Run Hyrax & ncWMS, collect logs, serve local data.
+```
+cd hyrax-docker/hyrax-1.13.5
+docker build -t hyrax_ncwms --build-arg USE_NCWMS=true --no-cache hyrax
+prefix=`pwd`
+docker run \
+   --name hyrax \
+   --publish 8080:8080 \
+   --volume $prefix/local_data:/usr/share/hyrax \
+   --volume $prefix/logs:/var/log/tomcat \
+   --volume $prefix/logs:/var/lib/tomcat/webapps/opendap/WEB-INF/conf/logs \
+   --volume $prefix/logs:/var/log/bes \
+   --volume $prefix/logs:/root/.ncWMS2/logs \
+   hyrax_ncwms \
+   -e support@erehwon.edu \
+   -s \
+   -n http://localhost:8080
+```
+
+
 
 
 ### docker-compose
