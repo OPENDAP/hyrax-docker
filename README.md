@@ -39,21 +39,19 @@ To build the single container hyrax, clone this project
 ```
 git clone https://github.com/opendap/hyrax-docker
 ```
-
-and use `docker build`
-
+change directory to the desired hyrax release:
+```
+cd hyrax-docker/hyrax-1.3.5
+```
+and then use `docker build`
 ```
 docker build -t hyrax_image hyrax
 ```
-
-to include ncWMS in the image, do this:
-
+to include ncWMS in the image, use a build argument like this:
 ```
 docker build -t hyrax_image --build-arg USE_NCWMS=true hyrax
 ```
-
 To run the container:
-
 ```
 docker run -h hyrax -p 8080:8080 --name=hyrax_container hyrax_image
 ```
