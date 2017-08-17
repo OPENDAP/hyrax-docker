@@ -299,12 +299,13 @@ docker run \
     --env NCWMS_BASE=http://foo.bar.com \
     hyrax_image
 ```
-Annontation:
-```--volume /tmp/bes_cache:/tmp  ``` Maps the the container's /tmp dir to the host's /tmp/bes_cache
-    --volume /usr/share/data:/usr/share/hyrax:ro  \
-    --volume /tmp/logs/tomcat:/var/log/tomcat \
-    --volume /tmp/logs:/var/lib/tomcat/webappss/opendap/WEB-INF/conf/logs \
-    --volume /tmp/logs:/var/log/bes \
+_Annontation:_
+
+- ```--volume /tmp/bes_cache:/tmp```: Maps the the container's /tmp dir to the host's /tmp/bes_cache
+- ```--volume /usr/share/data:/usr/share/hyrax:ro```: Maps the Hyrax data directory to the docker host directory '''/usr/share/data'''.
+- ```--volume /tmp/logs/tomcat:/var/log/tomcat```:
+- ```--volume /tmp/logs:/var/lib/tomcat/webappss/opendap/WEB-INF/conf/logs```:
+- ```--volume /tmp/logs:/var/log/bes```:
 
     
 
