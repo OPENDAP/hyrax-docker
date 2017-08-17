@@ -156,7 +156,7 @@ docker run \
 
 
 ### docker-compose
-The docker compose files contain volume mounts thatcollect the various server logs onto the local file system. 
+The docker compose files contain volume mounts that collect the various server logs onto the local file system. There also (disabled) examples of using mounts to map the BES cache onto the host filesystem and to supplant the default BES configuration with one from the host filesystem.
 
 For example, this YML snippet:
 ```
@@ -280,6 +280,31 @@ docker run \
     --env NCWMS_BASE=http://foo.bar.com \
     hyrax_image
 ```
+##### Advanced Examples
+In the event that greater control of the Hyrax configuration is desired, or additional disk space is required for the various BES caching activities one may utilize volume mounts to address these issues.
+
+##### Map BES cache to host filesystem
+
+```
+docker run \
+    --name hyrax \
+    --publish 8080:8080 \
+    --volume /tmp/bes_cache:/tmp  \
+    --volume /usr/share/data:/usr/share/hyrax:ro  \
+    --volume /tmp/logs/tomcat:/var/log/tomcat \
+    --volume /tmp/logs:/var/lib/tomcat/webappss/opendap/WEB-INF/conf/logs \
+    --volume /tmp/logs:/var/log/bes \
+    --env FOLLOW_SYMLINKS=true \
+    --env SERVER_HELP_EMAIL=support@foo.com \
+    --env NCWMS_BASE=http://foo.bar.com \
+    hyrax_image
+```
+Annontation:
+```--volume /tmp/bes_cache:/tmp  ``` Maps the the container's /tmp dir to the host's /tmp/bes_cache
+    --volume /usr/share/data:/usr/share/hyrax:ro  \
+    --volume /tmp/logs/tomcat:/var/log/tomcat \
+    --volume /tmp/logs:/var/lib/tomcat/webappss/opendap/WEB-INF/conf/logs \
+    --volume /tmp/logs:/var/log/bes \
 
     
 
@@ -320,7 +345,7 @@ name. The command line switches occur AFTER the image name.
 
 ### olfs
 
-This image, based on UNIDATA's security hardened Tomcat, contains just
+This image, based on the UNIDATA security hardened Tomcat, contains just
 the OLFS web application.
 
 > NOTE: _This image does not run Tomcat in its 'security' mode_

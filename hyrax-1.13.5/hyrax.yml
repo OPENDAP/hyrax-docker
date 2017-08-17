@@ -18,5 +18,7 @@ services:
     ports:
      - "10022:10022"
     volumes:
-      - ./logs:/var/log/bes/
-    # command: -e admin_contact@email.org -s
+     - ./logs:/var/log/bes/
+     # - ./cache:/var/cache/bes  # maps the BES cache directory to the local filesystem
+     # - ./conf:/etc/bes # Maps a local BES configuration directory onto the bes in docker.
+     # command: -e admin_contact@email.org -s
