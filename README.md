@@ -257,7 +257,7 @@ docker run \
     --publish 8080:8080 \
     --volume  /usr/share/data:/usr/share/hyrax:ro  \
     --volume /tmp/logs/tomcat:/var/log/tomcat \
-    --volume /tmp/logs:/var/lib/tomcat/webappss/opendap/WEB-INF/conf/logs \
+    --volume /tmp/logs:/var/lib/tomcat/webapps/opendap/WEB-INF/conf/logs \
     --volume /tmp/logs:/var/log/bes \
     hyrax \
     -e support@erehwon.edu \
@@ -273,7 +273,7 @@ docker run \
     --publish 8080:8080 \
     --volume  /usr/share/data:/usr/share/hyrax:ro  \
     --volume /tmp/logs/tomcat:/var/log/tomcat \
-    --volume /tmp/logs:/var/lib/tomcat/webappss/opendap/WEB-INF/conf/logs \
+    --volume /tmp/logs:/var/lib/tomcat/webapps/opendap/WEB-INF/conf/logs \
     --volume /tmp/logs:/var/log/bes \
     --env FOLLOW_SYMLINKS=true \
     --env SERVER_HELP_EMAIL=support@foo.com \
@@ -292,7 +292,7 @@ docker run \
     --volume /tmp/bes_cache:/tmp  \
     --volume /usr/share/data:/usr/share/hyrax:ro  \
     --volume /tmp/logs/tomcat:/var/log/tomcat \
-    --volume /tmp/logs:/var/lib/tomcat/webappss/opendap/WEB-INF/conf/logs \
+    --volume /tmp/logs:/var/lib/tomcat/webapps/opendap/WEB-INF/conf/logs \
     --volume /tmp/logs:/var/log/bes \
     --env FOLLOW_SYMLINKS=true \
     --env SERVER_HELP_EMAIL=support@foo.com \
@@ -302,10 +302,51 @@ docker run \
 _Annontation:_
 
 - ```--volume /tmp/bes_cache:/tmp```: Maps the the container's /tmp dir to the host's /tmp/bes_cache
-- ```--volume /usr/share/data:/usr/share/hyrax:ro```: Maps the Hyrax data directory to the docker host directory '''/usr/share/data'''.
-- ```--volume /tmp/logs/tomcat:/var/log/tomcat```:
-- ```--volume /tmp/logs:/var/lib/tomcat/webappss/opendap/WEB-INF/conf/logs```:
-- ```--volume /tmp/logs:/var/log/bes```:
+- ```--volume /usr/share/data:/usr/share/hyrax:ro```: Maps the Hyrax data directory to the docker host directory ```/usr/share/data```
+- ```--volume /tmp/logs/tomcat:/var/log/tomcat```: Maps the docker Tomcat logs directory to the docker host directory ```/tmp/logs/tomcat```
+- ```--volume /tmp/logs:/var/lib/tomcat/webapps/opendap/WEB-INF/conf/logs```: Maps the docker OLFS logs to the docker host directory ```/tmp/logs```
+- ```--volume /tmp/logs:/var/log/bes```: Maps the docker BES log files to the docker host directory ```/tmp/logs```
+
+##### Replace default BES configuration 
+
+```
+docker run \
+    --name hyrax \
+    --publish 8080:8080 \
+    --volume /home/roger/bes:/etc/bes  \
+    --volume /usr/share/data:/usr/share/hyrax:ro  \
+    --volume /tmp/logs/tomcat:/var/log/tomcat \
+    --volume /tmp/logs:/var/lib/tomcat/webapps/opendap/WEB-INF/conf/logs \
+    --volume /tmp/logs:/var/log/bes \
+    --env FOLLOW_SYMLINKS=true \
+    --env SERVER_HELP_EMAIL=support@foo.com \
+    --env NCWMS_BASE=http://foo.bar.com \
+    hyrax_image
+```
+_Annontation:_
+
+- ```--volume /home/roger/bes:/etc/bes```: Replaces the docker BES configuration with one held in the docker host file system directory ```/home/roger/bes```
+
+##### Replace default BES & OLFS configuration 
+
+```
+docker run \
+    --name hyrax \
+    --publish 8080:8080 \
+    --volume /home/roger/bes:/etc/bes  \
+    --volume /home/roger/olfs:/var/lib/tomcat/webapps/opendap/WEB-INF/conf \
+    --volume /usr/share/data:/usr/share/hyrax:ro  \
+    --volume /tmp/logs/tomcat:/var/log/tomcat \
+    --volume /tmp/logs:/var/log/bes \
+    --env FOLLOW_SYMLINKS=true \
+    --env SERVER_HELP_EMAIL=support@foo.com \
+    --env NCWMS_BASE=http://foo.bar.com \
+    hyrax_image
+```
+_Annontation:_
+
+- ```--volume /home/roger/bes:/etc/bes```: Replaces the docker BES configuration with one held in the docker host file system directory ```/home/roger/bes```
+- ```--volume /home/roger/olfs:/var/lib/tomcat/webapps/opendap/WEB-INF/conf```: Replaces the docker OLFS configuration with one held in the docker host file system directory ```/home/roger/olfs```
 
     
 
