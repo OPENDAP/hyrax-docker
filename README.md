@@ -280,10 +280,10 @@ docker run \
     --env NCWMS_BASE=http://foo.bar.com \
     hyrax_image
 ```
-##### Advanced Examples
+### Advanced Examples
 In the event that greater control of the Hyrax configuration is desired, or additional disk space is required for the various BES caching activities one may utilize volume mounts to address these issues.
 
-##### Map BES cache to host filesystem
+#### Map BES cache to host filesystem
 
 ```
 docker run \
@@ -307,7 +307,7 @@ _Annontation:_
 - ```--volume /tmp/logs:/var/lib/tomcat/webapps/opendap/WEB-INF/conf/logs```: Maps the docker OLFS logs to the docker host directory ```/tmp/logs```
 - ```--volume /tmp/logs:/var/log/bes```: Maps the docker BES log files to the docker host directory ```/tmp/logs```
 
-##### Replace default BES configuration 
+#### Replace default BES configuration 
 
 ```
 docker run \
@@ -327,7 +327,7 @@ _Annontation:_
 
 - ```--volume /home/roger/bes:/etc/bes```: Replaces the docker BES configuration with one held in the docker host file system directory ```/home/roger/bes```
 
-##### Replace default BES & OLFS configuration 
+#### Replace default BES & OLFS configuration 
 
 ```
 docker run \
