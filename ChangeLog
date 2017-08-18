@@ -1,0 +1,310 @@
+2017-08-18  dh-opendap  <d.holloway@opendap.org>
+
+	Added consistent nomenclature to container vs host in volume examples.
+
+2017-08-17  ndp-opendap  <ndp@opendap.org>
+
+	Docs...
+
+	Docs...
+
+	Docs...
+
+	Docs...
+
+2017-08-16  ndp-opendap  <ndp@opendap.org>
+
+	Merge branch 'master' of https://github.com/opendap/hyrax-docker
+
+	Clean up examples in first part of README.md
+
+2017-08-14  Nathan Potter  <ndp@opendap.org>
+
+	Added more recipe examples to the readme
+
+	Added more recipe examples to the readme
+
+	Added more recipe examples to the readme
+
+	Added more recipe examples to the readme
+
+2017-08-09  Nathan Potter  <ndp@opendap.org>
+
+	Updated version numbers in README.md
+
+	Merge branch 'master' of https://github.com/opendap/hyrax-docker
+
+	Updated docker images to hyrax-1.13.5
+
+	Bumped hyrax version
+
+2017-07-19  ndp-opendap  <ndp@opendap.org>
+
+	More updates to REAMDE
+
+	More docs
+
+2017-07-18  ndp-opendap  <ndp@opendap.org>
+
+	Added note about image performance
+
+2017-07-17  ndp-opendap  <ndp@opendap.org>
+
+	Add a bit on logs to readme.md
+
+2017-07-17  James Gallagher  <jgallagher@opendap.org>
+
+	More edits to README.md
+
+	Hacked text for README.md
+
+2017-07-17  ndp-opendap  <ndp@opendap.org>
+
+	Reoriginizing docker project to mimic the Tomcat proj.
+
+2017-07-15  ndp-opendap  <ndp@opendap.org>
+
+	Documentation edits
+
+	Documentation edits
+
+	Correcting small issues.
+
+2017-07-14  ndp-opendap  <ndp@opendap.org>
+
+	More documentation edits.
+
+	More documentation edits.
+
+2017-07-14  Nathan Potter  <ndp@opendap.org>
+
+	Merge pull request #1 from OPENDAP/trials
+	Trials
+
+2017-07-14  ndp-opendap  <ndp@opendap.org>
+
+	More edits
+
+	More edits
+
+	More edits
+
+	More edits
+
+	More edits
+
+	More edits
+
+	More edits
+
+	More edits
+
+	More edits
+
+	More edits
+
+	More edits
+
+	More edits
+
+	More edits
+
+	More edits
+
+	More edits
+
+	More edits
+
+	Starting Documentation
+
+	Starting Documentation
+
+	Starting Documentation
+
+	Fixed entrypoint scripts to utilize incoming env vars or set defaults prior to evaulating commandline inouts.
+
+2017-07-13  ndp-opendap  <ndp@opendap.org>
+
+	Added compose files for developer, hyrax, and hyrax with wms. All of these use single container versions of the OLFS, BES, and ncWMS to do their thing.
+
+	Added compose files for developer, hyrax, and hyrax with wms. All of these use single container versions of the OLFS, BES, and ncWMS to do their thing.
+
+2017-07-12  ndp-opendap  <ndp@opendap.org>
+
+	Worked on developer-compose.yml and it now works and launches esd, olfs, and ncWMS
+
+	Worked on developer-compose.yml and it now works and launches esd, olfs, and ncWMS
+
+2017-07-10  ndp-opendap  <ndp@opendap.org>
+
+	More edits
+
+	Added ncWMS to single container Hyrax. It works. Woot.
+
+2017-07-07  ndp-opendap  <ndp@opendap.org>
+
+	Dropping unused test for cors config
+
+	Added single container ncWMS
+
+2017-07-06  James Gallagher  <jgallagher@opendap.org>
+
+	Merge branch 'trials' of https://github.com/opendap/hyrax-docker into trials
+
+	Added
+
+2017-07-06  ndp-opendap  <ndp@opendap.org>
+
+	More bits...
+
+2017-07-06  James Gallagher  <jgallagher@opendap.org>
+
+	Small fix modified:   README.md
+
+	Hacked the README more
+
+	Modified README.md
+
+2017-07-06  ndp-opendap  <ndp@opendap.org>
+
+	Single image Hyrax-1.13.4 now with signature verification, v0
+
+	Single image Hyrax-1.13.4 now with signature verification, v0
+
+2017-07-05  ndp-opendap  <ndp@opendap.org>
+
+	Hyrax container is working.
+
+	First single container hyrax running. Woot.
+
+	First single container hyrax running. Woot.
+
+2017-06-28  ndp-opendap  <ndp@opendap.org>
+
+	Migrated besd container to CentOS-7 (latest)
+
+2017-06-14  ndp-opendap  <ndp@opendap.org>
+
+	comments
+
+	Added simple build, startuo and shutdown scripts.
+
+	WOOT! Working docker containers for OLFS and BES plus a simple startup.sh script.
+
+	Dropped ncWMS from olfs Dockerfile. Added the creation of the logs directory mount point (we can include this in future releases of the OLFS) Building this and lanuching it with a mount ont the olfs logs WORKS
+
+	Updated olfs to 1.16.3 (Hyrax-1.13.4)
+
+	Dropped uneeded file
+
+	Update besd to 3.18.0 (Hyrax-1.13.4)
+
+2016-11-17  Williams, Gareth (IM&T, Clayton)  <Gareth.Williams@csiro.au>
+
+	MIT license for release
+
+2016-11-06  Williams, Gareth (IM&T, Clayton)  <Gareth.Williams@csiro.au>
+
+	clarify
+
+	minor cleanup
+
+2016-11-04  Williams, Gareth (IM&T, Clayton)  <Gareth.Williams@csiro.au>
+
+	quick fix for ncWMS run time permissions
+
+	upstream license info
+
+	upstream addition of gosu
+
+2016-11-01  Williams, Gareth (IM&T, Clayton)  <Gareth.Williams@csiro.au>
+
+	trim cruft
+
+2016-10-20  Williams, Gareth (IM&T, Clayton)  <Gareth.Williams@csiro.au>
+
+	cleanup3
+
+	cleanup2
+
+2016-10-19  Williams, Gareth (IM&T, Clayton)  <Gareth.Williams@csiro.au>
+
+	cleanup
+
+	fix cc-by image
+
+	improve README more
+
+	improve README
+
+	Merge pull request #1 in ASC/hyrax-docker from template to master
+	acceptable new state!
+	* commit '25ec3ae44297aa2da565e2a89d8d22766765b3c7':
+	  fix double negative
+	  bring environment in local.env
+	  introduce entrypoint for olfs
+	  update doco for current state
+	  clean up and run as bes user
+	  introduce entrypoint
+	  move to compose 2 syntax
+	  cc-by-sa => cc-by
+	  prime and license
+	  save dead end - needs buildargs support
+
+2016-10-18  Williams, Gareth (IM&T, Clayton)  <Gareth.Williams@csiro.au>
+
+	fix double negative
+
+	bring environment in local.env
+
+	introduce entrypoint for olfs
+
+2016-10-17  Williams, Gareth (IM&T, Clayton)  <Gareth.Williams@csiro.au>
+
+	update doco for current state
+
+2016-10-16  Williams, Gareth (IM&T, Clayton)  <Gareth.Williams@csiro.au>
+
+	clean up and run as bes user
+
+	introduce entrypoint
+
+	move to compose 2 syntax
+
+2016-10-13  Williams, Gareth (IM&T, Clayton)  <Gareth.Williams@csiro.au>
+
+	cc-by-sa => cc-by
+
+	prime and license
+
+	save dead end - needs buildargs support
+
+2016-10-12  Williams, Gareth (IM&T, Clayton)  <Gareth.Williams@csiro.au>
+
+	apply changes to shipped viewers.xml
+
+2016-10-07  Williams, Gareth (IM&T, Clayton)  <Gareth.Williams@csiro.au>
+
+	capture info about ncWMS source
+
+2016-10-06  Williams, Gareth (IM&T, Clayton)  <Gareth.Williams@csiro.au>
+
+	make ncWMS work
+
+	typos
+
+2016-10-05  Williams, Gareth (IM&T, Clayton)  <Gareth.Williams@csiro.au>
+
+	toward enabling WMS and document
+
+	start adding ncWMS
+
+	rewrite shipped olfs.xml before deployment to /etc/olfs
+
+	rename
+
+	get compose and ansible working and start fixing connection
+
+2016-10-04  Williams, Gareth (IM&T, Clayton)  <Gareth.Williams@csiro.au>
+
+	initial commit
