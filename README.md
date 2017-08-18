@@ -301,11 +301,11 @@ docker run \
 ```
 _Annontation:_
 
-- ```--volume /tmp/bes_cache:/tmp```: Maps the the container's /tmp dir to the host's /tmp/bes_cache
-- ```--volume /usr/share/data:/usr/share/hyrax:ro```: Maps the Hyrax data directory to the docker host directory ```/usr/share/data```
-- ```--volume /tmp/logs/tomcat:/var/log/tomcat```: Maps the docker Tomcat logs directory to the docker host directory ```/tmp/logs/tomcat```
-- ```--volume /tmp/logs:/var/lib/tomcat/webapps/opendap/WEB-INF/conf/logs```: Maps the docker OLFS logs to the docker host directory ```/tmp/logs```
-- ```--volume /tmp/logs:/var/log/bes```: Maps the docker BES log files to the docker host directory ```/tmp/logs```
+- ```--volume /tmp/bes_cache:/tmp```: Maps the docker container's /tmp dir to the docker host directory /tmp/bes_cache
+- ```--volume /usr/share/data:/usr/share/hyrax:ro```: Maps the docker container's Hyrax data directory to the docker host directory ```/usr/share/data```
+- ```--volume /tmp/logs/tomcat:/var/log/tomcat```: Maps the docker container's Tomcat logs directory to the docker host directory ```/tmp/logs/tomcat```
+- ```--volume /tmp/logs:/var/lib/tomcat/webapps/opendap/WEB-INF/conf/logs```: Maps the docker container's OLFS logs to the docker host directory ```/tmp/logs```
+- ```--volume /tmp/logs:/var/log/bes```: Maps the docker container's BES log files to the docker host directory ```/tmp/logs```
 
 #### Replace default BES configuration 
 
@@ -325,7 +325,7 @@ docker run \
 ```
 _Annontation:_
 
-- ```--volume /home/roger/bes:/etc/bes```: Replaces the docker BES configuration with one held in the docker host file system directory ```/home/roger/bes```
+- ```--volume /home/roger/bes:/etc/bes```: Replaces the docker container's BES configuration with one held in the docker host file system directory ```/home/roger/bes```
 
 #### Replace default BES & OLFS configuration 
 
@@ -345,8 +345,8 @@ docker run \
 ```
 _Annontation:_
 
-- ```--volume /home/roger/bes:/etc/bes```: Replaces the docker BES configuration with one held in the docker host file system directory ```/home/roger/bes```
-- ```--volume /home/roger/olfs:/var/lib/tomcat/webapps/opendap/WEB-INF/conf```: Replaces the docker OLFS configuration with one held in the docker host file system directory ```/home/roger/olfs```
+- ```--volume /home/roger/bes:/etc/bes```: Replaces the docker container's BES configuration with one held in the docker host file system directory ```/home/roger/bes```
+- ```--volume /home/roger/olfs:/var/lib/tomcat/webapps/opendap/WEB-INF/conf```: Replaces the docker container's OLFS configuration with one held in the docker host file system directory ```/home/roger/olfs```
 
     
 
