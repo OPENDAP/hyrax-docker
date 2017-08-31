@@ -42,6 +42,7 @@ RUN set -e && \
 # Update and install the needful.
 RUN set -e \
     && yum -y install \
+       sudo \
        tomcat \
        unzip  \
        which \
