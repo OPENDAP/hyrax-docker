@@ -213,6 +213,15 @@ accessible service base for the ncWMS (something like
 http://yourhost:8080). If all you want is to test it on your local
 system then the default value of http://localhost:8080 will suffice.
 
+* **JAVA_OPTS** - If JAVA_OPTS is defined in the container runtime 
+environment, tomcat/olfs/ncWMS will include those options in the 
+service start up.  There are many options that could be passed. Of 
+particular note is –Xmx which sets the amount of memory available. 
+ncWMS will not work properly with low memory limits. JAVA_OPTS can 
+be set by normal methods: on the docker run command line, or in 
+docker-compose configuration or in your own container layer if you 
+build on the provided containers. (This from Gareth 11 Sept 2017.)
+
 #### Command Line Examples:
 
 ##### Command Line Options Example
