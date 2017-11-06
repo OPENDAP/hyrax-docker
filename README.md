@@ -286,6 +286,7 @@ docker run \
     --volume /tmp/logs/tomcat:/var/log/tomcat \
     --volume /tmp/logs:/var/lib/tomcat/webapps/opendap/WEB-INF/conf/logs \
     --volume /tmp/logs:/var/log/bes \
+    --volume /etc/bes:/etc/bes \
     --env FOLLOW_SYMLINKS=true \
     --env SERVER_HELP_EMAIL=support@foo.com \
     --env NCWMS_BASE=http://foo.bar.com \
