@@ -41,7 +41,7 @@ git clone https://github.com/opendap/hyrax-docker
 ```
 change directory to the desired hyrax release:
 ```
-cd hyrax-docker/hyrax-1.3.5
+cd hyrax-docker/hyrax-1.13.5
 ```
 and then use `docker build`
 ```
@@ -250,7 +250,8 @@ docker run \
 name. The command line switches occur AFTER the image name.
 
 ##### The Whole Enchilada
-In this example we use the command line parameters to condition the server. We specify a read-only volume for data and 3 read-write  volumes for collecting logs on the local disk.
+In this example we use the command line parameters to condition the server. We specify a read-only volume for data, 3 read-write  volumes for collecting logs on the local disk, and finally mount our
+local BES configuration onto the Docker BES instance configuration.
 ```
 docker run \
     --name hyrax \
@@ -259,6 +260,7 @@ docker run \
     --volume /tmp/logs/tomcat:/var/log/tomcat \
     --volume /tmp/logs:/var/lib/tomcat/webapps/opendap/WEB-INF/conf/logs \
     --volume /tmp/logs:/var/log/bes \
+    --volume /etc/bes:/etc/bes \
     hyrax \
     -e support@erehwon.edu \
     -s \
