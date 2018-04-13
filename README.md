@@ -2,9 +2,9 @@
 
 Current Version:
  
- **Hyrax-1.13.5** \[libdap-3.19.0 : 
- besd-3.18.0 : 
- olfs-1.16.4 : 
+ **Hyrax-1.14.0** \[libdap-3.19.1 : 
+ besd-3.19.` : 
+ olfs-1.17.0 : 
  ncWMS-2.2.2\]
  
 ## Overview
