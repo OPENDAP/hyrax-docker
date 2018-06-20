@@ -11,17 +11,23 @@
 echo "############################## BESD ##################################";   >&2
 echo "Greetings, I am "`whoami`".";   >&2
 
-if [ $SERVER_HELP_EMAIL ] && [ -n $SERVER_HELP_EMAIL ] ; then    
-    echo "Found exisiting SERVER_HELP_EMAIL: $SERVER_HELP_EMAIL"  
-else 
+if [ $SERVER_HELP_EMAIL ] && [ -n $SERVER_HELP_EMAIL ] ; then
+    echo "Found exisiting SERVER_HELP_EMAIL: $SERVER_HELP_EMAIL"
+else
     SERVER_HELP_EMAIL="not_set"
-     echo "SERVER_HELP_EMAIL is $SERVER_HELP_EMAIL"  
+     echo "SERVER_HELP_EMAIL is $SERVER_HELP_EMAIL"
 fi
-if [ $FOLLOW_SYMLINKS ] && [ -n $FOLLOW_SYMLINKS ] ; then    
-    echo "Found exisiting FOLLOW_SYMLINKS: $FOLLOW_SYMLINKS"  
-else 
+if [ $FOLLOW_SYMLINKS ] && [ -n $FOLLOW_SYMLINKS ] ; then
+    echo "Found exisiting FOLLOW_SYMLINKS: $FOLLOW_SYMLINKS"
+else
     FOLLOW_SYMLINKS="not_set";
-     echo "FOLLOW_SYMLINKS is $FOLLOW_SYMLINKS"  
+     echo "FOLLOW_SYMLINKS is $FOLLOW_SYMLINKS"
+fi
+if [ $SERVE_VOLUME ] && [ -n $SERVE_VOLUME ] ; then
+    echo "Found existing SERVE_VOUME: $SERVE_VOLUME"
+else
+    SERVE_VOUME="not_set"
+    echo "SERVE_VOLUME is $SERVE_VOLUME"
 fi
 debug=false;
 
@@ -29,8 +35,11 @@ debug=false;
 
 debug=false;
 
-while getopts "e:sd" opt; do
+while getopts "v:e:sd" opt; do
   case $opt in
+    v)
+      #echo "Setting volume from which files are served to: $OPTARG" >&2
+      SERVE_VOLUME=$OPTARG
     e)
       #echo "Setting server admin contact email to: $OPTARG" >&2
       SERVER_HELP_EMAIL=$OPTARG
@@ -49,6 +58,7 @@ while getopts "e:sd" opt; do
       echo " -e xxx where xxx is the email address of the admin contact for the server."
       echo " -s When present causes the BES to follow symbolic links."
       echo " -d Enables debugging output for this script."
+      echo " -v xxx Serve data from xxx instead of default location (/usr/share/hyrax)."
       exit 2;
       ;;
   esac
@@ -57,7 +67,7 @@ set -e
 # echo "$@"
 
 
-# modify bes.conf based on environment variables before startup. These are set in 
+# modify bes.conf based on environment variables before startup. These are set in
 # the Docker file to "not_set" and are overriden by the commandline here
 #
 if [ $SERVER_HELP_EMAIL != "not_set" ]; then
@@ -68,11 +78,14 @@ if [ $FOLLOW_SYMLINKS != "not_set" ]; then
     echo "Setting BES FollowSymLinks to YES."
     sed -i "s/^BES.Catalog.catalog.FollowSymLinks=No/BES.Catalog.catalog.FollowSymLinks=Yes/" /etc/bes/bes.conf
 fi
-
+if [ $SERVE_VOLUME != "not_set" ]; then
+    echo "Setting BES RootDirectory To: $SERVE_VOUME"
+    sed -i "/^BES.Catalog.catalog.RootDirectory=/ s|/usr/share/hyrax|$SERVE_VOUME|" /etc/bes/bes.conf
+fi
 
 # Start the BES daemon process
 # /usr/bin/besdaemon -i /usr -c /etc/bes/bes.conf -r /var/run/bes.pid
-/usr/bin/besctl start; 
+/usr/bin/besctl start;
 status=$?
 if [ $status -ne 0 ]; then
     echo "Failed to start BES: $status"
@@ -92,9 +105,9 @@ while /bin/true; do
         echo "The BES daemon appears to have died! Exiting."
         exit -1;
     fi
-    if [ $debug = true ];then 
+    if [ $debug = true ];then
         echo "-------------------------------------------------------------------"
         date
         echo "BESD_STATUS: $BESD_STATUS  besd_pid:$besd_pid"
     fi
-done 
+done

@@ -12,29 +12,38 @@ echo "Greetings, I am "`whoami`".";   >&2
 set -e
 #set -x
 
-if [ $SERVER_HELP_EMAIL ] && [ -n $SERVER_HELP_EMAIL ] ; then    
-    echo "Found exisiting SERVER_HELP_EMAIL: $SERVER_HELP_EMAIL"  
-else 
+if [ $SERVER_HELP_EMAIL ] && [ -n $SERVER_HELP_EMAIL ] ; then
+    echo "Found exisiting SERVER_HELP_EMAIL: $SERVER_HELP_EMAIL"
+else
     SERVER_HELP_EMAIL="not_set"
-     echo "SERVER_HELP_EMAIL is $SERVER_HELP_EMAIL"  
+     echo "SERVER_HELP_EMAIL is $SERVER_HELP_EMAIL"
 fi
-if [ $FOLLOW_SYMLINKS ] && [ -n $FOLLOW_SYMLINKS ] ; then    
-    echo "Found exisiting FOLLOW_SYMLINKS: $FOLLOW_SYMLINKS"  
-else 
+if [ $FOLLOW_SYMLINKS ] && [ -n $FOLLOW_SYMLINKS ] ; then
+    echo "Found exisiting FOLLOW_SYMLINKS: $FOLLOW_SYMLINKS"
+else
     FOLLOW_SYMLINKS="not_set";
-     echo "FOLLOW_SYMLINKS is $FOLLOW_SYMLINKS"  
+     echo "FOLLOW_SYMLINKS is $FOLLOW_SYMLINKS"
+fi
+if [ $SERVE_VOLUME ] && [ -n $SERVE_VOLUME ] ; then
+  echo "Found existing SERVE_VOUME: $SERVE_VOLUME"
+else
+    SERVE_VOUME="not_set"
+    echo "SERVE_VOLUME is $SERVE_VOLUME"
 fi
 
-if [ $NCWMS_BASE ] && [ -n $NCWMS_BASE ] ; then    
-    echo "Found exisiting NCWMS_BASE: $NCWMS_BASE"  
-else 
+if [ $NCWMS_BASE ] && [ -n $NCWMS_BASE ] ; then
+    echo "Found exisiting NCWMS_BASE: $NCWMS_BASE"
+else
     NCWMS_BASE="https://localhost:8080"
-     echo "Assigning default NCWMS_BASE: $NCWMS_BASE"  
+     echo "Assigning default NCWMS_BASE: $NCWMS_BASE"
 fi
 debug=false;
 
-while getopts "de:sn:" opt; do
+while getopts "de:sn:v:" opt; do
   case $opt in
+    v)
+      #echo "Setting volume from which files are served to: $OPTARG" >&2
+      SERVE_VOLUME=$OPTARG
     e)
       #echo "Setting server admin contact email to: $OPTARG" >&2
       SERVER_HELP_EMAIL=$OPTARG
@@ -59,6 +68,7 @@ while getopts "de:sn:" opt; do
       echo " -n yyy where yyy is the protocol, server and port part "  >&2
       echo "    of the ncWMS service (for example http://foo.com:8090)."  >&2
       echo " -d Enables debugging output for this script."  >&2
+      echo " -v xxx Serve data from xxx instead of default location (/usr/share/hyrax)." >&2
       echo "EXITING NOW"  >&2
       exit 2;
       ;;
@@ -91,11 +101,14 @@ if [ $FOLLOW_SYMLINKS != "not_set" ]; then
     echo "Setting BES FollowSymLinks to YES."
     sed -i "s/^BES.Catalog.catalog.FollowSymLinks=No/BES.Catalog.catalog.FollowSymLinks=Yes/" /etc/bes/bes.conf
 fi
-
+if [ $SERVE_VOLUME != "not_set" ]; then
+    echo "Setting BES RootDirectory To: $SERVE_VOUME"
+    sed -i "/^BES.Catalog.catalog.RootDirectory=/ s|/usr/share/hyrax|$SERVE_VOUME|" /etc/bes/bes.conf
+fi
 
 # Start the BES daemon process
 # /usr/bin/besdaemon -i /usr -c /etc/bes/bes.conf -r /var/run/bes.pid
-/usr/bin/besctl start; 
+/usr/bin/besctl start;
 status=$?
 if [ $status -ne 0 ]; then
     echo "Failed to start BES: $status" >&2
@@ -121,7 +134,7 @@ while /bin/true; do
     sleep 60
     besd_ps=`ps -f $besd_pid`;
     BESD_STATUS=$?
-    
+
     tomcat_ps=`ps -f $tomcat_pid`;
     TOMCAT_STATUS=$?
 
@@ -138,7 +151,7 @@ while /bin/true; do
         echo "Tomcat Console Log [END]" >&2
         exit -2;
     fi
-    
+
     if [ $debug = true ];then
         echo "-------------------------------------------------------------------"  >&2
         date >&2
@@ -146,6 +159,5 @@ while /bin/true; do
         echo "TOMCAT_STATUS: $TOMCAT_STATUS tomcat_pid:$tomcat_pid" >&2
     fi
 
-    
+
 done
- 
