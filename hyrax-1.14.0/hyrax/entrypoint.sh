@@ -103,8 +103,8 @@ if [ $FOLLOW_SYMLINKS != "not_set" ]; then
     sed -i "s/^BES.Catalog.catalog.FollowSymLinks=No/BES.Catalog.catalog.FollowSymLinks=Yes/" /etc/bes/bes.conf
 fi
 if [ $SERVE_VOLUME != "not_set" ]; then
-    echo "Setting BES RootDirectory To: $SERVE_VOUME"
-    sed -i "/^BES.Catalog.catalog.RootDirectory=/ s|/usr/share/hyrax|$SERVE_VOUME|" /etc/bes/bes.conf
+    echo "Setting BES RootDirectory To: $SERVE_VOLUME"
+    sed -i "/^BES.Catalog.catalog.RootDirectory=/ s|/usr/share/hyrax|$SERVE_VOLUME|" /etc/bes/bes.conf
 fi
 
 # Start the BES daemon process
