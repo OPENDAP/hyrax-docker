@@ -44,6 +44,7 @@ while getopts "de:sn:v:" opt; do
     v)
       #echo "Setting volume from which files are served to: $OPTARG" >&2
       SERVE_VOLUME=$OPTARG
+      ;;
     e)
       #echo "Setting server admin contact email to: $OPTARG" >&2
       SERVER_HELP_EMAIL=$OPTARG
