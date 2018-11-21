@@ -34,8 +34,8 @@ RUN set -e \
     && gpg --import $OPENDAP_PUBLIC_KEY_FILE
 
 # HYRAX VERSION INFO
-ENV HYRAX_VERSION=1.14.0 
-ENV OLFS_VERSION=1.17.0
+ENV HYRAX_VERSION=1.15
+ENV OLFS_VERSION=1.18.1
 
 ENV OLFS_WAR_URL="https://www.opendap.org/pub/olfs/olfs-${OLFS_VERSION}-webapp.tgz"
 
@@ -57,7 +57,8 @@ RUN set -e \
 # Fix ownership and access permissions
 RUN set -e \
     && mkdir -p ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs \
-    && chown -R tomcat:tomcat ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs \
+    && chown -R tomcat ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs \
+    && chgrp -R tomcat ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs \
     && chmod 700 ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs 
 
 
@@ -89,7 +90,8 @@ EXPOSE 8080 8443
 
 # Fix ownership and access permissions
 RUN mkdir -p ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs && \
-    chown -R tomcat:tomcat ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs && \
+    chown -R tomcat ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs && \
+    chgrp -R tomcat ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs && \
     chmod 700 ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs
 
 ##########################################################################################
@@ -109,12 +111,12 @@ RUN mkdir -p ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs && \
 #    && cat /tmp/policy >> /tmp/catalina.policy \
 #    && tail -n $muh_tail ${CATALINA_HOME}/conf/catalina.policy >> /tmp/catalina.policy \
 #    && cp /tmp/catalina.policy ${CATALINA_HOME}/conf/catalina.policy \
-#    && chown -R tomcat:tomcat ${CATALINA_HOME}/conf/catalina.policy \
+#    && chown -R tomcat ${CATALINA_HOME}/conf/catalina.policy \
+#    && chgrp -R tomcat ${CATALINA_HOME}/conf/catalina.policy \
 #    && echo "" \
 #    && echo "Updated catalina.policy: " \
 #    && cat ${CATALINA_HOME}/conf/catalina.policy
 ##########################################################################################
- 
 
 COPY entrypoint.sh /entrypoint.sh
 RUN  chmod +x /entrypoint.sh && cat /entrypoint.sh

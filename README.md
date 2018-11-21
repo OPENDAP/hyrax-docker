@@ -2,9 +2,9 @@
 
 Current Version:
  
- **Hyrax-1.14.0** \[libdap-3.19.1 : 
- besd-3.19.0 : 
- olfs-1.17.0 : 
+ **Hyrax-1.15.1** \[libdap-3.20.1 : 
+ besd-3.2.1 : 
+ olfs-1.18.1 : 
  ncWMS-2.2.2\]
  
 ## Overview
@@ -18,7 +18,9 @@ The hyrax-docker project can build the following Docker images:
     e-Science Centre](http://www.met.reading.ac.uk/resc/home/).
 
 Each of these images can be run standalone; the last three can be
-combined via docker compose or ansible.
+combined via docker compose or ansible. **Note: We build and upload the **_hyrax_**
+and **_hyrax_ncwms_** containers for our releases. You'll need to build the
+other, more specialized, containers yourself.
 
 The Hyrax service starts up providing access to the default (test)
 data, but can easily be configured to serve data from the host machine
@@ -41,7 +43,7 @@ git clone https://github.com/opendap/hyrax-docker
 ```
 change directory to the desired hyrax release:
 ```
-cd hyrax-docker/hyrax-1.13.5
+cd hyrax-docker/hyrax-latest
 ```
 and then use `docker build`
 ```
@@ -102,7 +104,7 @@ We can use volume mounts on the command line of the `docker run` command to coll
 
 #### Example - Run Hyrax & collect logs.
 ```
-cd hyrax-docker/hyrax-1.13.5
+cd hyrax-docker/hyrax-latest
 docker build -t hyrax --no-cache hyrax
 prefix=`pwd`
 docker run \
@@ -120,7 +122,7 @@ docker run \
 And we can use the mounts to serve data from the Docker host filesystem.
 #### Example - Run Hyrax, and serve local data.
 ```
-cd hyrax-docker/hyrax-1.13.5
+cd hyrax-docker/hyrax-latest
 docker build -t hyrax --no-cache hyrax
 prefix=`pwd`
 docker run \
@@ -135,7 +137,7 @@ docker run \
 
 #### Example - Run Hyrax & ncWMS, collect logs, serve local data.
 ```
-cd hyrax-docker/hyrax-1.13.5
+cd hyrax-docker/hyrax-latest
 docker build -t hyrax_ncwms --build-arg USE_NCWMS=true --no-cache hyrax
 prefix=`pwd`
 docker run \
@@ -152,9 +154,6 @@ docker run \
    -n http://localhost:8080
 ```
 
-
-
-
 ### docker-compose
 The docker compose files contain volume mounts that collect the various server logs onto the local file system. There also (disabled) examples of using mounts to map the BES cache onto the host filesystem and to supplant the default BES configuration with one from the host filesystem.
 
@@ -170,7 +169,6 @@ See the project YML for more:
  * developer.yml 
  * hyrax.yml     
  * hyrax_wms.yml 
-
 
 ## Images
 
@@ -232,7 +230,7 @@ and set the ncWMS service base to (`-n http://foo.bar.com:8080`)
 ```
 docker run                      \
     --name hyrax                \
-    --publish 8080:8080            \
+    --publish 8080:8080         \
     hyrax_image                 \
     -e support@erehwon.edu      \
     -s                          \
@@ -360,9 +358,11 @@ _Annontation:_
 - ```--volume /home/roger/bes:/etc/bes```: Replaces the docker container's BES configuration with one held in the docker host file system directory ```/home/roger/bes```
 - ```--volume /home/roger/olfs:/var/lib/tomcat/webapps/opendap/WEB-INF/conf```: Replaces the docker container's OLFS configuration with one held in the docker host file system directory ```/home/roger/olfs```
 
-    
-
 ### besd
+
+**_Note_**: The _besd_, _olfs_, and _ncWMS_ containers are tested only minimally
+by us at thsi time (Nov 2018) and are really for specialized cases wehre fine-grained
+control over the server tiers is needed. You'll need to build these containers yourself.
 
 This CentOS-7 based image contains just the BES component of the Hyrax server.
 

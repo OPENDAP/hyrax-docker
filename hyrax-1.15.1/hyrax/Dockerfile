@@ -68,13 +68,17 @@ RUN set -e \
 # This means for the sake of this download we need to get 
 # the RPM's from the old location, 1.13.4
 ENV HYRAX_VERSION=1.15
-ENV LIBDAP_VERSION=3.20.0-1
-ENV BES_VERSION=3.20.0-1
-ENV OLFS_VERSION=1.18.0
+ENV LIBDAP_VERSION=3.20.1-1
+ENV BES_VERSION=3.20.1-1
+ENV OLFS_VERSION=1.18.1
 
 # RELEASE URLs
-ENV LIBDAP_RPM="https://www.opendap.org/pub/binary/hyrax-${HYRAX_VERSION}/centos-7.x/libdap-${LIBDAP_VERSION}.el7.centos.x86_64.rpm"
-ENV BES_RPM="https://www.opendap.org/pub/binary/hyrax-${HYRAX_VERSION}/centos-7.x/bes-${BES_VERSION}.static.el7.centos.x86_64.rpm"
+
+# https://www.opendap.org/pub/binary/hyrax-1.15/centos-7.x/libdap-3.20.1-1.el7.x86_64.rpm
+# https://www.opendap.org/pub/binary/hyrax-1.15/centos-7.x/bes-3.20.1-1.static.el7.x86_64.rpm
+
+ENV LIBDAP_RPM="https://www.opendap.org/pub/binary/hyrax-${HYRAX_VERSION}/centos-7.x/libdap-${LIBDAP_VERSION}.el7.x86_64.rpm"
+ENV BES_RPM="https://www.opendap.org/pub/binary/hyrax-${HYRAX_VERSION}/centos-7.x/bes-${BES_VERSION}.static.el7.x86_64.rpm"
 ENV OLFS_WAR_URL="https://www.opendap.org/pub/olfs/olfs-${OLFS_VERSION}-webapp.tgz"
 
 ###############################################################
