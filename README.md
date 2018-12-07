@@ -2,9 +2,9 @@
 
 Current Version:
  
- **Hyrax-1.15.1** \[libdap-3.20.1 : 
- besd-3.2.1 : 
- olfs-1.18.1 : 
+ **Hyrax-1.15.2** \[libdap-3.20.2 : 
+ besd-3.20.2 : 
+ olfs-1.18.2 : 
  ncWMS-2.2.2\]
  
 ## Overview
@@ -525,7 +525,7 @@ ENV BES_VERSION=3.20.1-1
 ENV OLFS_VERSION=1.18.1
 ```
 
-Update this README and follow the istructions to build and push.
+Update this README and follow the instructions to build and push.
 
 # License
 
