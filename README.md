@@ -211,7 +211,7 @@ person for the service. This will be returned in error and help pages.
 * **NCWMS_BASE (`-n`)** - The system needs to know the publicly
 accessible service base for the ncWMS (something like
 http://yourhost:8080). If all you want is to test it on your local
-system then the default value of http://localhost:8080 will suffice.
+system then the value of http://localhost:8080 will suffice.
 
 * **JAVA_OPTS** - If JAVA_OPTS is defined in the container runtime 
 environment, tomcat/olfs/ncWMS will include those options in the 
