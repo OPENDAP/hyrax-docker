@@ -189,7 +189,7 @@ RUN set -e \
 
 COPY entrypoint.sh /
 RUN  set -e && chmod +x /entrypoint.sh
-ENTRYPOINT NCWMS_BASE="${NCWMS_BASE}" /entrypoint.sh
+ENTRYPOINT [ "/entrypoint.sh" ]
 
 EXPOSE 8080
 EXPOSE 8443

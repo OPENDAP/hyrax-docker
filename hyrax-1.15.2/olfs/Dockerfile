@@ -130,6 +130,6 @@ RUN mkdir -p ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs && \
 
 COPY entrypoint.sh /entrypoint.sh
 RUN  chmod +x /entrypoint.sh && cat /entrypoint.sh
-ENTRYPOINT NCWMS_BASE="${NCWMS_BASE}" /entrypoint.sh
+ENTRYPOINT [ "/entrypoint.sh" ]
 
 CMD ["-"]

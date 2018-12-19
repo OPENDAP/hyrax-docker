@@ -34,13 +34,14 @@ fi
 debug=false;
 
 while getopts "de:sn:" opt; do
+  echo "Processing command line opt: ${opt}"
   case $opt in
     e)
-      #echo "Setting server admin contact email to: $OPTARG" >&2
+      echo "Setting server admin contact email to: $OPTARG" >&2
       SERVER_HELP_EMAIL=$OPTARG
       ;;
     s)
-      #echo "Setting FollowSymLinks to: Yes" >&2
+      echo "Setting FollowSymLinks to: Yes" >&2
       FOLLOW_SYMLINKS="Yes"
       ;;
     n)
