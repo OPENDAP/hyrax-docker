@@ -8,9 +8,6 @@ MAINTAINER support@opendap.org
 
 USER root
 
-RUN apt-get update && \
-    apt-get install -y procps
-
 #
 # The --build-arg USE_NCWMS can be set to "true" in order to 
 # add the ncWMS application to the build.
@@ -60,7 +57,7 @@ RUN set -e \
 # Fix ownership and access permissions
 RUN set -e \
     && mkdir -p ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs \
-    #&& chown -R tomcat:tomcat ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs \
+    && chown -R tomcat:tomcat ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs \
     && chmod 700 ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs 
 
 
@@ -92,7 +89,7 @@ EXPOSE 8080 8443
 
 # Fix ownership and access permissions
 RUN mkdir -p ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs && \
-    #chown -R tomcat:tomcat ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs && \
+    chown -R tomcat:tomcat ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs && \
     chmod 700 ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs
 
 ##########################################################################################
