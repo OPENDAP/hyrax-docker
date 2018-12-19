@@ -32,6 +32,16 @@ ENV USE_NCWMS ${USE_NCWMS:-"false"}
 RUN set -e && \
     if [ $USE_NCWMS = "true" ];then echo "NCWMS: ENABLED"; else echo "NCWMS: DISABLED"; fi
 
+#
+# The --build-arg NCWMS_BASE can be set to the base URL for ncWMS.
+# The entrypoint.sh code defaults it to
+# the URL: https://localhost:8080 if the environment variable NCWMS_BASE
+# is not in the shell from which the entrypoint.sh script is called.
+ARG NCWMS_BASE
+ENV NCWMS_BASE ${NCWMS_BASE:-"https://localhost:8080"}
+RUN set -e && \
+    if [ $USE_NCWMS = "true" ];then echo "NCWMS_BASE: {$NCWMS_BASE}"; fi
+
 
 ARG DEVELOPER_MODE
 ENV DEVELOPER_MODE ${DEVELOPER_MODE:-"false"}
@@ -179,7 +189,7 @@ RUN set -e \
 
 COPY entrypoint.sh /
 RUN  set -e && chmod +x /entrypoint.sh
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT NCWMS_BASE="${NCWMS_BASE}" /entrypoint.sh
 
 EXPOSE 8080
 EXPOSE 8443
