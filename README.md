@@ -64,7 +64,7 @@ This can be done by utilizing the container's **<tt>-n</tt>** paramter to specif
 docker run -h hyrax -p 8080:8080 --name=hyrax_container hyrax_image -n http://localhost:8080
 ```
 
-TIP: The value of **<tt>-n</tt>** should be the outward facing domain 
+> **TIP:** The value of **<tt>-n</tt>** should be the outward facing domain 
 name / IP address of your Docker container. If you are running a 
 container on your local system, then the example value of 
 **<tt>http://localhost:8080</tt>** should work well. If your Hyrax container is
@@ -76,7 +76,7 @@ command. If no **<tt>NCWMS_BASE</tt>** was specified in the
 **<tt>docker build</tt>** command then the value defaults to 
 **<tt>https://localhost:8080</tt>** (note that this is an HTTPS transport URL)
 
-Configure the _hyrax\_container_ so the server is accessible using
+To configure the _hyrax\_container_ so the server is accessible using
 a port other than 8080, such as port 80, the default port for HTTP.
 This can also be used to run several servers, each accessed using a
 different port (e.g., you can have a development server running on
