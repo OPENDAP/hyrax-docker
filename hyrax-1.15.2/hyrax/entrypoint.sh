@@ -34,7 +34,7 @@ fi
 debug=false;
 
 while getopts "de:sn:" opt; do
-  echo "Processing command line opt: ${opt}"
+  echo "Processing command line opt: ${opt}" >&2
   case $opt in
     e)
       echo "Setting server admin contact email to: $OPTARG" >&2

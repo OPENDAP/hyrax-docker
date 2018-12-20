@@ -53,7 +53,7 @@ to include ncWMS in the image, use a build argument like this:
 ```
 docker build -t hyrax_image --build-arg USE_NCWMS=true  --build-arg NCWMS_BASE="http://localhost:8080" hyrax
 ```
-_Note: The value of NCWMS_BASE should be the outward facing domain name / IP address of your Docker container. If you are running a container on your local system, then the example value of **http://localhost:8080** should work well. Obviously if you Hyrax container is running in AWS you'll have to sort out what the value should be. The value of NCWMS_BASE defaults to using **https** transport: **https://localhost:8080** if omitted from the build command._
+_Note: The value of NCWMS_BASE should be the outward facing domain name / IP address of your Docker container. If you are running a container on your local system, then the example value of **http://localhost:8080** should work well. If your Hyrax container is running elsewhere (in AWS for example) you'll have to sort out what the value should be. The value of NCWMS_BASE defaults to using **https** transport: **https://localhost:8080** if omitted from the build command._
 
 To run the container:
 ```
