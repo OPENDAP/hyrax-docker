@@ -51,14 +51,30 @@ docker build -t hyrax_image hyrax
 ```
 to include ncWMS in the image, use a build argument like this:
 ```
-docker build -t hyrax_image --build-arg USE_NCWMS=true  --build-arg NCWMS_BASE="http://localhost:8080" hyrax
+docker build -t hyrax_image --build-arg USE_NCWMS=true hyrax
 ```
-_Note: The value of NCWMS_BASE should be the outward facing domain name / IP address of your Docker container. If you are running a container on your local system, then the example value of **http://localhost:8080** should work well. If your Hyrax container is running elsewhere (in AWS for example) you'll have to sort out what the value should be. The value of NCWMS_BASE defaults to using **https** transport: **https://localhost:8080** if omitted from the build command._
-
 To run the container:
 ```
 docker run -h hyrax -p 8080:8080 --name=hyrax_container hyrax_image
 ```
+
+To run the container with ncWMS you'll need to tell the server where the ncWMS service is located.
+This can be done by utilizing the container's **<tt>-n</tt>** paramter to specify the endpoint like this:
+```
+docker run -h hyrax -p 8080:8080 --name=hyrax_container hyrax_image -n http://localhost:8080
+```
+
+TIP: The value of **<tt>-n</tt>** should be the outward facing domain 
+name / IP address of your Docker container. If you are running a 
+container on your local system, then the example value of 
+**<tt>http://localhost:8080</tt>** should work well. If your Hyrax container is
+running elsewhere (in AWS for example) you'll have to sort out what
+the value should be. If the **<tt>-n</tt>**  parameter is omitted from 
+the **<tt>docker run</tt>** command then the value used will be the 
+value of **<tt>--build-arg NCWMS_BASE</tt>** from the **<tt>docker build</tt>** 
+command. If no **<tt>NCWMS_BASE</tt>** was specified in the 
+**<tt>docker build</tt>** command then the value defaults to 
+**<tt>https://localhost:8080</tt>** (note that this is an HTTPS transport URL)
 
 Configure the _hyrax\_container_ so the server is accessible using
 a port other than 8080, such as port 80, the default port for HTTP.
