@@ -62,16 +62,22 @@ do
     docker build -t `echo "${docker_container}" | tr '[:upper:]' '[:lower:]'` ${docker_container};
 done
 #
+#
+#
 # -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 #
 # This builds the hyrax release images with the correct tags
 #
 docker build -t opendap/hyrax:${HYRAX_FULL_VERSION}  hyrax;
+docker build -t opendap/hyrax:latest hyrax;
+#
 docker build -t opendap/hyrax_ncwms:${HYRAX_FULL_VERSION} --build-arg USE_NCWMS=true hyrax;
-
+docker build -t opendap/hyrax_ncwms:latest --build-arg USE_NCWMS=true hyrax;
+#
+#
 # Return to top dir...
 cd ..
-
+#
 ###############################################################################################
 ###############################################################################################
 ###############################################################################################
