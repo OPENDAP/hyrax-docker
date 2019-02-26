@@ -1,6 +1,7 @@
 #!/bin/bash
 # Docker Tricks
-# Source this file and then use the functions on the commandline
+# Source this file and read it to see what's up.
+# And then use the functions on the command line
 #
 
 
