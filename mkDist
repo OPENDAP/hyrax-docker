@@ -7,33 +7,37 @@
 # Some shell state reference:
 # set -f # "set -o noglob"  Disable file name generation using metacharacters (globbing).
 # set -v # "set -o verbose" Prints shell input lines as they are read.
-# set -x # "set -o xtrace"  Print command traces before executing command.
-# set -e #  Exit on error.
+ set -x # "set -o xtrace"  Print command traces before executing command.
+ set -e #  Exit on error.
 #
 # In general use "set -e" when running commands that matter and don't use
 # it for debugging stuff.
 #
-# Set one or more individual labels
 
-set -e # exit on error
-set -x # show what's happening
-
+###############################################################################################
+#
+# EDIT THIS SECTION TO REFLECT THE RELEASE VERSIONS OF THE VARIOUS COMPONENTS.
+# DO NOT FORGET THE RELEASE DATE!
+#
 HYRAX_MAJOR_VERSION="1.15"
 HYRAX_FULL_VERSION="1.15.3"
 OLFS_VERSION="1.18.3"
 LIBDAP_VERSION="3.20.3-1"
 BES_VERSION="3.20.3-1"
 RELEASE_DATE="2019-02-25"
+#
+###############################################################################################
 
 DOCKER_RELEASE="hyrax-${HYRAX_FULL_VERSION}";
 
-
-containers="besd olfs ncWMS hyrax"
-
-
+# Create release files from template
 mkdir -p "${DOCKER_RELEASE}"
 cp -R template/* "${DOCKER_RELEASE}"
-
+#
+# -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+# Massage the files drawn from the template with the current version numbers.
+#
+containers="besd olfs hyrax ncWMS"
 for docker_container in ${containers}
 do
     cat template/${docker_container}/Dockerfile | \
@@ -45,15 +49,32 @@ do
         -e "s/RELEASE_DATE_TEMPLATE/${RELEASE_DATE}/g"  \
         > ${DOCKER_RELEASE}/$docker_container/Dockerfile  
 done
-
+#
+# Drop into release directory.
 cd ${DOCKER_RELEASE}
+#
+# -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+#
+# Build the images using simple tags so they can be easily debugger'd
+#
 for docker_container in ${containers}
 do
     docker build -t `echo "${docker_container}" | tr '[:upper:]' '[:lower:]'` ${docker_container};
 done
+#
+# -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+#
+# This builds the hyrax release images with the correct tags
+#
+docker build -t opendap/hyrax:${HYRAX_FULL_VERSION}  hyrax;
+docker build -t opendap/hyrax_ncwms:${HYRAX_FULL_VERSION} --build-arg USE_NCWMS=true hyrax;
 
+# Return to top dir...
 cd ..
 
+###############################################################################################
+###############################################################################################
+###############################################################################################
 
 
 
