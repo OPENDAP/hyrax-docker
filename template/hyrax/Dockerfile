@@ -183,8 +183,13 @@ RUN set -e \
         echo "Skipping OLFS/ncWMS confguration installation."; \
     fi
     
-    
-    
+
+# Install our modified server.xml so that the server compresses responses.
+COPY tomcat7-server.xml /
+RUN set -e \
+    && mv /tomcat7-server.xml ${CATALINA_HOME}/conf/server.xml \
+    && chown -R tomcat:tomcat ${CATALINA_HOME}/conf/server.xml
+
 ###############################################################
 
 
