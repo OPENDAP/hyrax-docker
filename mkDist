@@ -20,11 +20,11 @@
 # DO NOT FORGET THE RELEASE DATE!
 #
 HYRAX_MAJOR_VERSION="1.15"
-HYRAX_FULL_VERSION="1.15.3"
-OLFS_VERSION="1.18.3"
+HYRAX_FULL_VERSION="1.15.4"
+OLFS_VERSION="1.18.4"
 LIBDAP_VERSION="3.20.3-1"
-BES_VERSION="3.20.3-1"
-RELEASE_DATE="2019-02-25"
+BES_VERSION="3.20.4-1"
+RELEASE_DATE="2019-03-25"
 #
 ###############################################################################################
 
