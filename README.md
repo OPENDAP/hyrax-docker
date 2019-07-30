@@ -2,9 +2,9 @@
 
 Current Version:
  
- **Hyrax-1.15.3** \[libdap-3.20.3 : 
- besd-3.20.3 : 
- olfs-1.18.3 : 
+ **Hyrax-1.15.4** \[libdap-3.20.3 : 
+ besd-3.20.4 : 
+ olfs-1.18.4 : 
  ncWMS-2.2.2\]
  
 ## Overview
@@ -526,7 +526,7 @@ it has not been tested.
 
 # Updating for new versions of Hyrax.
 
-Copy _hyrax-latest_ to _hyrax-<version>_ and edit the _Dcokerfile_s in
+Copy _hyrax-latest_ to _hyrax-**version**_ and edit the _Dockerfiles_ in
 the _hyrax_, _besd_, _olfs_ and _ncWMS_ directories. Generally, only
 the version numbers for the packages need to be edited. Look for:
 ```
