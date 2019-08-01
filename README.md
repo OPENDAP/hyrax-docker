@@ -1,11 +1,17 @@
 # Hyrax docker
 
-Current Version:
+## Current Version: <font style="font-size: 300%;">**Hyrax-1.16.0**</font>
+
+**Hyrax-1.16.0** is composed of:
  
- **Hyrax-1.15.4** \[libdap-3.20.3 : 
- besd-3.20.4 : 
- olfs-1.18.4 : 
- ncWMS-2.2.2\]
+ |||
+ | :---: | :---: |
+| **[OLFS version 1.18.5](https://github.com/OPENDAP/olfs/releases/tag/olfs-1.18.5)** | [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3355422.svg)](https://doi.org/10.5281/zenodo.3355422) |
+|**[BES version 3.20.5](https://github.com/OPENDAP/bes/releases/tag/version-3.20.5)** | [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3279223.svg)](https://doi.org/10.5281/zenodo.3279223) |
+ | **[libdap version 3.20.4 ](https://github.com/OPENDAP/libdap4/releases/tag/version-3.20.4)** | [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3267984.svg)](https://doi.org/10.5281/zenodo.3267984) |
+
+ 
+ 
  
 ## Overview
 
