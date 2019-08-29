@@ -9,7 +9,10 @@ MAINTAINER support@opendap.org
 # HYRAX VERSION INFO
 ENV HYRAX_VERSION=snapshot
 ENV OLFS_VERSION=snapshot
-ENV RELEASE_DATE=RELEASE_DATE
+
+ARG RELEASE_DATE
+ENV RELEASE_DATE ${RELEASE_DATE:-"unknown"}
+RUN echo "RELEASE_DATE: ${RELEASE_DATE}"
 
 
 LABEL vendor="OPeNDAP Incorporated"
@@ -22,7 +25,7 @@ USER root
 # Update OS and install ps (and other filesystem utils)
 RUN set -e \
     && apt-get update \
-    && apt-get install -y procps
+    && apt-get install -y procps awscli
 
 #
 # The --build-arg USE_NCWMS can be set to "true" in order to 
@@ -50,31 +53,21 @@ RUN set -e && \
 ENV PATH $CATALINA_HOME/bin:$PATH
 RUN echo "CATALINA_HOME: $CATALINA_HOME"
 
-# Installs the OPeNDAP security public key.
-# TODO: We should get this from a well known key-server instead.
-RUN echo "Adding OPeNDAP Public Security Key"
-ENV OPENDAP_PUBLIC_KEY_FILE="security_at_opendap.org.pub.asc"
-ENV OPENDAP_PUBLIC_KEY_URL="https://www.opendap.org/${OPENDAP_PUBLIC_KEY_FILE}"
-RUN set -e \
-    && curl -s $OPENDAP_PUBLIC_KEY_URL > $OPENDAP_PUBLIC_KEY_FILE \
-    && gpg --import $OPENDAP_PUBLIC_KEY_FILE
 
-ENV OLFS_WAR_URL="https://www.opendap.org/pub/olfs/olfs-${OLFS_VERSION}-webapp.tgz"
+# SNAPSHOT URLs
+ENV OLFS_PACKAGE="s3://opendap.travis.build/olfs-snapshot-webapp.tgz"
 
 ###############################################################
 # Retrieve, verify, and install the OLFS web application
 RUN set -e \
-    && echo "Retrieving And Installing OLFS-${OLFS_VERSION}" \
-    && curl -sfSL ${OLFS_WAR_URL} > olfs-${OLFS_VERSION}.tgz \
-    && curl -sfSL ${OLFS_WAR_URL}.sig > olfs-${OLFS_VERSION}.tgz.sig \
-    && echo "Verifying tarball..." \
-    && gpg --verify olfs-${OLFS_VERSION}.tgz.sig olfs-${OLFS_VERSION}.tgz \
-    && echo "Unpacking tarball..." \
-    && tar -C /dev/shm -xzf olfs-${OLFS_VERSION}.tgz \
+    && echo "Retrieving and installing the latest olfs snapshot." \
+    && aws --no-sign-request --region=us-east-1 s3 cp ${OLFS_PACKAGE}  ./olfs-snapshot-webapp.tgz\
+    && tar -C /dev/shm -xzf olfs-snapshot-webapp.tgz \
+    && ls -l /dev/shm/olfs-snapshot-webapp \
     && echo "Unpacking warfile..." \
-    && unzip -o /dev/shm/olfs-${OLFS_VERSION}-webapp/opendap.war -d ${CATALINA_HOME}/webapps/opendap/ \
+    && unzip -o /dev/shm/olfs-snapshot-webapp/opendap.war -d ${CATALINA_HOME}/webapps/opendap/ \
     && echo "Cleaning up." \
-    && rm -rf /dev/shm/* olfs-${OLFS_VERSION}.tgz*
+    && rm -rf /dev/shm/* olfs-snapshot-webapp.tgz*
 
 # set host for bes that olfs will contact - this is expected to be over docker's internal network
 ARG BES_HOST

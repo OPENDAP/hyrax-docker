@@ -15,20 +15,18 @@
 # Set one or more individual labels
 FROM centos:7
 
-# HYRAX VERSION INFO
-ENV HYRAX_VERSION=snapshot
-ENV LIBDAP_VERSION=snapshot
-ENV BES_VERSION=snapshot
-ENV RELEASE_DATE=RELEASE_DATE
+ARG RELEASE_DATE
+ENV RELEASE_DATE ${RELEASE_DATE:-"unknown"}
+RUN echo "RELEASE_DATE: ${RELEASE_DATE}"
 
-# RELEASE URLs
-ENV LIBDAP_RPM="https://s3.amazonaws.com/opendap.travis.build/libdap-snapshot.el7.x86_64.rpm"
-ENV BES_RPM="https://s3.amazonaws.com/opendap.travis.build/bes-snapshot.static.el7.x86_64.rpm"
+# SNAPSHOT URLs
+ENV LIBDAP_RPM="s3://opendap.travis.build/libdap-snapshot.el7.x86_64.rpm"
+ENV BES_RPM="s3://opendap.travis.build/bes-snapshot.static.el7.x86_64.rpm"
 
 LABEL vendor="OPeNDAP Incorporated"
 LABEL org.opendap.besdaemon.version=snapshot
 LABEL org.opendap.besdaemon.release-date=RELEASE_DATE
-LABEL org.opendap.hyrax.version.is-production="true"
+LABEL org.opendap.hyrax.version.is-production="false"
 
 MAINTAINER support@opendap.org
 
@@ -36,38 +34,27 @@ USER root
 
 # Update and install the needful.
 RUN set -e \
-    && yum -y install which \
+    && yum -y install \
+        which
+        awscli \
     && yum -y update \
     && yum clean all
 
-# Installs the OPeNDAP security public key.
-# TODO: We should get this from a well known key-server instead.
-RUN echo "Adding OPeNDAP Public Security Key"
-ENV OPENDAP_PUBLIC_KEY_FILE="security_at_opendap.org.pub.asc"
-ENV OPENDAP_PUBLIC_KEY_URL="https://www.opendap.org/${OPENDAP_PUBLIC_KEY_FILE}"
-RUN set -e \
-    && curl -s $OPENDAP_PUBLIC_KEY_URL > $OPENDAP_PUBLIC_KEY_FILE \
-    && gpg --import $OPENDAP_PUBLIC_KEY_FILE
-
 ###############################################################
-# Retrieve, verify, and install Libdap
+# Retrieve and install the latest libdap snapshot
 RUN set -e \
-    && echo "Retrieving, verifying, and installing libdap. rpm: $LIBDAP_RPM" \
-    && curl -s $LIBDAP_RPM > ./libdap.rpm \
-    && curl -s $LIBDAP_RPM.sig > ./libdap.rpm.sig \
-    && gpg -v --verify ./libdap.rpm.sig ./libdap.rpm \
+    && echo "Retrieving, and installing libdap snapshot. rpm: $LIBDAP_RPM" \
+    && aws --no-sign-request --region=us-east-1 s3 cp ${LIBDAP_RPM}  ./libdap.rpm\
     && ls -l ./libdap* \
     && yum -y install ./libdap.rpm \
     && rm -f libdap.*
 
 
 ###############################################################
-# Retrieve, verify, and install the BES
+# Retrieve and install the latest BES snapshot
 RUN set -e \
-    && echo "Retrieving, verifying, and installing besd. rpm: $BES_RPM" \
-    && curl -s ${BES_RPM} > ./bes.rpm \
-    && curl -s ${BES_RPM}.sig > ./bes.rpm.sig \
-    && gpg -v --verify ./bes.rpm.sig ./bes.rpm \
+    && echo "Retrieving, and installing besd snapshot. rpm: $BES_RPM" \
+    && aws --no-sign-request --region=us-east-1 s3 cp ${BES_RPM}  ./bes.rpm\
     && ls -l ./bes* \
     && yum -y install ./bes.rpm \
     && rm -f bes.*

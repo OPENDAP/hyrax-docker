@@ -15,19 +15,18 @@
 # Set one or more individual labels
 FROM centos:7
 
+RUN export NOW=`date +%s`
 # HYRAX VERSION INFO
-ENV HYRAX_VERSION=snapshot
-ENV HYRAX_VERSION_LABEL=snapshot
-ENV LIBDAP_VERSION=snapshot
-ENV BES_VERSION=snapshot
 ENV OLFS_VERSION=snapshot
-ENV RELEASE_DATE=RELEASE_DATE
 
+ARG RELEASE_DATE
+ENV RELEASE_DATE ${RELEASE_DATE:-"unknown"}
+RUN echo "RELEASE_DATE: ${RELEASE_DATE}"
 
 LABEL vendor="OPeNDAP Incorporated"
 LABEL org.opendap.hyrax.version=snapshot
 LABEL org.opendap.hyrax.release-date=RELEASE_DATE
-LABEL org.opendap.hyrax.version.is-production="true"
+LABEL org.opendap.hyrax.version.is-production="false"
 
 MAINTAINER support@opendap.org
 
@@ -64,6 +63,7 @@ RUN set -e \
        tomcat \
        unzip  \
        which \
+       awscli \
     && yum -y update \
     && yum clean all 
 
@@ -72,43 +72,26 @@ ENV CATALINA_HOME /usr/share/tomcat
 ENV PATH $CATALINA_HOME/bin:$PATH
 RUN echo "CATALINA_HOME: $CATALINA_HOME"
 
-# Installs the OPeNDAP security public key.
-# TODO: We should get this from a well known key-server instead.
-RUN echo "Adding OPeNDAP Public Security Key"
-ENV OPENDAP_PUBLIC_KEY_FILE="security_at_opendap.org.pub.asc"
-ENV OPENDAP_PUBLIC_KEY_URL="https://www.opendap.org/${OPENDAP_PUBLIC_KEY_FILE}"
-RUN set -e \
-    && curl -s $OPENDAP_PUBLIC_KEY_URL > $OPENDAP_PUBLIC_KEY_FILE \
-    && gpg --import $OPENDAP_PUBLIC_KEY_FILE
-
-
-# RELEASE URLs
-
-ENV LIBDAP_RPM="https://www.opendap.org/pub/binary/hyrax-${HYRAX_VERSION}/centos-7.x/libdap-${LIBDAP_VERSION}.el7.x86_64.rpm"
-ENV BES_RPM="https://www.opendap.org/pub/binary/hyrax-${HYRAX_VERSION}/centos-7.x/bes-${BES_VERSION}.static.el7.x86_64.rpm"
-ENV OLFS_WAR_URL="https://www.opendap.org/pub/olfs/olfs-${OLFS_VERSION}-webapp.tgz"
+# SNAPSHOT URLs
+ENV LIBDAP_RPM="s3://opendap.travis.build/libdap-snapshot.el7.x86_64.rpm"
+ENV BES_RPM="s3://opendap.travis.build/bes-snapshot.static.el7.x86_64.rpm"
+ENV OLFS_PACKAGE="s3://opendap.travis.build/olfs-snapshot-webapp.tgz"
 
 ###############################################################
-# Retrieve, verify, and install Libdap
+# Retrieve and install the latest libdap snapshot
 RUN set -e \
-    && echo "Retrieving, verifying, and installing libdap. rpm: $LIBDAP_RPM" \
-    && curl -s $LIBDAP_RPM > ./libdap.rpm \
-    && curl -s $LIBDAP_RPM.sig > ./libdap.rpm.sig \
-    && gpg -v --verify ./libdap.rpm.sig ./libdap.rpm \
+    && echo "Retrieving, and installing the latest libdap snapshot. rpm: $LIBDAP_RPM" \
+    && aws --no-sign-request --region=us-east-1 s3 cp ${LIBDAP_RPM}  ./libdap.rpm\
     && ls -l ./libdap* \
     && yum -y install ./libdap.rpm \
     && rm -f libdap.*
 
-# gpg --keyserver certserver.pgp.com --recv-keys 
-
 
 ###############################################################
-# Retrieve, verify, and install the BES
+# Retrieve and install the latest BES snapshot
 RUN set -e \
-    && echo "Retrieving, verifying, and installing besd. rpm: $BES_RPM" \
-    && curl -s ${BES_RPM} > ./bes.rpm \
-    && curl -s ${BES_RPM}.sig > ./bes.rpm.sig \
-    && gpg -v --verify ./bes.rpm.sig ./bes.rpm \
+    && echo "Retrieving, and installing the latest besd snapshot. rpm: $BES_RPM" \
+    && aws --no-sign-request --region=us-east-1 s3 cp ${BES_RPM}  ./bes.rpm\
     && ls -l ./bes* \
     && yum -y install ./bes.rpm \
     && rm -f bes.*
@@ -118,17 +101,14 @@ RUN echo "besdaemon is here: "`which besdaemon`
 ###############################################################
 # Retrieve, verify, and install the OLFS web application
 RUN set -e \
-    && echo "Retrieving And Installing OLFS-${OLFS_VERSION}" \
-    && curl -sfSL ${OLFS_WAR_URL} > olfs-${OLFS_VERSION}.tgz \
-    && curl -sfSL ${OLFS_WAR_URL}.sig > olfs-${OLFS_VERSION}.tgz.sig \
-    && echo "Verifying tarball..." \
-    && gpg --verify olfs-${OLFS_VERSION}.tgz.sig olfs-${OLFS_VERSION}.tgz \
-    && echo "Unpacking tarball..." \
-    && tar -C /dev/shm -xzf olfs-${OLFS_VERSION}.tgz \
+    && echo "Retrieving and installing the latest olfs snapshot." \
+    && aws --no-sign-request --region=us-east-1 s3 cp ${OLFS_PACKAGE}  ./olfs-snapshot-webapp.tgz\
+    && tar -C /dev/shm -xzf olfs-snapshot-webapp.tgz \
+    && ls -l /dev/shm/olfs-snapshot-webapp \
     && echo "Unpacking warfile..." \
-    && unzip -o /dev/shm/olfs-${OLFS_VERSION}-webapp/opendap.war -d ${CATALINA_HOME}/webapps/opendap/ \
+    && unzip -o /dev/shm/olfs-snapshot-webapp/opendap.war -d ${CATALINA_HOME}/webapps/opendap/ \
     && echo "Cleaning up." \
-    && rm -rf /dev/shm/* olfs-${OLFS_VERSION}.tgz*
+    && rm -rf /dev/shm/* olfs-snapshot-webapp.tgz*
 
 # Fix ownership and access permissions
 RUN set -e \
