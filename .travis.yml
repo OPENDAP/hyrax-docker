@@ -1,0 +1,92 @@
+
+# Initial Travic-CI control file. 6.11.15 jhrg
+# Added sonar scan 3.12.19 jhrg 
+
+dist: trusty
+
+# Use the docker container-based build systems
+sudo: false
+
+language: java
+
+services:
+    - docker
+    
+# Drop this and use the jdk: ... lines in the jobs: section below.
+# jhrg 3/19/19
+#
+# jdk:
+#  - openjdk7
+#  - openjdk8
+
+# whitelist
+branches:
+  only:
+    - master
+    - snapshot
+
+notifications:
+  email:
+    - ndp@opendap.org
+    - jgallagher@opendap.org
+
+
+env:
+  global:
+    # AWS_ACCESS_KEY_ID for the user 'travis'
+    - secure: "MB2g7wf6e2Dt5so1Ek6zoAP04L/8GjKxbOlHQKgTa+Luw30Oa7ndqrG9gc0FX/K3dr03WOjEnO6lZmL9ZMwK7Q2FadrzYO0Ym8ZkruOFMFZxrpRnUX30yQFz6zgY9zGe0PiCNdO7++wYXOaP5xGi6UVyMsfhfWtY3p5Aq9qyU8c="
+    # AWS_SECRET_ACCESS_KEY
+    - secure: "aLQeyAMzLydF6mK3Qpy0RewpD3VjzzFbQZhD0m/esLercK4tYHj3F4RlLNqCnKSBnrJcIvvFrEHad15B1XLNVTKCjbyobZEzMNGviiHkx7Vgqx6+BRJqg1uNFGOYmZJrnf4ZTCaqpvykXUs+CZGw3YC7VvWvUKiyzv5fmqE3A8I="
+    # DOCKER_USERNAME for our DockerHub account
+    - secure: "I31cY6mPuQVYQZSXnXzJfsG7I3Ed/LU7YMCoJJNcYy07A+v7xwTWTozDqqWn3jW5GSznRnRXJAs8OJETLnjQqPp2U7eN/KCJ4cMg+uTm50VJqop/BazozEvGYH8mTzHuexhLhqAMV/VJ1xXPtROqT24yNCoeCsg1txixzfFfIPY="
+    # DOCKER_PASSWORD for our DockerHub account
+    - secure: "e85309WOWZiwolrOgKg0C/N57YZ3nTQ8VxaFsRFIN6DhhOjcCAsRd2yyYbTqnl15UXbQAchX785ZnKZXRsmUdkOG6XPC7UAFM8At8y1FF96WnqhX4MdbxmyOFNWzeZB2gs7+/eKlWgy3Uu0DxqNDIxKthFrXHfMLWgslov91zq0="
+    
+stages:
+- name: build
+  if:  branch = master
+
+jobs:
+  include:
+    - stage: build
+      script: 
+          # Snapshot "version" number used for the OLFS and Hyrx versions
+        - export snap_tag="snapshot-"`date +%s`;
+        - ant -DHYRAX_VERSION=${snap_tag} -DOLFS_VERSION=${snap_tag} -DOLFS_DIST_BASE=olfs-snapshot DISTRO
+        - pwd; 
+        - ls -l build/dist
+
+
+before_deploy:
+    - echo "- -- -- -- -- -- BEGIN before_deploy -- -- -- -- -- -"    
+    - pip install --user awscli
+    - test -d $TRAVIS_BUILD_DIR/package || mkdir $TRAVIS_BUILD_DIR/package
+    - ls -l build/dist
+    - cp ./build/dist/*.tgz $TRAVIS_BUILD_DIR/package/;    
+    - echo "Checking ${TRAVIS_BUILD_DIR}/package/"     
+    - ls -l ${TRAVIS_BUILD_DIR}/package/
+    - echo "- -- -- -- -- -- END before_deploy -- -- -- -- -- -"    
+        
+deploy:
+  provider: s3
+  access_key_id: $AWS_ACCESS_KEY_ID
+  secret_access_key: $AWS_SECRET_ACCESS_KEY
+  bucket: opendap.travis.build
+  skip_cleanup: true
+  local_dir: $TRAVIS_BUILD_DIR/package
+  on:
+    branch: master
+
+after_deploy:
+    - echo "- -- -- -- -- -- BEGIN after_deploy -- -- -- -- -- -"    
+    - git clone https://github.com/opendap/hyrax-docker 
+    - ls -l hyrax-docker
+    - cd hyrax-docker; 
+    - git checkout snapshot;
+    - ls -l
+    - cd hyrax-snapshot 
+    - docker build --build-arg RELEASE_DATE=`date +%s` -t "opendap/olfs:snapshot" olfs
+    - docker image ls -a
+    - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin 
+    - docker push opendap/olfs:snapshot
+    - echo "- -- -- -- -- -- END after_deploy -- -- -- -- -- -"    
