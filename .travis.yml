@@ -30,6 +30,8 @@ notifications:
     - ndp@opendap.org
     - jgallagher@opendap.org
 
+install:
+    - pip install --user awscli
 
 env:
   global:
@@ -42,9 +44,6 @@ env:
     # DOCKER_PASSWORD for our DockerHub account
     - secure: "e85309WOWZiwolrOgKg0C/N57YZ3nTQ8VxaFsRFIN6DhhOjcCAsRd2yyYbTqnl15UXbQAchX785ZnKZXRsmUdkOG6XPC7UAFM8At8y1FF96WnqhX4MdbxmyOFNWzeZB2gs7+/eKlWgy3Uu0DxqNDIxKthFrXHfMLWgslov91zq0="
     
-stages:
-- name: build
-  if:  branch = master
 
 jobs:
   include:
@@ -53,7 +52,7 @@ jobs:
         - git checkout snapshot;
         - ls -l
         - cd hyrax-snapshot 
-        - docker build --build-arg RELEASE_DATE=`date +%s` -t "opendap/olfs:snapshot" besd
+        - docker build --build-arg RELEASE_DATE=`date +%s` -t "opendap/besd:snapshot" besd
         - docker image ls -a
         - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin 
         - docker push opendap/besd:snapshot
@@ -73,7 +72,7 @@ jobs:
         - git checkout snapshot;
         - ls -l
         - cd hyrax-snapshot 
-        - docker build --build-arg RELEASE_DATE=`date +%s` -t "opendap/olfs:snapshot" hyrax
+        - docker build --build-arg RELEASE_DATE=`date +%s` -t "opendap/hyrax:snapshot" hyrax
         - docker image ls -a
         - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin 
         - docker push opendap/hyrax:snapshot
