@@ -48,45 +48,34 @@ stages:
 
 jobs:
   include:
-    - stage: build
+    - stage: besd
       script: 
-          # Snapshot "version" number used for the OLFS and Hyrx versions
-        - export snap_tag="snapshot-"`date +%s`;
-        - ant -DHYRAX_VERSION=${snap_tag} -DOLFS_VERSION=${snap_tag} -DOLFS_DIST_BASE=olfs-snapshot DISTRO
-        - pwd; 
-        - ls -l build/dist
+        - git checkout snapshot;
+        - ls -l
+        - cd hyrax-snapshot 
+        - docker build --build-arg RELEASE_DATE=`date +%s` -t "opendap/olfs:snapshot" besd
+        - docker image ls -a
+        - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin 
+        - docker push opendap/besd:snapshot
+
+    - stage: olfs
+      script: 
+        - git checkout snapshot;
+        - ls -l
+        - cd hyrax-snapshot 
+        - docker build --build-arg RELEASE_DATE=`date +%s` -t "opendap/olfs:snapshot" olfs
+        - docker image ls -a
+        - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin 
+        - docker push opendap/olfs:snapshot
+
+    - stage: hyrax
+      script: 
+        - git checkout snapshot;
+        - ls -l
+        - cd hyrax-snapshot 
+        - docker build --build-arg RELEASE_DATE=`date +%s` -t "opendap/olfs:snapshot" hyrax
+        - docker image ls -a
+        - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin 
+        - docker push opendap/hyrax:snapshot
 
 
-before_deploy:
-    - echo "- -- -- -- -- -- BEGIN before_deploy -- -- -- -- -- -"    
-    - pip install --user awscli
-    - test -d $TRAVIS_BUILD_DIR/package || mkdir $TRAVIS_BUILD_DIR/package
-    - ls -l build/dist
-    - cp ./build/dist/*.tgz $TRAVIS_BUILD_DIR/package/;    
-    - echo "Checking ${TRAVIS_BUILD_DIR}/package/"     
-    - ls -l ${TRAVIS_BUILD_DIR}/package/
-    - echo "- -- -- -- -- -- END before_deploy -- -- -- -- -- -"    
-        
-deploy:
-  provider: s3
-  access_key_id: $AWS_ACCESS_KEY_ID
-  secret_access_key: $AWS_SECRET_ACCESS_KEY
-  bucket: opendap.travis.build
-  skip_cleanup: true
-  local_dir: $TRAVIS_BUILD_DIR/package
-  on:
-    branch: master
-
-after_deploy:
-    - echo "- -- -- -- -- -- BEGIN after_deploy -- -- -- -- -- -"    
-    - git clone https://github.com/opendap/hyrax-docker 
-    - ls -l hyrax-docker
-    - cd hyrax-docker; 
-    - git checkout snapshot;
-    - ls -l
-    - cd hyrax-snapshot 
-    - docker build --build-arg RELEASE_DATE=`date +%s` -t "opendap/olfs:snapshot" olfs
-    - docker image ls -a
-    - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin 
-    - docker push opendap/olfs:snapshot
-    - echo "- -- -- -- -- -- END after_deploy -- -- -- -- -- -"    
