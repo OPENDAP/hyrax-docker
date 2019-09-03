@@ -50,7 +50,7 @@ jobs:
   include:
     - stage: besd
       script: 
-        - git checkout snapshot;
+        - git status;
         - ls -l
         - cd hyrax-snapshot 
         - docker build --build-arg RELEASE_DATE=`date +%s` -t "opendap/besd:snapshot" besd
@@ -60,7 +60,7 @@ jobs:
 
     - stage: olfs
       script: 
-        - git checkout snapshot;
+        #- git checkout snapshot;
         - ls -l
         - cd hyrax-snapshot 
         - docker build --build-arg RELEASE_DATE=`date +%s` -t "opendap/olfs:snapshot" olfs
@@ -70,7 +70,7 @@ jobs:
 
     - stage: hyrax
       script: 
-        - git checkout snapshot;
+        #- git checkout snapshot;
         - ls -l
         - cd hyrax-snapshot 
         - docker build --build-arg RELEASE_DATE=`date +%s` -t "opendap/hyrax:snapshot" hyrax
