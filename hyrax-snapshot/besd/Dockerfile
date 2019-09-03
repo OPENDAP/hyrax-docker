@@ -35,7 +35,7 @@ USER root
 # Update and install the needful.
 RUN set -e \
     && yum -y install \
-        which
+        which \
         awscli \
     && yum -y update \
     && yum clean all
