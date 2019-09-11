@@ -23,7 +23,6 @@ services:
 branches:
   only:
     - master
-    - snapshot
 
 notifications:
   email:
