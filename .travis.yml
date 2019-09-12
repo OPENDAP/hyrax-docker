@@ -85,6 +85,6 @@ jobs:
         - docker build --build-arg RELEASE_DATE=`date +%s` --build-arg USE_NCWMS=true -t "opendap/hyrax_ncwms:snapshot" hyrax
         - docker image ls -a
         - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
-        - docker push opendap/hyrax_wms:snapshot
+        - docker push opendap/hyrax_ncwms:snapshot
 
 
