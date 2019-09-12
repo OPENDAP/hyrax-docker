@@ -10,10 +10,19 @@
 |**[BES version 3.20.5](https://github.com/OPENDAP/bes/releases/tag/version-3.20.5)** | [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3279223.svg)](https://doi.org/10.5281/zenodo.3279223) |
  | **[libdap version 3.20.4 ](https://github.com/OPENDAP/libdap4/releases/tag/version-3.20.4)** | [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3267984.svg)](https://doi.org/10.5281/zenodo.3267984) |
 
+## <a name="contents"></a>Contents
+* [Overview](#overview)
+* [Quick Start](#quickstart)
+* [Serving Your Data](#yerdata)
+* [Server Logs](#serverlogs)
+* [Images](#images)
+* [Docker-Compose](#dockercompose)
+* [Ansible](#ansible)
+* [License](#license)
+* [Acknowledgements](#ack)
+
  
- 
- 
-## Overview
+## <a name="overview"></a>Overview
 
 The hyrax-docker project can build the following Docker images:
 * **hyrax**- A complete Hyrax server in a single container. It may be
@@ -35,7 +44,7 @@ data, but can easily be configured to serve data from the host machine
 > NOTE: This code is based on work started by Gareth Williams at CSIRO
 and contributed to OPeNDAP. We are grateful for their support.
 
-## Quick Start
+## <a name="quickstart"> Quick Start
 
 **_Build and run Dockerized Hyrax, serving your own data._**
 
@@ -110,7 +119,7 @@ _removes_ the container and is needed only if you want to (re)start the
 container with different values for any of the `docker run`
 parameters.
 
-## Using Hyrax docker to serve your data
+##  <a name="yerdata"> Using Hyrax docker to serve your data
 
 To serve data other than the default data included with Hyrax/BES, use the
 _volume_ option with `docker run` to map the path to data on your host
@@ -120,7 +129,7 @@ to `/usr/share/hyrax` in the Hyrax or BES container (`--volume <your path>:/usr/
 docker run --hostname hyrax --port 8080:8080 --volume /home/mydata:/usr/share/hyrax --name=hyrax_container hyrax_image
 ```
 
-## Server Logs & Serving Your Data
+## <a name="serverlogs"> Server Logs & Serving Your Data
 
 ### docker run 
 
@@ -194,7 +203,7 @@ See the project YML for more:
  * hyrax.yml     
  * hyrax_wms.yml 
 
-## Images
+## <a name="images"> Images
 
 **_Performance Note:_**_We performed a rudimentary speed check comparing the single container Hyrax with the two container version launched by using docker-compose and the hyrax.yml file. Our results (below) indicated that, for our test, there was no significant performance difference between the two. YMMV._
 
@@ -486,7 +495,7 @@ base to (`-n http://foo.bar.com:8080`)
 docker run --name ncwms -p 8080:8080 ncwms_image
 ```
 
-## Docker-Compose 
+## <a name="dockercompose"> Docker-Compose 
 
 We provide several YAML files for docker-compose. All of the files are
 written to load the file `./local.env` in order to set the environment
@@ -525,33 +534,13 @@ directory.
 
 **Stop:** `docker-compose -f developer.yml down --remove-orphans`
 
-## Ansible
+## <a name="ansible"> Ansible
 
 It's possible that the existing **playbook.yml** file will work, but
 it has not been tested.
 
-# Updating for new versions of Hyrax.
 
-Copy _hyrax-latest_ to _hyrax-**version**_ and edit the _Dockerfiles_ in
-the _hyrax_, _besd_, _olfs_ and _ncWMS_ directories. Generally, only
-the version numbers for the packages need to be edited. Look for:
-```
-LABEL org.opendap.hyrax.version="1.15.1"
-# 24 September 2018
-LABEL org.opendap.hyrax.release-date="2018-11-26"
-LABEL org.opendap.hyrax.version.is-production="true"
-```
-and
-```
-ENV HYRAX_VERSION=1.15
-ENV LIBDAP_VERSION=3.20.1-1
-ENV BES_VERSION=3.20.1-1
-ENV OLFS_VERSION=1.18.1
-```
-
-Update this README and follow the instructions to build and push.
-
-# License
+# <a name="license"> License
 
 Copyright (c) 2017 OPeNDAP, Inc.
 
@@ -575,7 +564,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 You can contact OPeNDAP, Inc. at PO Box 112, Saunderstown, RI. 02874-0112.
 
-# Acknowledgements
+# <a name="ack"> Acknowledgements
 
 Based on https://bitbucket.csiro.au/projects/ASC/repos/hyrax-docker/,
 Dec 19, 2016, by gareth.williams@csiro.au. That project was licensed
