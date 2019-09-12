@@ -10,10 +10,12 @@
 |**[BES version 3.20.5](https://github.com/OPENDAP/bes/releases/tag/version-3.20.5)** | [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3279223.svg)](https://doi.org/10.5281/zenodo.3279223) |
  | **[libdap version 3.20.4 ](https://github.com/OPENDAP/libdap4/releases/tag/version-3.20.4)** | [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3267984.svg)](https://doi.org/10.5281/zenodo.3267984) |
 
-## (#contents)Contents
+## <a name="contents"></a>Contents
 * [Overview](#overview)
+* [Quick Start](#quickstart)
+* [Serving Your Data](#yerdata)
  
-## (#overview)Overview
+## <a name="overview"></a>Overview
 
 The hyrax-docker project can build the following Docker images:
 * **hyrax**- A complete Hyrax server in a single container. It may be
@@ -35,7 +37,7 @@ data, but can easily be configured to serve data from the host machine
 > NOTE: This code is based on work started by Gareth Williams at CSIRO
 and contributed to OPeNDAP. We are grateful for their support.
 
-## Quick Start
+##  <a name="quickstart"> Quick Start
 
 **_Build and run Dockerized Hyrax, serving your own data._**
 
@@ -110,7 +112,7 @@ _removes_ the container and is needed only if you want to (re)start the
 container with different values for any of the `docker run`
 parameters.
 
-## Using Hyrax docker to serve your data
+##  <a name="yerdata">Using Hyrax docker to serve your data
 
 To serve data other than the default data included with Hyrax/BES, use the
 _volume_ option with `docker run` to map the path to data on your host
