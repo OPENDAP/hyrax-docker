@@ -16,6 +16,10 @@
 * [Serving Your Data](#yerdata)
 * [Server Logs](#serverlogs)
 * [Images](#images)
+  * [Hyrax Data Server](#hyrax-image)
+  * [besd](#besd-image)
+  * [olfs](#olfs-image)
+  * [ncwms](#ncwms-image)
 * [Docker-Compose](#dockercompose)
 * [Ansible](#ansible)
 * [License](#license)
@@ -213,7 +217,7 @@ one_container_times:  n=100, min=  129.96,  mean=  131.41 +/-  0.54,  max=  133.
 two_container_times   n=100, min=   82.90,  mean=  126.42 +/- 13.23,  max=  133.03
 ````
 
-### hyrax
+### <a name="hyrax-image"> hyrax
 
 This image contains a complete Hyrax server. Currently based on
 **CentOS-7** and **Tomcat-7** installed using _yum_.
@@ -391,7 +395,7 @@ _Annontation:_
 - ```--volume /home/roger/bes:/etc/bes```: Replaces the docker container's BES configuration with one held in the docker host file system directory ```/home/roger/bes```
 - ```--volume /home/roger/olfs:/var/lib/tomcat/webapps/opendap/WEB-INF/conf```: Replaces the docker container's OLFS configuration with one held in the docker host file system directory ```/home/roger/olfs```
 
-### besd
+### <a name="besd-image"> besd
 
 **_Note_**: The _besd_, _olfs_, and _ncWMS_ containers are tested only minimally
 by us at thsi time (Nov 2018) and are really for specialized cases wehre fine-grained
@@ -430,7 +434,7 @@ docker run --name besd -p 10022:10022 -e FOLLOW_SYMLINKS=true -e SERVER_HELP_EMA
 > NOTE: The environment variables are set to the left of the image
 name. The command line switches occur AFTER the image name.
 
-### olfs
+### <a name="olfs-image"> olfs
 
 This image, based on the UNIDATA security hardened Tomcat, contains just
 the OLFS web application.
@@ -467,7 +471,7 @@ set the ncWMS service base to (`-e NCWMS_BASE=http://foo.bar.com`)
 docker run --name besd -p 8080:8080 -e NCWMS_BASE=http://foo.bar.com olfs_image
 ```
 
-### ncwms
+### <a name="ncwms-image"> ncwms
 
 This image, based on the official Tomcat:8 image, contains just the
 ncWMS-2.2.2 web application.
