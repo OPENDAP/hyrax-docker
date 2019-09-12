@@ -15,12 +15,15 @@
 * [Quick Start](#quickstart)
 * [Serving Your Data](#yerdata)
 * [Server Logs](#serverlogs)
-* [Images](#images)
-  * [Hyrax Data Server](#hyrax-image)
+* [Docker Images](#images)
+  * [hyrax](#hyrax-image)
   * [besd](#besd-image)
   * [olfs](#olfs-image)
   * [ncwms](#ncwms-image)
 * [Docker-Compose](#dockercompose)
+  * [hyrax](#hyrax-yml)
+  * [hyrax-wms](#hyrax-wms-yml)
+  * [developer](#developer-yml)
 * [Ansible](#ansible)
 * [License](#license)
 * [Acknowledgements](#ack)
@@ -32,13 +35,16 @@ The hyrax-docker project can build the following Docker images:
 * **hyrax**- A complete Hyrax server in a single container. It may be
     built with or without a bundled ncWMS.
 * **besd** - The BackEndServer (BES) component of Hyrax.  
-* **olfs** - The OLFS component of Hyrax, a Java Web Application deployed in Apache Tomcat.
+* **olfs** - The OLFS component of Hyrax, a Java Web Application deployed in 
+Apache Tomcat.
 * **ncwms** - The ncWMS application from our friends at the [Reading
     e-Science Centre](http://www.met.reading.ac.uk/resc/home/).
 
 Each of these images can be run standalone; the last three can be
-combined via docker compose or ansible. **Note: We build and upload the **_hyrax_**
-and **_hyrax_ncwms_** containers for our releases. You'll need to build the
+combined via docker compose or ansible. **Note: We build and upload the 
+**_hyrax_** and **_hyrax_ncwms_** containers for our releases to Docker Hub. 
+We also produce and publish to Docker Hub **snapshot** containers for every CI 
+build of **hyrax**, **olfs**, **besd**. You'll need to build the
 other, more specialized, containers yourself.
 
 The Hyrax service starts up providing access to the default (test)
@@ -50,7 +56,22 @@ and contributed to OPeNDAP. We are grateful for their support.
 
 ## <a name="quickstart"> Quick Start
 
-**_Build and run Dockerized Hyrax, serving your own data._**
+### Download and Run
+
+The quickest way to get started is to get one of our images from Docker Hub and 
+run that. Each of the docker hub pages has simple launch instructions for the 
+associated image(s).
+More elaborate instructions can be found below in this document.
+
+**Docker Hub Pages**
+- [**Hyrax** on Docker Hub](https://cloud.docker.com/u/opendap/repository/docker/opendap/hyrax)
+- [**besd** on Docker Hub](https://cloud.docker.com/u/opendap/repository/docker/opendap/olfs)
+- [**olfs** on Docker Hub](https://cloud.docker.com/u/opendap/repository/docker/opendap/besd)
+
+
+### Build and Run 
+
+Build and run a dockerized Hyrax, serving your own data.
 
 For detailed information about each of the four Docker container
 images, see the section **_Images_** below.
@@ -507,7 +528,7 @@ variables described above. A template for this file may be found in
 `./local.env.orig`, copy it to `./local.env` and edit that to
 configure your Hyrax instance.
 
-### hyrax.yml
+### <a name="hyrax-yml"> hyrax.yml
 
 This builds and launches a composed Hyrax made up of a single **besd**
 and a single **olfs** container. Log directories for the OLFS, Tomcat,
@@ -517,7 +538,7 @@ and the BES are mapped to the `./logs` directory.
 
 **Stop:** `docker-compose -f hyrax.yml down --remove-orphans`
 
-### hyrax_wms.yml
+### <a name="hyrax-wms-yml"> hyrax_wms.yml
 
 This builds and launches a composed Hyrax made up of a single
 **besd**, a single **olfs**, and a single **ncWMS* container. Log
@@ -528,7 +549,7 @@ directory.
 
 **Stop:** `docker-compose -f hyrax_wms.yml down --remove-orphans`
 
-### developer.yml 
+### <a name="developer-yml"> developer.yml 
 
 This builds and launches a **hyrax_wms**, but in developer mode. Log
 directories the OLFS, Tomcat, and the BES are mapped to the `./logs`

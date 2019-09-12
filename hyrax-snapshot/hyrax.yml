@@ -2,9 +2,9 @@
 version: '3'
 services:
   olfs:
-    build: ./olfs
+    # build: ./olfs
     env_file: ${PWD}/local.env
-    image: olfs:latest
+    image: opendap/olfs:snapshot
     ports:
      - "8080:8080"
     tty: true
@@ -12,9 +12,9 @@ services:
      - ./logs/olfs_tomcat:/usr/local/tomcat/logs
      - ./logs:/usr/local/tomcat/webapps/opendap/WEB-INF/conf/logs
   besd:
-    build: ./besd
+    # build: ./besd
     env_file: ${PWD}/local.env
-    image: besd:latest
+    image: opendap/besd:snapshot
     ports:
      - "10022:10022"
     volumes:

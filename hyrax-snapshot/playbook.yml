@@ -4,14 +4,14 @@
   - name: build olfs
     docker_image:
       name: olfs
-      tag: latest
+      tag: snapshot
       path: olfs
       state: present
       force: yes
   - name: build besd
     docker_image:
       name: besd
-      tag: latest
+      tag: snapshot
       path: besd
       state: present
       force: yes
