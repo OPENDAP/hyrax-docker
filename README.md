@@ -56,14 +56,13 @@ and contributed to OPeNDAP. We are grateful for their support.
 
 ## <a name="quickstart"> Quick Start
 
-You can easily build your own Docker image of Hyrax using the matrerial in the project, alternately you cxan download offical images fomr our various DockerHub repositories. Bith are discussed below.
+You can easily build your own Docker image of Hyrax using the material in this project. Alternatively, you can download offical images from our various DockerHub repositories. Both are discussed below.
 
 ### Download and Run
 
-Probably the quickest way to get started is to get one of our images from Docker Hub and 
-run that. Each of the docker hub pages has simple launch instructions for the 
-associated image(s).
-More elaborate instructions can be found below in this document.
+Probably the quickest way to get started is to _pull_ one of our images from Docker Hub and 
+run that. Each of the docker hub pages has simple launch instructions for the associated image(s).
+More elaborate instructions may be found below in this document.
 
 **Docker Hub Pages**
 - [**Hyrax Data Server** on Docker Hub](https://cloud.docker.com/u/opendap/repository/docker/opendap/hyrax)
