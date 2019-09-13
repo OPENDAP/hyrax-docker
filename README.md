@@ -65,10 +65,10 @@ run that. Each of the docker hub pages has simple launch instructions for the as
 More elaborate instructions may be found below in this document.
 
 **Docker Hub Pages**
-- [**Hyrax Data Server** on Docker Hub](https://cloud.docker.com/u/opendap/repository/docker/opendap/hyrax)
-- [**Hyrax Data Server + ncWMS2** on Docker Hub](https://cloud.docker.com/u/opendap/repository/docker/opendap/hyrax_ncmws)
-- [**besd** on Docker Hub](https://cloud.docker.com/u/opendap/repository/docker/opendap/olfs)
-- [**olfs** on Docker Hub](https://cloud.docker.com/u/opendap/repository/docker/opendap/besd)
+- [**Hyrax Data Server**](https://cloud.docker.com/u/opendap/repository/docker/opendap/hyrax)
+- [**Hyrax Data Server + ncWMS2**](https://cloud.docker.com/u/opendap/repository/docker/opendap/hyrax_ncmws)
+- [**besd**](https://cloud.docker.com/u/opendap/repository/docker/opendap/olfs)
+- [**olfs**](https://cloud.docker.com/u/opendap/repository/docker/opendap/besd)
 
 
 ### Build and Run 
