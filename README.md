@@ -58,7 +58,8 @@ and contributed to OPeNDAP. We are grateful for their support.
 
 You can easily build your own Docker image of Hyrax using the material in this project. Alternatively, you can download offical images from our various DockerHub repositories. Both are discussed below.
 
-### Download and Run
+### Get The Desired Image
+#### Download
 
 Probably the quickest way to get started is to _pull_ one of our images from Docker Hub and 
 run that. Each of the docker hub pages has simple launch instructions for the associated image(s).
@@ -71,7 +72,7 @@ More elaborate instructions may be found below in this document.
 - [**olfs**](https://cloud.docker.com/u/opendap/repository/docker/opendap/besd)
 
 
-### Build and Run 
+#### Build 
 
 Build and run a dockerized Hyrax, serving your own data.
 
@@ -95,6 +96,8 @@ to include ncWMS in the image, use a build argument like this:
 ```
 docker build -t hyrax_image --build-arg USE_NCWMS=true hyrax
 ```
+### Run The Server
+
 To run the container:
 ```
 docker run -h hyrax -p 8080:8080 --name=hyrax_container hyrax_image
