@@ -96,7 +96,7 @@ to include ncWMS in the image, use a build argument like this:
 ```
 docker build -t hyrax_image --build-arg USE_NCWMS=true hyrax
 ```
-### Run The Server
+### Running The Server
 
 To run the container:
 ```
