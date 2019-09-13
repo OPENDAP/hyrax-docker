@@ -65,7 +65,7 @@ Probably the quickest way to get started is to _pull_ one of our images from Doc
 run that. Each of the docker hub pages has simple launch instructions for the associated image(s).
 More elaborate instructions may be found below in this document.
 
-**Docker Hub Pages**
+_Hyrax Docker Hub Pages_
 - [**Hyrax Data Server**](https://cloud.docker.com/u/opendap/repository/docker/opendap/hyrax)
 - [**Hyrax Data Server + ncWMS2**](https://cloud.docker.com/u/opendap/repository/docker/opendap/hyrax_ncmws)
 - [**besd**](https://cloud.docker.com/u/opendap/repository/docker/opendap/olfs)
