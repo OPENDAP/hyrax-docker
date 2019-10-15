@@ -7,10 +7,7 @@ dist: trusty
 # Use the docker container-based build systems
 sudo: false
 
-language: python
-
-python:
-  - "2.7"
+language: java
 
 services:
     - docker
@@ -49,7 +46,9 @@ env:
 
 
 before_install:
-    - pip install awscli
+    - sudo apt-get update
+    - sudo apt-get awscli
+
 
 stages:
 - name: besd
