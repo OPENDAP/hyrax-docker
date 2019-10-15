@@ -7,7 +7,10 @@ dist: trusty
 # Use the docker container-based build systems
 sudo: false
 
-language: java
+language: python
+
+python:
+    - 3.4
 
 
 services:
@@ -39,6 +42,8 @@ env:
     # DOCKER_PASSWORD for our DockerHub account
     - secure: "DvQvxpRtfC/EUZ8LjxjL7XvfRRHmt1eimmSbDCAObedkglvjyI0Cvv0njzHDnPLLLZQ2HgtDAzVwZ4OhcJxw0L2olv8/3n01dTwgisziC/bquQHUJHB735naHJUUHB+Id0+02TB9VSJUSeWmlV6wml1hPgk290sHUNQ3+zLxYz51/F6pw4dC4hNuEji0J8A+wDsx2GUGPZaRqiVqAFjKGcnbRTZF/uZ/NRk5AVsxVW+4CF6Jy/e+9WNkj7XlPtPMSS8HCz+20hbhKRJTqlul2pMQOhqWBClEE39kKEd3Mv5UxeCr6hunAEVyS4ig91XgZykSh4/BZ5Tj9aG7LsA0uE4mAhYmN0NrfG3dtfSFSVPF9LwENk2hrh1HSLjuYF1VZpW+sJqnYZmZ35yBY+WtbUd2IwHZ/eVjKk4JX4O2+W3B62GuldSxwYGpoE0wJjmucGSt2XGo7r1nC1Em1rcA9wbzUPjb4Q6/MVPsrX0o3NKUcCn2FoOCat92Ge7WwnIM7LaHm0/6j2uoXLzPd8VAyxLLq0vhyY/7cxQp+8/+j7fIU4K0yJYNq97OOXlcSdkWhNW3kmnE26mPmWUQht5icz0YFAHielPLn3GarZA2X5bYeZ4ffElaN+QFv/4Jy4qRHS0Caml3el2Xi3jqQcj6DFRVKHNdNyvm0JL7b58xfv0="
 
+install:
+    - pip3 install --upgrade -r .travis.requirements
 
 stages:
 - name: besd
@@ -46,40 +51,54 @@ stages:
 - name: olfs
   if:  branch = master
 - name: hyrax
-  if:  branch = master OR branch = travisbs
+  if:  branch = master
 - name: hyrax_ncwms
   if:  branch = master
 
 jobs:
   include:
     - stage: besd
-      script: 
+      script:
         - git status;
         - ls -l
-        - cd hyrax-snapshot 
+        - cd hyrax-snapshot
         - docker build --build-arg RELEASE_DATE=`date +%s` -t "opendap/besd:snapshot" besd
         - docker image ls -a
-        - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin 
+        - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
         - docker push opendap/besd:snapshot
+        - aws configure list
+        - DOCKER_LOGIN=`aws ecr get-login --region us-east-1 | sed "s/-e none //g"`
+        - $DOCKER_LOGIN
+        - docker tag opendap/besd:snapshot 747931985039.dkr.ecr.us-east-1.amazonaws.com/opendap/besd:snapshot
+        - docker push 747931985039.dkr.ecr.us-east-1.amazonaws.com/opendap/besd:snapshot
 
     - stage: olfs
-      script: 
+      script:
         - ls -l
-        - cd hyrax-snapshot 
+        - cd hyrax-snapshot
         - docker build --build-arg RELEASE_DATE=`date +%s` -t "opendap/olfs:snapshot" olfs
         - docker image ls -a
-        - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin 
+        - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
         - docker push opendap/olfs:snapshot
+        - aws configure list
+        - DOCKER_LOGIN=`aws ecr get-login --region us-east-1 | sed "s/-e none //g"`
+        - $DOCKER_LOGIN
+        - docker tag opendap/olfs:snapshot 747931985039.dkr.ecr.us-east-1.amazonaws.com/opendap/olfs:snapshot
+        - docker push 747931985039.dkr.ecr.us-east-1.amazonaws.com/opendap/olfs:snapshot
 
     - stage: hyrax
-      script: 
+      script:
         - ls -l
-        - cd hyrax-snapshot 
+        - cd hyrax-snapshot
         - docker build --build-arg RELEASE_DATE=`date +%s` -t "opendap/hyrax:snapshot" hyrax
         - docker image ls -a
-        - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin 
+        - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
         - docker push opendap/hyrax:snapshot
-
+        - aws configure list
+        - DOCKER_LOGIN=`aws ecr get-login --region us-east-1 | sed "s/-e none //g"`
+        - $DOCKER_LOGIN
+        - docker tag opendap/hyrax:snapshot 747931985039.dkr.ecr.us-east-1.amazonaws.com/opendap/hyrax:snapshot
+        - docker push 747931985039.dkr.ecr.us-east-1.amazonaws.com/opendap/hyrax:snapshot
 
     - stage: hyrax_ncwms
       script:
@@ -89,5 +108,10 @@ jobs:
         - docker image ls -a
         - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
         - docker push opendap/hyrax_ncwms:snapshot
+        - aws configure list
+        - DOCKER_LOGIN=`aws ecr get-login --region us-east-1 | sed "s/-e none //g"`
+        - $DOCKER_LOGIN
+        - docker tag opendap/hyrax_ncwms:snapshot 747931985039.dkr.ecr.us-east-1.amazonaws.com/opendap/hyrax_ncwms:snapshot
+        - docker push 747931985039.dkr.ecr.us-east-1.amazonaws.com/opendap/hyrax_ncwms:snapshot
 
 
