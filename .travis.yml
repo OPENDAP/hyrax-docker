@@ -50,7 +50,6 @@ env:
 
 before_install:
     - pip install  --user awscli
-    - pip install pyOpenSSL ndg-httpsclient pyasn1
 
 stages:
 - name: besd
