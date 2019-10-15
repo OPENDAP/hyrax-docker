@@ -64,7 +64,6 @@ jobs:
 
     - stage: olfs
       script: 
-        #- git checkout snapshot;
         - ls -l
         - cd hyrax-snapshot 
         - docker build --build-arg RELEASE_DATE=`date +%s` -t "opendap/olfs:snapshot" olfs
@@ -74,7 +73,6 @@ jobs:
 
     - stage: hyrax
       script: 
-        #- git checkout snapshot;
         - ls -l
         - cd hyrax-snapshot 
         - docker build --build-arg RELEASE_DATE=`date +%s` -t "opendap/hyrax:snapshot" hyrax
@@ -85,7 +83,6 @@ jobs:
 
     - stage: hyrax_ncwms
       script:
-        #- git checkout snapshot;
         - ls -l
         - cd hyrax-snapshot
         - docker build --build-arg RELEASE_DATE=`date +%s` --build-arg USE_NCWMS=true -t "opendap/hyrax_ncwms:snapshot" hyrax
