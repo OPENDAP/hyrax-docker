@@ -50,13 +50,13 @@ before_install:
 
 stages:
 - name: besd
-  if:  branch = foo
+  if:  branch = master
 - name: olfs
-  if:  branch = foo
+  if:  branch = master
 - name: hyrax
   if:  branch = master
 - name: hyrax_ncwms
-  if:  branch = foo
+  if:  branch = master
 
 jobs:
   include:
@@ -69,6 +69,11 @@ jobs:
         - docker image ls -a
         - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin 
         - docker push opendap/besd:snapshot
+        - aws configure list
+        - DOCKER_LOGIN=`aws ecr get-login --region us-east-1 | sed "s/-e none //g"`
+        - $DOCKER_LOGIN
+        - docker tag opendap/besd:snapshot 747931985039.dkr.ecr.us-east-1.amazonaws.com/opendap/besd:snapshot
+        - docker push 747931985039.dkr.ecr.us-east-1.amazonaws.com/opendap/besd:snapshot
 
     - stage: olfs
       script: 
@@ -79,6 +84,11 @@ jobs:
         - docker image ls -a
         - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin 
         - docker push opendap/olfs:snapshot
+        - aws configure list
+        - DOCKER_LOGIN=`aws ecr get-login --region us-east-1 | sed "s/-e none //g"`
+        - $DOCKER_LOGIN
+        - docker tag opendap/olfs:snapshot 747931985039.dkr.ecr.us-east-1.amazonaws.com/opendap/olfs:snapshot
+        - docker push 747931985039.dkr.ecr.us-east-1.amazonaws.com/opendap/olfs:snapshot
 
     - stage: hyrax
       script: 
@@ -105,5 +115,10 @@ jobs:
         - docker image ls -a
         - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
         - docker push opendap/hyrax_ncwms:snapshot
+        - aws configure list
+        - DOCKER_LOGIN=`aws ecr get-login --region us-east-1 | sed "s/-e none //g"`
+        - $DOCKER_LOGIN
+        - docker tag opendap/hyrax_ncwms:snapshot 747931985039.dkr.ecr.us-east-1.amazonaws.com/opendap/hyrax_ncwms:snapshot
+        - docker push 747931985039.dkr.ecr.us-east-1.amazonaws.com/opendap/hyrax_ncwms:snapshot
 
 
