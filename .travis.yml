@@ -47,17 +47,17 @@ env:
 
 before_install:
     - pip install  --user awscli
-    - pip install requests[security]
+    - pip install pyOpenSSL ndg-httpsclient pyasn1
 
 stages:
 - name: besd
-  if:  branch = master
+  if:  branch = foo
 - name: olfs
-  if:  branch = master
+  if:  branch = foo
 - name: hyrax
   if:  branch = master
 - name: hyrax_ncwms
-  if:  branch = master
+  if:  branch = foo
 
 jobs:
   include:
