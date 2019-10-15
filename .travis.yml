@@ -46,7 +46,7 @@ env:
 
 
 before_install:
-    - pip3 install awscli
+    - pip install --user awscli
     # - pip install requests[security]
 
 stages:
