@@ -7,7 +7,7 @@ dist: trusty
 # Use the docker container-based build systems
 sudo: false
 
-language: java
+language: python
 
 services:
     - docker
