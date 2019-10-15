@@ -1,0 +1,2 @@
+# Requirements for building and deploying in Travis
+awscli
