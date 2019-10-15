@@ -43,17 +43,17 @@ env:
     - secure: "DvQvxpRtfC/EUZ8LjxjL7XvfRRHmt1eimmSbDCAObedkglvjyI0Cvv0njzHDnPLLLZQ2HgtDAzVwZ4OhcJxw0L2olv8/3n01dTwgisziC/bquQHUJHB735naHJUUHB+Id0+02TB9VSJUSeWmlV6wml1hPgk290sHUNQ3+zLxYz51/F6pw4dC4hNuEji0J8A+wDsx2GUGPZaRqiVqAFjKGcnbRTZF/uZ/NRk5AVsxVW+4CF6Jy/e+9WNkj7XlPtPMSS8HCz+20hbhKRJTqlul2pMQOhqWBClEE39kKEd3Mv5UxeCr6hunAEVyS4ig91XgZykSh4/BZ5Tj9aG7LsA0uE4mAhYmN0NrfG3dtfSFSVPF9LwENk2hrh1HSLjuYF1VZpW+sJqnYZmZ35yBY+WtbUd2IwHZ/eVjKk4JX4O2+W3B62GuldSxwYGpoE0wJjmucGSt2XGo7r1nC1Em1rcA9wbzUPjb4Q6/MVPsrX0o3NKUcCn2FoOCat92Ge7WwnIM7LaHm0/6j2uoXLzPd8VAyxLLq0vhyY/7cxQp+8/+j7fIU4K0yJYNq97OOXlcSdkWhNW3kmnE26mPmWUQht5icz0YFAHielPLn3GarZA2X5bYeZ4ffElaN+QFv/4Jy4qRHS0Caml3el2Xi3jqQcj6DFRVKHNdNyvm0JL7b58xfv0="
 
 install:
-    - pip3 install --upgrade -r .travis.requirements.txt
+    - pip3 install --upgrade -r .travis.requirements
 
 stages:
 - name: besd
-  if:  branch = master
+  if:  branch = master OR branch = travisbs
 - name: olfs
-  if:  branch = master
+  if:  branch = master OR branch = travisbs
 - name: hyrax
   if:  branch = master OR branch = travisbs
 - name: hyrax_ncwms
-  if:  branch = master
+  if:  branch = master OR branch = travisbs
 
 jobs:
   include:
@@ -96,11 +96,6 @@ jobs:
         - docker image ls -a
         - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin 
         - docker push opendap/hyrax:snapshot
-        # Put aws on path
-        - aws --version
-        - pip3 list -o
-        - export PATH=$PATH:$HOME/.local/bin
-        - echo $PATH
         - aws configure list
         - DOCKER_LOGIN=`aws ecr get-login --region us-east-1 | sed "s/-e none //g"`
         - $DOCKER_LOGIN
