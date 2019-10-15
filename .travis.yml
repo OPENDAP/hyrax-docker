@@ -52,7 +52,6 @@ stages:
   if:  branch = master
 - name: hyrax
   if:  branch = master OR branch = travisbs
-
 - name: hyrax_ncwms
   if:  branch = master
 
@@ -98,6 +97,8 @@ jobs:
         - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin 
         - docker push opendap/hyrax:snapshot
         # Put aws on path
+        - aws --version
+        - pip3 list -o
         - export PATH=$PATH:$HOME/.local/bin
         - echo $PATH
         - aws configure list
