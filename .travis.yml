@@ -86,7 +86,8 @@ jobs:
         - docker image ls -a
         - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin 
         - docker push opendap/hyrax:snapshot
-        - eval $(aws ecr get-login --region us-east-1)
+        - export DOCKER_LOGIN=`aws ecr get-login --region us-east-1`
+        - $DOCKER_LOGIN
         - docker tag opendap/hyrax:snapshot 747931985039.dkr.ecr.us-east-1.amazonaws.com/opendap/hyrax:snapshot
         - docker push 747931985039.dkr.ecr.us-east-1.amazonaws.com/opendap/hyrax:snapshot
 
