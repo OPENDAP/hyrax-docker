@@ -7,7 +7,7 @@ dist: trusty
 # Use the docker container-based build systems
 sudo: false
 
-language: python
+language: python: 2.7
 
 services:
     - docker
@@ -46,7 +46,7 @@ env:
 
 
 before_install:
-    - pip3 install --user awscli
+    - pip install --user awscli
 
 stages:
 - name: besd
