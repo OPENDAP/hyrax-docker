@@ -47,24 +47,24 @@ install:
 
 stages:
 - name: besd
-  if:  branch = master OR branch = travisbs
+  if:  branch = master
 - name: olfs
-  if:  branch = master OR branch = travisbs
+  if:  branch = master
 - name: hyrax
-  if:  branch = master OR branch = travisbs
+  if:  branch = master
 - name: hyrax_ncwms
-  if:  branch = master OR branch = travisbs
+  if:  branch = master
 
 jobs:
   include:
     - stage: besd
-      script: 
+      script:
         - git status;
         - ls -l
-        - cd hyrax-snapshot 
+        - cd hyrax-snapshot
         - docker build --build-arg RELEASE_DATE=`date +%s` -t "opendap/besd:snapshot" besd
         - docker image ls -a
-        - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin 
+        - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
         - docker push opendap/besd:snapshot
         - aws configure list
         - DOCKER_LOGIN=`aws ecr get-login --region us-east-1 | sed "s/-e none //g"`
@@ -73,13 +73,13 @@ jobs:
         - docker push 747931985039.dkr.ecr.us-east-1.amazonaws.com/opendap/besd:snapshot
 
     - stage: olfs
-      script: 
+      script:
         #- git checkout snapshot;
         - ls -l
-        - cd hyrax-snapshot 
+        - cd hyrax-snapshot
         - docker build --build-arg RELEASE_DATE=`date +%s` -t "opendap/olfs:snapshot" olfs
         - docker image ls -a
-        - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin 
+        - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
         - docker push opendap/olfs:snapshot
         - aws configure list
         - DOCKER_LOGIN=`aws ecr get-login --region us-east-1 | sed "s/-e none //g"`
@@ -88,13 +88,13 @@ jobs:
         - docker push 747931985039.dkr.ecr.us-east-1.amazonaws.com/opendap/olfs:snapshot
 
     - stage: hyrax
-      script: 
+      script:
         #- git checkout snapshot;
         - ls -l
-        - cd hyrax-snapshot 
+        - cd hyrax-snapshot
         - docker build --build-arg RELEASE_DATE=`date +%s` -t "opendap/hyrax:snapshot" hyrax
         - docker image ls -a
-        - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin 
+        - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
         - docker push opendap/hyrax:snapshot
         - aws configure list
         - DOCKER_LOGIN=`aws ecr get-login --region us-east-1 | sed "s/-e none //g"`
