@@ -9,12 +9,17 @@ sudo: false
 
 language: python
 
+python:
+    - 3.4
+
+
 services:
     - docker
 
 branches:
   only:
     - master
+    - travisbs
 
 notifications:
   email:
@@ -42,13 +47,14 @@ before-install:
 
 stages:
 - name: besd
-  if:  branch = foo
-- name: olfs
-  if:  branch = foo
-- name: hyrax
   if:  branch = master
+- name: olfs
+  if:  branch = master
+- name: hyrax
+  if:  branch = master OR branch = travisbs
+
 - name: hyrax_ncwms
-  if:  branch = foo
+  if:  branch = master
 
 jobs:
   include:
