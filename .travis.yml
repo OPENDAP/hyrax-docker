@@ -49,7 +49,7 @@ env:
 
 
 before_install:
-    - pip install  --user awscli
+    - pip install awscli
 
 stages:
 - name: besd
