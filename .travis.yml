@@ -24,8 +24,6 @@ notifications:
 
 env:
   global:
-    # Put aws on path
-    - PATH=$PATH:$HOME/.local/bin
     #
     # AWS_ACCESS_KEY_ID for the user 'travis'
     - secure: "n2ADTa+b1lW6kwryZMjCLQCgaY6IIaqru2FL+AZ4Mi+VMhSQ0Cb5Kv9lIlTszftm4aPOEBiO9bBVZo9jHZIQq/P72hMSmIue4UM1Mh/sJe3cLR39bntz1pb/U+2lTnOEaAC9JBsPuAWt0Vw82RY/IP2xC0dg7e8heHLofMSD22olvUXNpooUXYRTl/8LjJ6HwxeMGBvDgujXJPAqcKibdcyRqEOEsn9mS60zFol0j1luTY6SsIDPzDtlDjwxi5N0dM9QBRMq8pgojtePavyge3z0gD3ECL0+Ugw7yCpl6yB9zkFlmUlcMb3YcJdjieYWHOGxEUXkzDghv/M/PkLDjanTU4rhrvkqqxlhMbj5wzhQAFPkxxfLS4LLc6rrbf977JFGVYRRrK2K+6jfEs7+F2mPabu8a2WP5Hvdf4GYzCknH7sWLvn7Ogf6airK0F+n9mCkgLNIFGn2FDohu95C/sZYSs8v7GZqcE6UVeUb4MYVurZa/BW8X74+ReB5oldfHZtz0FKMuLY4Pitao5Q8I6jUunG1dkgv7RhwXRJ4j8IPQ7e5lefu9EnoaGYrLoZ3Is4DO0siS7NUO8KnxfYLkQrRxnM9QQpaL9UJAMVbPz/rvNi9PKqy9Eh2r8uu0HJ96EipYN+z30xE5sGar6wkT40FJEX8DxryldoqWyi1K5E="
@@ -93,6 +91,9 @@ jobs:
         - docker image ls -a
         - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin 
         - docker push opendap/hyrax:snapshot
+        # Put aws on path
+        - export PATH=$PATH:$HOME/.local/bin
+        - echo $PATH
         - aws configure list
         - DOCKER_LOGIN=`aws ecr get-login --region us-east-1 | sed "s/-e none //g"`
         - $DOCKER_LOGIN
