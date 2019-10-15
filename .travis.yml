@@ -12,7 +12,6 @@ language: python
 services:
     - docker
 
-]
 branches:
   only:
     - master
