@@ -59,13 +59,19 @@ ENV OLFS_PACKAGE="s3://opendap.travis.build/olfs-snapshot-webapp.tgz"
 
 ###############################################################
 # Retrieve, verify, and install the OLFS web application
+# In the following, replaced unzip with jar because unzip was failing with a message
+# about the archive containing a 'loop' of some sort. The original line was:
+#     unzip -o /dev/shm/olfs-snapshot-webapp/opendap.war -d ${CATALINA_HOME}/webapps/opendap/
+# and the new line is:
+#     (cd ${CATALINA_HOME}/webapps/opendap/ && jar -xf /dev/shm/olfs-snapshot-webapp/opendap.war)
+# 
 RUN set -e \
     && echo "Retrieving and installing the latest olfs snapshot." \
     && aws --no-sign-request --region=us-east-1 s3 cp ${OLFS_PACKAGE}  ./olfs-snapshot-webapp.tgz\
     && tar -C /dev/shm -xzf olfs-snapshot-webapp.tgz \
     && ls -l /dev/shm/olfs-snapshot-webapp \
     && echo "Unpacking warfile..." \
-    && unzip -o /dev/shm/olfs-snapshot-webapp/opendap.war -d ${CATALINA_HOME}/webapps/opendap/ \
+    && (cd ${CATALINA_HOME}/webapps/opendap/ && jar -xf /dev/shm/olfs-snapshot-webapp/opendap.war)
     && echo "Cleaning up." \
     && rm -rf /dev/shm/* olfs-snapshot-webapp.tgz*
 
