@@ -71,6 +71,7 @@ RUN set -e \
     && tar -C /dev/shm -xzf olfs-snapshot-webapp.tgz \
     && ls -l /dev/shm/olfs-snapshot-webapp \
     && echo "Unpacking warfile..." \
+    && mkdir -p ${CATALINA_HOME}/webapps/opendap/ \
     && (cd ${CATALINA_HOME}/webapps/opendap/ && jar -xf /dev/shm/olfs-snapshot-webapp/opendap.war) \
     && echo "Cleaning up." \
     && rm -rf /dev/shm/* olfs-snapshot-webapp.tgz*
