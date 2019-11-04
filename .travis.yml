@@ -44,13 +44,11 @@ install:
 stages:
   - name: build
     if:  branch = master
-  - name: not
 
 jobs:
   include:
     - stage: build
       script:
-        - ls -l
         - cd hyrax-snapshot
         - docker build --build-arg RELEASE_DATE=`date +%s` --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -t "opendap/besd:snapshot" besd
         - docker image ls -a
@@ -62,9 +60,8 @@ jobs:
         - docker tag opendap/besd:snapshot 747931985039.dkr.ecr.us-east-1.amazonaws.com/opendap/besd:snapshot
         - docker push 747931985039.dkr.ecr.us-east-1.amazonaws.com/opendap/besd:snapshot
 
-    - stage: not
+    - stage: build
       script:
-        - ls -l
         - cd hyrax-snapshot
         - docker build --build-arg RELEASE_DATE=`date +%s` --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -t "opendap/olfs:snapshot" olfs
         - docker image ls -a
@@ -76,9 +73,8 @@ jobs:
         - docker tag opendap/olfs:snapshot 747931985039.dkr.ecr.us-east-1.amazonaws.com/opendap/olfs:snapshot
         - docker push 747931985039.dkr.ecr.us-east-1.amazonaws.com/opendap/olfs:snapshot
 
-    - stage: not
+    - stage: build
       script:
-        - ls -l
         - cd hyrax-snapshot
         - docker build --build-arg RELEASE_DATE=`date +%s` --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -t "opendap/hyrax:snapshot" hyrax
         - docker image ls -a
@@ -90,9 +86,8 @@ jobs:
         - docker tag opendap/hyrax:snapshot 747931985039.dkr.ecr.us-east-1.amazonaws.com/opendap/hyrax:snapshot
         - docker push 747931985039.dkr.ecr.us-east-1.amazonaws.com/opendap/hyrax:snapshot
 
-    - stage: not
+    - stage: build
       script:
-        - ls -l
         - cd hyrax-snapshot
         - docker build --build-arg RELEASE_DATE=`date +%s` --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -t "opendap/hyrax_ncwms:snapshot" hyrax
         - docker image ls -a
@@ -103,5 +98,3 @@ jobs:
         - $DOCKER_LOGIN
         - docker tag opendap/hyrax_ncwms:snapshot 747931985039.dkr.ecr.us-east-1.amazonaws.com/opendap/hyrax_ncwms:snapshot
         - docker push 747931985039.dkr.ecr.us-east-1.amazonaws.com/opendap/hyrax_ncwms:snapshot
-
-
