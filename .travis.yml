@@ -44,6 +44,7 @@ install:
 stages:
   - name: build
     if:  branch = master
+  - name: not
 
 jobs:
   include:
@@ -62,11 +63,11 @@ jobs:
         - docker tag opendap/besd:snapshot 747931985039.dkr.ecr.us-east-1.amazonaws.com/opendap/besd:snapshot
         - docker push 747931985039.dkr.ecr.us-east-1.amazonaws.com/opendap/besd:snapshot
 
-    - stage: build
+    - stage: not
       script:
         - ls -l
         - cd hyrax-snapshot
-        - docker build --build-arg RELEASE_DATE=`date +%s` --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -t "opendap/olfs:snapshot" olfs
+        - docker build --build-arg RELEASE_DATE=`date +%s` -t "opendap/olfs:snapshot" olfs
         - docker image ls -a
         - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
         - docker push opendap/olfs:snapshot
@@ -76,11 +77,11 @@ jobs:
         - docker tag opendap/olfs:snapshot 747931985039.dkr.ecr.us-east-1.amazonaws.com/opendap/olfs:snapshot
         - docker push 747931985039.dkr.ecr.us-east-1.amazonaws.com/opendap/olfs:snapshot
 
-    - stage: build
+    - stage: not
       script:
         - ls -l
         - cd hyrax-snapshot
-        - docker build --build-arg RELEASE_DATE=`date +%s` --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -t "opendap/hyrax:snapshot" hyrax
+        - docker build --build-arg RELEASE_DATE=`date +%s` -t "opendap/hyrax:snapshot" hyrax
         - docker image ls -a
         - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
         - docker push opendap/hyrax:snapshot
@@ -90,11 +91,11 @@ jobs:
         - docker tag opendap/hyrax:snapshot 747931985039.dkr.ecr.us-east-1.amazonaws.com/opendap/hyrax:snapshot
         - docker push 747931985039.dkr.ecr.us-east-1.amazonaws.com/opendap/hyrax:snapshot
 
-    - stage: build
+    - stage: not
       script:
         - ls -l
         - cd hyrax-snapshot
-        - docker build --build-arg RELEASE_DATE=`date +%s` --build-arg USE_NCWMS=true --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -t "opendap/hyrax_ncwms:snapshot" hyrax
+        - docker build --build-arg RELEASE_DATE=`date +%s`  -t "opendap/hyrax_ncwms:snapshot" hyrax
         - docker image ls -a
         - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
         - docker push opendap/hyrax_ncwms:snapshot
