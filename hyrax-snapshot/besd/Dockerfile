@@ -21,8 +21,11 @@ RUN echo "RELEASE_DATE: ${RELEASE_DATE}"
 
 ARG AWS_ACCESS_KEY_ID
 ENV AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-"unknown"}
+RUN echo "AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}"
+
 ARG AWS_SECRET_ACCESS_KEY
 ENV AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-"unknown"}
+RUN echo "AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}"
 
 # SNAPSHOT URLs
 ENV LIBDAP_RPM="s3://opendap.travis.build/libdap-snapshot.el7.x86_64.rpm"
@@ -49,7 +52,7 @@ RUN set -e \
 # Retrieve and install the latest libdap snapshot
 RUN set -e \
     && echo "Retrieving, and installing libdap snapshot. rpm: $LIBDAP_RPM" \
-    && aws --no-sign-request --region=us-east-1 s3 cp ${LIBDAP_RPM}  ./libdap.rpm\
+    && aws --region=us-east-1 s3 cp ${LIBDAP_RPM}  ./libdap.rpm\
     && ls -l ./libdap* \
     && yum -y install ./libdap.rpm \
     && rm -f libdap.*
@@ -59,7 +62,7 @@ RUN set -e \
 # Retrieve and install the latest BES snapshot
 RUN set -e \
     && echo "Retrieving, and installing besd snapshot. rpm: $BES_RPM" \
-    && aws --no-sign-request --region=us-east-1 s3 cp ${BES_RPM}  ./bes.rpm\
+    && aws --region=us-east-1 s3 cp ${BES_RPM}  ./bes.rpm\
     && ls -l ./bes* \
     && yum -y install ./bes.rpm \
     && rm -f bes.*
