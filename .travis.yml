@@ -52,7 +52,7 @@ jobs:
         - git status
         - ls -l
         - cd hyrax-snapshot
-        - docker build --build-arg RELEASE_DATE=`date +%s` -t "opendap/besd:snapshot" besd
+        - docker build --build-arg RELEASE_DATE=`date +%s` AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -t "opendap/besd:snapshot" besd
         - docker image ls -a
         - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
         - docker push opendap/besd:snapshot

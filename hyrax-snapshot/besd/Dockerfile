@@ -19,6 +19,11 @@ ARG RELEASE_DATE
 ENV RELEASE_DATE ${RELEASE_DATE:-"unknown"}
 RUN echo "RELEASE_DATE: ${RELEASE_DATE}"
 
+ARG AWS_ACCESS_KEY_ID
+ENV AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-"unknown"}
+ARG AWS_SECRET_ACCESS_KEY_ID
+ENV AWS_SECRET_ACCESS_KEY_ID=${AWS_SECRET_ACCESS_KEY_ID:-"unknown"}
+
 # SNAPSHOT URLs
 ENV LIBDAP_RPM="s3://opendap.travis.build/libdap-snapshot.el7.x86_64.rpm"
 ENV BES_RPM="s3://opendap.travis.build/bes-snapshot.static.el7.x86_64.rpm"
