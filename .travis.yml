@@ -52,7 +52,7 @@ jobs:
         - git status
         - ls -l
         - cd hyrax-snapshot
-        - docker build --build-arg RELEASE_DATE=`date +%s` AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -t "opendap/besd:snapshot" besd
+        - docker build --build-arg RELEASE_DATE=`date +%s` --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -t "opendap/besd:snapshot" besd
         - docker image ls -a
         - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
         - docker push opendap/besd:snapshot
@@ -66,7 +66,7 @@ jobs:
       script:
         - ls -l
         - cd hyrax-snapshot
-        - docker build --build-arg RELEASE_DATE=`date +%s` -t "opendap/olfs:snapshot" olfs
+        - docker build --build-arg RELEASE_DATE=`date +%s` --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -t "opendap/olfs:snapshot" olfs
         - docker image ls -a
         - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
         - docker push opendap/olfs:snapshot
@@ -80,7 +80,7 @@ jobs:
       script:
         - ls -l
         - cd hyrax-snapshot
-        - docker build --build-arg RELEASE_DATE=`date +%s` -t "opendap/hyrax:snapshot" hyrax
+        - docker build --build-arg RELEASE_DATE=`date +%s` --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -t "opendap/hyrax:snapshot" hyrax
         - docker image ls -a
         - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
         - docker push opendap/hyrax:snapshot
@@ -94,7 +94,7 @@ jobs:
       script:
         - ls -l
         - cd hyrax-snapshot
-        - docker build --build-arg RELEASE_DATE=`date +%s` --build-arg USE_NCWMS=true -t "opendap/hyrax_ncwms:snapshot" hyrax
+        - docker build --build-arg RELEASE_DATE=`date +%s` --build-arg USE_NCWMS=true --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -t "opendap/hyrax_ncwms:snapshot" hyrax
         - docker image ls -a
         - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
         - docker push opendap/hyrax_ncwms:snapshot
