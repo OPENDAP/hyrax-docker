@@ -7,10 +7,10 @@ dist: trusty
 language: python
 
 python:
-    - 3.4
+  - 3.4
 
 services:
-    - docker
+  - docker
 
 branches:
   only:
