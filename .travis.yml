@@ -60,7 +60,6 @@ jobs:
     - stage: besd
       script:
         - git status;
-        - ls -l
         - cd hyrax-snapshot
         - docker build --build-arg RELEASE_DATE=`date +%s` -t "opendap/besd:snapshot" besd
         - docker image ls -a
@@ -74,7 +73,6 @@ jobs:
 
     - stage: olfs
       script:
-        - ls -l
         - cd hyrax-snapshot
         - docker build --build-arg RELEASE_DATE=`date +%s` -t "opendap/olfs:snapshot" olfs
         - docker image ls -a
@@ -88,7 +86,6 @@ jobs:
 
     - stage: hyrax
       script:
-        - ls -l
         - cd hyrax-snapshot
         - docker build --build-arg RELEASE_DATE=`date +%s` -t "opendap/hyrax:snapshot" hyrax
         - docker image ls -a
@@ -102,7 +99,6 @@ jobs:
 
     - stage: hyrax_ncwms
       script:
-        - ls -l
         - cd hyrax-snapshot
         - docker build --build-arg RELEASE_DATE=`date +%s` --build-arg USE_NCWMS=true -t "opendap/hyrax_ncwms:snapshot" hyrax
         - docker image ls -a
