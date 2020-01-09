@@ -83,6 +83,15 @@ RUN set -e \
     && echo "Cleaning up." \
     && rm -rf /dev/shm/* olfs-snapshot-webapp.tgz*
 
+# Clear these values so they do not persist in the container!
+ENV AWS_ACCESS_KEY_ID=
+ENV AWS_SECRET_ACCESS_KEY=
+RUN echo "unset AWS_ACCESS_KEY_ID"     >> ~/.bash_profile
+RUN echo "unset AWS_SECRET_ACCESS_KEY" >> ~/.bash_profile
+RUN echo "unset AWS_ACCESS_KEY_ID"     >> ~/.bashrc
+RUN echo "unset AWS_SECRET_ACCESS_KEY" >> ~/.bashrc
+
+
 # set host for bes that olfs will contact - this is expected to be over docker's internal network
 ARG BES_HOST
 ENV BES_HOST ${BES_HOST:-besd}

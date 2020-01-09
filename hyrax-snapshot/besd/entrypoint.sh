@@ -23,9 +23,6 @@ else
     FOLLOW_SYMLINKS="not_set";
      echo "FOLLOW_SYMLINKS is $FOLLOW_SYMLINKS"  
 fi
-debug=false;
-
-
 
 debug=false;
 
