@@ -124,9 +124,11 @@ RUN set -e \
     && chown -R tomcat:tomcat ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs \
     && chmod 700 ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs 
 
-# Clear these values so they d not persist in the container!
+# Clear these values so they do not persist in the container!
 ENV AWS_ACCESS_KEY_ID=
 ENV AWS_SECRET_ACCESS_KEY=
+RUN echo "unset AWS_ACCESS_KEY_ID"     >> ~/.bashrc
+RUN echo "unset AWS_SECRET_ACCESS_KEY" >> ~/.bashrc
 
 
 ###############################################################
