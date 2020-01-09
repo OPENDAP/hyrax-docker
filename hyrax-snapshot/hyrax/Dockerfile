@@ -127,6 +127,8 @@ RUN set -e \
 # Clear these values so they do not persist in the container!
 ENV AWS_ACCESS_KEY_ID=
 ENV AWS_SECRET_ACCESS_KEY=
+RUN echo "unset AWS_ACCESS_KEY_ID"     >> ~/.bash_profile
+RUN echo "unset AWS_SECRET_ACCESS_KEY" >> ~/.bash_profile
 RUN echo "unset AWS_ACCESS_KEY_ID"     >> ~/.bashrc
 RUN echo "unset AWS_SECRET_ACCESS_KEY" >> ~/.bashrc
 
