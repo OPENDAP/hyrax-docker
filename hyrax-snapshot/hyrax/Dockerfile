@@ -187,6 +187,14 @@ RUN set -e \
 ###############################################################
 
 
+# Override refreshing rate of  refreshInterval
+RUN  sed -i \
+-e 's/NodeCache.*/NodeCache maxEntries="20000" refreshInterval="8"\/\>/g' \
+/var/lib/tomcat/webapps/opendap/WEB-INF/conf/olfs.xml
+
+###############################################################
+
+
 COPY entrypoint.sh /
 RUN  set -e && chmod +x /entrypoint.sh
 ENTRYPOINT [ "/entrypoint.sh" ]
