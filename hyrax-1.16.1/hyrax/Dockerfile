@@ -233,6 +233,9 @@ RUN set -e \
     && autoreconf -vif \
     && ./configure
 
+# In order to get the executable "testsuite" to build we have to run
+# "make check" But that will fail at build time so the "make check" call
+# ends up pretty tortured to avoid a build error.
 RUN set -e \
     && cd ${TEST_INSTALL_DIR} \
     && make check -k | tee /dev/null > mk.log 2>&1 \
