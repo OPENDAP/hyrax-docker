@@ -230,6 +230,7 @@ RUN set -e \
     && mkdir -p ${TEST_INSTALL_DIR} \
     && git clone -v https://github.com/opendap/hyrax_regression_tests ${TEST_INSTALL_DIR} \
     && cd ${TEST_INSTALL_DIR} \
+    && git checkout tags/hyrax-${HYRAX_VERSION_LABEL} \
     && autoreconf -vif \
     && ./configure
 
@@ -239,9 +240,6 @@ RUN set -e \
 RUN set -e \
     && cd ${TEST_INSTALL_DIR} \
     && make check -k | tee /dev/null > mk.log 2>&1 \
-    && cat config.status \
-    && echo "h_r_t is here: " \
-    && ls -l ${TEST_INSTALL_DIR} \
     && echo "SUCCESS: hyrax_regression_tests ready!"
 ################################################################
 
