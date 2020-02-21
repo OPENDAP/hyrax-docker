@@ -64,6 +64,9 @@ RUN set -e \
        tomcat \
        unzip  \
        which \
+       autoconf \
+       automake \
+       git \
     && yum -y update \
     && yum clean all 
 
@@ -72,17 +75,31 @@ ENV CATALINA_HOME /usr/share/tomcat
 ENV PATH $CATALINA_HOME/bin:$PATH
 RUN echo "CATALINA_HOME: $CATALINA_HOME"
 
-# Installs the OPeNDAP security public key.
+
+################################################################
+# Set this to -k to convince curl to get the stuff when there
+# expired TLS certs.
+#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
+ENV ALLOW_EXPIRED=""
+###############################################################
+
+
+################################################################
+# Install the OPeNDAP security public key.
+#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 # TODO: We should get this from a well known key-server instead.
-RUN echo "Adding OPeNDAP Public Security Key"
+#RUN echo "Adding OPeNDAP Public Security Key"
 ENV OPENDAP_PUBLIC_KEY_FILE="security_at_opendap.org.pub.asc"
 ENV OPENDAP_PUBLIC_KEY_URL="https://www.opendap.org/${OPENDAP_PUBLIC_KEY_FILE}"
 RUN set -e \
-    && curl -s $OPENDAP_PUBLIC_KEY_URL > $OPENDAP_PUBLIC_KEY_FILE \
+    && curl $ALLOW_EXPIRED -s $OPENDAP_PUBLIC_KEY_URL > $OPENDAP_PUBLIC_KEY_FILE \
     && gpg --import $OPENDAP_PUBLIC_KEY_FILE
+###############################################################
 
 
+###############################################################
 # RELEASE URLs
+#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 
 ENV LIBDAP_RPM="https://www.opendap.org/pub/binary/hyrax-${HYRAX_VERSION}/centos-7.x/libdap-${LIBDAP_VERSION}.el7.x86_64.rpm"
 ENV BES_RPM="https://www.opendap.org/pub/binary/hyrax-${HYRAX_VERSION}/centos-7.x/bes-${BES_VERSION}.static.el7.x86_64.rpm"
@@ -90,10 +107,11 @@ ENV OLFS_WAR_URL="https://www.opendap.org/pub/olfs/olfs-${OLFS_VERSION}-webapp.t
 
 ###############################################################
 # Retrieve, verify, and install Libdap
+#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 RUN set -e \
     && echo "Retrieving, verifying, and installing libdap. rpm: $LIBDAP_RPM" \
-    && curl -s $LIBDAP_RPM > ./libdap.rpm \
-    && curl -s $LIBDAP_RPM.sig > ./libdap.rpm.sig \
+    && curl $ALLOW_EXPIRED -s $LIBDAP_RPM > ./libdap.rpm \
+    && curl $ALLOW_EXPIRED -s $LIBDAP_RPM.sig > ./libdap.rpm.sig \
     && gpg -v --verify ./libdap.rpm.sig ./libdap.rpm \
     && ls -l ./libdap* \
     && yum -y install ./libdap.rpm \
@@ -102,12 +120,13 @@ RUN set -e \
 # gpg --keyserver certserver.pgp.com --recv-keys 
 
 
-###############################################################
+################################################################
 # Retrieve, verify, and install the BES
+#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 RUN set -e \
     && echo "Retrieving, verifying, and installing besd. rpm: $BES_RPM" \
-    && curl -s ${BES_RPM} > ./bes.rpm \
-    && curl -s ${BES_RPM}.sig > ./bes.rpm.sig \
+    && curl $ALLOW_EXPIRED -s ${BES_RPM} > ./bes.rpm \
+    && curl $ALLOW_EXPIRED -s ${BES_RPM}.sig > ./bes.rpm.sig \
     && gpg -v --verify ./bes.rpm.sig ./bes.rpm \
     && ls -l ./bes* \
     && yum -y install ./bes.rpm \
@@ -115,12 +134,13 @@ RUN set -e \
 
 RUN echo "besdaemon is here: "`which besdaemon`
 
-###############################################################
+################################################################
 # Retrieve, verify, and install the OLFS web application
+#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 RUN set -e \
     && echo "Retrieving And Installing OLFS-${OLFS_VERSION}" \
-    && curl -sfSL ${OLFS_WAR_URL} > olfs-${OLFS_VERSION}.tgz \
-    && curl -sfSL ${OLFS_WAR_URL}.sig > olfs-${OLFS_VERSION}.tgz.sig \
+    && curl $ALLOW_EXPIRED -sfSL ${OLFS_WAR_URL} > olfs-${OLFS_VERSION}.tgz \
+    && curl $ALLOW_EXPIRED -sfSL ${OLFS_WAR_URL}.sig > olfs-${OLFS_VERSION}.tgz.sig \
     && echo "Verifying tarball..." \
     && gpg --verify olfs-${OLFS_VERSION}.tgz.sig olfs-${OLFS_VERSION}.tgz \
     && echo "Unpacking tarball..." \
@@ -134,14 +154,16 @@ RUN set -e \
 RUN set -e \
     && mkdir -p ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs \
     && chown -R tomcat:tomcat ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs \
-    && chmod 700 ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs 
+    && chmod 700 ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs
 
-
+################################################################
 
 
 ###############################################################
 # retrieve and install the ncWMS web application
 #
+#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
+
 # This is ncWMS-2.2.2
 ENV NCWMS_WAR_URL=http://search.maven.org/remotecontent?filepath=uk/ac/rdg/resc/ncWMS/2.2.2/ncWMS-2.2.2.war
 
@@ -190,7 +212,35 @@ RUN set -e \
     && mv /tomcat7-server.xml ${CATALINA_HOME}/conf/server.xml \
     && chown -R tomcat:tomcat ${CATALINA_HOME}/conf/server.xml
 
-###############################################################
+################################################################
+
+
+
+
+################################################################
+#
+# Retrieve, verify, and install the hyrax_regression_tests
+# project
+#
+#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
+ENV TEST_INSTALL_DIR="/hyrax_regression_tests"
+RUN set -e \
+    && echo "Retrieving, and building hyrax regression tests." \
+    && echo "h_r_t will be in: ${TEST_INSTALL_DIR}" \
+    && mkdir -p ${TEST_INSTALL_DIR} \
+    && git clone -v https://github.com/opendap/hyrax_regression_tests ${TEST_INSTALL_DIR} \
+    && cd ${TEST_INSTALL_DIR} \
+    && autoreconf -vif \
+    && ./configure
+
+RUN set -e \
+    && cd ${TEST_INSTALL_DIR} \
+    && make check -k | tee /dev/null > mk.log 2>&1 \
+    && cat config.status \
+    && echo "h_r_t is here: " \
+    && ls -l ${TEST_INSTALL_DIR} \
+    && echo "SUCCESS: hyrax_regression_tests ready!"
+################################################################
 
 
 COPY entrypoint.sh /
