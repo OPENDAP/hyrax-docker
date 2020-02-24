@@ -75,15 +75,6 @@ ENV CATALINA_HOME /usr/share/tomcat
 ENV PATH $CATALINA_HOME/bin:$PATH
 RUN echo "CATALINA_HOME: $CATALINA_HOME"
 
-
-################################################################
-# Set this to -k to convince curl to get the stuff when there
-# expired TLS certs.
-#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
-ENV ALLOW_EXPIRED=""
-###############################################################
-
-
 ################################################################
 # Install the OPeNDAP security public key.
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
@@ -92,7 +83,7 @@ ENV ALLOW_EXPIRED=""
 ENV OPENDAP_PUBLIC_KEY_FILE="security_at_opendap.org.pub.asc"
 ENV OPENDAP_PUBLIC_KEY_URL="https://www.opendap.org/${OPENDAP_PUBLIC_KEY_FILE}"
 RUN set -e \
-    && curl $ALLOW_EXPIRED -s $OPENDAP_PUBLIC_KEY_URL > $OPENDAP_PUBLIC_KEY_FILE \
+    && curl -s $OPENDAP_PUBLIC_KEY_URL > $OPENDAP_PUBLIC_KEY_FILE \
     && gpg --import $OPENDAP_PUBLIC_KEY_FILE
 ###############################################################
 
@@ -100,47 +91,51 @@ RUN set -e \
 ###############################################################
 # RELEASE URLs
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
-
 ENV LIBDAP_RPM="https://www.opendap.org/pub/binary/hyrax-${HYRAX_VERSION}/centos-7.x/libdap-${LIBDAP_VERSION}.el7.x86_64.rpm"
 ENV BES_RPM="https://www.opendap.org/pub/binary/hyrax-${HYRAX_VERSION}/centos-7.x/bes-${BES_VERSION}.static.el7.x86_64.rpm"
 ENV OLFS_WAR_URL="https://www.opendap.org/pub/olfs/olfs-${OLFS_VERSION}-webapp.tgz"
+###############################################################
+
 
 ###############################################################
 # Retrieve, verify, and install Libdap
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 RUN set -e \
     && echo "Retrieving, verifying, and installing libdap. rpm: $LIBDAP_RPM" \
-    && curl $ALLOW_EXPIRED -s $LIBDAP_RPM > ./libdap.rpm \
-    && curl $ALLOW_EXPIRED -s $LIBDAP_RPM.sig > ./libdap.rpm.sig \
+    && curl -s $LIBDAP_RPM > ./libdap.rpm \
+    && curl -s $LIBDAP_RPM.sig > ./libdap.rpm.sig \
     && gpg -v --verify ./libdap.rpm.sig ./libdap.rpm \
     && ls -l ./libdap* \
     && yum -y install ./libdap.rpm \
     && rm -f libdap.*
 
 # gpg --keyserver certserver.pgp.com --recv-keys 
+###############################################################
 
 
-################################################################
+###############################################################
 # Retrieve, verify, and install the BES
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 RUN set -e \
     && echo "Retrieving, verifying, and installing besd. rpm: $BES_RPM" \
-    && curl $ALLOW_EXPIRED -s ${BES_RPM} > ./bes.rpm \
-    && curl $ALLOW_EXPIRED -s ${BES_RPM}.sig > ./bes.rpm.sig \
+    && curl -s ${BES_RPM} > ./bes.rpm \
+    && curl -s ${BES_RPM}.sig > ./bes.rpm.sig \
     && gpg -v --verify ./bes.rpm.sig ./bes.rpm \
     && ls -l ./bes* \
     && yum -y install ./bes.rpm \
     && rm -f bes.*
 
 RUN echo "besdaemon is here: "`which besdaemon`
+###############################################################
+
 
 ################################################################
 # Retrieve, verify, and install the OLFS web application
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 RUN set -e \
     && echo "Retrieving And Installing OLFS-${OLFS_VERSION}" \
-    && curl $ALLOW_EXPIRED -sfSL ${OLFS_WAR_URL} > olfs-${OLFS_VERSION}.tgz \
-    && curl $ALLOW_EXPIRED -sfSL ${OLFS_WAR_URL}.sig > olfs-${OLFS_VERSION}.tgz.sig \
+    && curl -sfSL ${OLFS_WAR_URL} > olfs-${OLFS_VERSION}.tgz \
+    && curl -sfSL ${OLFS_WAR_URL}.sig > olfs-${OLFS_VERSION}.tgz.sig \
     && echo "Verifying tarball..." \
     && gpg --verify olfs-${OLFS_VERSION}.tgz.sig olfs-${OLFS_VERSION}.tgz \
     && echo "Unpacking tarball..." \
@@ -154,9 +149,8 @@ RUN set -e \
 RUN set -e \
     && mkdir -p ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs \
     && chown -R tomcat:tomcat ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs \
-    && chmod 700 ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs
-
-################################################################
+    && chmod 700 ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs 
+###############################################################
 
 
 ###############################################################
@@ -212,9 +206,7 @@ RUN set -e \
     && mv /tomcat7-server.xml ${CATALINA_HOME}/conf/server.xml \
     && chown -R tomcat:tomcat ${CATALINA_HOME}/conf/server.xml
 
-################################################################
-
-
+###############################################################
 
 
 ################################################################
