@@ -68,35 +68,47 @@ RUN set -e && \
 # Update and install the needful.
 RUN set -e \
     && yum -y install \
-       tomcat \
-       unzip  \
-       which \
-       awscli \
-    && yum -y update \
+        tomcat \
+        unzip  \
+        which \
+        awscli \
+        autoconf \
+        automake \
+        git \
+   && yum -y update \
     && yum clean all 
 
 # Tomcat environment (Tomcat installed above by via yum)
+#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 ENV CATALINA_HOME /usr/share/tomcat
 ENV PATH $CATALINA_HOME/bin:$PATH
 RUN echo "CATALINA_HOME: $CATALINA_HOME"
 
+
+################################################################
 # SNAPSHOT URLs
+#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 ENV LIBDAP_RPM="s3://opendap.travis.build/libdap-snapshot.el7.x86_64.rpm"
 ENV BES_RPM="s3://opendap.travis.build/bes-snapshot.static.el7.x86_64.rpm"
 ENV OLFS_PACKAGE="s3://opendap.travis.build/olfs-snapshot-webapp.tgz"
-
 ###############################################################
+
+
+################################################################
 # Retrieve and install the latest libdap snapshot
+#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 RUN set -e \
     && echo "Retrieving, and installing the latest libdap snapshot. rpm: $LIBDAP_RPM" \
     && aws --region=us-east-1 s3 cp ${LIBDAP_RPM}  ./libdap.rpm\
     && ls -l ./libdap* \
     && yum -y install ./libdap.rpm \
     && rm -f libdap.*
+################################################################
 
 
-###############################################################
+################################################################
 # Retrieve and install the latest BES snapshot
+#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 RUN set -e \
     && echo "Retrieving, and installing the latest besd snapshot. rpm: $BES_RPM" \
     && aws --region=us-east-1 s3 cp ${BES_RPM}  ./bes.rpm\
@@ -105,9 +117,12 @@ RUN set -e \
     && rm -f bes.*
 
 RUN echo "besdaemon is here: "`which besdaemon`
+################################################################
 
-###############################################################
+
+################################################################
 # Retrieve, verify, and install the OLFS web application
+#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 RUN set -e \
     && echo "Retrieving and installing the latest olfs snapshot." \
     && aws --region=us-east-1 s3 cp ${OLFS_PACKAGE}  ./olfs-snapshot-webapp.tgz\
@@ -131,11 +146,13 @@ RUN echo "unset AWS_ACCESS_KEY_ID"     >> ~/.bash_profile
 RUN echo "unset AWS_SECRET_ACCESS_KEY" >> ~/.bash_profile
 RUN echo "unset AWS_ACCESS_KEY_ID"     >> ~/.bashrc
 RUN echo "unset AWS_SECRET_ACCESS_KEY" >> ~/.bashrc
+################################################################
 
 
-###############################################################
+################################################################
 # retrieve and install the ncWMS web application
-#
+#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
+
 # This is ncWMS-2.2.2
 ENV NCWMS_WAR_URL=http://search.maven.org/remotecontent?filepath=uk/ac/rdg/resc/ncWMS/2.2.2/ncWMS-2.2.2.war
 
@@ -184,7 +201,33 @@ RUN set -e \
     && mv /tomcat7-server.xml ${CATALINA_HOME}/conf/server.xml \
     && chown -R tomcat:tomcat ${CATALINA_HOME}/conf/server.xml
 
-###############################################################
+################################################################
+
+
+################################################################
+#
+# Retrieve, verify, and install the hyrax_regression_tests
+# project
+#
+#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
+ENV TEST_INSTALL_DIR="/hyrax_regression_tests"
+RUN set -e \
+    && echo "Retrieving, and building hyrax regression tests." \
+    && echo "h_r_t will be in: ${TEST_INSTALL_DIR}" \
+    && mkdir -p ${TEST_INSTALL_DIR} \
+    && git clone -v https://github.com/opendap/hyrax_regression_tests ${TEST_INSTALL_DIR} \
+    && cd ${TEST_INSTALL_DIR} \
+    && autoreconf -vif \
+    && ./configure
+
+# In order to get the executable "testsuite" to build we have to run
+# "make check" But that will fail at build time so the "make check" call
+# ends up pretty tortured to avoid a build error.
+RUN set -e \
+    && cd ${TEST_INSTALL_DIR} \
+    && make check -k | tee /dev/null > mk.log 2>&1 \
+    && echo "SUCCESS: hyrax_regression_tests ready!"
+################################################################
 
 
 COPY entrypoint.sh /
