@@ -1,0 +1,2 @@
+#!/bin/bash
+docker exec -it hyrax  bash -c "cd hyrax_regression_tests; ./testsuite" 

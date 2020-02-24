@@ -43,7 +43,7 @@ install:
 
 stages:
   - name: build
-    if:  branch = master OR branch = reg_tests
+    if:  branch = master
 
 jobs:
   include:

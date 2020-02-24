@@ -61,12 +61,12 @@ RUN set -e && \
 # Update and install the needful.
 RUN set -e \
     && yum -y install \
-       tomcat \
-       unzip  \
-       which \
-       autoconf \
-       automake \
-       git \
+            tomcat \
+            unzip  \
+            which \
+            autoconf \
+            automake \
+            git \
     && yum -y update \
     && yum clean all 
 
@@ -79,7 +79,7 @@ RUN echo "CATALINA_HOME: $CATALINA_HOME"
 # Install the OPeNDAP security public key.
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 # TODO: We should get this from a well known key-server instead.
-#RUN echo "Adding OPeNDAP Public Security Key"
+RUN echo "Adding OPeNDAP Public Security Key"
 ENV OPENDAP_PUBLIC_KEY_FILE="security_at_opendap.org.pub.asc"
 ENV OPENDAP_PUBLIC_KEY_URL="https://www.opendap.org/${OPENDAP_PUBLIC_KEY_FILE}"
 RUN set -e \
