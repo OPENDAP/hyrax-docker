@@ -12,6 +12,13 @@ echo "Greetings, I am "`whoami`".";   >&2
 set -e
 #set -x
 
+# Only create the .netrc file if all three environment variables are defined
+if [ $HOST ] &&  [ $USERNAME ] && [ $PASSWORD ]; then
+    echo "machine $HOST" >> ~/.netrc
+    echo "login $USERNAME" >> ~/.netrc
+    echo "password $PASSWORD" >> ~/.netrc
+fi
+
 # Hyrax-in-the-cloud configuration
 # Only create the /etc/bes/site.conf file if all the necessary environment variables are defined
 if [ $S3_DISTRIBUTION_ENDPOINT ] &&  [ $S3_REFRESH_MARGIN ] && [ $S3_AWS_REGION ] && [ $S3_BASE_URL ]; then
