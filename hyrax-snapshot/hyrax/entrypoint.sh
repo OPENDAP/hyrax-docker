@@ -12,6 +12,13 @@ echo "Greetings, I am "`whoami`".";   >&2
 set -e
 #set -x
 
+# Only create the .netrc file if all three EDL environment variables are defined
+if [ $EDL_HOST ] &&  [ $EDL_USERNAME ] && [ $EDL_PASSWORD ]; then
+    echo "machine $EDL_HOST" >> ~/.netrc
+    echo "login $EDL_USERNAME" >> ~/.netrc
+    echo "password $EDL_PASSWORD" >> ~/.netrc
+fi
+
 if [ $SERVER_HELP_EMAIL ] && [ -n $SERVER_HELP_EMAIL ] ; then    
     echo "Found exisiting SERVER_HELP_EMAIL: $SERVER_HELP_EMAIL"  
 else 
