@@ -13,10 +13,10 @@ set -e
 #set -x
 
 # Only create the .netrc file if all three EDL environment variables are defined
-if [ $EDL_HOST ] &&  [ $EDL_USERNAME ] && [ $EDL_PASSWORD ]; then
-    echo "machine $EDL_HOST" >> ~/.netrc
-    echo "login $EDL_USERNAME" >> ~/.netrc
-    echo "password $EDL_PASSWORD" >> ~/.netrc
+if [ $HOST ] &&  [ $USERNAME ] && [ $PASSWORD ]; then
+    echo "machine $HOST" >> ~/.netrc
+    echo "login $USERNAME" >> ~/.netrc
+    echo "password $PASSWORD" >> ~/.netrc
 fi
 
 if [ $SERVER_HELP_EMAIL ] && [ -n $SERVER_HELP_EMAIL ] ; then    
