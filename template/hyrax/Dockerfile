@@ -67,6 +67,7 @@ RUN set -e \
             autoconf \
             automake \
             git \
+            bc \
     && yum -y update \
     && yum clean all 
 

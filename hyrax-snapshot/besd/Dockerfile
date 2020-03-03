@@ -45,6 +45,7 @@ RUN set -e \
     && yum -y install \
         which \
         awscli \
+        bc \
     && yum -y update \
     && yum clean all
 
