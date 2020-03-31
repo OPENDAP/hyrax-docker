@@ -191,7 +191,7 @@ RUN set -e \
         # to the server a viewers.xml which has
         # been templated so that the ncWMS host can be installed 
         # at startup.        
-        mv /tmp/olfs_viewers.xml ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml; \
+        mv /tmp/olfs_viewers.xml ${CATALINA_HOME}/webapps/ROOT/WEB-INF/conf/viewers.xml; \
     else \
         echo "Skipping OLFS/ncWMS confguration installation."; \
     fi

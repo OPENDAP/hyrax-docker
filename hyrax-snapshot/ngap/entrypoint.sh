@@ -105,10 +105,10 @@ if [ $debug = true ];then
     echo "Setting ncWMS access URLs in viewers.xml (if needed).";  >&2
 fi
 
-sed -i "s+@NCWMS_BASE@+$NCWMS_BASE+g" ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml;
+sed -i "s+@NCWMS_BASE@+$NCWMS_BASE+g" ${CATALINA_HOME}/webapps/ROOT/WEB-INF/conf/viewers.xml;
 if [ $debug = true ];then
-    echo "${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml";  >&2
-    cat ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml; >&2
+    echo "${CATALINA_HOME}/webapps/ROOT/WEB-INF/conf/viewers.xml";  >&2
+    cat ${CATALINA_HOME}/ROOT/ROOT/WEB-INF/conf/viewers.xml; >&2
 fi
 
 # modify bes.conf based on environment variables before startup.
