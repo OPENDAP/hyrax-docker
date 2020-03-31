@@ -2,7 +2,7 @@
 # This is the entrypoint.sh file for the single container Hyrax.
 
 # set -f # "set -o noglob"  Disable file name generation using metacharacters (globbing).
-# set -v # "set -o verbose" Prints shell input lines as they are read.
+set -v # "set -o verbose" Prints shell input lines as they are read.
 # set -x # "set -o xtrace"  Print command traces before executing command.
 # set -e #  Exit on error.
 
@@ -12,6 +12,34 @@ echo "Greetings, I am "`whoami`".";   >&2
 set -e
 #set -x
 
+################################################################################
+# Inject one set of credentials into .netrc
+# Only touch the .netrc file if all three environment variables are defined
+#
+if [ $HOST ] && [ -n $HOST ]  &&  \
+   [ $USERNAME ] &&  [ -n $USERNAME ] && \
+   [ $PASSWORD ] && [ -n $PASSWORD ]; then
+    echo "machine ${HOST}" >> ~/.netrc
+    echo "login ${USERNAME}" >> ~/.netrc
+    echo "password ${PASSWORD}" >> ~/.netrc
+fi
+################################################################################
+
+################################################################################
+# Inject an NGAP Cumulus Configuration
+# Only create the /etc/bes/site.conf file if all the necessary environment
+# variables are defined
+#
+if [ $S3_DISTRIBUTION_ENDPOINT ] && [ -n $S3_DISTRIBUTION_ENDPOINT ] &&  \
+   [ $S3_REFRESH_MARGIN ] && [ -n $S3_REFRESH_MARGIN ] && \
+   [ $S3_AWS_REGION ] && [ -n $S3_AWS_REGION ] && \
+   [ $S3_BASE_URL ] && [ -n $S3_BASE_URL ]; then
+    echo "NGAP.S3.distribution.endpoint.url=${S3_DISTRIBUTION_ENDPOINT}" >> /etc/bes/site.conf
+    echo "NGAP.S3.refresh.margin=${S3_REFRESH_MARGIN}" >> /etc/bes/site.conf
+    echo "NGAP.S3.region=${S3_AWS_REGION}" >> /etc/bes/site.conf
+    echo "NGAP.S3.url.base=${S3_BASE_URL}" >> /etc/bes/site.conf
+fi
+################################################################################
 
 if [ $SERVER_HELP_EMAIL ] && [ -n $SERVER_HELP_EMAIL ] ; then    
     echo "Found exisiting SERVER_HELP_EMAIL: $SERVER_HELP_EMAIL"  
@@ -77,10 +105,10 @@ if [ $debug = true ];then
     echo "Setting ncWMS access URLs in viewers.xml (if needed).";  >&2
 fi
 
-sed -i "s+@NCWMS_BASE@+$NCWMS_BASE+g" ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml;
+sed -i "s+@NCWMS_BASE@+$NCWMS_BASE+g" ${CATALINA_HOME}/webapps/ROOT/WEB-INF/conf/viewers.xml;
 if [ $debug = true ];then
-    echo "${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml";  >&2
-    cat ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml; >&2
+    echo "${CATALINA_HOME}/webapps/ROOT/WEB-INF/conf/viewers.xml";  >&2
+    cat ${CATALINA_HOME}/ROOT/ROOT/WEB-INF/conf/viewers.xml; >&2
 fi
 
 # modify bes.conf based on environment variables before startup.

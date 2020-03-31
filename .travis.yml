@@ -98,3 +98,17 @@ jobs:
         - $DOCKER_LOGIN
         - docker tag opendap/hyrax_ncwms:snapshot 747931985039.dkr.ecr.us-east-1.amazonaws.com/opendap/hyrax_ncwms:snapshot
         - docker push 747931985039.dkr.ecr.us-east-1.amazonaws.com/opendap/hyrax_ncwms:snapshot
+
+    - stage: build
+      script:
+        - cd hyrax-snapshot
+        - docker build --build-arg RELEASE_DATE=`date +%s` --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -t "opendap/hyrax:ngap-snapshot" ngap
+        - docker image ls -a
+        - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+        - docker push opendap/hyrax:ngap-snapshot
+        - aws configure list
+        - DOCKER_LOGIN=`aws ecr get-login --region us-east-1 | sed "s/-e none //g"`
+        - $DOCKER_LOGIN
+        - docker tag opendap/hyrax:ngap-snapshot 747931985039.dkr.ecr.us-east-1.amazonaws.com/opendap/hyrax:ngap-snapshot
+        - docker push 747931985039.dkr.ecr.us-east-1.amazonaws.com/opendap/hyrax:ngap-snapshot
+

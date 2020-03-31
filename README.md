@@ -100,13 +100,13 @@ docker build -t hyrax_image --build-arg USE_NCWMS=true hyrax
 
 To run the container:
 ```
-docker run -h hyrax -p 8080:8080 --name=hyrax_container hyrax_image
+docker run -d -h hyrax -p 8080:8080 --name=hyrax_container hyrax_image
 ```
 
 To run the container with ncWMS you'll need to tell the server where the ncWMS service is located.
 This can be done by utilizing the container's **<tt>-n</tt>** paramter to specify the endpoint like this:
 ```
-docker run -h hyrax -p 8080:8080 --name=hyrax_container hyrax_image -n http://localhost:8080
+docker run -d -h hyrax -p 8080:8080 --name=hyrax_container hyrax_image -n http://localhost:8080
 ```
 
 > **TIP:** The value of **<tt>-n</tt>** should be the outward facing domain 
