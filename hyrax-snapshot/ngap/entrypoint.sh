@@ -30,7 +30,7 @@ fi
 # Inject user-access.xml document to define the servers relation ship to
 # EDL and the user access rules.
 #
-echo "CATALINA_HOME: ${CATALINA_HOME}";   >&2
+echo "CATALINA_HOME: ${CATALINA_HOME}" >&2
 user_access_xml_file="/usr/share/tomcat/webapps/ROOT/WEB-INF/conf/user-access.xml"
 if [ $USER_ACCESS_XML ] && [ -n $USER_ACCESS_XML ] ; then
     echo "${USER_ACCESS_XML}" > ${user_access_xml_file}
