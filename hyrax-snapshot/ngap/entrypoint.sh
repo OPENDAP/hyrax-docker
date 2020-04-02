@@ -31,7 +31,7 @@ fi
 # Only touch the .netrc file if all three environment variables are defined
 #
 if [ ${USER_ACCESS_XML} ] && [ -n ${USER_ACCESS_XML} ] ; then
-    echo "${USER_ACCESS_XML}" >> /usr/share/tomcat/webapps/ROOT/WEB-INF/conf/user-access.xml
+    echo "${USER_ACCESS_XML}" > /usr/share/tomcat/webapps/ROOT/WEB-INF/conf/user-access.xml
 fi
 ################################################################################
 
