@@ -16,6 +16,8 @@
 # Set one or more individual labels
 FROM centos:7
 
+ENV NGAP_DEPLOY_CONTEXT="opendap"
+
 RUN export NOW=`date +%s`
 # HYRAX VERSION INFO
 ENV OLFS_VERSION=snapshot
@@ -131,15 +133,15 @@ RUN set -e \
     && tar -C /dev/shm -xzf ngap-snapshot-webapp.tgz \
     && ls -l /dev/shm/ngap-snapshot-webapp \
     && echo "Unpacking warfile..." \
-    && unzip -o /dev/shm/ngap-snapshot-webapp/ROOT.war -d ${CATALINA_HOME}/webapps/ROOT/ \
+    && unzip -o /dev/shm/ngap-snapshot-webapp/${NGAP_DEPLOY_CONTEXT}.war -d ${CATALINA_HOME}/webapps/${NGAP_DEPLOY_CONTEXT}/ \
     && echo "Cleaning up." \
     && rm -rf /dev/shm/* ngap-snapshot-webapp.tgz*
 
 # Fix ownership and access permissions
 RUN set -e \
-    && mkdir -p ${CATALINA_HOME}/webapps/ROOT/WEB-INF/conf/logs \
-    && chown -R tomcat:tomcat ${CATALINA_HOME}/webapps/ROOT/WEB-INF/conf/logs \
-    && chmod 700 ${CATALINA_HOME}/webapps/ROOT/WEB-INF/conf/logs
+    && mkdir -p ${CATALINA_HOME}/webapps/${NGAP_DEPLOY_CONTEXT}/WEB-INF/conf/logs \
+    && chown -R tomcat:tomcat ${CATALINA_HOME}/webapps/${NGAP_DEPLOY_CONTEXT}/WEB-INF/conf/logs \
+    && chmod 700 ${CATALINA_HOME}/webapps/${NGAP_DEPLOY_CONTEXT}/WEB-INF/conf/logs
 
 # Clear these values so they do not persist in the container!
 ENV AWS_ACCESS_KEY_ID=

@@ -27,7 +27,7 @@ fi
 
 
 ################################################################################
-# Inject user-access.xml document to define the servers relation ship to
+# Inject user-access.xml document to define the servers relationship to
 # EDL and the user access rules.
 #
 echo "CATALINA_HOME: ${CATALINA_HOME}"; >&2
