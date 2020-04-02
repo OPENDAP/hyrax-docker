@@ -31,7 +31,7 @@ fi
 # EDL and the user access rules.
 #
 echo "CATALINA_HOME: ${CATALINA_HOME}"; >&2
-user_access_xml_file="/usr/share/tomcat/webapps/${NGAP_DEPLOY_CONTEXT}/WEB-INF/conf/user-access.xml"
+user_access_xml_file="/usr/share/tomcat/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/user-access.xml"
 # Test if the user-access.xml env variable is set (by way of not unset) and not empty
 if [ ! -z ${USER_ACCESS_XML+set} ] && [ -n "${USER_ACCESS_XML}" ] ; then
     echo "${USER_ACCESS_XML}" > ${user_access_xml_file}
@@ -136,10 +136,10 @@ if [ $debug = true ];then
     echo "Setting ncWMS access URLs in viewers.xml (if needed).";  >&2
 fi
 
-sed -i "s+@NCWMS_BASE@+$NCWMS_BASE+g" ${CATALINA_HOME}/webapps/ROOT/WEB-INF/conf/viewers.xml;
+sed -i "s+@NCWMS_BASE@+$NCWMS_BASE+g" ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/viewers.xml;
 if [ $debug = true ];then
-    echo "${CATALINA_HOME}/webapps/ROOT/WEB-INF/conf/viewers.xml";  >&2
-    cat ${CATALINA_HOME}/ROOT/ROOT/WEB-INF/conf/viewers.xml; >&2
+    echo "${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/viewers.xml";  >&2
+    cat ${CATALINA_HOME}/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/viewers.xml; >&2
 fi
 
 # modify bes.conf based on environment variables before startup.
