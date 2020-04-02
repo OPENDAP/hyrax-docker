@@ -27,11 +27,29 @@ fi
 
 
 ################################################################################
-# Inject one set of credentials into .netrc
-# Only touch the .netrc file if all three environment variables are defined
+# Inject user-access.xml document to define the servers relation ship to
+# EDL and the user access rules.
 #
-if [ ${USER_ACCESS_XML} ] && [ -n ${USER_ACCESS_XML} ] ; then
-    echo "${USER_ACCESS_XML}" > /usr/share/tomcat/webapps/ROOT/WEB-INF/conf/user-access.xml
+echo "CATALINA_HOME: ${CATALINA_HOME}";   >&2
+user_access_xml_file="usr/share/tomcat/webapps/ROOT/WEB-INF/conf/user-access.xml"
+if [ $USER_ACCESS_XML ] && [ -n $USER_ACCESS_XML ] ; then
+    echo "${USER_ACCESS_XML}" > ${user_access_xml_file}
+    echo "${user_access_xml_file} -" >&2
+    cat ${user_access_xml_file} >&2
+fi
+
+################################################################################
+
+
+################################################################################
+# Inject BES configuration site.conf document to configure the BES to operate
+# in the NGAP environment.
+#
+bes_site_conf_file="/etc/bes/site.conf"
+if [ $BES_SITE_CONF ] && [ -n $BES_SITE_CONF ] ; then
+    echo "${BES_SITE_CONF}" > ${bes_site_conf_file}
+    echo "${bes_site_conf_file} -" >&2
+    cat ${bes_site_conf_file} >&2
 fi
 ################################################################################
 
