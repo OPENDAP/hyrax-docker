@@ -47,7 +47,7 @@ fi
 #
 bes_site_conf_file="/etc/bes/site.conf"
 # Test if the bes.conf env variable is both set and not empty
-if [ -z ${$BES_SITE_CONF+x} ] && [ -n "${$BES_SITE_CONF}" ] ; then
+if [ -z ${BES_SITE_CONF+x} ] && [ -n "${BES_SITE_CONF}" ] ; then
     echo "${BES_SITE_CONF}" > ${bes_site_conf_file}
     echo "${bes_site_conf_file} -" >&2
     cat ${bes_site_conf_file} >&2
