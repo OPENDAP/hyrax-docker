@@ -137,13 +137,14 @@ RUN set -e \
     && unzip -o /dev/shm/ngap-snapshot-webapp/${DEFAULT_NGAP_DEPLOYMENT_CONTEXT}.war -d ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/ \
     && echo "Cleaning up." \
     && rm -rf /dev/shm/* ngap-snapshot-webapp.tgz*
-
+#
+#
 # Fix ownership and access permissions
 RUN set -e \
     && mkdir -p ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/logs \
     && chown -R tomcat:tomcat ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/logs \
     && chmod 700 ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/logs
-
+#
 # Clear these values so they do not persist in the container!
 ENV AWS_ACCESS_KEY_ID=
 ENV AWS_SECRET_ACCESS_KEY=

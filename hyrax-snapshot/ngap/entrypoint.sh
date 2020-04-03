@@ -2,7 +2,7 @@
 # This is the entrypoint.sh file for the single container Hyrax.
 
 # set -f # "set -o noglob"  Disable file name generation using metacharacters (globbing).
-set -v # "set -o verbose" Prints shell input lines as they are read.
+# set -v # "set -o verbose" Prints shell input lines as they are read.
 # set -x # "set -o xtrace"  Print command traces before executing command.
 # set -e #  Exit on error.
 
@@ -16,12 +16,16 @@ set -e
 # Inject one set of credentials into .netrc
 # Only touch the .netrc file if all three environment variables are defined
 #
-if [ $HOST ] && [ -n $HOST ]  &&  \
-   [ $USERNAME ] &&  [ -n $USERNAME ] && \
-   [ $PASSWORD ] && [ -n $PASSWORD ]; then
-    echo "machine ${HOST}" >> ~/.netrc
-    echo "login ${USERNAME}" >> ~/.netrc
-    echo "password ${PASSWORD}" >> ~/.netrc
+if [ -n "${HOST}" ]  &&  [ -n "${USERNAME}" ] &&  [ -n "${PASSWORD}" ]; then
+    echo "machine ${HOST}"          >> /etc/bes/ngap_netrc
+    echo "    login ${USERNAME}"    >> /etc/bes/ngap_netrc
+    echo "    password ${PASSWORD}" >> /etc/bes/ngap_netrc
+    cp /etc/bes/ngap_netrc ~/.netrc
+    cp /etc/bes/ngap_netrc /var/log/bes/.netrc
+    chown bes:bes /etc/bes/ngap_netrc /var/log/bes/.netrc
+    chmod 400 /etc/bes/ngap_netrc  ~/.netrc /var/log/bes/.netrc
+    ls -l /etc/bes/ngap_netrc  >&2
+    cat /etc/bes/ngap_netrc >&2
 fi
 ################################################################################
 
@@ -201,12 +205,13 @@ while /bin/true; do
     fi
     
     if [ $debug = true ];then
-        echo "-------------------------------------------------------------------"  >&2
+        echo "-----------------------------------------------------------"  >&2
         date >&2
         echo "BESD_STATUS: $BESD_STATUS  besd_pid:$besd_pid" >&2
         echo "TOMCAT_STATUS: $TOMCAT_STATUS tomcat_pid:$tomcat_pid" >&2
     fi
 
+    tail -f /var/log/bes/bes.log
     
 done
  
