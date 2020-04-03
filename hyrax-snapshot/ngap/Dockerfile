@@ -16,7 +16,8 @@
 # Set one or more individual labels
 FROM centos:7
 
-ENV DEPLOYMENT_CONTEXT="opendap"
+ENV DEPLOYMENT_CONTEXT="ROOT"
+ENV DEFAULT_NGAP_DEPLOYMENT_CONTEXT="ngap"
 
 RUN export NOW=`date +%s`
 # HYRAX VERSION INFO
@@ -133,7 +134,7 @@ RUN set -e \
     && tar -C /dev/shm -xzf ngap-snapshot-webapp.tgz \
     && ls -l /dev/shm/ngap-snapshot-webapp \
     && echo "Unpacking warfile..." \
-    && unzip -o /dev/shm/ngap-snapshot-webapp/${DEPLOYMENT_CONTEXT}.war -d ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/ \
+    && unzip -o /dev/shm/ngap-snapshot-webapp/${DEFAULT_NGAP_DEPLOYMENT_CONTEXT}.war -d ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/ \
     && echo "Cleaning up." \
     && rm -rf /dev/shm/* ngap-snapshot-webapp.tgz*
 
