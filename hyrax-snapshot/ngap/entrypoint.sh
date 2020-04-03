@@ -48,7 +48,7 @@ fi
 bes_site_conf_file="/etc/bes/site.conf"
 # Test if the bes.conf env variable is set (by way of not unset) and not empty
 if [ ! -z ${BES_SITE_CONF+set} ] && [ -n "${BES_SITE_CONF}" ] ; then
-    echo "${BES_SITE_CONF}" > ${bes_site_conf_file}
+    echo "${BES_SITE_CONF}" | sed -e "s+BES.LogName=stdout+BES.LogName=/var/log/bes/bes.log+g" > ${bes_site_conf_file}
     echo "${bes_site_conf_file} -" >&2
     cat ${bes_site_conf_file} >&2
 fi
