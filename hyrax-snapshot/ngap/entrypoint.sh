@@ -37,7 +37,7 @@ fi
 echo "CATALINA_HOME: ${CATALINA_HOME}"; >&2
 user_access_xml_file="/usr/share/tomcat/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/user-access.xml"
 # Test if the user-access.xml env variable is set (by way of not unset) and not empty
-if [ ! -z ${USER_ACCESS_XML+set} ] && [ -n "${USER_ACCESS_XML}" ] ; then
+if [ -n "${USER_ACCESS_XML}" ] ; then
     echo "${USER_ACCESS_XML}" > ${user_access_xml_file}
     echo "${user_access_xml_file} -" >&2
     cat ${user_access_xml_file} >&2
@@ -51,7 +51,8 @@ fi
 #
 bes_site_conf_file="/etc/bes/site.conf"
 # Test if the bes.conf env variable is set (by way of not unset) and not empty
-if [ ! -z ${BES_SITE_CONF+set} ] && [ -n "${BES_SITE_CONF}" ] ; then
+if [ -n "${BES_SITE_CONF}" ] ; then
+    # echo "${BES_SITE_CONF}" > ${bes_site_conf_file}
     echo "${BES_SITE_CONF}" | sed -e "s+BES.LogName=stdout+BES.LogName=/var/log/bes/bes.log+g" > ${bes_site_conf_file}
     echo "${bes_site_conf_file} -" >&2
     cat ${bes_site_conf_file} >&2
