@@ -17,7 +17,8 @@ set -e
 # Only touch the .netrc file if all three environment variables are defined
 #
 if [ -n "${HOST}" ]  &&  [ -n "${USERNAME}" ] &&  [ -n "${PASSWORD}" ]; then
-    echo "machine ${HOST}" | sed -e "s_https://__g"  -e "s_http://__g" >> /etc/bes/ngap_netrc
+    # machine is a domain name or a ip address, not a URL.
+    echo "machine ${HOST}" | sed -e "s_https:__g"  -e "s_http:__g" -e "s+/++g" >> /etc/bes/ngap_netrc
     echo "    login ${USERNAME}"    >> /etc/bes/ngap_netrc
     echo "    password ${PASSWORD}" >> /etc/bes/ngap_netrc
     cp /etc/bes/ngap_netrc ~/.netrc
