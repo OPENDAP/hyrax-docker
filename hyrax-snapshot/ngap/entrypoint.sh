@@ -21,10 +21,8 @@ if [ -n "${HOST}" ]  &&  [ -n "${USERNAME}" ] &&  [ -n "${PASSWORD}" ]; then
     echo "machine ${HOST}" | sed -e "s_https:__g"  -e "s_http:__g" -e "s+/++g" >> /etc/bes/ngap_netrc
     echo "    login ${USERNAME}"    >> /etc/bes/ngap_netrc
     echo "    password ${PASSWORD}" >> /etc/bes/ngap_netrc
-    cp /etc/bes/ngap_netrc ~/.netrc
-    cp /etc/bes/ngap_netrc /var/log/bes/.netrc
-    chown bes:bes /etc/bes/ngap_netrc /var/log/bes/.netrc
-    chmod 400 /etc/bes/ngap_netrc  ~/.netrc /var/log/bes/.netrc
+    chown bes:bes /etc/bes/ngap_netrc
+    chmod 400 /etc/bes/ngap_netrc
     ls -l /etc/bes/ngap_netrc  >&2
     cat /etc/bes/ngap_netrc >&2
 fi
@@ -78,24 +76,24 @@ fi
 #fi
 ################################################################################
 
-if [ $SERVER_HELP_EMAIL ] && [ -n $SERVER_HELP_EMAIL ] ; then    
-    echo "Found exisiting SERVER_HELP_EMAIL: $SERVER_HELP_EMAIL"  
-else 
+if [ -n "${SERVER_HELP_EMAIL}" ] ; then
+    echo "Found exisiting SERVER_HELP_EMAIL: ${SERVER_HELP_EMAIL}"
+else
     SERVER_HELP_EMAIL="not_set"
-     echo "SERVER_HELP_EMAIL is $SERVER_HELP_EMAIL"  
+     echo "SERVER_HELP_EMAIL is ${SERVER_HELP_EMAIL}"
 fi
-if [ $FOLLOW_SYMLINKS ] && [ -n $FOLLOW_SYMLINKS ] ; then    
-    echo "Found exisiting FOLLOW_SYMLINKS: $FOLLOW_SYMLINKS"  
-else 
+if [ -n "${FOLLOW_SYMLINKS}" ] ; then
+    echo "Found existing FOLLOW_SYMLINKS: ${FOLLOW_SYMLINKS}"
+else
     FOLLOW_SYMLINKS="not_set";
-     echo "FOLLOW_SYMLINKS is $FOLLOW_SYMLINKS"  
+     echo "FOLLOW_SYMLINKS is $FOLLOW_SYMLINKS"
 fi
 
-if [ $NCWMS_BASE ] && [ -n $NCWMS_BASE ] ; then    
-    echo "Found exisiting NCWMS_BASE: $NCWMS_BASE"  
-else 
+if [ -n "${NCWMS_BASE}" ] ; then
+    echo "Found exisiting NCWMS_BASE: ${NCWMS_BASE}"
+else
     NCWMS_BASE="https://localhost:8080"
-     echo "Assigning default NCWMS_BASE: $NCWMS_BASE"  
+    echo "Assigning default NCWMS_BASE: ${NCWMS_BASE}"
 fi
 debug=false;
 
@@ -150,11 +148,11 @@ fi
 
 # modify bes.conf based on environment variables before startup.
 #
-if [ $SERVER_HELP_EMAIL != "not_set" ]; then
-    echo "Setting Admin Contact To: $SERVER_HELP_EMAIL"
-    sed -i "s/admin.email.address@your.domain.name/$SERVER_HELP_EMAIL/" /etc/bes/bes.conf
+if [ "${SERVER_HELP_EMAIL}" != "not_set" ]; then
+    echo "Setting Admin Contact To: ${SERVER_HELP_EMAIL}"
+    sed -i "s/admin.email.address@your.domain.name/${SERVER_HELP_EMAIL}/" /etc/bes/bes.conf
 fi
-if [ $FOLLOW_SYMLINKS != "not_set" ]; then
+if [ "${FOLLOW_SYMLINKS}" != "not_set" ]; then
     echo "Setting BES FollowSymLinks to YES."
     sed -i "s/^BES.Catalog.catalog.FollowSymLinks=No/BES.Catalog.catalog.FollowSymLinks=Yes/" /etc/bes/bes.conf
 fi
@@ -162,7 +160,7 @@ fi
 
 # Start the BES daemon process
 # /usr/bin/besdaemon -i /usr -c /etc/bes/bes.conf -r /var/run/bes.pid
-/usr/bin/besctl start; 
+/usr/bin/besctl start;
 status=$?
 if [ $status -ne 0 ]; then
     echo "Failed to start BES: $status" >&2
@@ -188,7 +186,7 @@ while /bin/true; do
     sleep 60
     besd_ps=`ps -f $besd_pid`;
     BESD_STATUS=$?
-    
+
     tomcat_ps=`ps -f $tomcat_pid`;
     TOMCAT_STATUS=$?
 
@@ -205,7 +203,7 @@ while /bin/true; do
         echo "Tomcat Console Log [END]" >&2
         exit -2;
     fi
-    
+
     if [ $debug = true ];then
         echo "-----------------------------------------------------------"  >&2
         date >&2
@@ -214,6 +212,6 @@ while /bin/true; do
     fi
 
     tail -f /var/log/bes/bes.log
-    
+
 done
- 
+

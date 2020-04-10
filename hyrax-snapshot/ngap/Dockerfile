@@ -109,7 +109,7 @@ ENV NGAP_PACKAGE="s3://opendap.travis.build/ngap-snapshot-webapp.tgz"
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 RUN set -e \
     && echo "Retrieving, and installing the latest libdap snapshot. rpm: $LIBDAP_RPM" \
-    && aws --region=us-east-1 s3 cp ${LIBDAP_RPM}  ./libdap.rpm\
+    && aws --region=us-east-1 s3 cp ${LIBDAP_RPM}  ./libdap.rpm \
     && ls -l ./libdap* \
     && yum -y install ./libdap.rpm \
     && rm -f libdap.*
@@ -138,7 +138,7 @@ RUN set -e \
     && aws --region=us-east-1 s3 cp ${NGAP_PACKAGE}  ./ngap-snapshot-webapp.tgz\
     && tar -C /dev/shm -xzf ngap-snapshot-webapp.tgz \
     && ls -l /dev/shm/ngap-snapshot-webapp \
-    && echo "Unpacking warfile..." \
+    && echo "Unpacking war file..." \
     && unzip -o /dev/shm/ngap-snapshot-webapp/${DEFAULT_NGAP_DEPLOYMENT_CONTEXT}.war -d ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/ \
     && echo "Cleaning up." \
     && rm -rf /dev/shm/* ngap-snapshot-webapp.tgz*
@@ -228,15 +228,17 @@ RUN set -e \
     && mkdir -p ${TEST_INSTALL_DIR} \
     && git clone -v https://github.com/opendap/hyrax_regression_tests ${TEST_INSTALL_DIR} \
     && cd ${TEST_INSTALL_DIR} \
+    && git status \
     && autoreconf -vif \
     && ./configure
+
 
 # In order to get the executable "testsuite" to build we have to run
 # "make check" But that will fail at build time so the "make check" call
 # ends up pretty tortured to avoid a build error.
 RUN set -e \
     && cd ${TEST_INSTALL_DIR} \
-    && make check -k | tee /dev/null > mk.log 2>&1 \
+    && make testsuite > mk.log 2>&1 \
     && echo "SUCCESS: hyrax_regression_tests ready!"
 ################################################################
 
