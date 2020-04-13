@@ -7,8 +7,8 @@
 # set -e #  Exit on error.
 
 #echo "entrypoint.sh  command line: \"$@\""
-echo "############################## HYRAX ##################################";   >&2
-echo "Greetings, I am "`whoami`".";   >&2
+echo "############################## HYRAX ##################################" >&2
+echo "Greetings, I am "`whoami`"." >&2
 set -e
 #set -x
 
@@ -33,7 +33,7 @@ fi
 # Inject user-access.xml document to define the servers relationship to
 # EDL and the user access rules.
 #
-echo "CATALINA_HOME: ${CATALINA_HOME}"; >&2
+echo "CATALINA_HOME: ${CATALINA_HOME}" >&2
 user_access_xml_file="/usr/share/tomcat/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/user-access.xml"
 # Test if the user-access.xml env variable is set (by way of not unset) and not empty
 if [ -n "${USER_ACCESS_XML}" ] ; then
@@ -131,19 +131,31 @@ while getopts "de:sn:" opt; do
 done
 
 if [ $debug = true ];then
-    echo "CATALINA_HOME: ${CATALINA_HOME}";  >&2
+    echo "CATALINA_HOME: ${CATALINA_HOME}"  >&2
     ls -l "$CATALINA_HOME" "$CATALINA_HOME/bin"  >&2
 fi
 
+WEB_INF_DIR="${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF"
+VIEWERS_XML="${WEB_INF_DIR}/conf/viewers.xml"
 if [ $debug = true ];then
     echo "NCWMS_BASE: ${NCWMS_BASE}"  >&2
-    echo "Setting ncWMS access URLs in viewers.xml (if needed).";  >&2
+    echo "Setting ncWMS access URLs in viewers.xml (if needed)."  >&2
+    ls -l "${VIEWERS_XML}" >&2
 fi
 
-sed -i "s+@NCWMS_BASE@+$NCWMS_BASE+g" ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/viewers.xml;
+sed -i "s+@NCWMS_BASE@+${NCWMS_BASE}+g" "${VIEWERS_XML}";
+
 if [ $debug = true ];then
-    echo "${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/viewers.xml";  >&2
-    cat ${CATALINA_HOME}/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/viewers.xml; >&2
+    echo "${VIEWERS_XML} - "  >&2
+    cat "${VIEWERS_XML}" >&2
+fi
+
+LOGBACK_XML="${WEB_INF_DIR}/logback.xml"
+NGAP_LOGBACK_XML="${WEB_INF_DIR}/logback-ngap.xml"
+if [ $debug = true ];then
+    cp "${NGAP_LOGBACK_XML}" "${LOGBACK_XML}"
+    echo "Enabled Logback (slf4j) debug logging for NGAP."  >&2
+    cat "${LOGBACK_XML}"  >&2
 fi
 
 # modify bes.conf based on environment variables before startup.
@@ -152,6 +164,7 @@ if [ "${SERVER_HELP_EMAIL}" != "not_set" ]; then
     echo "Setting Admin Contact To: ${SERVER_HELP_EMAIL}"
     sed -i "s/admin.email.address@your.domain.name/${SERVER_HELP_EMAIL}/" /etc/bes/bes.conf
 fi
+
 if [ "${FOLLOW_SYMLINKS}" != "not_set" ]; then
     echo "Setting BES FollowSymLinks to YES."
     sed -i "s/^BES.Catalog.catalog.FollowSymLinks=No/BES.Catalog.catalog.FollowSymLinks=Yes/" /etc/bes/bes.conf
@@ -167,7 +180,7 @@ if [ $status -ne 0 ]; then
     exit $status
 fi
 besd_pid=`ps aux | grep /usr/bin/besdaemon | grep -v grep | awk '{print $2;}' - `;
-echo "The BES is UP! pid: $besd_pid"; >&2
+echo "The BES is UP! pid: $besd_pid" >&2
 
 
 # Start Tomcat process
@@ -178,9 +191,9 @@ if [ $status -ne 0 ]; then
     echo "Failed to start Tomcat: $status" >&2
     exit $status
 fi
-echo "Tomcat is UP! pid: $tomcat_pid"; >&2
+echo "Tomcat is UP! pid: $tomcat_pid" >&2
 
-echo "Hyrax Has Arrived..."; >&2
+echo "Hyrax Has Arrived..." >&2
 
 while /bin/true; do
     sleep 60
