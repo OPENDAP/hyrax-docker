@@ -135,8 +135,8 @@ if [ $debug = true ];then
     ls -l "$CATALINA_HOME" "$CATALINA_HOME/bin"  >&2
 fi
 
-WEB_INF_DIR="${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF"
-VIEWERS_XML="${WEB_INF_DIR}/conf/viewers.xml"
+DEFAULT_CONF_DIR="${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf"
+VIEWERS_XML="${DEFAULT_CONF_DIR}/viewers.xml"
 if [ $debug = true ];then
     echo "NCWMS_BASE: ${NCWMS_BASE}"  >&2
     echo "Setting ncWMS access URLs in viewers.xml (if needed)."  >&2
@@ -150,8 +150,8 @@ if [ $debug = true ];then
     cat "${VIEWERS_XML}" >&2
 fi
 
-LOGBACK_XML="${WEB_INF_DIR}/logback.xml"
-NGAP_LOGBACK_XML="${WEB_INF_DIR}/logback-ngap.xml"
+LOGBACK_XML="${DEFAULT_CONF_DIR}/logback.xml"
+NGAP_LOGBACK_XML="${DEFAULT_CONF_DIR}/logback-ngap.xml"
 if [ $debug = true ];then
     cp "${NGAP_LOGBACK_XML}" "${LOGBACK_XML}"
     echo "Enabled Logback (slf4j) debug logging for NGAP."  >&2
