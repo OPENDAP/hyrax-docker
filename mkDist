@@ -20,11 +20,11 @@
 # DO NOT FORGET THE RELEASE DATE!
 #
 HYRAX_MAJOR_VERSION="1.16"
-HYRAX_FULL_VERSION="1.16.1"
-OLFS_VERSION="1.18.6"
-LIBDAP_VERSION="3.20.5-1"
-BES_VERSION="3.20.6-1"
-RELEASE_DATE="2020-02-10"
+HYRAX_FULL_VERSION="1.16.2"
+OLFS_VERSION="1.18.7"
+LIBDAP_VERSION="3.20.6-1"
+BES_VERSION="3.20.7-1"
+RELEASE_DATE="2020-04-27"
 #
 ###############################################################################################
 
@@ -37,7 +37,7 @@ cp -R template/* "${DOCKER_RELEASE}"
 # -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 # Massage the files drawn from the template with the current version numbers.
 #
-containers="besd olfs hyrax ncWMS"
+containers="besd olfs hyrax ncWMS ngap"
 for docker_container in ${containers}
 do
     cat template/${docker_container}/Dockerfile | \
@@ -73,6 +73,9 @@ docker build -t opendap/hyrax:latest hyrax;
 #
 docker build -t opendap/hyrax_ncwms:${HYRAX_FULL_VERSION} --build-arg USE_NCWMS=true hyrax;
 docker build -t opendap/hyrax_ncwms:latest --build-arg USE_NCWMS=true hyrax;
+#
+docker build -t opendap/hyrax:ngap-${HYRAX_FULL_VERSION}  ngap;
+docker build -t opendap/hyrax:ngap-latest ngap;
 #
 #
 # Return to top dir...

@@ -16,10 +16,10 @@
 FROM centos:7
 
 # HYRAX VERSION INFO
-ENV HYRAX_VERSION=HYRAX_MAJOR_VERSION_TEMPLATE
-ENV LIBDAP_VERSION=LIBDAP_VERSION_TEMPLATE
-ENV BES_VERSION=BES_VERSION_TEMPLATE
-ENV RELEASE_DATE=RELEASE_DATE_TEMPLATE
+ENV HYRAX_VERSION=1.16
+ENV LIBDAP_VERSION=3.20.6-1
+ENV BES_VERSION=3.20.7-1
+ENV RELEASE_DATE=2020-04-27
 
 # RELEASE URLs
 # https://www.opendap.org/pub/binary/hyrax-1.15/centos-7.x/libdap-3.20.1-1.el7.x86_64.rpm
@@ -29,8 +29,8 @@ ENV LIBDAP_RPM="https://www.opendap.org/pub/binary/hyrax-${HYRAX_VERSION}/centos
 ENV BES_RPM="https://www.opendap.org/pub/binary/hyrax-${HYRAX_VERSION}/centos-7.x/bes-${BES_VERSION}.static.el7.x86_64.rpm"
 
 LABEL vendor="OPeNDAP Incorporated"
-LABEL org.opendap.besdaemon.version=BES_VERSION_TEMPLATE
-LABEL org.opendap.besdaemon.release-date=RELEASE_DATE_TEMPLATE
+LABEL org.opendap.besdaemon.version=3.20.7-1
+LABEL org.opendap.besdaemon.release-date=2020-04-27
 LABEL org.opendap.hyrax.version.is-production="true"
 
 MAINTAINER support@opendap.org
