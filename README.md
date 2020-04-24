@@ -1,14 +1,14 @@
 # Hyrax docker
 
-## Current Version: <font style="font-size: 300%;">**Hyrax-1.16.1**</font>
+## Current Version: <font style="font-size: 300%;">**Hyrax-1.16.2**</font>
 
-**Hyrax-1.16.1** is composed of:
+**Hyrax-1.16.2** is composed of:
 
 |||
  | :---: | :---: |
- | **OLFS version 1.18.6** [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3659315.svg)](https://doi.org/10.5281/zenodo.3659315) |
-| **BES version 3.20.6** [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3659278.svg)](https://doi.org/10.5281/zenodo.3659278) |
-| **libdap4 version 3.20.5** [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3641778.svg)](https://doi.org/10.5281/zenodo.3641778) |
+ | **OLFS version 1.18.7** [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3762740.svg)](https://doi.org/10.5281/zenodo.3762740) |
+| **BES version 3.20.7** [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3762439.svg)](https://doi.org/10.5281/zenodo.3762439) |
+| **libdap4 version 3.20.6** [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3759849.svg)](https://doi.org/10.5281/zenodo.3759849) |
 
 ## <a name="contents"></a>Contents
 * [Overview](#overview)
