@@ -226,7 +226,7 @@ RUN set -e \
 # ends up pretty tortured to avoid a build error.
 RUN set -e \
     && cd ${TEST_INSTALL_DIR} \
-    && make check -k | tee /dev/null > mk.log 2>&1 \
+    && make testsuite > mk.log 2>&1 \
     && echo "SUCCESS: hyrax_regression_tests ready!"
 ################################################################
 
