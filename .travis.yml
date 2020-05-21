@@ -119,5 +119,5 @@ jobs:
         - test_image_name="opendap/hyrax:snapshot"
         - docker pull ${test_image_name}
         - container_id=$(docker run -d -h hyrax -p 8080:8080 --name=hyrax ${test_image_name})
-	- echo "Testing the following image: ${test_image_name}"
+        - echo "Testing the following image: ${test_image_name}"
         - docker exec hyrax /bin/bash -c "sleep 20; cd hyrax_regression_tests; ./testsuite"
