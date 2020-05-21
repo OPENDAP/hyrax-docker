@@ -44,6 +44,8 @@ install:
 stages:
   - name: build
     if:  branch = master
+  - name: test
+    if: branch = master
 
 jobs:
   include:
@@ -111,3 +113,11 @@ jobs:
         - $DOCKER_LOGIN
         - docker tag opendap/hyrax:ngap-snapshot 747931985039.dkr.ecr.us-east-1.amazonaws.com/opendap/hyrax:ngap-snapshot
         - docker push 747931985039.dkr.ecr.us-east-1.amazonaws.com/opendap/hyrax:ngap-snapshot
+
+    - stage: test
+      script:
+        - test_image_name="opendap/hyrax:snapshot"
+        - docker pull ${test_image_name}
+        - container_id=$(docker run -d -h hyrax -p 8080:8080 --name=hyrax ${test_image_name})
+        - echo "Testing the following image ${test_image_name} - container_id ${container_id}"
+        - docker exec hyrax /bin/bash -c "sleep 20; cd hyrax_regression_tests; ./testsuite"
