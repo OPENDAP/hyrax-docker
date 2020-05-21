@@ -118,5 +118,4 @@ jobs:
       script:
         - docker pull opendap/hyrax:snapshot
         - container_id=$(docker run -d -h hyrax -p 8080:8080 --name=hyrax opendap/hyrax:snapshot)
-	- sleep(20)
-        - docker exec hyrax /bin/bash -c "cd hyrax_regression_tests; ./testsuite"
+        - docker exec hyrax /bin/bash -c "sleep 20; cd hyrax_regression_tests; ./testsuite"
