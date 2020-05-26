@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-​echo "Starting up ..."
+echo "Starting up ..."
 
 default_time_out=30
 default_image_name="opendap/hyrax:snapshot"
