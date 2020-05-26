@@ -1,0 +1,56 @@
+#!/bin/bash
+set -e
+​
+default_time_out=30
+default_image_name="opendap/hyrax:snapshot"
+default_endpoint="http://localhost:8080/opendap/"
+​
+​
+test_image_name="${1:-${default_image_name}}"
+end_point="${2:-${default_endpoint}}"
+​
+​
+function waitForHyrax() {
+    # Don't fail on errors, they're expected...
+    set +e
+    let start=`date "+%s"`
+    done_flag="";
+    while test -z "${done_flag}"
+    do
+        curl -s -c cookies -b cookies -n -L ${end_point} 2>&1 > /dev/null
+        status=$?
+        if [ $status -eq 0 ]
+        then
+            done_flag="yup"
+        fi
+        echo -n "."
+        let now=`date "+%s"`
+        let elapsed=$now-$start;
+        # echo "elapsed: $elapsed"
+        if [ ${elapsed} -gt ${default_time_out} ]
+        then
+            echo ""
+            echo "ERROR: Hyrax FAILED To Start! Waited for ${elapsed} seconds"
+            exit 1;
+        fi   
+    done
+    # Now we can fail on errors agin.
+    set -e
+    echo ""
+    echo "Hyrax has arrived!"
+}
+   
+ 
+# get the image
+docker pull ${test_image_name}
+​
+# Dump all other containers
+docker rm -f $(docker ps -aq);
+​
+#start Hyrax
+container_id=$(docker run -d -h hyrax -p 8080:8080 --name=hyrax ${test_image_name})
+​
+waitForHyrax
+​
+echo "Testing the following image: ${test_image_name}"
+docker exec hyrax /bin/bash -c "cd hyrax_regression_tests; ./testsuite 1 2 3 4 5"
