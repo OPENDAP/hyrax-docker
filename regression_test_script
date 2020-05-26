@@ -6,8 +6,35 @@ default_time_out=30
 default_image_name="opendap/hyrax:snapshot"
 default_endpoint="http://localhost:8080/opendap/"
 
-test_image_name="${1:-${default_image_name}}"
-end_point="${2:-${default_endpoint}}"
+time_out="${default_time_out}"
+test_image_name="${default_image_name}"
+end_point="${default_endpoint}"
+
+while getopts "ht:i:e:" OPTION; do
+    case $OPTION in
+    t)
+        time_out=$OPTARG
+        ;;
+    i)
+        test_image_name=$OPTARG
+        ;;
+    e)
+        end_point=$OPTARG
+        ;;
+    h)
+        echo "-h help -t time_out -i image_name -e end_point_url"
+        ;;
+    *)
+        echo "Incorrect options provided"
+        exit 1
+        ;;
+    esac
+done
+
+echo "Using following configurations:"
+echo "Time out duration: ${time_out}"
+echo "Image name: ${test_image_name}"
+echo "End point: ${end_point}"
 
 function waitForHyrax() {
     # Don't fail on errors, they're expected...
@@ -26,7 +53,7 @@ function waitForHyrax() {
         let now=`date "+%s"`
         let elapsed=$now-$start;
         # echo "elapsed: $elapsed"
-        if [ ${elapsed} -gt ${default_time_out} ]
+        if [ ${elapsed} -gt ${time_out} ]
         then
             echo ""
             echo "ERROR: Hyrax FAILED To Start! Waited for ${elapsed} seconds"
