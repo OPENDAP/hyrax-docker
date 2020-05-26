@@ -43,7 +43,11 @@ function waitForHyrax() {
 docker pull ${test_image_name}
 
 # Dump all other containers
-docker rm -f $(docker ps -aq);
+containers=$(docker ps -aq)
+if [ -n "${containers}" ]
+then
+    docker rm -f $(docker ps -aq);
+fi
 
 #start Hyrax
 container_id=$(docker run -d -h hyrax -p 8080:8080 --name=hyrax ${test_image_name})
