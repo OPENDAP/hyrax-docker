@@ -1,6 +1,7 @@
 #!/bin/bash
 set -e
-​
+​echo "Starting up ..."
+
 default_time_out=30
 default_image_name="opendap/hyrax:snapshot"
 default_endpoint="http://localhost:8080/opendap/"
