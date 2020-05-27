@@ -9,15 +9,16 @@ default_endpoint="http://localhost:8080/opendap/"
 time_out="${default_time_out}"
 test_image_name="${default_image_name}"
 end_point="${default_endpoint}"
-netrc_fileurl=""
+netrc_file=""
+tests="1 2 3 4 5 6 7 8 9 10"
 
-while getopts "ht:i:e:n:" OPTION; do
+while getopts "ho:i:e:n:t:" OPTION; do
     case $OPTION in
     h)
         echo "-h help -t time_out -i image_name -e end_point_url"
 	exit 0
         ;;
-    t)
+    o)
         time_out=$OPTARG
         ;;
     i)
@@ -27,7 +28,10 @@ while getopts "ht:i:e:n:" OPTION; do
         end_point=$OPTARG
         ;;
     n)
-        netrc_fileurl=$OPTARG
+        netrc_file=$OPTARG
+        ;;
+    t)
+        tests=$OPTARG
         ;;
     *)
         echo "Incorrect options provided"
@@ -40,6 +44,7 @@ echo "Using following configurations:"
 echo "Time out duration: ${time_out}"
 echo "Image name: ${test_image_name}"
 echo "End point: ${end_point}"
+echo "Tests: ${tests}"
 
 function waitForHyrax() {
     # Don't fail on errors, they're expected...
@@ -88,4 +93,4 @@ container_id=$(docker run -d -h hyrax -p 8080:8080 --name=hyrax ${test_image_nam
 waitForHyrax
 
 echo "Testing the following image: ${test_image_name}"
-docker exec hyrax /bin/bash -c "cd hyrax_regression_tests; ./testsuite 1 2 3 4 5"
+docker exec hyrax /bin/bash -c "cd hyrax_regression_tests; ./testsuite --hyraxurl=\"${end_point}\" ${netrc_file} ${tests}"
