@@ -9,9 +9,14 @@ default_endpoint="http://localhost:8080/opendap/"
 time_out="${default_time_out}"
 test_image_name="${default_image_name}"
 end_point="${default_endpoint}"
+netrc_fileurl=""
 
-while getopts "ht:i:e:" OPTION; do
+while getopts "ht:i:e:n:" OPTION; do
     case $OPTION in
+    h)
+        echo "-h help -t time_out -i image_name -e end_point_url"
+	exit 0
+        ;;
     t)
         time_out=$OPTARG
         ;;
@@ -21,8 +26,8 @@ while getopts "ht:i:e:" OPTION; do
     e)
         end_point=$OPTARG
         ;;
-    h)
-        echo "-h help -t time_out -i image_name -e end_point_url"
+    n)
+        netrc_fileurl=$OPTARG
         ;;
     *)
         echo "Incorrect options provided"
