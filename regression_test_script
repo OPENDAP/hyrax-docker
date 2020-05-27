@@ -4,7 +4,7 @@ echo "Starting up ..."
 
 default_time_out=30
 default_image_name="opendap/hyrax:snapshot"
-default_endpoint="http://localhost:8080/opendap/"
+default_endpoint="http://localhost:8080/opendap"
 
 time_out="${default_time_out}"
 test_image_name="${default_image_name}"
@@ -53,13 +53,28 @@ function waitForHyrax() {
     done_flag="";
     while test -z "${done_flag}"
     do
-        curl -s -c cookies -b cookies -n -L ${end_point} 2>&1 > /dev/null
-        status=$?
-        if [ $status -eq 0 ]
-        then
-            done_flag="yup"
-        fi
         echo -n "."
+        curl -s -c cookies -b cookies -n ${netrc_file} -L ${end_point} > /dev/null
+        status=$?
+        # echo "cURL status: ${status}";
+        if [ ${status} -eq 0 ]
+        then
+            echo ""
+            echo "Endpoint may have been retrieved. Checking again..."
+            # What happens next: We get the response headers "-I" and look
+            # for the string "HTTP/" because we know there will be redirects.
+            # We use tail to look at the last HTTP/ header and if that status is
+            # 200 we're off to the races.
+            set -x; # Echo the stuff
+            curl -s -c cookies -b cookies -n ${netrc_file} -I -L ${end_point} | grep "HTTP/" | tail -1 | grep 200  > /dev/null;
+            found=$?;
+            set +x; # Stop echoing the stuff...
+            # echo "cURL found: ${found}";
+            if [ ${found} -eq 0 ]; then
+                echo "The Test Endpoint URL: ${end_point} returned a status of 200"
+                done_flag="yup";
+            fi
+        fi
         let now=`date "+%s"`
         let elapsed=$now-$start;
         # echo "elapsed: $elapsed"
@@ -70,9 +85,8 @@ function waitForHyrax() {
             exit 1;
         fi   
     done
-    # Now we can fail on errors agin.
+    # Now we can fail on errors again.
     set -e
-    echo ""
     echo "Hyrax has arrived!"
 }
 
@@ -93,4 +107,5 @@ container_id=$(docker run -d -h hyrax -p 8080:8080 --name=hyrax ${test_image_nam
 waitForHyrax
 
 echo "Testing the following image: ${test_image_name}"
-docker exec hyrax /bin/bash -c "cd hyrax_regression_tests; ./testsuite --hyraxurl=\"${end_point}\" ${netrc_file} ${tests}"
+set -x
+docker exec -it hyrax /bin/bash -c "cd hyrax_regression_tests; ./testsuite --hyraxurl=\"${end_point}\" ${netrc_file} ${tests}"
