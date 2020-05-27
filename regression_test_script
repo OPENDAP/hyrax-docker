@@ -10,7 +10,7 @@ time_out="${default_time_out}"
 test_image_name="${default_image_name}"
 end_point="${default_endpoint}"
 netrc_file=""
-tests="1 2 3 4 5 6 7 8 9 10"
+tests=""
 
 while getopts "ht:i:e:n:" OPTION; do
     case $OPTION in
