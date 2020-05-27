@@ -1,0 +1,111 @@
+#!/bin/bash
+set -e
+echo "Starting up ..."
+
+default_time_out=30
+default_image_name="opendap/hyrax:snapshot"
+default_endpoint="http://localhost:8080/opendap"
+
+time_out="${default_time_out}"
+test_image_name="${default_image_name}"
+end_point="${default_endpoint}"
+netrc_file=""
+tests=""
+
+while getopts "ht:i:e:n:" OPTION; do
+    case $OPTION in
+    h)
+        echo "-h help -t time_out -i image_name -e end_point_url -n netrc_file test1 test2 ..."
+	exit 0
+        ;;
+    t)
+        time_out=$OPTARG
+        ;;
+    i)
+        test_image_name=$OPTARG
+        ;;
+    e)
+        end_point=$OPTARG
+        ;;
+    n)
+        netrc_file="--netrc ${OPTARG}"
+        ;;
+    *)
+        echo "Incorrect options provided"
+        exit 1
+        ;;
+    esac
+done
+
+shift $(($OPTIND - 1))
+tests="$@"
+
+echo "Using following configurations:"
+echo "Time out duration: ${time_out}"
+echo "Image name: ${test_image_name}"
+echo "End point: ${end_point}"
+echo "Tests: ${tests}"
+
+function waitForHyrax() {
+    # Don't fail on errors, they're expected...
+    set +e
+    let start=`date "+%s"`
+    done_flag="";
+    while test -z "${done_flag}"
+    do
+        echo -n "."
+        curl -s -c cookies -b cookies -n ${netrc_file} -L ${end_point} > /dev/null
+        status=$?
+        # echo "cURL status: ${status}";
+        if [ ${status} -eq 0 ]
+        then
+            echo ""
+            echo "Endpoint may have been retrieved. Checking again..."
+            # What happens next: We get the response headers "-I" and look
+            # for the string "HTTP/" because we know there will be redirects.
+            # We use tail to look at the last HTTP/ header and if that status is
+            # 200 we're off to the races.
+            set -x; # Echo the stuff
+            curl -s -c cookies -b cookies -n ${netrc_file} -I -L ${end_point} | grep "HTTP/" | tail -1 | grep 200  > /dev/null;
+            found=$?;
+            set +x; # Stop echoing the stuff...
+            # echo "cURL found: ${found}";
+            if [ ${found} -eq 0 ]; then
+                echo "The Test Endpoint URL: ${end_point} returned a status of 200"
+                done_flag="yup";
+            fi
+        fi
+        let now=`date "+%s"`
+        let elapsed=$now-$start;
+        # echo "elapsed: $elapsed"
+        if [ ${elapsed} -gt ${time_out} ]
+        then
+            echo ""
+            echo "ERROR: Hyrax FAILED To Start! Waited for ${elapsed} seconds"
+            exit 1;
+        fi   
+    done
+    # Now we can fail on errors again.
+    set -e
+    echo "Hyrax has arrived!"
+}
+
+# get the image
+docker pull ${test_image_name};
+
+# Dump all other containers
+containers=$(docker ps -aq);
+if test -n "${containers}"
+then
+    echo "Removing containers: ${containers}";
+    docker rm -f ${containers};
+fi
+
+#start Hyrax
+container_id=$(docker run -d -h hyrax -p 8080:8080 --name=hyrax ${test_image_name})
+
+waitForHyrax
+
+echo "Testing the following image: ${test_image_name}"
+set -x
+docker exec -it hyrax /bin/bash -c "cd hyrax_regression_tests; ./testsuite --hyraxurl=\"${end_point}\" ${netrc_file} ${tests}"
