@@ -2,7 +2,7 @@
 #
 # Translates OPeNDAP bes.logs into JSON
 
-BEGIN { FS="\\\|&\\\|" } 
+BEGIN { FS="\\|&\\|" } 
 # Prints valid logs
 {if ($3 == "OLFS") print "{\n" \
 "\x22time\x22:" "\x22" $1 "\x22,\n" \
