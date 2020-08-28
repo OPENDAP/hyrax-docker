@@ -58,8 +58,10 @@ jobs:
         - cd hyrax-snapshot
         - docker build --build-arg RELEASE_DATE=`date +%s` --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -t "opendap/besd:snapshot" besd
         - docker image ls -a
-        - if test "${TRAVIS_PULL_REQUEST}" = "false"; then &&
-            echo "Deploying to docker hub";  &&
+        - if test "${TRAVIS_PULL_REQUEST}" = "false"; then
+            echo "Deploying to docker hub";
+            echo "Deploying to docker hub"; 
+            echo "Deploying to docker hub";
             fi
         - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
         - docker push opendap/besd:snapshot
