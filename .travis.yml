@@ -36,6 +36,11 @@ env:
     #
     # DOCKER_PASSWORD for our DockerHub account
     - secure: "DvQvxpRtfC/EUZ8LjxjL7XvfRRHmt1eimmSbDCAObedkglvjyI0Cvv0njzHDnPLLLZQ2HgtDAzVwZ4OhcJxw0L2olv8/3n01dTwgisziC/bquQHUJHB735naHJUUHB+Id0+02TB9VSJUSeWmlV6wml1hPgk290sHUNQ3+zLxYz51/F6pw4dC4hNuEji0J8A+wDsx2GUGPZaRqiVqAFjKGcnbRTZF/uZ/NRk5AVsxVW+4CF6Jy/e+9WNkj7XlPtPMSS8HCz+20hbhKRJTqlul2pMQOhqWBClEE39kKEd3Mv5UxeCr6hunAEVyS4ig91XgZykSh4/BZ5Tj9aG7LsA0uE4mAhYmN0NrfG3dtfSFSVPF9LwENk2hrh1HSLjuYF1VZpW+sJqnYZmZ35yBY+WtbUd2IwHZ/eVjKk4JX4O2+W3B62GuldSxwYGpoE0wJjmucGSt2XGo7r1nC1Em1rcA9wbzUPjb4Q6/MVPsrX0o3NKUcCn2FoOCat92Ge7WwnIM7LaHm0/6j2uoXLzPd8VAyxLLq0vhyY/7cxQp+8/+j7fIU4K0yJYNq97OOXlcSdkWhNW3kmnE26mPmWUQht5icz0YFAHielPLn3GarZA2X5bYeZ4ffElaN+QFv/4Jy4qRHS0Caml3el2Xi3jqQcj6DFRVKHNdNyvm0JL7b58xfv0="
+    #
+    #
+    - isPR: type=pull_request
+
+
 
 install:
   - pip3 install awscli
@@ -46,8 +51,6 @@ stages:
     if:  branch = master
   - name: test
     if: branch = master
-  - name: deploy
-    if: branch = master AND NOT type = pull_request
 
 jobs:
   include:
@@ -56,6 +59,7 @@ jobs:
         - cd hyrax-snapshot
         - docker build --build-arg RELEASE_DATE=`date +%s` --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -t "opendap/besd:snapshot" besd
         - docker image ls -a
+        - echo $isPR
         - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
         - docker push opendap/besd:snapshot
         - aws configure list
@@ -121,7 +125,3 @@ jobs:
         - echo "Running Test Script"
         - ./regression_test_script
 
-    - stage: deploy
-      script:
-        - echo "Deploy!"
-        - docker image ls -a
