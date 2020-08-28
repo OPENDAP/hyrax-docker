@@ -46,6 +46,8 @@ stages:
     if:  branch = master
   - name: test
     if: branch = master
+  - name: deploy
+      if: branch = master AND NOT type = pull_request
 
 jobs:
   include:
@@ -118,3 +120,8 @@ jobs:
       script:
         - echo "Running Test Script"
         - ./regression_test_script
+
+    - stage: deploy
+      script:
+        - echo "Deploy!"
+        - docker image ls -a
