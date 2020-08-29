@@ -148,7 +148,12 @@ jobs:
 
 deploy:
   - provider: script
-    script: echo "<<<<<<<<<<<<<<<< Deploying $IMAGE_TAG >>>>>>>>>>>>>>>>>"
+    script:
+      - echo "<<<<<<<<<<<<<<<< Deploying $IMAGE_TAG >>>>>>>>>>>>>>>>>"
+      - echo "Deploying $IMAGE_TAG to Docker Hub";
+      - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin;
+      - docker push $IMAGE_TAG;
+      - echo "Docker Hub deployment complete.";
     on:
       branch: master
       condition: ${TRAVIS_PULL_REQUEST} = "false"
