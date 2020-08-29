@@ -148,7 +148,7 @@ jobs:
 
 deploy:
   - provider: script
-    script: echo "<Deploying $IMAGE"
+    script: echo "<<<<<<<<<<<<<<<< Deploying $IMAGE_TAG >>>>>>>>>>>>>>>>>"
     on:
       branch: master
       condition: ${TRAVIS_PULL_REQUEST} = "false"
