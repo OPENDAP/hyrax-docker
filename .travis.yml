@@ -50,6 +50,8 @@ stages:
     if:  branch = master
   - name: test
     if: branch = master
+  - name: deploy
+    if: branch = master
 
 jobs:
   include:
@@ -62,7 +64,7 @@ jobs:
         #- echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
         #- docker push opendap/besd:snapshot
         - if test "${TRAVIS_PULL_REQUEST}" = "false"; then
-            echo "Deploying opendap/besd:snapshot to Docker Hub";
+            echo "Deploying $IMAGE_TAG to Docker Hub";
             echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin;
             docker push $IMAGE_TAG;
             echo "Docker Hub deployment complete.";
@@ -82,13 +84,10 @@ jobs:
             echo "AWS S3 deployment complete.";
             fi
 
-        - if test "${TRAVIS_PULL_REQUEST}" = "false"; then
-            fi
-
-
 
     - stage: build
       script:
+        - export IMAGE_TAG=opendap/olfs:snapshot
         - cd hyrax-snapshot
         - docker build --build-arg RELEASE_DATE=`date +%s` --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -t "opendap/olfs:snapshot" olfs
         - docker image ls -a
@@ -102,6 +101,7 @@ jobs:
 
     - stage: build
       script:
+        - export IMAGE_TAG=opendap/hyrax:snapshot
         - cd hyrax-snapshot
         - docker build --build-arg RELEASE_DATE=`date +%s` --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -t "opendap/hyrax:snapshot" hyrax
         - docker image ls -a
@@ -114,6 +114,7 @@ jobs:
 
     - stage: build
       script:
+        - export IMAGE_TAG=opendap/hyrax_ncwms:snapshot
         - cd hyrax-snapshot
         - docker build --build-arg RELEASE_DATE=`date +%s` --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -t "opendap/hyrax_ncwms:snapshot" hyrax
         - docker image ls -a
@@ -127,6 +128,7 @@ jobs:
 
     - stage: build
       script:
+        - export IMAGE_TAG=hyrax:ngap-snapshot
         - cd hyrax-snapshot
         - docker build --build-arg RELEASE_DATE=`date +%s` --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -t "opendap/hyrax:ngap-snapshot" ngap
         - docker image ls -a
@@ -143,4 +145,10 @@ jobs:
         - echo "Running Test Script"
         - ./regression_test_script
 
-script:
+deploy:
+  - provider: script
+      skip_cleanup: true
+      script: echo "<<<<<<<<< Deploying $IMAGE >>>>>>>>>>>"
+      on:
+        branch: master
+        condition: ${TRAVIS_PULL_REQUEST} = "false"
