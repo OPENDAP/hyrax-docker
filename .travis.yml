@@ -64,26 +64,26 @@ jobs:
         - docker image ls -a
         #- echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
         #- docker push opendap/besd:snapshot
-        - if test "${TRAVIS_PULL_REQUEST}" = "false"; then
-            echo "Deploying $IMAGE_TAG to Docker Hub";
-            echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin;
-            docker push $IMAGE_TAG;
-            echo "Docker Hub deployment complete.";
-            fi
+        #- if test "${TRAVIS_PULL_REQUEST}" = "false"; then
+        #    echo "Deploying $IMAGE_TAG to Docker Hub";
+        #    echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin;
+        #    docker push $IMAGE_TAG;
+        #    echo "Docker Hub deployment complete.";
+        #    fi
         #- aws configure list
         #- DOCKER_LOGIN=`aws ecr get-login --region us-east-1 | sed "s/-e none //g"`
         #- $DOCKER_LOGIN
         #- docker tag opendap/besd:snapshot 747931985039.dkr.ecr.us-east-1.amazonaws.com/opendap/besd:snapshot
         #- docker push 747931985039.dkr.ecr.us-east-1.amazonaws.com/opendap/besd:snapshot
-        - if test "${TRAVIS_PULL_REQUEST}" = "false"; then
-            echo "Deploying $IMAGE_TAG to AWS S3";
-            aws configure list;
-            DOCKER_LOGIN=`aws ecr get-login --region us-east-1 | sed "s/-e none //g"`;
-            $DOCKER_LOGIN;
-            docker tag $IMAGE_TAG 747931985039.dkr.ecr.us-east-1.amazonaws.com/$IMAGE_TAG;
-            docker push 747931985039.dkr.ecr.us-east-1.amazonaws.com/$IMAGE_TAG;
-            echo "AWS S3 deployment complete.";
-            fi
+        #- if test "${TRAVIS_PULL_REQUEST}" = "false"; then
+        #    echo "Deploying $IMAGE_TAG to AWS S3";
+        #    aws configure list;
+        #    DOCKER_LOGIN=`aws ecr get-login --region us-east-1 | sed "s/-e none //g"`;
+        #    $DOCKER_LOGIN;
+        #    docker tag $IMAGE_TAG 747931985039.dkr.ecr.us-east-1.amazonaws.com/$IMAGE_TAG;
+        #    docker push 747931985039.dkr.ecr.us-east-1.amazonaws.com/$IMAGE_TAG;
+        #    echo "AWS S3 deployment complete.";
+        #    fi
 
 
     - stage: build
@@ -92,13 +92,13 @@ jobs:
         - cd hyrax-snapshot
         - docker build --build-arg RELEASE_DATE=`date +%s` --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -t "opendap/olfs:snapshot" olfs
         - docker image ls -a
-        - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
-        - docker push opendap/olfs:snapshot
-        - aws configure list
-        - DOCKER_LOGIN=`aws ecr get-login --region us-east-1 | sed "s/-e none //g"`
-        - $DOCKER_LOGIN
-        - docker tag opendap/olfs:snapshot 747931985039.dkr.ecr.us-east-1.amazonaws.com/opendap/olfs:snapshot
-        - docker push 747931985039.dkr.ecr.us-east-1.amazonaws.com/opendap/olfs:snapshot
+        #- echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+        #- docker push opendap/olfs:snapshot
+        #- aws configure list
+        #- DOCKER_LOGIN=`aws ecr get-login --region us-east-1 | sed "s/-e none //g"`
+        #- $DOCKER_LOGIN
+        #- docker tag opendap/olfs:snapshot 747931985039.dkr.ecr.us-east-1.amazonaws.com/opendap/olfs:snapshot
+        #- docker push 747931985039.dkr.ecr.us-east-1.amazonaws.com/opendap/olfs:snapshot
 
     - stage: build
       script:
@@ -106,12 +106,12 @@ jobs:
         - cd hyrax-snapshot
         - docker build --build-arg RELEASE_DATE=`date +%s` --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -t "opendap/hyrax:snapshot" hyrax
         - docker image ls -a
-        - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
-        - docker push opendap/hyrax:snapshot
-        - aws configure list
-        - DOCKER_LOGIN=`aws ecr get-login --region us-east-1 | sed "s/-e none //g"`
-        - $DOCKER_LOGIN
-        - docker tag opendap/hyrax:snapshot 747931985039.dkr.ecr.us-east-1.amazonaws.com/opendap/hyrax:snapshot
+        #- echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+        #- docker push opendap/hyrax:snapshot
+        #- aws configure list
+        #- DOCKER_LOGIN=`aws ecr get-login --region us-east-1 | sed "s/-e none //g"`
+        #- $DOCKER_LOGIN
+        #- docker tag opendap/hyrax:snapshot 747931985039.dkr.ecr.us-east-1.amazonaws.com/opendap/hyrax:snapshot
 
     - stage: build
       script:
@@ -119,13 +119,13 @@ jobs:
         - cd hyrax-snapshot
         - docker build --build-arg RELEASE_DATE=`date +%s` --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -t "opendap/hyrax_ncwms:snapshot" hyrax
         - docker image ls -a
-        - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
-        - docker push opendap/hyrax_ncwms:snapshot
-        - aws configure list
-        - DOCKER_LOGIN=`aws ecr get-login --region us-east-1 | sed "s/-e none //g"`
-        - $DOCKER_LOGIN
-        - docker tag opendap/hyrax_ncwms:snapshot 747931985039.dkr.ecr.us-east-1.amazonaws.com/opendap/hyrax_ncwms:snapshot
-        - docker push 747931985039.dkr.ecr.us-east-1.amazonaws.com/opendap/hyrax_ncwms:snapshot
+        #- echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+        #- docker push opendap/hyrax_ncwms:snapshot
+        #- aws configure list
+        #- DOCKER_LOGIN=`aws ecr get-login --region us-east-1 | sed "s/-e none //g"`
+        #- $DOCKER_LOGIN
+        #- docker tag opendap/hyrax_ncwms:snapshot 747931985039.dkr.ecr.us-east-1.amazonaws.com/opendap/hyrax_ncwms:snapshot
+        #- docker push 747931985039.dkr.ecr.us-east-1.amazonaws.com/opendap/hyrax_ncwms:snapshot
 
     - stage: build
       script:
@@ -133,13 +133,13 @@ jobs:
         - cd hyrax-snapshot
         - docker build --build-arg RELEASE_DATE=`date +%s` --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -t "opendap/hyrax:ngap-snapshot" ngap
         - docker image ls -a
-        - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
-        - docker push opendap/hyrax:ngap-snapshot
-        - aws configure list
-        - DOCKER_LOGIN=`aws ecr get-login --region us-east-1 | sed "s/-e none //g"`
-        - $DOCKER_LOGIN
-        - docker tag opendap/hyrax:ngap-snapshot 747931985039.dkr.ecr.us-east-1.amazonaws.com/opendap/hyrax:ngap-snapshot
-        - docker push 747931985039.dkr.ecr.us-east-1.amazonaws.com/opendap/hyrax:ngap-snapshot
+        #- echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+        #- docker push opendap/hyrax:ngap-snapshot
+        #- aws configure list
+        #- DOCKER_LOGIN=`aws ecr get-login --region us-east-1 | sed "s/-e none //g"`
+        #- $DOCKER_LOGIN
+        #- docker tag opendap/hyrax:ngap-snapshot 747931985039.dkr.ecr.us-east-1.amazonaws.com/opendap/hyrax:ngap-snapshot
+        #- docker push 747931985039.dkr.ecr.us-east-1.amazonaws.com/opendap/hyrax:ngap-snapshot
 
     - stage: test
       script:
@@ -153,6 +153,13 @@ deploy:
         echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin;
         docker push $IMAGE_TAG;
         echo "Docker Hub deployment complete.";
+        echo "Deploying $IMAGE_TAG to AWS S3";
+        aws configure list;
+        DOCKER_LOGIN=`aws ecr get-login --region us-east-1 | sed "s/-e none //g"`;
+        $DOCKER_LOGIN;
+        docker tag $IMAGE_TAG 747931985039.dkr.ecr.us-east-1.amazonaws.com/$IMAGE_TAG;
+        docker push 747931985039.dkr.ecr.us-east-1.amazonaws.com/$IMAGE_TAG;
+        echo "AWS S3 deployment complete.";
     on:
       branch: master
       condition: ${TRAVIS_PULL_REQUEST} = "false"
