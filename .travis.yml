@@ -1,3 +1,4 @@
+# paste config here
 
 # Initial Travic-CI control file. 6.11.15 jhrg
 # Added sonar scan 3.12.19 jhrg 
@@ -147,8 +148,7 @@ jobs:
 
 deploy:
   - provider: script
-      skip_cleanup: true
-      script: echo "<<<<<<<<< Deploying $IMAGE >>>>>>>>>>>"
-      on:
-        branch: master
-        condition: ${TRAVIS_PULL_REQUEST} = "false"
+    script: echo "<Deploying $IMAGE"
+    on:
+      branch: master
+      condition: ${TRAVIS_PULL_REQUEST} = "false"
