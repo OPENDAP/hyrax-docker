@@ -146,6 +146,17 @@ jobs:
         - echo "Running Test Script"
         - ./regression_test_script
 
+before_deploy:
+  # Get creds for pushing snapshots to w.o.o.
+  # - if  test "$BES_BUILD" = "srcdist" || test "$BES_BUILD" = "centos6" || test "$BES_BUILD" = "centos7" ;
+  #   then
+  #     openssl aes-256-cbc -K $encrypted_f3adba893add_key -iv $encrypted_f3adba893add_iv -in ./travis/woo_deploy_rsa_enc -out /tmp/woo_deploy_rsa -d;
+  #     eval "$(ssh-agent -s)";
+  #     chmod 600 /tmp/woo_deploy_rsa;
+  #     ssh-add /tmp/woo_deploy_rsa;
+  #   fi
+  - export DOCKER_LOGIN=`aws ecr get-login --region us-east-1 | sed "s/-e none //g"`;
+
 deploy:
   - provider: script
     script:
@@ -155,7 +166,7 @@ deploy:
         echo "Docker Hub deployment complete.";
         echo "Deploying $IMAGE_TAG to AWS S3";
         aws configure list;
-        DOCKER_LOGIN=`aws ecr get-login --region us-east-1 | sed "s/-e none //g"`;
+        #DOCKER_LOGIN=`aws ecr get-login --region us-east-1 | sed "s/-e none //g"`;
         #$DOCKER_LOGIN;
         #docker tag $IMAGE_TAG 747931985039.dkr.ecr.us-east-1.amazonaws.com/$IMAGE_TAG;
         #docker push 747931985039.dkr.ecr.us-east-1.amazonaws.com/$IMAGE_TAG;
