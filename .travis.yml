@@ -159,8 +159,6 @@ deploy:
         echo "Docker Hub deployment complete.";
         echo "Deploying $IMAGE_TAG to AWS S3";
         aws configure list;
-        #DOCKER_LOGIN=`aws ecr get-login --region us-east-1 | sed "s/-e none //g"`;
-        #$DOCKER_LOGIN;
         docker tag $IMAGE_TAG 747931985039.dkr.ecr.us-east-1.amazonaws.com/$IMAGE_TAG;
         docker push 747931985039.dkr.ecr.us-east-1.amazonaws.com/$IMAGE_TAG;
         echo "AWS S3 deployment complete.";
