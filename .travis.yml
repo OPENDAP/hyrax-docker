@@ -90,7 +90,7 @@ jobs:
       script:
         - export IMAGE_TAG=opendap/olfs:snapshot
         - cd hyrax-snapshot
-        - docker build --build-arg RELEASE_DATE=`date +%s` --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -t "opendap/olfs:snapshot" olfs
+        - docker build --build-arg RELEASE_DATE=`date +%s` --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -t "$IMAGE_TAG" olfs
         - docker image ls -a
         #- echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
         #- docker push opendap/olfs:snapshot
@@ -104,7 +104,7 @@ jobs:
       script:
         - export IMAGE_TAG=opendap/hyrax:snapshot
         - cd hyrax-snapshot
-        - docker build --build-arg RELEASE_DATE=`date +%s` --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -t "opendap/hyrax:snapshot" hyrax
+        - docker build --build-arg RELEASE_DATE=`date +%s` --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -t "$IMAGE_TAG" hyrax
         - docker image ls -a
         #- echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
         #- docker push opendap/hyrax:snapshot
@@ -117,7 +117,7 @@ jobs:
       script:
         - export IMAGE_TAG=opendap/hyrax_ncwms:snapshot
         - cd hyrax-snapshot
-        - docker build --build-arg RELEASE_DATE=`date +%s` --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -t "opendap/hyrax_ncwms:snapshot" hyrax
+        - docker build --build-arg RELEASE_DATE=`date +%s` --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -t "$IMAGE_TAG" hyrax
         - docker image ls -a
         #- echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
         #- docker push opendap/hyrax_ncwms:snapshot
@@ -129,9 +129,9 @@ jobs:
 
     - stage: build
       script:
-        - export IMAGE_TAG=hyrax:ngap-snapshot
+        - export IMAGE_TAG=opendap/hyrax:ngap-snapshot
         - cd hyrax-snapshot
-        - docker build --build-arg RELEASE_DATE=`date +%s` --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -t "opendap/hyrax:ngap-snapshot" ngap
+        - docker build --build-arg RELEASE_DATE=`date +%s` --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -t "$IMAGE_TAG" ngap
         - docker image ls -a
         #- echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
         #- docker push opendap/hyrax:ngap-snapshot
@@ -157,11 +157,13 @@ deploy:
         echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin;
         docker push $IMAGE_TAG;
         echo "Docker Hub deployment complete.";
-        echo "Deploying $IMAGE_TAG to AWS S3";
+        echo "Deploying $IMAGE_TAG to AWS ECR";
         aws configure list;
         docker tag $IMAGE_TAG 747931985039.dkr.ecr.us-east-1.amazonaws.com/$IMAGE_TAG;
         docker push 747931985039.dkr.ecr.us-east-1.amazonaws.com/$IMAGE_TAG;
-        echo "AWS S3 deployment complete.";
+        echo "AWS ECR deployment complete.";
     on:
       branch: master
       condition: ${TRAVIS_PULL_REQUEST} = "false"
+
+
