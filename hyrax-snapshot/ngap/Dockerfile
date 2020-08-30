@@ -242,7 +242,8 @@ RUN set -e \
     && echo "SUCCESS: hyrax_regression_tests ready!"
 ################################################################
 
-
+COPY beslog2json.awk /
+RUN  set -e && chmod +x beslog2json.awk
 COPY entrypoint.sh /
 RUN  set -e && chmod +x /entrypoint.sh
 ENTRYPOINT [ "/entrypoint.sh" ]
