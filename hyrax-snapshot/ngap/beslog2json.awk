@@ -11,7 +11,7 @@ BEGIN { FS="\\|&\\|" }
 "\x22user_agent\x22:" "\x22" $5 "\x22," \
 "\x22session_id\x22:" "\x22" $6 "\x22," \
 "\x22user_id\x22:" "\x22" $7 "\x22," \
-"\x22startTime\x22:" "\x22" $8 "\x22," \
+"\x22start_time\x22:" "\x22" $8 "\x22," \
 "\x22" "duration\x22:" "\x22" $9 "\x22," \
 "\x22http_verb\x22:" "\x22" $10 "\x22," \
 "\x22url_path\x22:" "\x22" $11 "\x22," \
