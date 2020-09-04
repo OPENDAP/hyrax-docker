@@ -20,7 +20,7 @@ BEGIN {
     # The time that the log message was written.
     log_fields[1]="time";
 
-    # The PID of the beslistner that wrote the log entry.
+    # The PID of the beslistener that wrote the log entry.
     log_fields[2]="pid";
 
     # Field 3 is a field that indicates the following fields orginated
@@ -56,7 +56,7 @@ BEGIN {
 }
 {
     if(debug=="true"){
-        print "------------------------------------------------"
+        print "------------------------------------------------";
         print $0;
     }
 
