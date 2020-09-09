@@ -65,7 +65,7 @@ BEGIN {
     log_fields[14]="bes_request";
 
     # The DAP protocl
-    log_fields[15]="protocol";
+    log_fields[15]="dap_version";
 
     # The local file path to the resource.
     log_fields[16]="local_path";
@@ -90,7 +90,7 @@ BEGIN {
 {
     # First, escape all of the double quotes in the values of the log fields.
     gsub(/\"/, "\\\"");
-    
+
     if(debug=="true"){
         print "------------------------------------------------";
         print $0;
