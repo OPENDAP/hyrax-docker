@@ -55,6 +55,8 @@ BEGIN {
 
 }
 {
+    # First, escape all of the double quotes in the input.
+    gsub(/\"/, "\\\"");
     if(debug=="true"){
         print "------------------------------------------------";
         print $0;
@@ -72,8 +74,10 @@ BEGIN {
     }
     else {
         for(i=1; i<=NF ; i++){
-            if(i>1)
+            if(i>1) {
                 printf(", %s",n);
+            }
+            msg
             printf("%s\"%s\": \"%s\"",indent,error_fields[i],$i);
         }
    }
