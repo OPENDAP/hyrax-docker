@@ -212,11 +212,11 @@ RUN set -e \
     && mv /tomcat7-server.xml ${CATALINA_HOME}/conf/server.xml \
     && chown -R tomcat:tomcat ${CATALINA_HOME}/conf/server.xml
 
-# Install our modified server.xml so that the server compresses responses.
+# Install our modified tomcat.conf so that the server use the memory.
 COPY tomcat.conf /
 RUN set -e \
-    && mv /tomcat7-server.xml ${CATALINA_HOME}/conf/server.xml \
-    && chown -R tomcat:tomcat ${CATALINA_HOME}/conf/server.xml
+    && mv /tomcat.conf /etc/tomcat/tomcat.conf \
+    && chown -R tomcat:tomcat /etc/tomcat/tomcat.conf
 
 ################################################################
 
