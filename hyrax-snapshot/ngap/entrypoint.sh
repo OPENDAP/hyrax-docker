@@ -173,7 +173,7 @@ fi
 
 # Start the BES daemon process
 # /usr/bin/besdaemon -i /usr -c /etc/bes/bes.conf -r /var/run/bes.pid
-/usr/bin/besctl start;
+/usr/bin/besctl start -d "/var/log/bes/bes-debug.log,euc,rr" ;
 status=$?
 if [ $status -ne 0 ]; then
     echo "Failed to start BES: $status" >&2
