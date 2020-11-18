@@ -152,7 +152,7 @@ BEGIN {
     pid=$2;
     log_name=$3;
     printf("{%s", n);
-    printf("%s\"time\": \"%s\", %s", indent, ltime, n);
+    printf("%s\"time\": %s, %s", indent, ltime, n);
     printf("%s\"pid\": \"%s\", %s", indent, pid, n);
     printf("%s\"type\": \"%s\"", indent, log_name);
 
@@ -160,8 +160,13 @@ BEGIN {
         for(i=4; i<=NF  ; i++){
             if(i!=4 && i!=14 && i!=18){
                 printf(", %s",n);
-                printf("%s\"%s\": \"%s\"",indent,request_log_fields[i],$i);
-            }
+                if(i==9 || i==10){
+                    printf("%s\"%s\": %s",indent,request_log_fields[i],$i);
+                }
+                else {
+                    printf("%s\"%s\": \"%s\"",indent,request_log_fields[i],$i);
+                }
+             }
         }
     }
     else if(log_name=="info" || log_name=="error" || log_name=="verbose" ){
@@ -175,16 +180,16 @@ BEGIN {
         if(time_type=="start_us"){
             # 1601642669|&|2122|&|timing|&|start_us|&|1601642669945133|&|-|&|TIMER_NAME
             #      1         2      3        4             5             6      7
-            printf(", %s%s\"%s\": \"%s\"", n, indent, "start_time_us", $5);
+            printf(", %s%s\"%s\": %s", n, indent, "start_time_us", $5);
             printf(", %s%s\"%s\": \"%s\"", n, indent, "req_id", $6);
             printf(", %s%s\"%s\": \"%s\"", n, indent, "name:", $7);
         }
         else if(time_type=="elapsed_us"){
             #1601653546|&|7096|&|timing|&|elapsed_us|&|2169|&|start_us|&|1601653546269617|&|stop_us|&|1601653546271786|&|ReqId|&|TIMER_NAME
             #     1          2      3         4          5        6            7                8           9              10       11
-            printf(", %s%s\"%s\": \"%s\"", n, indent, "elapsed_time_us", $5);
-            printf(", %s%s\"%s\": \"%s\"", n, indent, "start_time_us", $7);
-            printf(", %s%s\"%s\": \"%s\"", n, indent, "stop_time_us", $9);
+            printf(", %s%s\"%s\": %s", n, indent, "elapsed_time_us", $5);
+            printf(", %s%s\"%s\": %s", n, indent, "start_time_us", $7);
+            printf(", %s%s\"%s\": %s", n, indent, "stop_time_us", $9);
             printf(", %s%s\"%s\": \"%s\"", n, indent, "req_id", $10);
             printf(", %s%s\"%s\": \"%s\"", n, indent,  "name:", $11);
 

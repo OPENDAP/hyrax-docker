@@ -54,7 +54,7 @@ function waitForHyrax() {
     while test -z "${done_flag}"
     do
         echo -n "."
-        curl -s -c cookies -b cookies -n ${netrc_file} -L ${end_point} > /dev/null
+        curl -s -c cookies -b cookies -n --netrc-file ${netrc_file} -L ${end_point} > /dev/null
         status=$?
         # echo "cURL status: ${status}";
         if [ ${status} -eq 0 ]
