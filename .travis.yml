@@ -57,7 +57,7 @@ stages:
 jobs:
   include:
     - stage: build
-      name:
+      name: "opendap/besd:snapshot"
       script:
         - export IMAGE_TAG=opendap/besd:snapshot
         - cd hyrax-snapshot
@@ -66,6 +66,7 @@ jobs:
 
 
     - stage: build
+      name: "opendap/olfs:snapshot"
       script:
         - export IMAGE_TAG=opendap/olfs:snapshot
         - cd hyrax-snapshot
@@ -73,6 +74,7 @@ jobs:
         - docker image ls -a
 
     - stage: build
+      name: "opendap/hyrax:snapshot"
       script:
         - export IMAGE_TAG=opendap/hyrax:snapshot
         - cd hyrax-snapshot
@@ -80,6 +82,7 @@ jobs:
         - docker image ls -a
 
     - stage: build
+      name: "opendap/hyrax_ncwms:snapshot"
       script:
         - export IMAGE_TAG=opendap/hyrax_ncwms:snapshot
         - cd hyrax-snapshot
@@ -87,6 +90,7 @@ jobs:
         - docker image ls -a
 
     - stage: build
+      name: "opendap/hyrax:ngap-snapshot"
       script:
         - export IMAGE_TAG=opendap/hyrax:ngap-snapshot
         - cd hyrax-snapshot
@@ -94,6 +98,7 @@ jobs:
         - docker image ls -a
 
     - stage: test
+      name: "Hyrax Regression Tests"
       script:
         - echo "Running Test Script"
         - ./regression_test_script
