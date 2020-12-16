@@ -164,8 +164,8 @@ RUN echo "unset AWS_SECRET_ACCESS_KEY" >> ~/.bashrc
 # retrieve and install the ncWMS web application
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 
-# This is ncWMS-2.2.2
-ENV NCWMS_WAR_URL=http://search.maven.org/remotecontent?filepath=uk/ac/rdg/resc/ncWMS/2.2.2/ncWMS-2.2.2.war
+# This is ncWMS-2.4.2
+ENV NCWMS_WAR_URL=http://search.maven.org/remotecontent?filepath=uk/ac/rdg/resc/ncWMS/2.4.2/ncWMS-2.4.2.war
 
 RUN set -e \
     && if [ $USE_NCWMS = "true" ]; then \
