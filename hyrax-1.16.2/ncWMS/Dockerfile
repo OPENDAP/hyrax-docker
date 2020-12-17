@@ -1,5 +1,5 @@
 ###
-# Dockerfile for ncWMS-2.2.2
+# Dockerfile for ncWMS-2.4.2
 ###
 
 
@@ -33,7 +33,7 @@ RUN echo "CATALINA_HOME: ${CATALINA_HOME}"
 ###
 # Grab and unzip ncWMS
 ###
-ENV NCWMS_WAR_URL=http://search.maven.org/remotecontent?filepath=uk/ac/rdg/resc/ncWMS/2.2.2/ncWMS-2.2.2.war
+ENV NCWMS_WAR_URL=https://github.com/Reading-eScience-Centre/ncwms/releases/download/ncwms-2.4.2/ncWMS2.war
 # or get from https://github.com/Reading-eScience-Centre/edal-java/releases
 
 ###############################################################
