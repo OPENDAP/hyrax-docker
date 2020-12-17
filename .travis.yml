@@ -86,7 +86,7 @@ jobs:
       script:
         - export IMAGE_TAG=opendap/hyrax_ncwms:snapshot
         - cd hyrax-snapshot
-        - docker build --build-arg RELEASE_DATE=`date +%s` --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -t "$IMAGE_TAG" hyrax
+        - docker build --build-arg RELEASE_DATE=`date +%s` --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY  --build-arg USE_NCWMS=true -t "$IMAGE_TAG" hyrax
         - docker image ls -a
 
     - stage: build
