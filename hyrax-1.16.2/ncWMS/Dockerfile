@@ -1,5 +1,5 @@
 ###
-# Dockerfile for ncWMS-2.4.2
+# Dockerfile for ncWMS-2.2.2
 ###
 
 
