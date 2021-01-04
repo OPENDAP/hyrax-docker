@@ -85,6 +85,8 @@ RUN set -e \
         automake \
         git \
         bc \
+        emacs \
+        vim \
     && yum -y update \
     && yum clean all 
 
