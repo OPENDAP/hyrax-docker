@@ -92,6 +92,7 @@ RUN echo "CATALINA_HOME: $CATALINA_HOME"
 ENV LIBDAP_RPM="s3://opendap.travis.build/libdap-snapshot.el7.x86_64.rpm"
 ENV BES_RPM="s3://opendap.travis.build/bes-snapshot.static.el7.x86_64.rpm"
 ENV OLFS_PACKAGE="s3://opendap.travis.build/olfs-snapshot-webapp.tgz"
+ENV ROBOTS_PACKAGE="s3://opendap.travis.build/robots-olfs-snapshot-webapp.tgz"
 ###############################################################
 
 
@@ -129,10 +130,20 @@ RUN set -e \
     && aws --region=us-east-1 s3 cp ${OLFS_PACKAGE}  ./olfs-snapshot-webapp.tgz\
     && tar -C /dev/shm -xzf olfs-snapshot-webapp.tgz \
     && ls -l /dev/shm/olfs-snapshot-webapp \
-    && echo "Unpacking warfile..." \
+    && echo "Unpacking olfs warfile..." \
     && unzip -o /dev/shm/olfs-snapshot-webapp/opendap.war -d ${CATALINA_HOME}/webapps/opendap/ \
-    && echo "Cleaning up." \
+    && echo "Cleaning up OLFS snapshot..." \
     && rm -rf /dev/shm/* olfs-snapshot-webapp.tgz*
+
+RUN set -e \
+    && echo "Retrieving and installing the latest dynamic robots.txt snapshot." \
+    && aws --region=us-east-1 s3 cp ${ROBOTS_PACKAGE}  ./robots-olfs-snapshot-webapp.tgz\
+    && tar -C /dev/shm -xzf robots-olfs-snapshot-webapp.tgz \
+    && ls -l /dev/shm/robots-olfs-snapshot-webapp \
+    && echo "Unpacking dynamic robots.txt warfile..." \
+    && unzip -o /dev/shm/robots-olfs-snapshot-webapp/ROOT.war -d ${CATALINA_HOME}/webapps/ROOT/ \
+    && echo "Cleaning up dynamic robots.txt snapshot..." \
+    && rm -rf /dev/shm/* robots-olfs-snapshot-webapp.tgz*
 
 # Fix ownership and access permissions
 RUN set -e \

@@ -95,6 +95,7 @@ RUN set -e \
 ENV LIBDAP_RPM="https://www.opendap.org/pub/binary/hyrax-${HYRAX_VERSION}/centos-7.x/libdap-${LIBDAP_VERSION}.el7.x86_64.rpm"
 ENV BES_RPM="https://www.opendap.org/pub/binary/hyrax-${HYRAX_VERSION}/centos-7.x/bes-${BES_VERSION}.static.el7.x86_64.rpm"
 ENV OLFS_WAR_URL="https://www.opendap.org/pub/olfs/olfs-${OLFS_VERSION}-webapp.tgz"
+ENV ROBOTS_WAR_URL="https://www.opendap.org/pub/olfs/robots-olfs-${OLFS_VERSION}-webapp.tgz"
 ###############################################################
 
 
@@ -137,14 +138,28 @@ RUN set -e \
     && echo "Retrieving And Installing OLFS-${OLFS_VERSION}" \
     && curl -sfSL ${OLFS_WAR_URL} > olfs-${OLFS_VERSION}.tgz \
     && curl -sfSL ${OLFS_WAR_URL}.sig > olfs-${OLFS_VERSION}.tgz.sig \
-    && echo "Verifying tarball..." \
+    && echo "Verifying OLFS-${OLFS_VERSION} tarball..." \
     && gpg --verify olfs-${OLFS_VERSION}.tgz.sig olfs-${OLFS_VERSION}.tgz \
-    && echo "Unpacking tarball..." \
+    && echo "Unpacking OLFS-${OLFS_VERSION} tarball..." \
     && tar -C /dev/shm -xzf olfs-${OLFS_VERSION}.tgz \
-    && echo "Unpacking warfile..." \
+    && echo "Unpacking OLFS-${OLFS_VERSION} warfile..." \
     && unzip -o /dev/shm/olfs-${OLFS_VERSION}-webapp/opendap.war -d ${CATALINA_HOME}/webapps/opendap/ \
-    && echo "Cleaning up." \
+    && echo "Cleaning up OLFS-${OLFS_VERSION} downloads." \
     && rm -rf /dev/shm/* olfs-${OLFS_VERSION}.tgz*
+
+# Retrieve, verify, and install the dynamic robots.txt ROOT web application
+RUN set -e \
+    && echo "Retrieving And Installing Dynamic Robots.txt webapp version ${OLFS_VERSION}" \
+    && curl -sfSL ${ROBOTS_WAR_URL} > robots-olfs-${OLFS_VERSION}.tgz \
+    && curl -sfSL ${ROBOTS_WAR_URL}.sig > robots-olfs-${OLFS_VERSION}.tgz.sig \
+    && echo "Verifying Dynamic Robots.txt tarball..." \
+    && gpg --verify robots-olfs-${OLFS_VERSION}.tgz.sig robots-olfs-${OLFS_VERSION}.tgz \
+    && echo "Unpacking Dynamic Robots.txt tarball..." \
+    && tar -C /dev/shm -xzf robots-olfs-${OLFS_VERSION}.tgz \
+    && echo "Unpacking Dynamic Robots.txt warfile..." \
+    && unzip -o /dev/shm/robots-olfs-${OLFS_VERSION}-webapp/ROOT.war -d ${CATALINA_HOME}/webapps/ROOT/ \
+    && echo "Cleaning up Dynamic Robots.txt downloads." \
+    && rm -rf /dev/shm/* robots-olfs-${OLFS_VERSION}.tgz*
 
 # Fix ownership and access permissions
 RUN set -e \
