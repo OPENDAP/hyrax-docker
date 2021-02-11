@@ -1,14 +1,14 @@
 # Hyrax docker
 
-## Current Version: <font style="font-size: 300%;">**Hyrax-1.16.2**</font>
+## Current Version: <font style="font-size: 300%;">**Hyrax-1.16.3**</font>
 
-**Hyrax-1.16.2** is composed of:
+**Hyrax-1.16.3** is composed of:
 
 |||
  | :---: | :---: |
- | **OLFS version 1.18.7** [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3762740.svg)](https://doi.org/10.5281/zenodo.3762740) |
-| **BES version 3.20.7** [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3762439.svg)](https://doi.org/10.5281/zenodo.3762439) |
-| **libdap4 version 3.20.6** [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3759849.svg)](https://doi.org/10.5281/zenodo.3759849) |
+ | **OLFS version 1.18.8** [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4401912.svg)](https://doi.org/10.5281/zenodo.4401912) |
+| **BES version 3.20.8** [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4399984.svg)](https://doi.org/10.5281/zenodo.4399984) |
+| **libdap4 version 3.20.7** [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4399722.svg)](https://doi.org/10.5281/zenodo.4399722) |
 
 ## <a name="contents"></a>Contents
 * [Overview](#overview)
@@ -133,7 +133,7 @@ started as the super user because only root can bind ports less than
 1024).
 
 ```
-sudo docker run -h hyrax -p 80:8080 --name=hyrax_container hyrax_image
+sudo docker run -d -h hyrax -p 80:8080 --name=hyrax_container hyrax_image
 ```
 
 To stop the container
