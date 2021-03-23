@@ -59,45 +59,57 @@ jobs:
     - stage: build
       name: "opendap/besd:snapshot"
       script:
-        - export IMAGE_TAG=opendap/besd:snapshot
+        - export SNAPSHOT_IMAGE_TAG=opendap/besd:snapshot
         - cd hyrax-snapshot
-        - docker build --build-arg RELEASE_DATE=`date +%s` --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -t "$IMAGE_TAG" besd
+        - export BUILD_VERSION_TAG="opendap/"`grep "bes-" snapshot.time | awk '{print $1;}' - | sed "s/-/:/"`
+        - echo "BUILD_VERSION_TAG ${BUILD_VERSION_TAG}"
+        - docker build --build-arg RELEASE_DATE=`date +%s` --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -t "${SNAPSHOT_IMAGE_TAG}" besd
+        - docker tag ${SNAPSHOT_IMAGE_TAG} ${BUILD_VERSION_TAG}
         - docker image ls -a
 
 
     - stage: build
       name: "opendap/olfs:snapshot"
       script:
-        - export IMAGE_TAG=opendap/olfs:snapshot
+        - export SNAPSHOT_IMAGE_TAG=opendap/olfs:snapshot
         - cd hyrax-snapshot
-        - export VERSION_TAG="opendap/"`grep "olfs-" snapshot.time | awk '{print $1;}' - | sed "s/-/:/"`
-        - echo "VERSION_TAG ${VERSION_TAG}"
-        - docker build --build-arg RELEASE_DATE=`date +%s` --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -t "${IMAGE_TAG}" olfs
-        - docker tag ${IMAGE_TAG} ${VERSION_TAG}
+        - export BUILD_VERSION_TAG="opendap/"`grep "olfs-" snapshot.time | awk '{print $1;}' - | sed "s/-/:/"`
+        - echo "BUILD_VERSION_TAG ${BUILD_VERSION_TAG}"
+        - docker build --build-arg RELEASE_DATE=`date +%s` --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -t "${SNAPSHOT_IMAGE_TAG}" olfs
+        - docker tag ${SNAPSHOT_IMAGE_TAG} ${BUILD_VERSION_TAG}
         - docker image ls -a
 
     - stage: build
       name: "opendap/hyrax:snapshot"
       script:
-        - export IMAGE_TAG=opendap/hyrax:snapshot
+        - export SNAPSHOT_IMAGE_TAG=opendap/hyrax:snapshot
         - cd hyrax-snapshot
-        - docker build --build-arg RELEASE_DATE=`date +%s` --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -t "$IMAGE_TAG" hyrax
+        - export BUILD_VERSION_TAG="opendap/"`grep "hyrax-" snapshot.time | awk '{print $1;}' - | sed "s/-/:/"`
+        - echo "BUILD_VERSION_TAG ${BUILD_VERSION_TAG}"
+        - docker build --build-arg RELEASE_DATE=`date +%s` --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -t "${SNAPSHOT_IMAGE_TAG}" hyrax
+        - docker tag ${SNAPSHOT_IMAGE_TAG} ${BUILD_VERSION_TAG}
         - docker image ls -a
 
     - stage: build
       name: "opendap/hyrax_ncwms:snapshot"
       script:
-        - export IMAGE_TAG=opendap/hyrax_ncwms:snapshot
+        - export SNAPSHOT_IMAGE_TAG=opendap/hyrax_ncwms:snapshot
         - cd hyrax-snapshot
-        - docker build --build-arg RELEASE_DATE=`date +%s` --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY  --build-arg USE_NCWMS=true -t "$IMAGE_TAG" hyrax
+        - export BUILD_VERSION_TAG="opendap/"`grep "hyrax-" snapshot.time | awk '{print $1;}' - | sed -e "s/hyrax-/hyrax_ncwms:/g"`
+        - echo "BUILD_VERSION_TAG ${BUILD_VERSION_TAG}"
+        - docker build --build-arg RELEASE_DATE=`date +%s` --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY  --build-arg USE_NCWMS=true -t "${SNAPSHOT_IMAGE_TAG}" hyrax
+        - docker tag ${SNAPSHOT_IMAGE_TAG} ${BUILD_VERSION_TAG}
         - docker image ls -a
 
     - stage: build
       name: "opendap/hyrax:ngap-snapshot"
       script:
-        - export IMAGE_TAG=opendap/hyrax:ngap-snapshot
+        - export SNAPSHOT_IMAGE_TAG=opendap/hyrax:ngap-snapshot
         - cd hyrax-snapshot
-        - docker build --build-arg RELEASE_DATE=`date +%s` --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -t "$IMAGE_TAG" ngap
+        - export BUILD_VERSION_TAG="opendap/"`grep "hyrax-" snapshot.time | awk '{print $1;}' - | sed -e "s/hyrax-/hyrax:ngap-/g"`
+        - echo "BUILD_VERSION_TAG ${BUILD_VERSION_TAG}"
+        - docker build --build-arg RELEASE_DATE=`date +%s` --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -t "${SNAPSHOT_IMAGE_TAG}" ngap
+        - docker tag ${SNAPSHOT_IMAGE_TAG} ${BUILD_VERSION_TAG}
         - docker image ls -a
 
     - stage: test
