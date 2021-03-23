@@ -70,10 +70,10 @@ jobs:
       script:
         - export IMAGE_TAG=opendap/olfs:snapshot
         - cd hyrax-snapshot
-        - docker build --build-arg RELEASE_DATE=`date +%s` --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -t "$IMAGE_TAG" olfs
         - export VERSION_TAG=`grep "olfs-" snapshot.time | awk '{print $1;}' -`
         - echo "VERSION_TAG ${VERSION_TAG}"
-        - docker build --build-arg RELEASE_DATE=`date +%s` --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -t "${VERSION_TAG}" olfs
+        - docker build --build-arg RELEASE_DATE=`date +%s` --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -t "${IMAGE_TAG}" olfs
+        - docker tag ${IMAGE_TAG} ${VERSION_TAG}
         - docker image ls -a
 
     - stage: build
