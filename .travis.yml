@@ -72,7 +72,8 @@ jobs:
         - cd hyrax-snapshot
         - docker build --build-arg RELEASE_DATE=`date +%s` --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -t "$IMAGE_TAG" olfs
         - export VERSION_TAG=`grep "olfs-" snapshot.time | awk '{print $4;}' -`
-        - docker build --build-arg RELEASE_DATE=`date +%s` --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -t "$VERSION_TAG" olfs
+        - echo "VERSION_TAG ${VERSION_TAG}"
+        - docker build --build-arg RELEASE_DATE=`date +%s` --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -t "${VERSION_TAG}" olfs
         - docker image ls -a
 
     - stage: build
