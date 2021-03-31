@@ -3,7 +3,7 @@
 # Initial Travic-CI control file. 6.11.15 jhrg
 # Added sonar scan 3.12.19 jhrg 
 
-dist: trusty
+dist: xenial
 
 language: python
 
@@ -16,7 +16,7 @@ services:
 branches:
   only:
     - master
-    - travis
+    - build-numbers
 
 notifications:
   email:
@@ -37,18 +37,23 @@ env:
     #
     # DOCKER_PASSWORD for our DockerHub account
     - secure: "DvQvxpRtfC/EUZ8LjxjL7XvfRRHmt1eimmSbDCAObedkglvjyI0Cvv0njzHDnPLLLZQ2HgtDAzVwZ4OhcJxw0L2olv8/3n01dTwgisziC/bquQHUJHB735naHJUUHB+Id0+02TB9VSJUSeWmlV6wml1hPgk290sHUNQ3+zLxYz51/F6pw4dC4hNuEji0J8A+wDsx2GUGPZaRqiVqAFjKGcnbRTZF/uZ/NRk5AVsxVW+4CF6Jy/e+9WNkj7XlPtPMSS8HCz+20hbhKRJTqlul2pMQOhqWBClEE39kKEd3Mv5UxeCr6hunAEVyS4ig91XgZykSh4/BZ5Tj9aG7LsA0uE4mAhYmN0NrfG3dtfSFSVPF9LwENk2hrh1HSLjuYF1VZpW+sJqnYZmZ35yBY+WtbUd2IwHZ/eVjKk4JX4O2+W3B62GuldSxwYGpoE0wJjmucGSt2XGo7r1nC1Em1rcA9wbzUPjb4Q6/MVPsrX0o3NKUcCn2FoOCat92Ge7WwnIM7LaHm0/6j2uoXLzPd8VAyxLLq0vhyY/7cxQp+8/+j7fIU4K0yJYNq97OOXlcSdkWhNW3kmnE26mPmWUQht5icz0YFAHielPLn3GarZA2X5bYeZ4ffElaN+QFv/4Jy4qRHS0Caml3el2Xi3jqQcj6DFRVKHNdNyvm0JL7b58xfv0="
-    #
-    #
-
-
+    LIBDAP_VERSION=$(grep "libdap4-" snapshot.time | awk '{print $1;}' - | sed "s/libdap4-//g")
+    BES_VERSION=$(grep "bes-" snapshot.time | awk '{print $1;}' - | sed "s/bes-//g")
+    OLFS_VERSION=$(grep "olfs-" snapshot.time | awk '{print $1;}' - | sed "s/olfs-//g")
+    HYRAX_VERSION=$(grep "hyrax-" snapshot.time | awk '{print $1;}' - | sed "s/hyrx-//g")
+    RELEASE_DATE=`date +%s`
 
 install:
   - pip3 install awscli
-  # pip3 install --upgrade -r .travis.requirements
+  - echo "print env:"
+  - printenv
+
 
 stages:
   - name: build
-    if:  branch = master
+    if:  branch = master OR branch = build-numbers
+  - name: old
+    if: branch = master
   - name: test
     if: branch = master
   - name: deploy
@@ -57,17 +62,21 @@ stages:
 jobs:
   include:
     - stage: build
-      name: "opendap/besd:snapshot"
+      name: "opendap/besd:${BES_VERSION}"
       script:
         - export SNAPSHOT_IMAGE_TAG=opendap/besd:snapshot
-        - cd hyrax-snapshot
-        - export BUILD_VERSION_TAG="opendap/"`grep "bes-" snapshot.time | awk '{print $1;}' - | sed "s/-/:/"`
-        - echo "BUILD_VERSION_TAG ${BUILD_VERSION_TAG}"
-        - docker build --build-arg RELEASE_DATE=`date +%s` --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -t "${SNAPSHOT_IMAGE_TAG}" besd
+        - export BUILD_VERSION_TAG=opendap/besd:${BES_VERSION}
+        - cd hyrax-builds
+        - docker build --build-arg RELEASE_DATE
+                        --build-arg AWS_ACCESS_KEY_ID
+                        --build-arg AWS_SECRET_ACCESS_KEY
+                        --build-arg LIBDAP_VERSION
+                        --build-arg BES_VERSION
+                        -t "${SNAPSHOT_IMAGE_TAG}" besd
         - docker tag ${SNAPSHOT_IMAGE_TAG} ${BUILD_VERSION_TAG}
         - docker image ls -a
 
-    - stage: build
+    - stage: old
       name: "opendap/olfs:snapshot"
       script:
         - export SNAPSHOT_IMAGE_TAG=opendap/olfs:snapshot
@@ -78,7 +87,7 @@ jobs:
         - docker tag ${SNAPSHOT_IMAGE_TAG} ${BUILD_VERSION_TAG}
         - docker image ls -a
 
-    - stage: build
+    - stage: old
       name: "opendap/hyrax:snapshot"
       script:
         - export SNAPSHOT_IMAGE_TAG=opendap/hyrax:snapshot
@@ -89,7 +98,7 @@ jobs:
         - docker tag ${SNAPSHOT_IMAGE_TAG} ${BUILD_VERSION_TAG}
         - docker image ls -a
 
-    - stage: build
+    - stage: old
       name: "opendap/hyrax_ncwms:snapshot"
       script:
         - export SNAPSHOT_IMAGE_TAG=opendap/hyrax_ncwms:snapshot
@@ -100,7 +109,7 @@ jobs:
         - docker tag ${SNAPSHOT_IMAGE_TAG} ${BUILD_VERSION_TAG}
         - docker image ls -a
 
-    - stage: build
+    - stage: old
       name: "opendap/hyrax:ngap-snapshot"
       script:
         - export SNAPSHOT_IMAGE_TAG=opendap/hyrax:ngap-snapshot
@@ -111,7 +120,7 @@ jobs:
         - docker tag ${SNAPSHOT_IMAGE_TAG} ${BUILD_VERSION_TAG}
         - docker image ls -a
 
-    - stage: test
+    - stage: old
       name: "Hyrax Regression Tests"
       script:
         - echo "Running Test Script"
