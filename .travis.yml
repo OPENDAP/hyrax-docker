@@ -7,8 +7,8 @@ dist: xenial
 
 language: python
 
-python:
-  - 3.4
+# python:
+#  - 3.4
 
 services:
   - docker
@@ -39,10 +39,10 @@ before_install:
   - pip3 install awscli
 
 install:
-  - export LIBDAP_VERSION=$(grep "libdap4-" snapshot.time | awk '{print $1;}' - | sed "s/libdap4-//g")
-  - export BES_VERSION=$(grep "bes-" snapshot.time | awk '{print $1;}' - | sed "s/bes-//g")
-  - export OLFS_VERSION=$(grep "olfs-" snapshot.time | awk '{print $1;}' - | sed "s/olfs-//g")
-  - export HYRAX_VERSION=$(grep "hyrax-" snapshot.time | awk '{print $1;}' - | sed "s/hyrx-//g")
+  - export LIBDAP_VERSION=`grep "libdap4-" snapshot.time | awk '{print $1;}' - | sed "s/libdap4-//g"`
+  - export BES_VERSION=`grep "bes-" snapshot.time | awk '{print $1;}' - | sed "s/bes-//g"`
+  - export OLFS_VERSION=`grep "olfs-" snapshot.time | awk '{print $1;}' - | sed "s/olfs-//g"`
+  - export HYRAX_VERSION=`grep "hyrax-" snapshot.time | awk '{print $1;}' - | sed "s/hyrx-//g"`
   - echo "print env:"
   - printenv
 
