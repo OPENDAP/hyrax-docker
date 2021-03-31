@@ -130,7 +130,7 @@ before_deploy:
 
 deploy:
   - provider: script
-    script: bash deploy_to_docker_hub.sh
+    script: bash ./deploy_to_docker_hub.sh
     on:
       branch: build-numbers
       condition: ${TRAVIS_PULL_REQUEST} = "false"
