@@ -40,7 +40,6 @@ env:
     - OLFS_VERSION=$(grep "olfs-" ${VERSION_FILE} | awk '{print $1;}' - | sed "s/olfs-//g")
     - HYRAX_VERSION=$(grep "hyrax-" ${VERSION_FILE} | awk '{print $1;}' - | sed "s/hyrx-//g")
 
-
 before_install:
   - pip3 install awscli
 
@@ -133,7 +132,7 @@ deploy:
   - provider: script
     script: bash deploy_to_docker_hub.sh
     on:
-      branch: master OR build-numbers
+      branch: build-numbers
       condition: ${TRAVIS_PULL_REQUEST} = "false"
 
 
