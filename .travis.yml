@@ -33,17 +33,18 @@ env:
     - secure: "SeClVCFBXKAhynv5wD/6OdqLwtK0d5kc0XawlwinPBT2Hg5Y1ZlQKIAZsOwOqXTUcAQtVjnHYLru09ataLuDRIdtcZeDv7TKkE6ZS9nFb4bMM8j6XwxFo2lM4pICks7tY5clClRTvTzdxbkPbmfxHnInHnZmB8md/gOIi3KJseRVS9aignr+1qxyvuyAPha9Rxeiz+iOo4kWKuK3IGiSKp5qIJczoz631f3lsZQJ14Eyiz8vcCL0mJxQ3RbBfl9pNsYmM9XZSCSp9yRNCCDkLGUZNIRNjamy5UFxkhb2meGWOCTAgD5kvRl5LjIv7i2//r46tBN9OMZ8Agz4FvVM9OzWMGCGoimQ6omTp+/+bn+gBhssVoZi4Z9EgYdl2oWPCk8XihmCpFcY/wWrxuYWjQ9u5eXOEVrLp3qNMhmq1X3Z/RWev40b1hWy5ofqjdKfQHsC6j/HHGzxey+VRR9PZHke9c38uOLqb/4Wkaa5Nm3W4cFaeAzyB26GjTe2FiaKZKmYyHz75G52TEoFAOoe2UShp/JDG/HAefr2XJuA1vxHfn/xURMxvoHJ3XEfOORE1S+mP3iREl3Gl1hlp9Dpa6UTWkO6WWdMkBhhX104zyHtTtJu1EebAgoUzoyTe14gi8OgD6FECGyUK4f4c9PlfKabu0y72Nw29t5ef4OKffc="
     # DOCKER_PASSWORD for our DockerHub account
     - secure: "DvQvxpRtfC/EUZ8LjxjL7XvfRRHmt1eimmSbDCAObedkglvjyI0Cvv0njzHDnPLLLZQ2HgtDAzVwZ4OhcJxw0L2olv8/3n01dTwgisziC/bquQHUJHB735naHJUUHB+Id0+02TB9VSJUSeWmlV6wml1hPgk290sHUNQ3+zLxYz51/F6pw4dC4hNuEji0J8A+wDsx2GUGPZaRqiVqAFjKGcnbRTZF/uZ/NRk5AVsxVW+4CF6Jy/e+9WNkj7XlPtPMSS8HCz+20hbhKRJTqlul2pMQOhqWBClEE39kKEd3Mv5UxeCr6hunAEVyS4ig91XgZykSh4/BZ5Tj9aG7LsA0uE4mAhYmN0NrfG3dtfSFSVPF9LwENk2hrh1HSLjuYF1VZpW+sJqnYZmZ35yBY+WtbUd2IwHZ/eVjKk4JX4O2+W3B62GuldSxwYGpoE0wJjmucGSt2XGo7r1nC1Em1rcA9wbzUPjb4Q6/MVPsrX0o3NKUcCn2FoOCat92Ge7WwnIM7LaHm0/6j2uoXLzPd8VAyxLLq0vhyY/7cxQp+8/+j7fIU4K0yJYNq97OOXlcSdkWhNW3kmnE26mPmWUQht5icz0YFAHielPLn3GarZA2X5bYeZ4ffElaN+QFv/4Jy4qRHS0Caml3el2Xi3jqQcj6DFRVKHNdNyvm0JL7b58xfv0="
-    - LIBDAP_VERSION=$(grep "libdap4-" snapshot.time | awk '{print $1;}' - | sed "s/libdap4-//g")
-    - BES_VERSION=$(grep "bes-" snapshot.time | awk '{print $1;}' - | sed "s/bes-//g")
-    - OLFS_VERSION=$(grep "olfs-" snapshot.time | awk '{print $1;}' - | sed "s/olfs-//g")
-    - HYRAX_VERSION=$(grep "hyrax-" snapshot.time | awk '{print $1;}' - | sed "s/hyrx-//g")
     - RELEASE_DATE=`date +%s`
 
-install:
+before_install:
   - pip3 install awscli
+
+install:
+  - export LIBDAP_VERSION=$(grep "libdap4-" snapshot.time | awk '{print $1;}' - | sed "s/libdap4-//g")
+  - export BES_VERSION=$(grep "bes-" snapshot.time | awk '{print $1;}' - | sed "s/bes-//g")
+  - export OLFS_VERSION=$(grep "olfs-" snapshot.time | awk '{print $1;}' - | sed "s/olfs-//g")
+  - export HYRAX_VERSION=$(grep "hyrax-" snapshot.time | awk '{print $1;}' - | sed "s/hyrx-//g")
   - echo "print env:"
   - printenv
-
 
 stages:
   - name: build
