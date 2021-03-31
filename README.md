@@ -112,14 +112,14 @@ docker run -d -h hyrax -p 8080:8080 --name=hyrax_container hyrax_image -n http:/
 > **TIP:** The value of **<tt>-n</tt>** should be the outward facing domain 
 name / IP address of your Docker container. If you are running a 
 container on your local system, then the example value of 
-**<tt>http://localhost:8080</tt>** should work well. If your Hyrax container is
+**<tt>http://localhost:8080 </tt>** should work well. If your Hyrax container is
 running elsewhere (in AWS for example) you'll have to sort out what
 the value should be. If the **<tt>-n</tt>**  parameter is omitted from 
 the **<tt>docker run</tt>** command then the value used will be the 
 value of **<tt>--build-arg NCWMS_BASE</tt>** from the **<tt>docker build</tt>** 
 command. If no **<tt>NCWMS_BASE</tt>** was specified in the 
 **<tt>docker build</tt>** command then the value defaults to 
-**<tt>https://localhost:8080</tt>** (note that this is an HTTPS transport URL)
+**<tt>https://localhost:8080 </tt>** (note that this is an HTTPS transport URL)
 
 To configure the _hyrax\_container_ so the server is accessible using
 a port other than 8080, such as port 80, the default port for HTTP.
@@ -599,7 +599,7 @@ You can contact OPeNDAP, Inc. at PO Box 112, Saunderstown, RI. 02874-0112.
 Based on https://bitbucket.csiro.au/projects/ASC/repos/hyrax-docker/,
 Dec 19, 2016, by gareth.williams@csiro.au. That project was licensed
 under a CSIRO variation of a MIT / BSD Open Source License. The
-license text is in the file CSIRO\_MIT\_LICENSE
+license text is in the file CSIRO_MIT_LICENSE
 
 > NOTE: Gareth wrote: Ideas have been drawn from
 https://github.com/Unidata/thredds-docker and various other

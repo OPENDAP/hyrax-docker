@@ -76,7 +76,7 @@ RUN set -e \
         automake \
         git \
         bc \
-   && yum -y update \
+    && yum -y update \
     && yum clean all 
 
 # Tomcat environment (Tomcat installed above by via yum)

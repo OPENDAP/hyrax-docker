@@ -124,16 +124,16 @@ before_deploy:
 deploy:
   - provider: script
     script:
-      - echo "Deploying ${SNAPSHOT_IMAGE_TAG} to Docker Hub";
-        echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin;
-        docker push ${SNAPSHOT_IMAGE_TAG};
-        docker push ${BUILD_VERSION_TAG};
-        echo "Docker Hub deployment complete.";
-        echo "Deploying ${SNAPSHOT_IMAGE_TAG} to AWS ECR";
-        aws configure list;
-        docker tag ${SNAPSHOT_IMAGE_TAG} 747931985039.dkr.ecr.us-east-1.amazonaws.com/${SNAPSHOT_IMAGE_TAG};
-        docker push 747931985039.dkr.ecr.us-east-1.amazonaws.com/${SNAPSHOT_IMAGE_TAG};
-        echo "AWS ECR deployment complete.";
+      - echo "Deploying ${SNAPSHOT_IMAGE_TAG} to Docker Hub"
+      - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+      - docker push ${SNAPSHOT_IMAGE_TAG}
+      - docker push ${BUILD_VERSION_TAG}
+      - echo "Docker Hub deployment complete."
+      - echo "Deploying ${SNAPSHOT_IMAGE_TAG} to AWS ECR"
+      - aws configure list
+      - docker tag ${SNAPSHOT_IMAGE_TAG} 747931985039.dkr.ecr.us-east-1.amazonaws.com/${SNAPSHOT_IMAGE_TAG}
+      - docker push 747931985039.dkr.ecr.us-east-1.amazonaws.com/${SNAPSHOT_IMAGE_TAG}
+      - echo "AWS ECR deployment complete."
     on:
       branch: master
       condition: ${TRAVIS_PULL_REQUEST} = "false"
