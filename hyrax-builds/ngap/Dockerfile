@@ -40,7 +40,7 @@ ARG AWS_SECRET_ACCESS_KEY
 ENV AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-"unknown"}
 RUN echo "AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}"
 
-LABEL vendor="OPeNDAP Incorporated"
+LABEL vendor="OPeNDAP"
 LABEL org.opendap.hyrax.version=snapshot
 LABEL org.opendap.hyrax.release-date=RELEASE_DATE
 LABEL org.opendap.hyrax.version.is-production="false"
@@ -48,25 +48,6 @@ LABEL org.opendap.hyrax.version.is-production="false"
 MAINTAINER support@opendap.org
 
 USER root
-
-#
-# The --build-arg USE_NCWMS can be set to "true" in order to 
-# add the ncWMS application to the build.
-ARG USE_NCWMS
-ENV USE_NCWMS ${USE_NCWMS:-"false"}
-RUN set -e && \
-    if [ $USE_NCWMS = "true" ];then echo "NCWMS: ENABLED"; else echo "NCWMS: DISABLED"; fi
-
-#
-# The --build-arg NCWMS_BASE can be set to the base URL for ncWMS.
-# The entrypoint.sh code defaults it to
-# the URL: https://localhost:8080 if the environment variable NCWMS_BASE
-# is not in the shell from which the entrypoint.sh script is called.
-ARG NCWMS_BASE
-ENV NCWMS_BASE ${NCWMS_BASE:-"https://localhost:8080"}
-RUN set -e && \
-    if [ $USE_NCWMS = "true" ];then echo "NCWMS_BASE: {$NCWMS_BASE}"; fi
-
 
 ARG DEVELOPER_MODE
 ENV DEVELOPER_MODE ${DEVELOPER_MODE:-"false"}
@@ -103,8 +84,6 @@ RUN echo "CATALINA_HOME: $CATALINA_HOME"
 ENV LIBDAP_RPM="s3://opendap.travis.build/libdap-snapshot.el7.x86_64.rpm"
 ENV BES_RPM="s3://opendap.travis.build/bes-snapshot.static.el7.x86_64.rpm"
 ENV NGAP_PACKAGE="s3://opendap.travis.build/ngap-snapshot-webapp.tgz"
-###############################################################
-
 
 ################################################################
 # Retrieve and install the latest libdap snapshot
@@ -115,8 +94,6 @@ RUN set -e \
     && ls -l ./libdap* \
     && yum -y install ./libdap.rpm \
     && rm -f libdap.*
-################################################################
-
 
 ################################################################
 # Retrieve and install the latest BES snapshot
@@ -129,8 +106,6 @@ RUN set -e \
     && rm -f bes.*
 
 RUN echo "besdaemon is here: "`which besdaemon`
-################################################################
-
 
 ################################################################
 # Retrieve, verify, and install the NGAP/OLFS web application
@@ -151,6 +126,7 @@ RUN set -e \
     && mkdir -p ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/logs \
     && chown -R tomcat:tomcat ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/logs \
     && chmod 700 ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/logs
+
 #
 # Clear these values so they do not persist in the container!
 ENV AWS_ACCESS_KEY_ID=
@@ -159,54 +135,6 @@ RUN echo "unset AWS_ACCESS_KEY_ID"     >> ~/.bash_profile
 RUN echo "unset AWS_SECRET_ACCESS_KEY" >> ~/.bash_profile
 RUN echo "unset AWS_ACCESS_KEY_ID"     >> ~/.bashrc
 RUN echo "unset AWS_SECRET_ACCESS_KEY" >> ~/.bashrc
-################################################################
-
-
-################################################################
-# retrieve and install the ncWMS web application
-#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
-
-# This is ncWMS-2.4.2
-ENV NCWMS_WAR_URL=https://github.com/Reading-eScience-Centre/ncwms/releases/download/ncwms-2.4.2/ncWMS2.war
-
-RUN set -e \
-    && if [ $USE_NCWMS = "true" ]; then \
-        echo "Installing ncWMS..."; \
-        curl -sfSL ${NCWMS_WAR_URL} -o /dev/shm/ncWMS.war; \
-        unzip -o /dev/shm/ncWMS.war -d ${CATALINA_HOME}/webapps/ncWMS2/; \
-        rm -rf /dev/shm/*; \
-    else \
-        echo "ncWMS will NOT be installed."; \
-    fi
-
-# set a default ncWMS admin if DEVELOPER_MODE is enabled.
-RUN set -e \
-    && if [ ${DEVELOPER_MODE} = "true" ] && [ $USE_NCWMS = "true" ]; then \
-        echo "DEVELOPER MODE: Adding ncWMS admin credentials"; \
-        sed -i 'sX</tomcat-users>X<role rolename="ncWMS-admin"/> <user username="admin" password="admin" roles="ncWMS-admin"/> </tomcat-users>X' ${CATALINA_HOME}/conf/tomcat-users.xml; \
-    else \
-        echo "No ncWMS admin credentials installed."; \
-    fi
-    
-#
-# make ncWMS work without further configuration 
-# @TODO We will need to adjust this target if we 
-# decide to run as a different (not root) user.
-COPY ncWMS_config.xml /root/.ncWMS2/config.xml
-RUN  chmod +r /root/.ncWMS2/config.xml
-
-COPY olfs_viewers.xml /tmp/olfs_viewers.xml
-RUN set -e \
-    && if [ $USE_NCWMS = "true" ]; then \
-        # If we're installing ncWMS then we copy 
-        # to the server a viewers.xml which has
-        # been templated so that the ncWMS host can be installed 
-        # at startup.        
-        mv /tmp/olfs_viewers.xml ${CATALINA_HOME}/webapps/ROOT/WEB-INF/conf/viewers.xml; \
-    else \
-        echo "Skipping OLFS/ncWMS confguration installation."; \
-    fi
-    
 
 # Install our modified server.xml so that the server compresses responses.
 COPY tomcat7-server.xml /
@@ -219,9 +147,6 @@ COPY tomcat.conf /
 RUN set -e \
     && mv /tomcat.conf /etc/tomcat/tomcat.conf \
     && chown -R tomcat:tomcat /etc/tomcat/tomcat.conf
-
-################################################################
-
 
 ################################################################
 #
@@ -248,7 +173,6 @@ RUN set -e \
     && cd ${TEST_INSTALL_DIR} \
     && make testsuite > mk.log 2>&1 \
     && echo "SUCCESS: hyrax_regression_tests ready!"
-################################################################
 
 COPY beslog2json.awk /
 RUN  set -e && chmod +x beslog2json.awk

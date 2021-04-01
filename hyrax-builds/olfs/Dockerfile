@@ -71,7 +71,7 @@ RUN echo "OLFS_VERSION: ${OLFS_VERSION}"
 # and the new line is:
 #     (cd ${CATALINA_HOME}/webapps/opendap/ && jar -xf /dev/shm/olfs-snapshot-webapp/opendap.war)
 #
-ENV ROOT=/root
+ENV ROOT=/dev/shm
 RUN echo "Retrieving and installing the latest olfs snapshot (${OLFS_VERSION})."
 RUN set -e \
     && aws --region=us-east-1 s3 cp ${OLFS_PACKAGE} ./olfs-${OLFS_VERSION}-webapp.tgz \
