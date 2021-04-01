@@ -59,8 +59,7 @@ USER root
 # add the ncWMS application to the build.
 ARG USE_NCWMS
 ENV USE_NCWMS ${USE_NCWMS:-"false"}
-RUN set -e && \
-    if [ $USE_NCWMS = "true" ];then echo "NCWMS: ENABLED"; else echo "NCWMS: DISABLED"; fi
+RUN if [ $USE_NCWMS = "true" ];then echo "NCWMS: ENABLED"; else echo "NCWMS: DISABLED"; fi
 
 #
 # The --build-arg NCWMS_BASE can be set to the base URL for ncWMS.
@@ -69,29 +68,19 @@ RUN set -e && \
 # is not in the shell from which the entrypoint.sh script is called.
 ARG NCWMS_BASE
 ENV NCWMS_BASE ${NCWMS_BASE:-"https://localhost:8080"}
-RUN set -e && \
-    if [ $USE_NCWMS = "true" ];then echo "NCWMS_BASE: {$NCWMS_BASE}"; fi
+RUN if [ $USE_NCWMS = "true" ];then echo "NCWMS_BASE: {$NCWMS_BASE}"; fi
 
 
 ARG DEVELOPER_MODE
 ENV DEVELOPER_MODE ${DEVELOPER_MODE:-"false"}
-RUN set -e && \
-    if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else echo "DEVELOPER_MODE: DISABLED"; fi
+RUN if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else echo "DEVELOPER_MODE: DISABLED"; fi
 
 
 # Update and install the needful.
-RUN set -e \
-    && yum -y install \
-        tomcat \
-        unzip  \
-        which \
-        awscli \
-        autoconf \
-        automake \
-        git \
-        bc \
-    && yum -y update \
-    && yum clean all 
+RUN yum -y install tomcat unzip which awscli
+# Was also installing:  autoconf automake git bc
+RUN yum -y update
+RUN yum clean all
 
 # Tomcat environment (Tomcat installed above by via yum)
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
@@ -113,7 +102,7 @@ ENV ROBOTS_PACKAGE="s3://opendap.travis.build/robots-olfs-${OLFS_VERSION}-webapp
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 RUN set -e \
     && echo "Retrieving, and installing the latest libdap snapshot. rpm: $LIBDAP_RPM" \
-    && aws --region=us-east-1 s3 cp ${LIBDAP_RPM}  ./libdap.rpm\
+    && aws --region=us-east-1 s3 cp ${LIBDAP_RPM}  ./libdap.rpm \
     && ls -l ./libdap* \
     && yum -y install ./libdap.rpm \
     && rm -f libdap.*
@@ -123,7 +112,7 @@ RUN set -e \
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 RUN set -e \
     && echo "Retrieving, and installing the latest besd snapshot. rpm: $BES_RPM" \
-    && aws --region=us-east-1 s3 cp ${BES_RPM}  ./bes.rpm\
+    && aws --region=us-east-1 s3 cp ${BES_RPM}  ./bes.rpm \
     && ls -l ./bes* \
     && yum -y install ./bes.rpm \
     && rm -f bes.*
@@ -178,8 +167,7 @@ RUN echo "unset AWS_SECRET_ACCESS_KEY" >> ~/.bashrc
 # This is ncWMS-2.4.2
 ENV NCWMS_WAR_URL=https://github.com/Reading-eScience-Centre/ncwms/releases/download/ncwms-2.4.2/ncWMS2.war
 
-RUN set -e \
-    && if [ $USE_NCWMS = "true" ]; then \
+RUN if [ $USE_NCWMS = "true" ]; then \
         echo "Installing ncWMS..."; \
         curl -sfSL ${NCWMS_WAR_URL} -o /dev/shm/ncWMS.war; \
         unzip -o /dev/shm/ncWMS.war -d ${CATALINA_HOME}/webapps/ncWMS2/; \
@@ -189,8 +177,7 @@ RUN set -e \
     fi
 
 # set a default ncWMS admin if DEVELOPER_MODE is enabled.
-RUN set -e \
-    && if [ ${DEVELOPER_MODE} = "true" ] && [ $USE_NCWMS = "true" ]; then \
+RUN if [ ${DEVELOPER_MODE} = "true" ] && [ $USE_NCWMS = "true" ]; then \
         echo "DEVELOPER MODE: Adding ncWMS admin credentials"; \
         sed -i 'sX</tomcat-users>X<role rolename="ncWMS-admin"/> <user username="admin" password="admin" roles="ncWMS-admin"/> </tomcat-users>X' ${CATALINA_HOME}/conf/tomcat-users.xml; \
     else \
@@ -205,8 +192,7 @@ COPY ncWMS_config.xml /root/.ncWMS2/config.xml
 RUN  chmod +r /root/.ncWMS2/config.xml
 
 COPY olfs_viewers.xml /tmp/olfs_viewers.xml
-RUN set -e \
-    && if [ $USE_NCWMS = "true" ]; then \
+RUN if [ $USE_NCWMS = "true" ]; then \
         # If we're installing ncWMS then we copy 
         # to the server a viewers.xml which has
         # been templated so that the ncWMS host can be installed 
@@ -250,7 +236,7 @@ RUN set -e \
 
 
 COPY entrypoint.sh /
-RUN  set -e && chmod +x /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 ENTRYPOINT [ "/entrypoint.sh" ]
 
 EXPOSE 8080
@@ -260,7 +246,7 @@ EXPOSE 11002
 
 # can't use USER with entrypoint that needs root
 # use gosu or, as done, enable bes user write so the entrypoint does not need root
-RUN  set -e && chown -R bes /etc/bes
+RUN chown -R bes /etc/bes
 USER root
 
 CMD ["-"]
