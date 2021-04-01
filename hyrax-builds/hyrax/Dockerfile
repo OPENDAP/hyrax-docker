@@ -16,8 +16,6 @@
 FROM centos:7
 
 RUN export NOW=`date +%s`
-# HYRAX VERSION INFO
-ENV OLFS_VERSION=snapshot
 
 ARG RELEASE_DATE
 ENV RELEASE_DATE ${RELEASE_DATE:-"unknown"}
@@ -31,8 +29,24 @@ ARG AWS_SECRET_ACCESS_KEY
 ENV AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-"unknown"}
 RUN echo "AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}"
 
-LABEL vendor="OPeNDAP Incorporated"
-LABEL org.opendap.hyrax.version=snapshot
+ARG LIBDAP_VERSION
+ENV LIBDAP_VERSION=${LIBDAP_VERSION:-"unknown"}
+RUN echo "LIBDAP_VERSION: ${LIBDAP_VERSION}"
+
+ARG BES_VERSION
+ENV BES_VERSION=${BES_VERSION:-"unknown"}
+RUN echo "BES_VERSION: ${BES_VERSION}"
+
+ARG OLFS_VERSION
+ENV OLFS_VERSION=${OLFS_VERSION:-"unknown"}
+RUN echo "OLFS_VERSION: ${OLFS_VERSION}"
+
+ARG HYRAX_VERSION
+ENV HYRAX_VERSION=${HYRAX_VERSION:-"unknown"}
+RUN echo "HYRAX_VERSION: ${HYRAX_VERSION}"
+
+LABEL vendor="OPeNDAP"
+LABEL org.opendap.hyrax.version=${HYRAX_VERSION}
 LABEL org.opendap.hyrax.release-date=RELEASE_DATE
 LABEL org.opendap.hyrax.version.is-production="false"
 
@@ -81,20 +95,18 @@ RUN set -e \
 
 # Tomcat environment (Tomcat installed above by via yum)
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
+# TODO Is this needed; it's not used in 'olfs' jhrg 4/1/31
 ENV CATALINA_HOME /usr/share/tomcat
 ENV PATH $CATALINA_HOME/bin:$PATH
 RUN echo "CATALINA_HOME: $CATALINA_HOME"
 
-
 ################################################################
 # SNAPSHOT URLs
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
-ENV LIBDAP_RPM="s3://opendap.travis.build/libdap-snapshot.el7.x86_64.rpm"
-ENV BES_RPM="s3://opendap.travis.build/bes-snapshot.static.el7.x86_64.rpm"
-ENV OLFS_PACKAGE="s3://opendap.travis.build/olfs-snapshot-webapp.tgz"
-ENV ROBOTS_PACKAGE="s3://opendap.travis.build/robots-olfs-snapshot-webapp.tgz"
-###############################################################
-
+ENV LIBDAP_RPM="s3://opendap.travis.build/libdap-${LIBDAP_VERSION}.el7.x86_64.rpm"
+ENV BES_RPM="s3://opendap.travis.build/bes-${BES_VERSION}.static.el7.x86_64.rpm"
+ENV OLFS_PACKAGE="s3://opendap.travis.build/olfs-${OLFS_VERSION}-webapp.tgz"
+ENV ROBOTS_PACKAGE="s3://opendap.travis.build/robots-olfs-${OLFS_VERSION}-webapp.tgz"
 
 ################################################################
 # Retrieve and install the latest libdap snapshot
@@ -105,8 +117,6 @@ RUN set -e \
     && ls -l ./libdap* \
     && yum -y install ./libdap.rpm \
     && rm -f libdap.*
-################################################################
-
 
 ################################################################
 # Retrieve and install the latest BES snapshot
@@ -119,31 +129,32 @@ RUN set -e \
     && rm -f bes.*
 
 RUN echo "besdaemon is here: "`which besdaemon`
-################################################################
-
 
 ################################################################
 # Retrieve, verify, and install the OLFS web application
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
+ENV ROOT=/dev/shm
+
+RUN echo "Retrieving and installing the latest olfs snapshot (${OLFS_VERSION})."
 RUN set -e \
-    && echo "Retrieving and installing the latest olfs snapshot." \
-    && aws --region=us-east-1 s3 cp ${OLFS_PACKAGE}  ./olfs-snapshot-webapp.tgz\
-    && tar -C /dev/shm -xzf olfs-snapshot-webapp.tgz \
-    && ls -l /dev/shm/olfs-snapshot-webapp \
-    && echo "Unpacking olfs warfile..." \
-    && unzip -o /dev/shm/olfs-snapshot-webapp/opendap.war -d ${CATALINA_HOME}/webapps/opendap/ \
-    && echo "Cleaning up OLFS snapshot..." \
-    && rm -rf /dev/shm/* olfs-snapshot-webapp.tgz*
+    && aws --region=us-east-1 s3 cp ${OLFS_PACKAGE} ./olfs-${OLFS_VERSION}-webapp.tgz \
+    && tar -C ${ROOT} -xzvf ./olfs-${OLFS_VERSION}-webapp.tgz \
+    && ls -l ${ROOT} \
+    && echo "Unpacking warfile..." \
+    && mkdir -p ${CATALINA_HOME}/webapps/opendap/ \
+    && (cd ${CATALINA_HOME}/webapps/opendap/ && jar -xf ${ROOT}/olfs-${OLFS_VERSION}-webapp/opendap.war) \
+    && echo "Cleaning up." \
+    && rm -rf ${ROOT}/olfs-${OLFS_VERSION}-webapp ./olfs-${OLFS_VERSION}-webapp.tgz
 
 RUN set -e \
-    && echo "Retrieving and installing the latest dynamic robots.txt snapshot." \
-    && aws --region=us-east-1 s3 cp ${ROBOTS_PACKAGE}  ./robots-olfs-snapshot-webapp.tgz\
-    && tar -C /dev/shm -xzf robots-olfs-snapshot-webapp.tgz \
-    && ls -l /dev/shm/robots-olfs-snapshot-webapp \
+    && echo "Retrieving and installing the latest dynamic robots.txt snapshot (${OLFS_VERSION})." \
+    && aws --region=us-east-1 s3 cp ${ROBOTS_PACKAGE}  ./robots-olfs-${OLFS_VERSION}-webapp.tgz\
+    && tar -C ${ROOT} -xzf robots-olfs-${OLFS_VERSION}-webapp.tgz \
+    && ls -l ${ROOT}/robots-olfs-${OLFS_VERSION}-webapp \
     && echo "Unpacking dynamic robots.txt warfile..." \
-    && unzip -o /dev/shm/robots-olfs-snapshot-webapp/ROOT.war -d ${CATALINA_HOME}/webapps/ROOT/ \
+    && unzip -o ${ROOT}/robots-olfs-${OLFS_VERSION}-webapp/ROOT.war -d ${CATALINA_HOME}/webapps/ROOT/ \
     && echo "Cleaning up dynamic robots.txt snapshot..." \
-    && rm -rf /dev/shm/* robots-olfs-snapshot-webapp.tgz*
+    && rm -rf ${ROOT}/* robots-olfs-${OLFS_VERSION}-webapp.tgz
 
 # Fix ownership and access permissions
 RUN set -e \
@@ -158,8 +169,6 @@ RUN echo "unset AWS_ACCESS_KEY_ID"     >> ~/.bash_profile
 RUN echo "unset AWS_SECRET_ACCESS_KEY" >> ~/.bash_profile
 RUN echo "unset AWS_ACCESS_KEY_ID"     >> ~/.bashrc
 RUN echo "unset AWS_SECRET_ACCESS_KEY" >> ~/.bashrc
-################################################################
-
 
 ################################################################
 # retrieve and install the ncWMS web application
@@ -212,9 +221,6 @@ COPY tomcat7-server.xml /
 RUN set -e \
     && mv /tomcat7-server.xml ${CATALINA_HOME}/conf/server.xml \
     && chown -R tomcat:tomcat ${CATALINA_HOME}/conf/server.xml
-
-################################################################
-
 
 ################################################################
 #
