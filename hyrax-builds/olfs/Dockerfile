@@ -71,13 +71,15 @@ RUN echo "OLFS_VERSION: ${OLFS_VERSION}"
 # and the new line is:
 #     (cd ${CATALINA_HOME}/webapps/opendap/ && jar -xf /dev/shm/olfs-snapshot-webapp/opendap.war)
 #
+ENV ROOT=/root
 RUN echo "Retrieving and installing the latest olfs snapshot (${OLFS_VERSION})."
-RUN aws --region=us-east-1 s3 cp ${OLFS_PACKAGE} olfs-${OLFS_VERSION}-webapp.tgz
-RUN tar -C /dev/shm -xzf olfs-${OLFS_VERSION}-webapp.tgz
-RUN ls -l /dev/shm/olfs-${OLFS_VERSION}-webapp
+RUN aws --region=us-east-1 s3 cp ${OLFS_PACKAGE} ./olfs-${OLFS_VERSION}-webapp.tgz
+RUN tar -C ${ROOT} -xzvf ./olfs-${OLFS_VERSION}-webapp.tgz
+RUN ls -l ${ROOT}
+# olfs-${OLFS_VERSION}-webapp
 RUN echo "Unpacking warfile..."
 RUN mkdir -p ${CATALINA_HOME}/webapps/opendap/
-RUN (cd ${CATALINA_HOME}/webapps/opendap/ && jar -xf /dev/shm/olfs-webapp/opendap.war)
+RUN (cd ${CATALINA_HOME}/webapps/opendap/ && jar -xf ${ROOT}olfs-webapp/opendap.war)
 RUN echo "Cleaning up."
 RUN rm -rf /dev/shm/* olfs-${OLFS_VERSION}-webapp.tgz
 
