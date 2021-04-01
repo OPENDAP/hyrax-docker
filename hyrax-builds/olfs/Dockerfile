@@ -73,15 +73,15 @@ RUN echo "OLFS_VERSION: ${OLFS_VERSION}"
 #
 ENV ROOT=/root
 RUN echo "Retrieving and installing the latest olfs snapshot (${OLFS_VERSION})."
-RUN aws --region=us-east-1 s3 cp ${OLFS_PACKAGE} ./olfs-${OLFS_VERSION}-webapp.tgz
-RUN tar -C ${ROOT} -xzvf ./olfs-${OLFS_VERSION}-webapp.tgz
-RUN ls -l ${ROOT}
-# olfs-${OLFS_VERSION}-webapp
-RUN echo "Unpacking warfile..."
-RUN mkdir -p ${CATALINA_HOME}/webapps/opendap/
-RUN (cd ${CATALINA_HOME}/webapps/opendap/ && jar -xf ${ROOT}/olfs-${OLFS_VERSION}-webapp/opendap.war)
-RUN echo "Cleaning up."
-RUN rm -rf ${ROOT}/olfs-${OLFS_VERSION}-webapp ./olfs-${OLFS_VERSION}-webapp.tgz
+RUN set -e \
+    && aws --region=us-east-1 s3 cp ${OLFS_PACKAGE} ./olfs-${OLFS_VERSION}-webapp.tgz \
+    && tar -C ${ROOT} -xzvf ./olfs-${OLFS_VERSION}-webapp.tgz \
+    && ls -l ${ROOT} \
+    && echo "Unpacking warfile..." \
+    && mkdir -p ${CATALINA_HOME}/webapps/opendap/ \
+    && (cd ${CATALINA_HOME}/webapps/opendap/ && jar -xf ${ROOT}/olfs-${OLFS_VERSION}-webapp/opendap.war) \
+    && echo "Cleaning up." \
+    && rm -rf ${ROOT}/olfs-${OLFS_VERSION}-webapp ./olfs-${OLFS_VERSION}-webapp.tgz
 
 # Clear these values so they do not persist in the container!
 ENV AWS_ACCESS_KEY_ID=""
@@ -90,7 +90,6 @@ RUN echo "unset AWS_ACCESS_KEY_ID"     >> ~/.bash_profile
 RUN echo "unset AWS_SECRET_ACCESS_KEY" >> ~/.bash_profile
 RUN echo "unset AWS_ACCESS_KEY_ID"     >> ~/.bashrc
 RUN echo "unset AWS_SECRET_ACCESS_KEY" >> ~/.bashrc
-
 
 # set host for bes that olfs will contact - this is expected to be over docker's internal network
 ARG BES_HOST
