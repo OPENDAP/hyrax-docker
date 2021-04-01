@@ -19,6 +19,7 @@ else
     NCWMS_BASE="https://localhost:8080"
      echo "Assigning default NCWMS_BASE: $NCWMS_BASE"  
 fi
+
 debug=false;
 
 while getopts "n:d" opt; do
@@ -44,7 +45,7 @@ while getopts "n:d" opt; do
 done
 
 if [ $debug = true ];then
-    echo "CATALINA_HOME: ${CATALINA_HOME}"; >&2
+    echo "CATALINA_HOME: ${CATALINA_HOME}" >&2
     ls -l "$CATALINA_HOME" "$CATALINA_HOME/bin"  >&2
     echo "NCWMS_BASE: ${NCWMS_BASE}" >&2
     echo "Setting ncWMS access URLs in viewers.xml (if needed)." >&2
@@ -60,21 +61,21 @@ fi
 $CATALINA_HOME/bin/startup.sh
 status=$?
 if [ $status != "0" ];then 
-    echo "Failed to launch the Tomcat process. status: ${status} EXITING!"; >&2
-    exit 2; 
+    echo "Failed to launch the Tomcat process. status: ${status} EXITING!" >&2
+    exit 2
 fi
 
 echo "Launched Tomcat." >&2
 
-tomcat_key="/usr/local/tomcat/bin/tomcat-juli.jar";
+tomcat_key="/usr/local/tomcat/bin/tomcat-juli.jar"
 
-tomcat_info=`ps -f | grep ${tomcat_key} - `;
+tomcat_info=`ps -f | grep ${tomcat_key} - `
 status=$?
 echo "tomcat_info: $tomcat_info status: $status" >&2
 
 if [ $status != "0" ];then 
-    echo "Unable to detect Tomcat process. status: ${status} EXITING!"; >&2
-    exit 2; 
+    echo "Unable to detect Tomcat process. status: ${status} EXITING!" >&2
+    exit 2
 fi
 
 tomcat_pid=`echo $tomcat_info | awk '{print $2}' -`
@@ -92,7 +93,7 @@ while /bin/true; do
         echo "Tomcat Console Log [BEGIN]" >&2
         cat /usr/local/tomcat/logs/catalina.out >&2
         echo "Tomcat Console Log [END]" >&2
-        exit -2;
+        exit -2
     fi
     if [ $debug = true ];then 
         echo "-------------------------------------------------------------------"

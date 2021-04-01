@@ -22,10 +22,14 @@ ARG AWS_SECRET_ACCESS_KEY
 ENV AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-"unknown"}
 RUN echo "AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}"
 
-LABEL vendor="OPeNDAP Incorporated"
-LABEL org.opendap.olfs.version=snapshot
+ARG OLFS_VERSION
+ENV OLFS_VERSION=${OLFS_VERSION:-"unknown"}
+RUN echo "OLFS_VERSION: ${OLFS_VERSION}"
+
+LABEL vendor="OPeNDAP"
+LABEL org.opendap.olfs.version=${OLFS_VERSION}
 LABEL org.opendap.olfs.release-date=RELEASE_DATE
-LABEL org.opendap.hyrax.version.is-production="true"
+LABEL org.opendap.hyrax.version.is-production="false"
 
 USER root
 
@@ -52,7 +56,6 @@ ENV NCWMS_BASE ${NCWMS_BASE:-"https://localhost:8080"}
 RUN set -e && \
     if [ $USE_NCWMS = "true" ];then echo "NCWMS_BASE: {$NCWMS_BASE}"; fi
 
-
 ###
 # Grab and unzip the OLFS
 ###
@@ -60,9 +63,8 @@ RUN set -e && \
 ENV PATH $CATALINA_HOME/bin:$PATH
 RUN echo "CATALINA_HOME: $CATALINA_HOME"
 
-
 # SNAPSHOT URLs
-ENV OLFS_PACKAGE="s3://opendap.travis.build/olfs-snapshot-webapp.tgz"
+ENV OLFS_PACKAGE="s3://opendap.travis.build/olfs-${OLFS_VERSION}-webapp.tgz"
 
 ###############################################################
 # Retrieve, verify, and install the OLFS web application
@@ -73,15 +75,15 @@ ENV OLFS_PACKAGE="s3://opendap.travis.build/olfs-snapshot-webapp.tgz"
 #     (cd ${CATALINA_HOME}/webapps/opendap/ && jar -xf /dev/shm/olfs-snapshot-webapp/opendap.war)
 # 
 RUN set -e \
-    && echo "Retrieving and installing the latest olfs snapshot." \
-    && aws --region=us-east-1 s3 cp ${OLFS_PACKAGE}  ./olfs-snapshot-webapp.tgz\
-    && tar -C /dev/shm -xzf olfs-snapshot-webapp.tgz \
-    && ls -l /dev/shm/olfs-snapshot-webapp \
+    && echo "Retrieving and installing the latest olfs snapshot (${OLFS_VERSION})." \
+    && aws --region=us-east-1 s3 cp ${OLFS_PACKAGE}  ./olfs-webapp.tgz \
+    && tar -C /dev/shm -xzf olfs-webapp.tgz \
+    && ls -l /dev/shm/olfs-webapp \
     && echo "Unpacking warfile..." \
     && mkdir -p ${CATALINA_HOME}/webapps/opendap/ \
-    && (cd ${CATALINA_HOME}/webapps/opendap/ && jar -xf /dev/shm/olfs-snapshot-webapp/opendap.war) \
+    && (cd ${CATALINA_HOME}/webapps/opendap/ && jar -xf /dev/shm/olfs-webapp/opendap.war) \
     && echo "Cleaning up." \
-    && rm -rf /dev/shm/* olfs-snapshot-webapp.tgz*
+    && rm -rf /dev/shm/* olfs-webapp.tgz*
 
 # Clear these values so they do not persist in the container!
 ENV AWS_ACCESS_KEY_ID=
@@ -117,40 +119,6 @@ RUN set -e \
 ###
 
 EXPOSE 8080 8443
-
-#
-# I commented this next section out (2019-02-24) because at this time the unidata/tomcat-docker:8 image is running
-# Tomcat as the root user - ndp
-#
-# Fix ownership and access permissions
-#RUN mkdir -p ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs && \
-#    chown -R tomcat ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs && \
-#    chgrp -R tomcat ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs && \
-#    chmod 700 ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs
-
-##########################################################################################
-# The following is an effort to tweak the security policy to allow the JULI code to
-# to look at webapps/opendap/WEB-INF/classes/logging.properties Even though this
-# file does not exist and the code will move on to other locations the fact that 
-# it trys to look at it is enough to alert the security manager.
-#
-# COPY logging_config.policy /tmp/policy
-# RUN set -e \
-#    && lines=`cat ${CATALINA_HOME}/conf/catalina.policy | wc -l` \
-#    && insert=`grep -n 'grant codeBase \"file:\${catalina.home}/bin/tomcat-juli.jar' ${CATALINA_HOME}/conf/catalina.policy \
-#    | awk '{split($0,s,":"); print s[1];}' -` \
-#    && muh_tail=`expr $lines - $insert + 1` \
-#    && echo "lines: $lines insert: $insert muh_tail: $muh_tail" \
-#    && head -$insert ${CATALINA_HOME}/conf/catalina.policy > /tmp/catalina.policy \
-#    && cat /tmp/policy >> /tmp/catalina.policy \
-#    && tail -n $muh_tail ${CATALINA_HOME}/conf/catalina.policy >> /tmp/catalina.policy \
-#    && cp /tmp/catalina.policy ${CATALINA_HOME}/conf/catalina.policy \
-#    && chown -R tomcat ${CATALINA_HOME}/conf/catalina.policy \
-#    && chgrp -R tomcat ${CATALINA_HOME}/conf/catalina.policy \
-#    && echo "" \
-#    && echo "Updated catalina.policy: " \
-#    && cat ${CATALINA_HOME}/conf/catalina.policy
-##########################################################################################
 
 COPY entrypoint.sh /entrypoint.sh
 RUN  chmod +x /entrypoint.sh && cat /entrypoint.sh
