@@ -70,21 +70,20 @@ RUN echo "OLFS_VERSION: ${OLFS_VERSION}"
 #     unzip -o /dev/shm/olfs-snapshot-webapp/opendap.war -d ${CATALINA_HOME}/webapps/opendap/
 # and the new line is:
 #     (cd ${CATALINA_HOME}/webapps/opendap/ && jar -xf /dev/shm/olfs-snapshot-webapp/opendap.war)
-# 
-RUN set -e \
-    && echo "Retrieving and installing the latest olfs snapshot (${OLFS_VERSION})." \
-    && aws --region=us-east-1 s3 cp ${OLFS_PACKAGE} olfs-webapp.tgz \
-    && tar -C /dev/shm -xzf olfs-webapp.tgz \
-    && ls -l /dev/shm/olfs-webapp \
-    && echo "Unpacking warfile..." \
-    && mkdir -p ${CATALINA_HOME}/webapps/opendap/ \
-    && (cd ${CATALINA_HOME}/webapps/opendap/ && jar -xf /dev/shm/olfs-webapp/opendap.war) \
-    && echo "Cleaning up." \
-    && rm -rf /dev/shm/* olfs-webapp.tgz
+#
+RUN echo "Retrieving and installing the latest olfs snapshot (${OLFS_VERSION})."
+RUN aws --region=us-east-1 s3 cp ${OLFS_PACKAGE} olfs-webapp.tgz
+RUN tar -C /dev/shm -xzf olfs-webapp.tgz
+RUN ls -l /dev/shm/olfs-webapp
+RUN echo "Unpacking warfile..."
+RUN mkdir -p ${CATALINA_HOME}/webapps/opendap/
+RUN (cd ${CATALINA_HOME}/webapps/opendap/ && jar -xf /dev/shm/olfs-webapp/opendap.war)
+RUN echo "Cleaning up."
+RUN rm -rf /dev/shm/* olfs-webapp.tgz
 
 # Clear these values so they do not persist in the container!
-ENV AWS_ACCESS_KEY_ID=
-ENV AWS_SECRET_ACCESS_KEY=
+ENV AWS_ACCESS_KEY_ID=""
+ENV AWS_SECRET_ACCESS_KEY=""
 RUN echo "unset AWS_ACCESS_KEY_ID"     >> ~/.bash_profile
 RUN echo "unset AWS_SECRET_ACCESS_KEY" >> ~/.bash_profile
 RUN echo "unset AWS_ACCESS_KEY_ID"     >> ~/.bashrc
