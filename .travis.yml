@@ -7,9 +7,6 @@ dist: xenial
 
 language: python
 
-# python:
-#  - 3.4
-
 services:
   - docker
 
@@ -89,7 +86,7 @@ jobs:
         - docker image ls -a
 
     - stage: build
-      name: "opendap/hyrax:snapshot"
+      name: "opendap/hyrax:${HYRAX_VERSION}"
       script:
         - export SNAPSHOT_IMAGE_TAG=opendap/hyrax:snapshot
         - export BUILD_VERSION_TAG=opendap/hyrax:${HYRAX_VERSION}
@@ -105,7 +102,7 @@ jobs:
         - docker image ls -a
 
     - stage: build
-      name: "opendap/hyrax_ncwms:snapshot"
+      name: "opendap/hyrax_ncwms:${HYRAX_VERSION}"
       script:
         - export SNAPSHOT_IMAGE_TAG=opendap/hyrax_ncwms:snapshot
         - export BUILD_VERSION_TAG=opendap/hyrax_ncwms:${HYRAX_VERSION}

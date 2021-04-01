@@ -142,7 +142,8 @@ RUN set -e \
     && ls -l ${ROOT} \
     && echo "Unpacking warfile..." \
     && mkdir -p ${CATALINA_HOME}/webapps/opendap/ \
-    && (cd ${CATALINA_HOME}/webapps/opendap/ && jar -xf ${ROOT}/olfs-${OLFS_VERSION}-webapp/opendap.war) \
+    # && (cd ${CATALINA_HOME}/webapps/opendap/ && jar -xf ${ROOT}/olfs-${OLFS_VERSION}-webapp/opendap.war) \
+    && unzip -o ${ROOT}/olfs-${OLFS_VERSION}-webapp/opendap.war -d ${CATALINA_HOME}/webapps/opendap/ \
     && echo "Cleaning up." \
     && rm -rf ${ROOT}/olfs-${OLFS_VERSION}-webapp ./olfs-${OLFS_VERSION}-webapp.tgz
 
