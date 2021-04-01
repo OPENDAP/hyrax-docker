@@ -72,14 +72,14 @@ RUN echo "OLFS_VERSION: ${OLFS_VERSION}"
 #     (cd ${CATALINA_HOME}/webapps/opendap/ && jar -xf /dev/shm/olfs-snapshot-webapp/opendap.war)
 #
 RUN echo "Retrieving and installing the latest olfs snapshot (${OLFS_VERSION})."
-RUN aws --region=us-east-1 s3 cp ${OLFS_PACKAGE} olfs-webapp.tgz
-RUN tar -C /dev/shm -xzf olfs-webapp.tgz
-RUN ls -l /dev/shm/olfs-webapp
+RUN aws --region=us-east-1 s3 cp ${OLFS_PACKAGE} olfs-${OLFS_VERSION}-webapp.tgz
+RUN tar -C /dev/shm -xzf olfs-${OLFS_VERSION}-webapp.tgz
+RUN ls -l /dev/shm/olfs-${OLFS_VERSION}-webapp
 RUN echo "Unpacking warfile..."
 RUN mkdir -p ${CATALINA_HOME}/webapps/opendap/
 RUN (cd ${CATALINA_HOME}/webapps/opendap/ && jar -xf /dev/shm/olfs-webapp/opendap.war)
 RUN echo "Cleaning up."
-RUN rm -rf /dev/shm/* olfs-webapp.tgz
+RUN rm -rf /dev/shm/* olfs-${OLFS_VERSION}-webapp.tgz
 
 # Clear these values so they do not persist in the container!
 ENV AWS_ACCESS_KEY_ID=""
