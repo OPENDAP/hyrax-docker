@@ -57,7 +57,7 @@ stages:
 jobs:
   include:
     - stage: build
-      name: "opendap/besd:${BES_VERSION}"
+      name: "opendap/besd:snapshot"
       script:
         - export SNAPSHOT_IMAGE_TAG=opendap/besd:snapshot
         - export BUILD_VERSION_TAG=opendap/besd:${BES_VERSION}
@@ -72,7 +72,7 @@ jobs:
         - docker image ls -a
 
     - stage: build
-      name: "opendap/olfs:${OLFS_VERSION}"
+      name: "opendap/olfs:snapshot"
       script:
         - export SNAPSHOT_IMAGE_TAG=opendap/olfs:snapshot
         - export BUILD_VERSION_TAG=opendap/olfs:${OLFS_VERSION}
@@ -86,7 +86,7 @@ jobs:
         - docker image ls -a
 
     - stage: build
-      name: "opendap/hyrax:${HYRAX_VERSION}"
+      name: "opendap/hyrax:snapshot}"
       script:
         - export SNAPSHOT_IMAGE_TAG=opendap/hyrax:snapshot
         - export BUILD_VERSION_TAG=opendap/hyrax:${HYRAX_VERSION}
@@ -97,12 +97,12 @@ jobs:
                         --build-arg LIBDAP_VERSION
                         --build-arg BES_VERSION
                         --build-arg OLFS_VERSION
-                        -t "${SNAPSHOT_IMAGE_TAG}" hyrax
+                        --tag "${SNAPSHOT_IMAGE_TAG}" hyrax
         - docker tag ${SNAPSHOT_IMAGE_TAG} ${BUILD_VERSION_TAG}
         - docker image ls -a
 
     - stage: build
-      name: "opendap/hyrax_ncwms:${HYRAX_VERSION}"
+      name: "opendap/hyrax_ncwms:snapshot}"
       script:
         - export SNAPSHOT_IMAGE_TAG=opendap/hyrax_ncwms:snapshot
         - export BUILD_VERSION_TAG=opendap/hyrax_ncwms:${HYRAX_VERSION}
@@ -114,7 +114,7 @@ jobs:
                         --build-arg BES_VERSION
                         --build-arg OLFS_VERSION
                         --build-arg USE_NCWMS=true
-                        -t "${SNAPSHOT_IMAGE_TAG}" hyrax
+                        --tag "${SNAPSHOT_IMAGE_TAG}" hyrax
         - docker tag ${SNAPSHOT_IMAGE_TAG} ${BUILD_VERSION_TAG}
         - docker image ls -a
 
