@@ -65,6 +65,7 @@ RUN echo "CATALINA_HOME: $CATALINA_HOME"
 
 # SNAPSHOT URLs
 ENV OLFS_PACKAGE="s3://opendap.travis.build/olfs-${OLFS_VERSION}-webapp.tgz"
+RUN echo "OLFS_VERSION: ${OLFS_VERSION}"
 
 ###############################################################
 # Retrieve, verify, and install the OLFS web application
@@ -76,14 +77,14 @@ ENV OLFS_PACKAGE="s3://opendap.travis.build/olfs-${OLFS_VERSION}-webapp.tgz"
 # 
 RUN set -e \
     && echo "Retrieving and installing the latest olfs snapshot (${OLFS_VERSION})." \
-    && aws --region=us-east-1 s3 cp ${OLFS_PACKAGE}  ./olfs-webapp.tgz \
+    && aws --region=us-east-1 s3 cp ${OLFS_PACKAGE} olfs-webapp.tgz \
     && tar -C /dev/shm -xzf olfs-webapp.tgz \
     && ls -l /dev/shm/olfs-webapp \
     && echo "Unpacking warfile..." \
     && mkdir -p ${CATALINA_HOME}/webapps/opendap/ \
     && (cd ${CATALINA_HOME}/webapps/opendap/ && jar -xf /dev/shm/olfs-webapp/opendap.war) \
     && echo "Cleaning up." \
-    && rm -rf /dev/shm/* olfs-webapp.tgz*
+    && rm -rf /dev/shm/* olfs-webapp.tgz
 
 # Clear these values so they do not persist in the container!
 ENV AWS_ACCESS_KEY_ID=

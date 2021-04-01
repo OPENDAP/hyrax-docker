@@ -80,7 +80,7 @@ jobs:
         - export SNAPSHOT_IMAGE_TAG=opendap/olfs:snapshot
         - export BUILD_VERSION_TAG=opendap/olfs:${OLFS_VESION}
         - cd hyrax-builds
-        - docker build --build-arg RELEASE_DATE=`date +%s`
+        - docker build --build-arg RELEASE_DATE
                         --build-arg AWS_ACCESS_KEY_ID
                         --build-arg AWS_SECRET_ACCESS_KEY
                         --build-arg OLFS_VERSION
