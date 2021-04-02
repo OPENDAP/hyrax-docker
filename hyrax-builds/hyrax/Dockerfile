@@ -16,8 +16,6 @@
 FROM centos:7
 
 RUN export NOW=`date +%s`
-# HYRAX VERSION INFO
-ENV OLFS_VERSION=snapshot
 
 ARG RELEASE_DATE
 ENV RELEASE_DATE ${RELEASE_DATE:-"unknown"}
@@ -31,8 +29,24 @@ ARG AWS_SECRET_ACCESS_KEY
 ENV AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-"unknown"}
 RUN echo "AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}"
 
-LABEL vendor="OPeNDAP Incorporated"
-LABEL org.opendap.hyrax.version=snapshot
+ARG LIBDAP_VERSION
+ENV LIBDAP_VERSION=${LIBDAP_VERSION:-"unknown"}
+RUN echo "LIBDAP_VERSION: ${LIBDAP_VERSION}"
+
+ARG BES_VERSION
+ENV BES_VERSION=${BES_VERSION:-"unknown"}
+RUN echo "BES_VERSION: ${BES_VERSION}"
+
+ARG OLFS_VERSION
+ENV OLFS_VERSION=${OLFS_VERSION:-"unknown"}
+RUN echo "OLFS_VERSION: ${OLFS_VERSION}"
+
+ARG HYRAX_VERSION
+ENV HYRAX_VERSION=${HYRAX_VERSION:-"unknown"}
+RUN echo "HYRAX_VERSION: ${HYRAX_VERSION}"
+
+LABEL vendor="OPeNDAP"
+LABEL org.opendap.hyrax.version=${HYRAX_VERSION}
 LABEL org.opendap.hyrax.release-date=RELEASE_DATE
 LABEL org.opendap.hyrax.version.is-production="false"
 
@@ -45,8 +59,7 @@ USER root
 # add the ncWMS application to the build.
 ARG USE_NCWMS
 ENV USE_NCWMS ${USE_NCWMS:-"false"}
-RUN set -e && \
-    if [ $USE_NCWMS = "true" ];then echo "NCWMS: ENABLED"; else echo "NCWMS: DISABLED"; fi
+RUN if [ $USE_NCWMS = "true" ];then echo "NCWMS: ENABLED"; else echo "NCWMS: DISABLED"; fi
 
 #
 # The --build-arg NCWMS_BASE can be set to the base URL for ncWMS.
@@ -55,95 +68,86 @@ RUN set -e && \
 # is not in the shell from which the entrypoint.sh script is called.
 ARG NCWMS_BASE
 ENV NCWMS_BASE ${NCWMS_BASE:-"https://localhost:8080"}
-RUN set -e && \
-    if [ $USE_NCWMS = "true" ];then echo "NCWMS_BASE: {$NCWMS_BASE}"; fi
+RUN if [ $USE_NCWMS = "true" ];then echo "NCWMS_BASE: {$NCWMS_BASE}"; fi
 
 
 ARG DEVELOPER_MODE
 ENV DEVELOPER_MODE ${DEVELOPER_MODE:-"false"}
-RUN set -e && \
-    if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else echo "DEVELOPER_MODE: DISABLED"; fi
+RUN if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else echo "DEVELOPER_MODE: DISABLED"; fi
 
 
 # Update and install the needful.
-RUN set -e \
-    && yum -y install \
-        tomcat \
-        unzip  \
-        which \
-        awscli \
-        autoconf \
-        automake \
-        git \
-        bc \
-    && yum -y update \
-    && yum clean all 
+RUN yum -y install tomcat unzip which awscli autoconf automake git bc
+# Installing autoconf automake git bc for the tests install. The tests
+# are installed in the container but not run until a later stage of the
+# Travis build (or at a later time). They need to be part of the container,
+# howerver, to be run, so install them as part of this Dockerfile.
+RUN yum -y update
+RUN yum clean all
 
 # Tomcat environment (Tomcat installed above by via yum)
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
+# TODO Is this needed; it's not used in 'olfs' jhrg 4/1/31
 ENV CATALINA_HOME /usr/share/tomcat
 ENV PATH $CATALINA_HOME/bin:$PATH
 RUN echo "CATALINA_HOME: $CATALINA_HOME"
 
-
 ################################################################
 # SNAPSHOT URLs
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
-ENV LIBDAP_RPM="s3://opendap.travis.build/libdap-snapshot.el7.x86_64.rpm"
-ENV BES_RPM="s3://opendap.travis.build/bes-snapshot.static.el7.x86_64.rpm"
-ENV OLFS_PACKAGE="s3://opendap.travis.build/olfs-snapshot-webapp.tgz"
-ENV ROBOTS_PACKAGE="s3://opendap.travis.build/robots-olfs-snapshot-webapp.tgz"
-###############################################################
-
+ENV LIBDAP_RPM="s3://opendap.travis.build/libdap-${LIBDAP_VERSION}.el7.x86_64.rpm"
+ENV BES_RPM="s3://opendap.travis.build/bes-${BES_VERSION}.static.el7.x86_64.rpm"
+ENV OLFS_PACKAGE="s3://opendap.travis.build/olfs-${OLFS_VERSION}-webapp.tgz"
+ENV ROBOTS_PACKAGE="s3://opendap.travis.build/robots-olfs-${OLFS_VERSION}-webapp.tgz"
 
 ################################################################
 # Retrieve and install the latest libdap snapshot
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 RUN set -e \
     && echo "Retrieving, and installing the latest libdap snapshot. rpm: $LIBDAP_RPM" \
-    && aws --region=us-east-1 s3 cp ${LIBDAP_RPM}  ./libdap.rpm\
+    && aws --region=us-east-1 s3 cp ${LIBDAP_RPM}  ./libdap.rpm \
     && ls -l ./libdap* \
     && yum -y install ./libdap.rpm \
     && rm -f libdap.*
-################################################################
-
 
 ################################################################
 # Retrieve and install the latest BES snapshot
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 RUN set -e \
     && echo "Retrieving, and installing the latest besd snapshot. rpm: $BES_RPM" \
-    && aws --region=us-east-1 s3 cp ${BES_RPM}  ./bes.rpm\
+    && aws --region=us-east-1 s3 cp ${BES_RPM}  ./bes.rpm \
     && ls -l ./bes* \
     && yum -y install ./bes.rpm \
     && rm -f bes.*
 
 RUN echo "besdaemon is here: "`which besdaemon`
-################################################################
-
 
 ################################################################
 # Retrieve, verify, and install the OLFS web application
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
+ENV ROOT=/dev/shm
+
+RUN echo "Retrieving and installing the latest olfs snapshot (${OLFS_VERSION})."
 RUN set -e \
-    && echo "Retrieving and installing the latest olfs snapshot." \
-    && aws --region=us-east-1 s3 cp ${OLFS_PACKAGE}  ./olfs-snapshot-webapp.tgz\
-    && tar -C /dev/shm -xzf olfs-snapshot-webapp.tgz \
-    && ls -l /dev/shm/olfs-snapshot-webapp \
-    && echo "Unpacking olfs warfile..." \
-    && unzip -o /dev/shm/olfs-snapshot-webapp/opendap.war -d ${CATALINA_HOME}/webapps/opendap/ \
-    && echo "Cleaning up OLFS snapshot..." \
-    && rm -rf /dev/shm/* olfs-snapshot-webapp.tgz*
+    && aws --region=us-east-1 s3 cp ${OLFS_PACKAGE} ./olfs-${OLFS_VERSION}-webapp.tgz \
+    && tar -C ${ROOT} -xzvf ./olfs-${OLFS_VERSION}-webapp.tgz \
+    && ls -l ${ROOT} \
+    && echo "Unpacking warfile..." \
+    && mkdir -p ${CATALINA_HOME}/webapps/opendap/ \
+    # && (cd ${CATALINA_HOME}/webapps/opendap/ && jar -xf ${ROOT}/olfs-${OLFS_VERSION}-webapp/opendap.war) \
+    && unzip -o ${ROOT}/olfs-${OLFS_VERSION}-webapp/opendap.war -d ${CATALINA_HOME}/webapps/opendap/ \
+    && echo "Cleaning up." \
+    && rm -rf ${ROOT}/olfs-${OLFS_VERSION}-webapp ./olfs-${OLFS_VERSION}-webapp.tgz
 
 RUN set -e \
-    && echo "Retrieving and installing the latest dynamic robots.txt snapshot." \
-    && aws --region=us-east-1 s3 cp ${ROBOTS_PACKAGE}  ./robots-olfs-snapshot-webapp.tgz\
-    && tar -C /dev/shm -xzf robots-olfs-snapshot-webapp.tgz \
-    && ls -l /dev/shm/robots-olfs-snapshot-webapp \
+    && echo "Retrieving and installing the latest dynamic robots.txt snapshot (${OLFS_VERSION})." \
+    && aws --region=us-east-1 s3 cp ${ROBOTS_PACKAGE}  ./robots-olfs-${OLFS_VERSION}-webapp.tgz\
+    && tar -C ${ROOT} -xzf robots-olfs-${OLFS_VERSION}-webapp.tgz \
+    && ls -l ${ROOT}/robots-olfs-${OLFS_VERSION}-webapp \
     && echo "Unpacking dynamic robots.txt warfile..." \
-    && unzip -o /dev/shm/robots-olfs-snapshot-webapp/ROOT.war -d ${CATALINA_HOME}/webapps/ROOT/ \
+    && unzip -o ${ROOT}/robots-olfs-${OLFS_VERSION}-webapp/ROOT.war -d ${CATALINA_HOME}/webapps/ROOT/ \
     && echo "Cleaning up dynamic robots.txt snapshot..." \
-    && rm -rf /dev/shm/* robots-olfs-snapshot-webapp.tgz*
+    && rm -rf ${ROOT}/* robots-olfs-${OLFS_VERSION}-webapp.tgz
 
 # Fix ownership and access permissions
 RUN set -e \
@@ -158,8 +162,6 @@ RUN echo "unset AWS_ACCESS_KEY_ID"     >> ~/.bash_profile
 RUN echo "unset AWS_SECRET_ACCESS_KEY" >> ~/.bash_profile
 RUN echo "unset AWS_ACCESS_KEY_ID"     >> ~/.bashrc
 RUN echo "unset AWS_SECRET_ACCESS_KEY" >> ~/.bashrc
-################################################################
-
 
 ################################################################
 # retrieve and install the ncWMS web application
@@ -168,8 +170,7 @@ RUN echo "unset AWS_SECRET_ACCESS_KEY" >> ~/.bashrc
 # This is ncWMS-2.4.2
 ENV NCWMS_WAR_URL=https://github.com/Reading-eScience-Centre/ncwms/releases/download/ncwms-2.4.2/ncWMS2.war
 
-RUN set -e \
-    && if [ $USE_NCWMS = "true" ]; then \
+RUN if [ $USE_NCWMS = "true" ]; then \
         echo "Installing ncWMS..."; \
         curl -sfSL ${NCWMS_WAR_URL} -o /dev/shm/ncWMS.war; \
         unzip -o /dev/shm/ncWMS.war -d ${CATALINA_HOME}/webapps/ncWMS2/; \
@@ -179,8 +180,7 @@ RUN set -e \
     fi
 
 # set a default ncWMS admin if DEVELOPER_MODE is enabled.
-RUN set -e \
-    && if [ ${DEVELOPER_MODE} = "true" ] && [ $USE_NCWMS = "true" ]; then \
+RUN if [ ${DEVELOPER_MODE} = "true" ] && [ $USE_NCWMS = "true" ]; then \
         echo "DEVELOPER MODE: Adding ncWMS admin credentials"; \
         sed -i 'sX</tomcat-users>X<role rolename="ncWMS-admin"/> <user username="admin" password="admin" roles="ncWMS-admin"/> </tomcat-users>X' ${CATALINA_HOME}/conf/tomcat-users.xml; \
     else \
@@ -189,14 +189,13 @@ RUN set -e \
     
 #
 # make ncWMS work without further configuration 
-# @TODO We will need to adjust this target if we 
+# We will need to adjust this target if we
 # decide to run as a different (not root) user.
 COPY ncWMS_config.xml /root/.ncWMS2/config.xml
 RUN  chmod +r /root/.ncWMS2/config.xml
 
 COPY olfs_viewers.xml /tmp/olfs_viewers.xml
-RUN set -e \
-    && if [ $USE_NCWMS = "true" ]; then \
+RUN if [ $USE_NCWMS = "true" ]; then \
         # If we're installing ncWMS then we copy 
         # to the server a viewers.xml which has
         # been templated so that the ncWMS host can be installed 
@@ -212,9 +211,6 @@ COPY tomcat7-server.xml /
 RUN set -e \
     && mv /tomcat7-server.xml ${CATALINA_HOME}/conf/server.xml \
     && chown -R tomcat:tomcat ${CATALINA_HOME}/conf/server.xml
-
-################################################################
-
 
 ################################################################
 #
@@ -243,7 +239,7 @@ RUN set -e \
 
 
 COPY entrypoint.sh /
-RUN  set -e && chmod +x /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 ENTRYPOINT [ "/entrypoint.sh" ]
 
 EXPOSE 8080
@@ -253,7 +249,7 @@ EXPOSE 11002
 
 # can't use USER with entrypoint that needs root
 # use gosu or, as done, enable bes user write so the entrypoint does not need root
-RUN  set -e && chown -R bes /etc/bes
+RUN chown -R bes /etc/bes
 USER root
 
 CMD ["-"]

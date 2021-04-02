@@ -32,7 +32,8 @@ DOCKER_RELEASE="hyrax-${HYRAX_FULL_VERSION}";
 
 # Create release files from template
 mkdir -p "${DOCKER_RELEASE}"
-cp -R template/* "${DOCKER_RELEASE}"
+cp -R template "${DOCKER_RELEASE}"
+
 #
 # -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 # Massage the files drawn from the template with the current version numbers.
