@@ -23,7 +23,6 @@ ARG DEPLOYMENT_CONTEXT
 ENV DEPLOYMENT_CONTEXT ${DEPLOYMENT_CONTEXT:-"ROOT"}
 RUN echo "DEPLOYMENT_CONTEXT: ${DEPLOYMENT_CONTEXT}"
 
-
 RUN export NOW=`date +%s`
 # HYRAX VERSION INFO
 ENV OLFS_VERSION=snapshot
@@ -39,6 +38,22 @@ RUN echo "AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}"
 ARG AWS_SECRET_ACCESS_KEY
 ENV AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-"unknown"}
 RUN echo "AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}"
+
+ARG LIBDAP_VERSION
+ENV LIBDAP_VERSION=${LIBDAP_VERSION:-"unknown"}
+RUN echo "LIBDAP_VERSION: ${LIBDAP_VERSION}"
+
+ARG BES_VERSION
+ENV BES_VERSION=${BES_VERSION:-"unknown"}
+RUN echo "BES_VERSION: ${BES_VERSION}"
+
+ARG OLFS_VERSION
+ENV OLFS_VERSION=${OLFS_VERSION:-"unknown"}
+RUN echo "OLFS_VERSION: ${OLFS_VERSION}"
+
+ARG HYRAX_VERSION
+ENV HYRAX_VERSION=${HYRAX_VERSION:-"unknown"}
+RUN echo "HYRAX_VERSION: ${HYRAX_VERSION}"
 
 LABEL vendor="OPeNDAP"
 LABEL org.opendap.hyrax.version=snapshot
@@ -56,20 +71,14 @@ RUN set -e && \
 
 
 # Update and install the needful.
-RUN set -e \
-    && yum -y install \
-        tomcat \
-        unzip  \
-        which \
-        awscli \
-        autoconf \
-        automake \
-        git \
-        bc \
-        emacs \
-        vim \
-    && yum -y update \
-    && yum clean all 
+RUN yum -y install tomcat unzip which awscli autoconf automake git bc emacs vim
+# Installing autoconf automake git bc for the tests install. The tests
+# are installed in the container but not run until a later stage of the
+# Travis build (or at a later time). They need to be part of the container,
+# howerver, to be run, so install them as part of this Dockerfile.
+RUN yum -y update
+RUN yum clean all
+
 
 # Tomcat environment (Tomcat installed above by via yum)
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
@@ -81,9 +90,9 @@ RUN echo "CATALINA_HOME: $CATALINA_HOME"
 ################################################################
 # SNAPSHOT URLs
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
-ENV LIBDAP_RPM="s3://opendap.travis.build/libdap-snapshot.el7.x86_64.rpm"
-ENV BES_RPM="s3://opendap.travis.build/bes-snapshot.static.el7.x86_64.rpm"
-ENV NGAP_PACKAGE="s3://opendap.travis.build/ngap-snapshot-webapp.tgz"
+ENV LIBDAP_RPM="s3://opendap.travis.build/libdap-${LIBDAP_VERSION}.el7.x86_64.rpm"
+ENV BES_RPM="s3://opendap.travis.build/bes-${BES_VERSION}.static.el7.x86_64.rpm"
+ENV NGAP_PACKAGE="s3://opendap.travis.build/ngap-${OLFS_VERSION}-webapp.tgz"
 
 ################################################################
 # Retrieve and install the latest libdap snapshot
@@ -110,24 +119,25 @@ RUN echo "besdaemon is here: "`which besdaemon`
 ################################################################
 # Retrieve, verify, and install the NGAP/OLFS web application
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
+ENV ROOT=/dev/shm
+
+# NGAP package uses the OLFS_VERSION number. jhrg 4/2/21
+RUN echo "Retrieving and installing the latest ngap snapshot (${OLFS_VERSION})."
 RUN set -e \
-    && echo "Retrieving and installing the latest olfs snapshot." \
-    && aws --region=us-east-1 s3 cp ${NGAP_PACKAGE}  ./ngap-snapshot-webapp.tgz\
-    && tar -C /dev/shm -xzf ngap-snapshot-webapp.tgz \
-    && ls -l /dev/shm/ngap-snapshot-webapp \
-    && echo "Unpacking war file..." \
-    && unzip -o /dev/shm/ngap-snapshot-webapp/${DEFAULT_NGAP_DEPLOYMENT_CONTEXT}.war -d ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/ \
+    && aws --region=us-east-1 s3 cp ${NGAP_PACKAGE} ./ngap-${OLFS_VERSION}-webapp.tgz \
+    && tar -C ${ROOT} -xzvf ./ngap-${OLFS_VERSION}-webapp.tgz \
+    && ls -l ${ROOT} \
+    && echo "Unpacking warfile..." \
+    && unzip -o ${ROOT}/ngap-${OLFS_VERSION}-webapp/${DEFAULT_NGAP_DEPLOYMENT_CONTEXT}.war -d ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/ \
     && echo "Cleaning up." \
-    && rm -rf /dev/shm/* ngap-snapshot-webapp.tgz*
-#
-#
+    && rm -rf ${ROOT}/ngap-${OLFS_VERSION}-webapp ./ngap-${OLFS_VERSION}-webapp.tgz
+
 # Fix ownership and access permissions
 RUN set -e \
     && mkdir -p ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/logs \
     && chown -R tomcat:tomcat ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/logs \
     && chmod 700 ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/logs
 
-#
 # Clear these values so they do not persist in the container!
 ENV AWS_ACCESS_KEY_ID=
 ENV AWS_SECRET_ACCESS_KEY=

@@ -118,16 +118,19 @@ jobs:
         - docker tag ${SNAPSHOT_IMAGE_TAG} ${BUILD_VERSION_TAG}
         - docker image ls -a
 
-        # docker build --build-arg RELEASE_DATE=`date +%s` --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY  --build-arg USE_NCWMS=true -t "${SNAPSHOT_IMAGE_TAG}" hyrax
-
-    - stage: old
+    - stage: build
       name: "opendap/hyrax:ngap-snapshot"
       script:
-        - export SNAPSHOT_IMAGE_TAG=opendap/hyrax:ngap-snapshot
-        - cd hyrax-snapshot
-        - export BUILD_VERSION_TAG="opendap/"`grep "hyrax-" snapshot.time | awk '{print $1;}' - | sed -e "s/hyrax-/hyrax:ngap-/g"`
-        - echo "BUILD_VERSION_TAG ${BUILD_VERSION_TAG}"
-        - docker build --build-arg RELEASE_DATE=`date +%s` --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -t "${SNAPSHOT_IMAGE_TAG}" ngap
+        - export SNAPSHOT_IMAGE_TAG=opendap/hyrax:ngap_snapshot
+        - export BUILD_VERSION_TAG=opendap/hyrax:ngap-${HYRAX_VERSION}
+        - cd hyrax-builds
+        - docker build --build-arg RELEASE_DATE
+          --build-arg AWS_ACCESS_KEY_ID
+          --build-arg AWS_SECRET_ACCESS_KEY
+          --build-arg LIBDAP_VERSION
+          --build-arg BES_VERSION
+          --build-arg OLFS_VERSION
+          --tag "${SNAPSHOT_IMAGE_TAG}" ngap
         - docker tag ${SNAPSHOT_IMAGE_TAG} ${BUILD_VERSION_TAG}
         - docker image ls -a
 
