@@ -13,7 +13,6 @@ services:
 branches:
   only:
     - master
-    - build-numbers
 
 notifications:
   email:
@@ -46,11 +45,9 @@ install:
 
 stages:
   - name: build
-    if:  branch = master OR branch = build-numbers
+    if:  branch = master
   - name: test
-    if: branch = master OR branch = build-numbers
-#  - name: deploy
-#    if: branch = master
+    if: branch = master
 
 jobs:
   include:
@@ -146,7 +143,7 @@ deploy:
   - provider: script
     script: bash ${TRAVIS_BUILD_DIR}/deploy_to_docker_hub.sh
     on:
-      branch: build-numbers
+      branch: master
       condition: ${TRAVIS_PULL_REQUEST} = "false"
 
 
