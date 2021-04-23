@@ -42,6 +42,7 @@ before_install:
 install:
   - echo "print env:"
   - printenv
+  - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
 
 stages:
   - name: build
