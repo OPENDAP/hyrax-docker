@@ -173,7 +173,7 @@ fi
 
 # Start the BES daemon process
 # /usr/bin/besdaemon -i /usr -c /etc/bes/bes.conf -r /var/run/bes.pid
-/usr/bin/besctl start -d "/dev/null,timing";
+/usr/bin/besctl start -d "/dev/null,timing" >&2
 status=$?
 if [ $status -ne 0 ]; then
     echo "Failed to start BES: $status" >&2
@@ -224,7 +224,8 @@ while /bin/true; do
         echo "TOMCAT_STATUS: $TOMCAT_STATUS tomcat_pid:$tomcat_pid" >&2
     fi
 
-    tail -f /var/log/bes/bes.log | awk -f beslog2json.awk >&2
+    # Dropping log tail to test stdout pollution. (ndp-05/25/21)
+    # tail -f /var/log/bes/bes.log | awk -f beslog2json.awk >&2
 
 done
 
