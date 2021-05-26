@@ -225,7 +225,7 @@ while /bin/true; do
     fi
 
     # Dropping log tail to test stdout pollution. (ndp-05/25/21)
-    # tail -f /var/log/bes/bes.log | awk -f beslog2json.awk >&2
+    tail -f /var/log/bes/bes.log | awk -f beslog2json.awk >&2
 
 done
 
