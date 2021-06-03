@@ -224,8 +224,7 @@ while /bin/true; do
         echo "TOMCAT_STATUS: $TOMCAT_STATUS tomcat_pid:$tomcat_pid" >&2
     fi
 
-    # Piping log to stdout to test output pollution. (ndp-06/03/21)
-    tail -f /var/log/bes/bes.log | awk -f beslog2json.awk # >&2
+    tail -f /var/log/bes/bes.log | awk -f beslog2json.awk
 
 done
 
