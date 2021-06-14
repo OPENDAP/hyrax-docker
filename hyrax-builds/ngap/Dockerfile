@@ -55,6 +55,10 @@ ARG HYRAX_VERSION
 ENV HYRAX_VERSION=${HYRAX_VERSION:-"unknown"}
 RUN echo "HYRAX_VERSION: ${HYRAX_VERSION}"
 
+ARG TOMCAT_CONNECTION_TIMEOUT_MS
+ENV TOMCAT_CONNECTION_TIMEOUT_MS=${TOMCAT_CONNECTION_TIMEOUT_MS:-"1000000"}
+RUN echo "TOMCAT_CONNECTION_TIMEOUT_MS: ${TOMCAT_CONNECTION_TIMEOUT_MS}"
+
 LABEL vendor="OPeNDAP"
 LABEL org.opendap.hyrax.version=snapshot
 LABEL org.opendap.hyrax.release-date=RELEASE_DATE
@@ -80,12 +84,17 @@ RUN yum -y update
 RUN yum clean all
 
 
+################################################################
 # Tomcat environment (Tomcat installed above by via yum)
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 ENV CATALINA_HOME /usr/share/tomcat
 ENV PATH $CATALINA_HOME/bin:$PATH
 RUN echo "CATALINA_HOME: $CATALINA_HOME"
 
+RUN set -e \
+    && echo "Setting Tomcat connectionTimeout to ${TOMCAT_CONNECTION_TIMEOUT_MS}" \
+    && sed -e "s/connectionTimeout=\"[0-9]*\"/connectionTimeout=\"${TOMCAT_CONNECTION_TIMEOUT_MS}\"/g" ${CATALINA_HOME}/conf/server.xml  > /tmp/server.xml \
+    && mv /tmp/server.xml ${CATALINA_HOME}/conf/server.xml
 
 ################################################################
 # SNAPSHOT URLs
