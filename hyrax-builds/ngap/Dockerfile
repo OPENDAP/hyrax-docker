@@ -88,13 +88,9 @@ RUN yum clean all
 # Tomcat environment (Tomcat installed above by via yum)
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 ENV CATALINA_HOME /usr/share/tomcat
-ENV PATH $CATALINA_HOME/bin:$PATH
-RUN echo "CATALINA_HOME: $CATALINA_HOME"
+ENV PATH ${CATALINA_HOME}/bin:$PATH
+RUN echo "CATALINA_HOME: ${CATALINA_HOME}"
 
-RUN set -e \
-    && echo "Setting Tomcat connectionTimeout to ${TOMCAT_CONNECTION_TIMEOUT_MS}" \
-    && sed -e "s/connectionTimeout=\"[0-9]*\"/connectionTimeout=\"${TOMCAT_CONNECTION_TIMEOUT_MS}\"/g" ${CATALINA_HOME}/conf/server.xml  > /tmp/server.xml \
-    && mv /tmp/server.xml ${CATALINA_HOME}/conf/server.xml
 
 ################################################################
 # SNAPSHOT URLs
@@ -155,7 +151,8 @@ RUN echo "unset AWS_SECRET_ACCESS_KEY" >> ~/.bash_profile
 RUN echo "unset AWS_ACCESS_KEY_ID"     >> ~/.bashrc
 RUN echo "unset AWS_SECRET_ACCESS_KEY" >> ~/.bashrc
 
-# Install our modified server.xml so that the server compresses responses.
+# Install our modified server.xml so that the server compresses responses and
+# sets the connectionTimeout to 1000 seconds
 COPY tomcat7-server.xml /
 RUN set -e \
     && mv /tomcat7-server.xml ${CATALINA_HOME}/conf/server.xml \

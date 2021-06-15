@@ -73,7 +73,7 @@
     <Connector 
         port="8080" 
         protocol="HTTP/1.1"
-        connectionTimeout="20000"
+        connectionTimeout="1000000"
         redirectPort="8443" 
         compression="force"
         compressionMinSize="2048"
@@ -86,7 +86,7 @@
     <!--
     <Connector executor="tomcatThreadPool"
                port="8080" protocol="HTTP/1.1"
-               connectionTimeout="20000"
+               connectionTimeout="1000000"
                redirectPort="8443" />
     -->
     <!-- Define a SSL HTTP/1.1 Connector on port 8443
