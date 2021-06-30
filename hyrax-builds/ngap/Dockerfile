@@ -174,7 +174,8 @@ RUN set -e \
     && cp olfs/resources/ngap/lib/memcached-session-manager-2.3.3-SNAPSHOT.jar  ${CATALINA_HOME}/lib \
     && echo "Copying memcached Session Manager TC7" \
     && cp olfs/resources/ngap/lib/memcached-session-manager-tc7-2.3.3-SNAPSHOT.jar  ${CATALINA_HOME}/lib \
-    && chown -R tomcat:tomcat  ${CATALINA_HOME}/lib
+    && chown -R tomcat:tomcat  ${CATALINA_HOME}/lib \
+    && rm -rf olfs
 
 ################################################################
 #
