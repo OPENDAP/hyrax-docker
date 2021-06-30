@@ -88,8 +88,8 @@ RUN yum clean all
 # Tomcat environment (Tomcat installed above by via yum)
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 ENV CATALINA_HOME /usr/share/tomcat
-ENV PATH ${CATALINA_HOME}/bin:$PATH
-RUN echo "CATALINA_HOME: ${CATALINA_HOME}"
+ENV PATH $CATALINA_HOME/bin:$PATH
+RUN echo "CATALINA_HOME: $CATALINA_HOME"
 
 
 ################################################################
@@ -163,6 +163,18 @@ COPY tomcat.conf /
 RUN set -e \
     && mv /tomcat.conf /etc/tomcat/tomcat.conf \
     && chown -R tomcat:tomcat /etc/tomcat/tomcat.conf
+
+# Install Session Manager jars into the Tomcat: ${CATALINA_HOME}/lib
+RUN set -e \
+    && echo "Installing Session Manager jar files. Cloning OLFS..." \
+    && git clone --depth 1 https://github.com/OPENDAP/olfs \
+    && echo "Copying AmazonElastiCacheClusterClient" \
+    && cp olfs/resources/ngap/lib/AmazonElastiCacheClusterClient-no-version.jar  ${CATALINA_HOME}/lib \
+    && echo "Copying memcached Session Manager" \
+    && cp olfs/resources/ngap/lib/memcached-session-manager-2.3.3-SNAPSHOT.jar  ${CATALINA_HOME}/lib \
+    && echo "Copying memcached Session Manager TC7" \
+    && cp olfs/resources/ngap/lib/memcached-session-manager-tc7-2.3.3-SNAPSHOT.jar  ${CATALINA_HOME}/lib \
+    && chown -R tomcat:tomcat  ${CATALINA_HOME}/lib
 
 ################################################################
 #
