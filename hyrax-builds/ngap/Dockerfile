@@ -81,7 +81,6 @@ RUN yum -y install tomcat unzip which awscli autoconf automake git bc emacs vim
 # Travis build (or at a later time). They need to be part of the container,
 # howerver, to be run, so install them as part of this Dockerfile.
 RUN yum -y update
-RUN yum clean all
 
 
 ################################################################
@@ -165,17 +164,19 @@ RUN set -e \
     && chown -R tomcat:tomcat /etc/tomcat/tomcat.conf
 
 # Install Session Manager jars into the Tomcat: ${CATALINA_HOME}/lib
-RUN set -e \
-    && echo "Installing Session Manager jar files. Cloning OLFS..." \
-    && git clone --depth 1 https://github.com/OPENDAP/olfs \
-    && echo "Copying AmazonElastiCacheClusterClient" \
-    && cp olfs/resources/ngap/lib/AmazonElastiCacheClusterClient-no-version.jar  ${CATALINA_HOME}/lib \
-    && echo "Copying memcached Session Manager" \
-    && cp olfs/resources/ngap/lib/memcached-session-manager-2.3.3-SNAPSHOT.jar  ${CATALINA_HOME}/lib \
-    && echo "Copying memcached Session Manager TC7" \
-    && cp olfs/resources/ngap/lib/memcached-session-manager-tc7-2.3.3-SNAPSHOT.jar  ${CATALINA_HOME}/lib \
-    && chown -R tomcat:tomcat  ${CATALINA_HOME}/lib \
-    && rm -rf olfs
+#RUN set -e \
+#    && echo "Installing Session Manager jar files. Cloning OLFS..." \
+#    && git clone --depth 1 https://github.com/OPENDAP/olfs \
+#    && echo "Copying AmazonElastiCacheClusterClient" \
+#    && cp olfs/resources/ngap/lib/AmazonElastiCacheClusterClient-no-version.jar ${CATALINA_HOME}/lib \
+#    && echo "Copying memcached Session Manager" \
+#    && cp olfs/resources/ngap/lib/memcached-session-manager-2.3.3-SNAPSHOT.jar ${CATALINA_HOME}/lib \
+#    && echo "Copying memcached Session Manager TC7" \
+#    && cp olfs/resources/ngap/lib/memcached-session-manager-tc7-2.3.3-SNAPSHOT.jar ${CATALINA_HOME}/lib \
+#    && chown -R tomcat:tomcat  ${CATALINA_HOME}/lib \
+#    && rm -rfv olfs
+
+RUN yum clean all
 
 ################################################################
 #
