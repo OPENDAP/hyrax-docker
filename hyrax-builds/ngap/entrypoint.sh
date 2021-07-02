@@ -53,8 +53,23 @@ bes_site_conf_file="/etc/bes/site.conf"
 if [ -n "${BES_SITE_CONF}" ] ; then
     # echo "${BES_SITE_CONF}" > ${bes_site_conf_file}
     echo "${BES_SITE_CONF}" | sed -e "s+BES.LogName=stdout+BES.LogName=/var/log/bes/bes.log+g" > ${bes_site_conf_file}
-    echo "${bes_site_conf_file} -" >&2
+    echo "${bes_site_conf_file} - " >&2
     cat ${bes_site_conf_file} >&2
+fi
+################################################################################
+
+
+
+################################################################################
+# Inject Tomcat's context.xml configuratio document to configure the Tomcat to
+# utilize Session Management in the NGAP environment.
+#
+tomcat_context_xml_file="/usr/share/tomcat/conf/context.xml"
+# Test if the bes.conf env variable is set (by way of not unset) and not empty
+if [ -n "${TOMCAT_CONTEXT_XML}" ] ; then
+    echo "${TOMCAT_CONTEXT_XML}" > ${tomcat_context_xml_file}
+    echo "${tomcat_context_xml_file} - " >&2
+    cat ${tomcat_context_xml_file} >&2
 fi
 ################################################################################
 
