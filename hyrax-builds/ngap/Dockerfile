@@ -167,7 +167,7 @@ RUN set -e \
 RUN set -e \
     && echo "Installing Session Manager jar files. Cloning OLFS..." \
     && git clone --depth 1 https://github.com/OPENDAP/olfs \
-    && echo "Copying AmazonElastiCacheClusterClient" \
+    && echo "Copying elasticache client" \
     && cp olfs/resources/ngap/lib/elasticache-java-cluster-client-1.1.2.jar ${CATALINA_HOME}/lib \
     && echo "Copying memcached Session Manager" \
     && cp olfs/resources/ngap/lib/memcached-session-manager-2.3.2.jar ${CATALINA_HOME}/lib \
