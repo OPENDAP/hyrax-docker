@@ -121,6 +121,9 @@ if [ $debug = true ];then
     echo "NCWMS: Setting ncWMS access URLs in viewers.xml (if needed).";  >&2
 fi
 
+
+while true; do sleep 1; done
+
 sed -i "s+@NCWMS_BASE@+$NCWMS_BASE+g" ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml;
 if [ $debug = true ];then
     echo "${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml";  >&2
@@ -205,7 +208,7 @@ while /bin/true; do
     if [ $BESD_STATUS -ne 0 ]; then
         echo "BESD_STATUS: $BESD_STATUS bes_pid:$bes_pid" >&2
         echo "The BES daemon appears to have died! Exiting." >&2
-        exit -1;
+        exit 1;
     fi
     if [ $TOMCAT_STATUS -ne 0 ]; then
         echo "TOMCAT_STATUS: $TOMCAT_STATUS tomcat_pid:$tomcat_pid" >&2
@@ -213,7 +216,7 @@ while /bin/true; do
         echo "Tomcat Console Log [BEGIN]" >&2
         cat /usr/share/tomcat/logs/console.log >&2
         echo "Tomcat Console Log [END]" >&2
-        exit -2;
+        exit 2;
     fi
     
     if [ $debug = true ];then

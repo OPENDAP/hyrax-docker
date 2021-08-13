@@ -4,4 +4,5 @@ logs
 .DS_Store
 .idea
 *.iml
+*.log
 /.project
