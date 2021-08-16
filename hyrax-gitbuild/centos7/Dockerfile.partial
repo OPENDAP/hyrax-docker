@@ -189,7 +189,7 @@ RUN set -e \
 RUN set -e \
     && echo "BES: Cloning." \
     && cd /hyrax \
-    && git clone --depth 1 ${GIT_SERVICE}/OPENDAP/bes bes \
+    && git clone ${GIT_SERVICE}/OPENDAP/bes bes \
     && echo "Cloned BES project."
 #
 # Update the BES submodules
@@ -208,7 +208,6 @@ RUN set -e && \
 RUN set -e \
     && cd /hyrax/bes \
     && echo "BES: Checking out BES branch: ${BES_BRANCH}" \
-    && git fetch --depth 1 origin ${BES_BRANCH}:${BES_BRANCH} \
     && git checkout ${BES_BRANCH}  \
     && git branch
 #
@@ -224,7 +223,6 @@ RUN set -e && \
 RUN set -e \
     && cd /hyrax/bes/modules/hdf4_handler \
     && echo "BES: Checking out hdf4_handler branch: ${H4_BRANCH}" \
-    $$ git checkout master \
     && git checkout ${H4_BRANCH} \
     && git branch
 #
