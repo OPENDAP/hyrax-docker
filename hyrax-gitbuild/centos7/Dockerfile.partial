@@ -120,7 +120,7 @@ RUN set -e \
 RUN set -e \
     && cd /hyrax/hyrax-dependencies \
     && echo "HYRAX-DEPS: make (using prefix=${prefix})" \
-    && make \
+    && make for-travis \
     && echo "HYRAX-DEPS: stamps" \
     && ls -l *stamp
 
