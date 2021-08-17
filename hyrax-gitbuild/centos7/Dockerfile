@@ -309,19 +309,19 @@ RUN set -e && \
     echo "OLFS_BRANCH: ${OLFS_BRANCH}"
 
 #
-# Checkout the branch
-
-
+# Clone the repo
 RUN set -e \
     && echo "OLFS: Cloning" \
     && cd /hyrax \
     && git clone --depth 1 ${GIT_SERVICE}/OPENDAP/olfs olfs
 #
+# Check out target branch
 RUN set -e \
     && cd /hyrax/olfs \
     && echo "OLFS: Checking out branch: ${OLFS_BRANCH}" \
     && git checkout ${OLFS_BRANCH}
 #
+# Build the OLFS
 RUN set -e \
     && cd /hyrax/olfs \
     && echo "OLFS: Building ANT target: ${OLFS_TARGET}" \
@@ -441,7 +441,7 @@ USER bes
 ENV TEST_INSTALL_DIR="/hyrax/hyrax_regression_tests"
 RUN set -e \
     && echo "Retrieving, and building hyrax regression tests." \
-    && echo "h_r_t will be in: ${TEST_INSTALL_DIR}" \
+    && echo "Hyrax regression tests will be in: ${TEST_INSTALL_DIR}" \
     && mkdir -p ${TEST_INSTALL_DIR} \
     && git clone -v https://github.com/opendap/hyrax_regression_tests ${TEST_INSTALL_DIR} \
     && cd ${TEST_INSTALL_DIR} \
