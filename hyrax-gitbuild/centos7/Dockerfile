@@ -37,61 +37,10 @@ MAINTAINER support@opendap.org
 
 USER root
 
-ARG HYRAX_DEPENDENCIES_BRANCH
-ENV HYRAX_DEPENDENCIES_BRANCH ${HYRAX_DEPENDENCIES_BRANCH:-"master"}
-RUN set -e && \
-    echo "HYRAX_DEPENDENCIES_BRANCH: ${HYRAX_DEPENDENCIES_BRANCH}";
-
-ARG LIBDAP_BRANCH
-ENV LIBDAP_BRANCH ${LIBDAP_BRANCH:-"master"}
-RUN set -e && \
-    echo "LIBDAP_BRANCH: ${LIBDAP_BRANCH}";
-
-ARG BES_BRANCH
-ENV BES_BRANCH ${BES_BRANCH:-"master"}
-RUN set -e && \
-    echo "BES_BRANCH: ${BES_BRANCH}";
-
-ARG H4_BRANCH
-ENV H4_BRANCH ${H4_BRANCH:-"master"}
-RUN set -e && \
-    echo "H4_BRANCH: ${H4_BRANCH}";
-
-ARG H5_BRANCH
-ENV H5_BRANCH ${H5_BRANCH:-"master"}
-RUN set -e && \
-    echo "H5_BRANCH: ${H5_BRANCH}";
-
-ARG OLFS_BRANCH
-ENV OLFS_BRANCH ${OLFS_BRANCH:-"master"}
-RUN set -e && \
-    echo "OLFS_BRANCH: ${OLFS_BRANCH}";
-
-
-#
-# The --build-arg USE_NCWMS can be set to "true" in order to
-# add the ncWMS application to the build.
-ARG USE_NCWMS
-ENV USE_NCWMS ${USE_NCWMS:-"false"}
-RUN set -e && \
-    if [ $USE_NCWMS = "true" ];then echo "NCWMS: ENABLED"; else echo "NCWMS: DISABLED"; fi
-
-#
-# The --build-arg NCWMS_BASE can be set to the base URL for ncWMS.
-# The entrypoint.sh code defaults it to
-# the URL: https://localhost:8080 if the environment variable NCWMS_BASE
-# is not in the shell from which the entrypoint.sh script is called.
-ARG NCWMS_BASE
-ENV NCWMS_BASE ${NCWMS_BASE:-"https://localhost:8080"}
-RUN set -e && \
-    if [ $USE_NCWMS = "true" ];then echo "NCWMS_BASE: {$NCWMS_BASE}"; fi
-
-
 ARG DEVELOPER_MODE
 ENV DEVELOPER_MODE ${DEVELOPER_MODE:-"true"}
 RUN set -e && \
     if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else echo "DEVELOPER_MODE: DISABLED"; fi
-
 
 # Update and install the needful.
 RUN set -e \
@@ -125,7 +74,6 @@ RUN set -e \
         cppunit-devel \
         unzip \
         vim \
-        emacs \
         bc  \
         tomcat \
         libicu-devel \
@@ -139,8 +87,20 @@ ENV CATALINA_HOME /usr/share/tomcat
 ENV PATH ${CATALINA_HOME}/bin:$PATH
 RUN echo "CATALINA_HOME: $CATALINA_HOME"
 
+#
+# Create a 'bes' user and group
+RUN set -e \
+    && echo "Creating user 'bes'" \
+    &&  useradd -U -m bes
+
 RUN mkdir /hyrax \
-    && mkdir /hyrax/build
+    && mkdir /hyrax/build \
+    && chown -R bes:bes /hyrax
+
+USER bes
+RUN set -e \
+    && echo -n "I am " \
+    && whoami
 
 ENV prefix /hyrax/build
 RUN echo "prefix: ${prefix}"
@@ -154,6 +114,11 @@ RUN echo "BES_SITE_CONF: ${BES_SITE_CONF}"
 ###############################################################
 # Retrieve, build, and install hyrax-dependencies
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
+ARG HYRAX_DEPENDENCIES_BRANCH
+ENV HYRAX_DEPENDENCIES_BRANCH ${HYRAX_DEPENDENCIES_BRANCH:-"master"}
+RUN set -e && \
+    echo "HYRAX_DEPENDENCIES_BRANCH: ${HYRAX_DEPENDENCIES_BRANCH}";
+
 RUN set -e \
     && echo "HYRAX-DEPS: Cloning hyrax-dependencies" \
     && cd /hyrax \
@@ -167,7 +132,7 @@ RUN set -e \
 RUN set -e \
     && cd /hyrax/hyrax-dependencies \
     && echo "HYRAX-DEPS: make (using prefix=${prefix})" \
-    && make \
+    && make for-travis \
     && echo "HYRAX-DEPS: stamps" \
     && ls -l *stamp
 
@@ -196,6 +161,11 @@ RUN set -e \
 ###############################################################
 # Retrieve, build, and install libdap
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
+ARG LIBDAP_BRANCH
+ENV LIBDAP_BRANCH ${LIBDAP_BRANCH:-"master"}
+RUN set -e && \
+    echo "LIBDAP_BRANCH: ${LIBDAP_BRANCH}";
+
 RUN set -e \
     && echo "LIBDAP4: Cloning." \
     && cd /hyrax \
@@ -226,87 +196,166 @@ RUN set -e \
 ###############################################################
 # Retrieve, build, and install BES
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
+#
+# First we clone the BES repo.
 RUN set -e \
     && echo "BES: Cloning." \
     && cd /hyrax \
-    && git clone --depth 1 ${GIT_SERVICE}/OPENDAP/bes bes
-
+    && git clone ${GIT_SERVICE}/OPENDAP/bes bes \
+    && echo "Cloned BES project."
+#
+# Update the BES submodules
 RUN set -e \
     && echo "BES: Updating Git Submodules." \
     && cd /hyrax/bes \
     && git submodule update --init
-
+#
+# Now we check out the requested BES branch
+#
+ARG BES_BRANCH
+ENV BES_BRANCH ${BES_BRANCH:-"master"}
+RUN set -e && \
+    echo "BES_BRANCH: ${BES_BRANCH}";
+#
 RUN set -e \
-    && echo "BES: Checking out target branches." \
     && cd /hyrax/bes \
-    && echo "BES: Checking out branch: ${BES_BRANCH}" \
-    && git checkout ${BES_BRANCH} \
+    && echo "BES: Checking out BES branch: ${BES_BRANCH}" \
+    && git checkout ${BES_BRANCH}  \
+    && git branch
+#
+# Now we check out the requested hdf4_handler branch
+#
+# @FIXME This checkout code does not work if the branch is not "master"
+#
+ARG H4_BRANCH
+ENV H4_BRANCH ${H4_BRANCH:-"master"}
+RUN set -e && \
+    echo "H4_BRANCH: ${H4_BRANCH}";
+#
+# Checkout the branch
+RUN set -e \
+    && cd /hyrax/bes/modules/hdf4_handler \
     && echo "BES: Checking out hdf4_handler branch: ${H4_BRANCH}" \
-    && cd modules/hdf4_handler \
     && git checkout ${H4_BRANCH} \
+    && git branch
+#
+# Now we check out the requested hdf5_handler branch
+#
+# @FIXME This checkout code does not work if the branch is not "master"
+#
+ARG H5_BRANCH
+ENV H5_BRANCH ${H5_BRANCH:-"master"}
+RUN set -e && \
+    echo "H5_BRANCH: ${H5_BRANCH}";
+#
+# Checkout the branch
+RUN set -e \
+    && cd /hyrax/bes/modules/hdf5_handler \
     && echo "BES: Checking out hdf5_handler branch: ${H5_BRANCH}" \
-    && cd ../hdf5_handler \
-    && git checkout ${H5_BRANCH}
-
-
+    && git checkout ${H5_BRANCH} \
+    && git branch
+#
+# And we run configure
 RUN set -e \
     && cd /hyrax/bes \
     && echo "BES: autoreconf" \
     && autoreconf -vif \
     && echo "BES: configure (using prefix=${prefix})" \
     && ./configure --prefix=${prefix} --with-dependencies=${prefix}/deps --enable-developer
-
+#
+# And we run make
 RUN set -e \
     && cd /hyrax/bes \
     && echo "BES: ${MAKE}" \
     && $MAKE
-
+#
+# And then make check
 RUN set -e \
     && cd /hyrax/bes \
     && echo "BES: make check" \
-    && $MAKE check \
+    && $MAKE check
+
+# And then we install.
+RUN set -e \
+    && cd /hyrax/bes \
     && echo "BES: make install" \
     && make install
-
-RUN set -e \
-    && echo "Creating user 'bes'" \
-    &&  useradd -U -m bes
-
+#
+# Update the BES configuration to use the new bes user and group.
 RUN set -e \
     && cd /hyrax/bes \
     && echo "Setting BES User and Group to the 'bes' user in ${BES_SITE_CONF}" >&2 \
     && echo "BES.User=bes" >> "${BES_SITE_CONF}" \
     && echo "BES.Group=bes" >> "${BES_SITE_CONF}"
-
+#
+# Assign ownership of the deployment stack to the 'bes' user and group.
 RUN set -e \
     && echo "Assigning ownership of the BES deployment to the 'bes' user." >&2 \
     && chown -v -R bes:bes ${prefix}
 
+
 ###############################################################
-# Retrieve, build, and install OLFS
+# Retrieve, build, and install the OLFS
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
+#
 ENV OLFS_TARGET="server"
 ENV HYRAX_DEPLOYMENT_CONTEXT="opendap"
 ENV NGAP_DEPLOYMENT_CONTEXT="ROOT"
+
+
+ARG OLFS_BRANCH
+ENV OLFS_BRANCH ${OLFS_BRANCH:-"master"}
+RUN set -e && \
+    echo "OLFS_BRANCH: ${OLFS_BRANCH}"
+
+#
+# Checkout the branch
+
+
 RUN set -e \
     && echo "OLFS: Cloning" \
     && cd /hyrax \
-    && git clone --depth 1 ${GIT_SERVICE}/OPENDAP/olfs olfs \
-    && cd olfs \
+    && git clone --depth 1 ${GIT_SERVICE}/OPENDAP/olfs olfs
+#
+RUN set -e \
+    && cd /hyrax/olfs \
     && echo "OLFS: Checking out branch: ${OLFS_BRANCH}" \
-    && git checkout ${OLFS_BRANCH} \
-    && echo "OLFS: Building target: ${OLFS_TARGET}" \
-    && ant ${OLFS_TARGET} \
-    && echo "OLFS: Unpacking opendap.war file..." \
-    && unzip -o build/dist/opendap.war -d ${CATALINA_HOME}/webapps/${HYRAX_DEPLOYMENT_CONTEXT}/ \
+    && git checkout ${OLFS_BRANCH}
+#
+RUN set -e \
+    && cd /hyrax/olfs \
+    && echo "OLFS: Building ANT target: ${OLFS_TARGET}" \
+    && ant ${OLFS_TARGET}
+#
+# Need to be root for some system stuff.
+USER root
+#
+# Unpack the OLFS war file.
+RUN set -e \
+    && cd /hyrax/olfs \
+    && echo "OLFS: Unpacking opendap.war file" \
+    && unzip -o -d ${CATALINA_HOME}/webapps/${HYRAX_DEPLOYMENT_CONTEXT}/ build/dist/opendap.war
+#
+# Fix tomcat ownership and access permissions
+RUN set -e \
+    && mkdir -p ${CATALINA_HOME}/webapps/${HYRAX_DEPLOYMENT_CONTEXT}/WEB-INF/conf/logs \
+    && chown -R tomcat:tomcat ${CATALINA_HOME}/webapps/${HYRAX_DEPLOYMENT_CONTEXT}/ \
+    && chmod 700 ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs
+#
+# Install our modified server.xml so that the server compresses responses.
+COPY tomcat7-server.xml /
+RUN set -e \
+    && mv /tomcat7-server.xml ${CATALINA_HOME}/conf/server.xml \
+    && chown -R tomcat:tomcat ${CATALINA_HOME}/conf/server.xml
+#
+# Back to the 'bes' user.
+USER bes
+
+RUN set -e \
+    && cd /hyrax/olfs \
     && echo "OLFS: Cleaning up." \
     && ant clean
 
-# Fix ownership and access permissions
-RUN set -e \
-    && mkdir -p ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs \
-    && chown -R tomcat:tomcat ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs \
-    && chmod 700 ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs
 ###############################################################
 
 
@@ -314,9 +363,25 @@ RUN set -e \
 # retrieve and install the ncWMS web application
 #
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
-
 # This is ncWMS-2.4.2
 ENV NCWMS_WAR_URL=https://github.com/Reading-eScience-Centre/ncwms/releases/download/ncwms-2.4.2/ncWMS2.war
+
+#
+# The --build-arg USE_NCWMS can be set to "true" in order to
+# add the ncWMS application to the build.
+ARG USE_NCWMS
+ENV USE_NCWMS ${USE_NCWMS:-"false"}
+RUN set -e && \
+    if [ $USE_NCWMS = "true" ];then echo "NCWMS: ENABLED"; else echo "NCWMS: DISABLED"; fi
+#
+# The --build-arg NCWMS_BASE can be set to the base URL for ncWMS.
+# The entrypoint.sh code defaults it to
+# the URL: https://localhost:8080 if the environment variable NCWMS_BASE
+# is not in the shell from which the entrypoint.sh script is called.
+ARG NCWMS_BASE
+ENV NCWMS_BASE ${NCWMS_BASE:-"https://localhost:8080"}
+RUN set -e \
+    && if [ $USE_NCWMS = "true" ];then echo "NCWMS_BASE: {$NCWMS_BASE}"; fi
 
 RUN set -e \
     && if [ $USE_NCWMS = "true" ]; then \
@@ -325,7 +390,7 @@ RUN set -e \
         unzip -o /dev/shm/ncWMS.war -d ${CATALINA_HOME}/webapps/ncWMS2/; \
         rm -rf /dev/shm/*; \
     else \
-        echo "ncWMS will NOT be installed."; \
+        echo "NcWMS will NOT be installed."; \
     fi
 
 # set a default ncWMS admin if DEVELOPER_MODE is enabled.
@@ -341,8 +406,14 @@ RUN set -e \
 # make ncWMS work without further configuration
 # @TODO We will need to adjust this target if we
 # decide to run as a different (not root) user.
+USER root
 COPY ncWMS_config.xml /root/.ncWMS2/config.xml
-RUN  chmod +r /root/.ncWMS2/config.xml
+RUN set -e \
+    && if [ $USE_NCWMS = "true" ]; then \
+        chmod +r /root/.ncWMS2/config.xml; \
+    else \
+        rm -f /root/.ncWMS2/config.xml; \
+    fi
 
 COPY olfs_viewers.xml /tmp/olfs_viewers.xml
 RUN set -e \
@@ -351,20 +422,15 @@ RUN set -e \
         # to the server a viewers.xml which has
         # been templated so that the ncWMS host can be installed
         # at startup.
-        mv /tmp/olfs_viewers.xml ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml; \
+        mv /tmp/olfs_viewers.xml ${CATALINA_HOME}/webapps/${HYRAX_DEPLOYMENT_CONTEXT}/WEB-INF/conf/viewers.xml; \
+        chown -R tomcat:tomcat ${CATALINA_HOME}/webapps/${HYRAX_DEPLOYMENT_CONTEXT}/WEB-INF/conf/viewers.xml; \
     else \
-        echo "Skipping OLFS/ncWMS confguration installation."; \
+        echo -n "Skipping OLFS/ncWMS confguration installation. Removing: "; \
+        rm -f /tmp/olfs_viewers.xml; \
     fi
-
-
-# Install our modified server.xml so that the server compresses responses.
-COPY tomcat7-server.xml /
-RUN set -e \
-    && mv /tomcat7-server.xml ${CATALINA_HOME}/conf/server.xml \
-    && chown -R tomcat:tomcat ${CATALINA_HOME}/conf/server.xml
+USER bes
 
 ###############################################################
-
 
 ################################################################
 #
@@ -372,7 +438,7 @@ RUN set -e \
 # project
 #
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
-ENV TEST_INSTALL_DIR="/hyrax_regression_tests"
+ENV TEST_INSTALL_DIR="/hyrax/hyrax_regression_tests"
 RUN set -e \
     && echo "Retrieving, and building hyrax regression tests." \
     && echo "h_r_t will be in: ${TEST_INSTALL_DIR}" \
@@ -392,6 +458,9 @@ RUN set -e \
     && echo "SUCCESS: hyrax_regression_tests ready!"
 ################################################################
 
+
+USER root
+
 COPY entrypoint.sh /
 RUN  set -e && chmod +x /entrypoint.sh
 ENTRYPOINT [ "/entrypoint.sh" ]
@@ -401,10 +470,6 @@ EXPOSE 8443
 EXPOSE 10022
 EXPOSE 11002
 
-# can't use USER with entrypoint that needs root
-# use gosu or, as done, enable bes user write so the entrypoint does not need root
-#RUN  set -e && chown -R bes /etc/bes
-USER root
 
 CMD ["-"]
 

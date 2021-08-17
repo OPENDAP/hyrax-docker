@@ -122,7 +122,7 @@ if [ $debug = true ];then
 fi
 
 
-while true; do sleep 1; done
+# while true; do sleep 1; done
 
 sed -i "s+@NCWMS_BASE@+$NCWMS_BASE+g" ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml;
 if [ $debug = true ];then
@@ -140,37 +140,6 @@ if [ $FOLLOW_SYMLINKS != "not_set" ]; then
     echo "BES: Setting BES FollowSymLinks to YES."
     sed -i "s/^BES.Catalog.catalog.FollowSymLinks=No/BES.Catalog.catalog.FollowSymLinks=Yes/" /etc/bes/bes.conf
 fi
-
-#
-# Set the BES user and group ids to an unprivilged user.
-#
-# BES_CONF="${prefix}/etc/bes/bes.conf"
-#user_centos_conf=`cat $prefix/etc/bes/bes.conf | sed -e "s/user_name/centos/g" -e "s/group_name/centos/g"`
-#echo "${user_centos_conf}" > "${BES_CONF}"
-
-if [ $debug = true ]
-then
-  echo "#######################################################################"
-  echo "# /etc/passwd"
-  echo "#"
-  cat /etc/passwd
-
-  echo "#######################################################################"
-  echo "# /etc/group"
-  echo "#"
-  cat /etc/group
-fi
-
-#
-# Set the BES user and group ids to an unprivilged user.
-#
-#BES_SITE_CONF="${prefix}/etc/bes/site.conf"
-#echo "Setting BES User and Group to tomcat user in ${BES_SITE_CONF}" >&2
-#echo "BES.User=bes" >> "${BES_SITE_CONF}"
-#echo "BES.Group=bes" >> "${BES_SITE_CONF}"
-#
-#echo "Assigning ownership of BES deployment to 'bes' user." >&2
-#chown -v -R bes:bes ${prefix}
 
 
 # Start the BES daemon process
