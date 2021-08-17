@@ -124,10 +124,17 @@ fi
 
 # while true; do sleep 1; done
 
-sed -i "s+@NCWMS_BASE@+$NCWMS_BASE+g" ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml;
-if [ $debug = true ];then
-    echo "${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml";  >&2
-    cat ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml; >&2
+viewers_xml=$(find ${CATALINA_HOME}/webapps/ -name viewers.xml -print)
+echo "viewers_xml: ${viewers_xml}"
+if test -n "$viewers_xml"; then
+  echo "NCWMS: Located viewers.xml here: ${viewers_xml}"
+  sed -i "s+@NCWMS_BASE@+$NCWMS_BASE+g" ${viewers_xml};
+  if [ $debug = true ]; then
+      echo "${viewers_xml}";  >&2
+      cat ${viewers_xml}; >&2
+  fi
+else
+  echo "NCWMS: Failed to locate viewers.xml in: ${CATALINA_HOME}/webapps Skipping."
 fi
 
 # modify bes.conf based on environment variables before startup.

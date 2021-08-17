@@ -298,16 +298,6 @@ RUN set -e \
 # Retrieve, build, and install the OLFS
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 #
-ENV OLFS_TARGET="server"
-ENV HYRAX_DEPLOYMENT_CONTEXT="opendap"
-ENV NGAP_DEPLOYMENT_CONTEXT="ROOT"
-
-
-ARG OLFS_BRANCH
-ENV OLFS_BRANCH ${OLFS_BRANCH:-"master"}
-RUN set -e && \
-    echo "OLFS_BRANCH: ${OLFS_BRANCH}"
-
 #
 # Clone the repo
 RUN set -e \
@@ -316,39 +306,58 @@ RUN set -e \
     && git clone --depth 1 ${GIT_SERVICE}/OPENDAP/olfs olfs
 #
 # Check out target branch
+#
+ARG OLFS_BRANCH
+ENV OLFS_BRANCH ${OLFS_BRANCH:-"master"}
+RUN set -e && \
+    echo "OLFS_BRANCH: ${OLFS_BRANCH}"
+
 RUN set -e \
     && cd /hyrax/olfs \
     && echo "OLFS: Checking out branch: ${OLFS_BRANCH}" \
     && git checkout ${OLFS_BRANCH}
 #
 # Build the OLFS
+#
+ARG OLFS_BUILD_TARGET
+ENV OLFS_BUILD_TARGET ${OLFS_BUILD_TARGET:-"opendap"}
+RUN set -e && \
+    echo "OLFS_BUILD_TARGET: ${OLFS_BUILD_TARGET}"
+
 RUN set -e \
     && cd /hyrax/olfs \
-    && echo "OLFS: Building ANT target: ${OLFS_TARGET}" \
-    && ant ${OLFS_TARGET}
+    && echo "OLFS: Building ANT target: ${OLFS_BUILD_TARGET}" \
+    && ant ${OLFS_BUILD_TARGET}
 #
-# Need to be root for some system stuff.
+# Unpack the OLFS war file into the HYRAX_DEPLOYMENT_CONTEXT
+#
+ARG HYRAX_DEPLOYMENT_CONTEXT
+ENV HYRAX_DEPLOYMENT_CONTEXT ${HYRAX_DEPLOYMENT_CONTEXT:-"opendap"}
+RUN set -e && \
+    echo "HYRAX_DEPLOYMENT_CONTEXT: ${HYRAX_DEPLOYMENT_CONTEXT}"
+
 USER root
-#
-# Unpack the OLFS war file.
 RUN set -e \
     && cd /hyrax/olfs \
-    && echo "OLFS: Unpacking opendap.war file" \
-    && unzip -o -d ${CATALINA_HOME}/webapps/${HYRAX_DEPLOYMENT_CONTEXT}/ build/dist/opendap.war
+    && echo "OLFS: Unpacking ${OLFS_BUILD_TARGET}.war file" \
+    && unzip -o -d ${CATALINA_HOME}/webapps/${HYRAX_DEPLOYMENT_CONTEXT}/ build/dist/${OLFS_BUILD_TARGET}.war
 #
 # Fix tomcat ownership and access permissions
+#
 RUN set -e \
     && mkdir -p ${CATALINA_HOME}/webapps/${HYRAX_DEPLOYMENT_CONTEXT}/WEB-INF/conf/logs \
     && chown -R tomcat:tomcat ${CATALINA_HOME}/webapps/${HYRAX_DEPLOYMENT_CONTEXT}/ \
-    && chmod 700 ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs
+    && chmod 700 ${CATALINA_HOME}/webapps/${HYRAX_DEPLOYMENT_CONTEXT}/WEB-INF/conf/logs
 #
 # Install our modified server.xml so that the server compresses responses.
+#
 COPY tomcat7-server.xml /
 RUN set -e \
     && mv /tomcat7-server.xml ${CATALINA_HOME}/conf/server.xml \
     && chown -R tomcat:tomcat ${CATALINA_HOME}/conf/server.xml
 #
 # Back to the 'bes' user.
+#
 USER bes
 
 RUN set -e \
