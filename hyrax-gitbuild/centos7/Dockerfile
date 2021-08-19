@@ -17,10 +17,6 @@ FROM centos:7
 
 ENV MAKE "make -j2"
 
-# HYRAX VERSION INFO
-ENV HYRAX_VERSION=snapshot
-ENV HYRAX_VERSION_LABEL=snapshot
-
 ENV GIT_SERVICE=https://github.com
 
 ARG RELEASE_DATE
@@ -40,7 +36,7 @@ USER root
 ARG DEVELOPER_MODE
 ENV DEVELOPER_MODE ${DEVELOPER_MODE:-"true"}
 RUN set -e && \
-    if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else echo "DEVELOPER_MODE: DISABLED"; fi
+    if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"  >&2 ; else echo "DEVELOPER_MODE: DISABLED"  >&2 ; fi
 
 # Update and install the needful.
 RUN set -e \
@@ -85,12 +81,12 @@ RUN set -e \
 # Tomcat environment (Tomcat installed above by via yum)
 ENV CATALINA_HOME /usr/share/tomcat
 ENV PATH ${CATALINA_HOME}/bin:$PATH
-RUN echo "CATALINA_HOME: $CATALINA_HOME"
+RUN echo "CATALINA_HOME: $CATALINA_HOME" >&2
 
 #
 # Create a 'bes' user and group
 RUN set -e \
-    && echo "Creating user 'bes'" \
+    && echo "Creating user 'bes'" >&2 \
     &&  useradd -U -m bes
 
 RUN mkdir /hyrax \
@@ -102,14 +98,14 @@ RUN set -e \
     && echo -n "I am " \
     && whoami
 
-ENV prefix /hyrax/build
-RUN echo "prefix: ${prefix}"
+ENV prefix "/hyrax/build"
+RUN echo "prefix: '${prefix}'" >&2
 
 ENV PATH $prefix/bin:$prefix/deps/bin:$PATH
-RUN echo "PATH: ${PATH}"
+RUN echo "PATH: '${PATH}'" >&2
 
-ENV BES_SITE_CONF "${prefix}/etc/bes/site.conf"
-RUN echo "BES_SITE_CONF: ${BES_SITE_CONF}"
+ENV bes_site_conf_file "${prefix}/etc/bes/site.conf"
+RUN echo "bes_site_conf_file: '${bes_site_conf_file}'" >&2
 
 ###############################################################
 # Retrieve, build, and install hyrax-dependencies
@@ -117,42 +113,42 @@ RUN echo "BES_SITE_CONF: ${BES_SITE_CONF}"
 ARG HYRAX_DEPENDENCIES_BRANCH
 ENV HYRAX_DEPENDENCIES_BRANCH ${HYRAX_DEPENDENCIES_BRANCH:-"master"}
 RUN set -e && \
-    echo "HYRAX_DEPENDENCIES_BRANCH: ${HYRAX_DEPENDENCIES_BRANCH}";
+    echo "HYRAX_DEPENDENCIES_BRANCH: ${HYRAX_DEPENDENCIES_BRANCH}" >&2
 
 RUN set -e \
-    && echo "HYRAX-DEPS: Cloning hyrax-dependencies" \
+    && echo "HYRAX-DEPS: Cloning hyrax-dependencies" >&2 \
     && cd /hyrax \
     && git clone --depth 1 ${GIT_SERVICE}/OPENDAP/hyrax-dependencies hyrax-dependencies \
     && cd hyrax-dependencies \
-    && echo "HYRAX-DEPS: Checking out branch: ${HYRAX_DEPENDENCIES_BRANCH}" \
+    && echo "HYRAX-DEPS: Checking out branch: ${HYRAX_DEPENDENCIES_BRANCH}" >&2 \
     && git checkout ${HYRAX_DEPENDENCIES_BRANCH} \
-    && echo "HYRAX-DEPS: top level files" \
+    && echo "HYRAX-DEPS: top level files" >&2 \
     && ls -l
 
 RUN set -e \
     && cd /hyrax/hyrax-dependencies \
-    && echo "HYRAX-DEPS: make (using prefix=${prefix})" \
+    && echo "HYRAX-DEPS: make (using prefix=${prefix})" >&2 \
     && make for-travis \
-    && echo "HYRAX-DEPS: stamps" \
+    && echo "HYRAX-DEPS: stamps" >&2 \
     && ls -l *stamp
 
 RUN set -e \
     && cd /hyrax/hyrax-dependencies \
-    && echo "HYRAX-DEPS: make proj (using prefix=${prefix})" \
+    && echo "HYRAX-DEPS: make proj (using prefix=${prefix})" >&2 \
     && make proj \
-    && echo "HYRAX-DEPS: stamps" \
+    && echo "HYRAX-DEPS: stamps" >&2 \
     && ls -l *stamp
 
 RUN set -e \
     && cd /hyrax/hyrax-dependencies \
-    && echo "HYRAX-DEPS: make (using prefix=${prefix})" \
+    && echo "HYRAX-DEPS: make (using prefix=${prefix})" >&2 \
     && make gdal4 \
-    && echo "HYRAX-DEPS: stamps" \
+    && echo "HYRAX-DEPS: stamps" >&2 \
     && ls -l *stamp
 
 RUN set -e \
     && cd /hyrax/hyrax-dependencies \
-    && echo "HYRAX-DEPS: Stamps and deps" \
+    && echo "HYRAX-DEPS: Stamps and deps" >&2 \
     && ls -l *stamp \
     && ls -l ${prefix}/deps/lib
 
@@ -164,31 +160,31 @@ RUN set -e \
 ARG LIBDAP_BRANCH
 ENV LIBDAP_BRANCH ${LIBDAP_BRANCH:-"master"}
 RUN set -e && \
-    echo "LIBDAP_BRANCH: ${LIBDAP_BRANCH}";
+    echo "LIBDAP_BRANCH: ${LIBDAP_BRANCH}" >&2
 
 RUN set -e \
-    && echo "LIBDAP4: Cloning." \
+    && echo "LIBDAP4: Cloning." >&2 \
     && cd /hyrax \
     && git clone --depth 1 ${GIT_SERVICE}/OPENDAP/libdap4  libdap4 \
     && cd libdap4 \
-    && echo "LIBDAP4: Checking out branch: ${LIBDAP_BRANCH}" \
+    && echo "LIBDAP4: Checking out branch: ${LIBDAP_BRANCH}" >&2 \
     && git checkout ${LIBDAP_BRANCH}
 
 RUN set -e \
     && pwd \
     && cd /hyrax/libdap4 \
-    && echo "LIBDAP4: autoreconf" \
+    && echo "LIBDAP4: autoreconf" >&2 \
     && autoreconf -vif \
-    && echo "LIBDAP4: ./configure (using prefix=${prefix})" \
+    && echo "LIBDAP4: ./configure (using prefix=${prefix})" >&2 \
     && ./configure --prefix=${prefix} --enable-developer \
-    && echo "LIBDAP4: ${MAKE}" \
+    && echo "LIBDAP4: ${MAKE}" >&2 \
     && $MAKE
 
 RUN set -e \
     && cd /hyrax/libdap4 \
-    && echo "LIBDAP4: ${MAKE} check" \
+    && echo "LIBDAP4: ${MAKE} check" >&2 \
     && $MAKE check \
-    && echo "LIBDAP4: make install" \
+    && echo "LIBDAP4: make install" >&2 \
     && make install
 
 ###############################################################
@@ -199,14 +195,14 @@ RUN set -e \
 #
 # First we clone the BES repo.
 RUN set -e \
-    && echo "BES: Cloning." \
+    && echo "BES: Cloning..." >&2 \
     && cd /hyrax \
     && git clone ${GIT_SERVICE}/OPENDAP/bes bes \
-    && echo "Cloned BES project."
+    && echo "Cloned BES project." >&2
 #
 # Update the BES submodules
 RUN set -e \
-    && echo "BES: Updating Git Submodules." \
+    && echo "BES: Updating Git Submodules." >&2 \
     && cd /hyrax/bes \
     && git submodule update --init
 #
@@ -215,11 +211,11 @@ RUN set -e \
 ARG BES_BRANCH
 ENV BES_BRANCH ${BES_BRANCH:-"master"}
 RUN set -e && \
-    echo "BES_BRANCH: ${BES_BRANCH}";
+    echo "BES_BRANCH: ${BES_BRANCH}" >&2
 #
 RUN set -e \
     && cd /hyrax/bes \
-    && echo "BES: Checking out BES branch: ${BES_BRANCH}" \
+    && echo "BES: Checking out BES branch: ${BES_BRANCH}" >&2 \
     && git checkout ${BES_BRANCH}  \
     && git branch
 #
@@ -230,12 +226,12 @@ RUN set -e \
 ARG H4_BRANCH
 ENV H4_BRANCH ${H4_BRANCH:-"master"}
 RUN set -e && \
-    echo "H4_BRANCH: ${H4_BRANCH}";
+    echo "H4_BRANCH: ${H4_BRANCH}" >&2
 #
 # Checkout the branch
 RUN set -e \
     && cd /hyrax/bes/modules/hdf4_handler \
-    && echo "BES: Checking out hdf4_handler branch: ${H4_BRANCH}" \
+    && echo "BES: Checking out hdf4_handler branch: ${H4_BRANCH}" >&2 \
     && git checkout ${H4_BRANCH} \
     && git branch
 #
@@ -246,47 +242,49 @@ RUN set -e \
 ARG H5_BRANCH
 ENV H5_BRANCH ${H5_BRANCH:-"master"}
 RUN set -e && \
-    echo "H5_BRANCH: ${H5_BRANCH}";
+    echo "H5_BRANCH: ${H5_BRANCH}"  >&2
 #
 # Checkout the branch
 RUN set -e \
     && cd /hyrax/bes/modules/hdf5_handler \
-    && echo "BES: Checking out hdf5_handler branch: ${H5_BRANCH}" \
+    && echo "BES: Checking out hdf5_handler branch: ${H5_BRANCH}" >&2 \
     && git checkout ${H5_BRANCH} \
     && git branch
 #
 # And we run configure
 RUN set -e \
     && cd /hyrax/bes \
-    && echo "BES: autoreconf" \
+    && echo "BES: autoreconf" >&2 \
     && autoreconf -vif \
-    && echo "BES: configure (using prefix=${prefix})" \
+    && echo "BES: configure (using prefix=${prefix})" >&2 \
     && ./configure --prefix=${prefix} --with-dependencies=${prefix}/deps --enable-developer
 #
 # And we run make
 RUN set -e \
     && cd /hyrax/bes \
-    && echo "BES: ${MAKE}" \
+    && echo "BES: ${MAKE}" >&2 \
     && $MAKE
 #
 # And then make check
 RUN set -e \
     && cd /hyrax/bes \
-    && echo "BES: make check" \
+    && echo "BES: make check" >&2 \
     && $MAKE check
 
 # And then we install.
 RUN set -e \
     && cd /hyrax/bes \
-    && echo "BES: make install" \
+    && echo "BES: make install" >&2 \
     && make install
 #
 # Update the BES configuration to use the new bes user and group.
 RUN set -e \
     && cd /hyrax/bes \
-    && echo "Setting BES User and Group to the 'bes' user in ${BES_SITE_CONF}" >&2 \
-    && echo "BES.User=bes" >> "${BES_SITE_CONF}" \
-    && echo "BES.Group=bes" >> "${BES_SITE_CONF}"
+    && echo "Setting BES User and Group to the 'bes' user in ${bes_site_conf_file}" >&2 \
+    && echo "BES.User=bes" >> "${bes_site_conf_file}" \
+    && echo "BES.Group=bes" >> "${bes_site_conf_file}" \
+    && echo "${bes_site_conf_file}:" >&2 \
+    && cat "${bes_site_conf_file}"  >&2
 #
 # Assign ownership of the deployment stack to the 'bes' user and group.
 RUN set -e \
@@ -317,6 +315,12 @@ RUN set -e \
     && echo "OLFS: Checking out branch: ${OLFS_BRANCH}" \
     && git checkout ${OLFS_BRANCH}
 #
+# Build the version string
+#
+ENV HYRAX_VERSION_BASE "libdap:${LIBDAP_BRANCH}, bes:${BES_BRANCH}, h4:${H4_BRANCH}, h5:${H5_BRANCH}, olfs:${OLFS_BRANCH}"
+RUN set -e && \
+    echo "HYRAX_VERSION_BASE: ${HYRAX_VERSION_BASE}"
+#
 # Build the OLFS
 #
 ARG OLFS_BUILD_TARGET
@@ -326,8 +330,10 @@ RUN set -e && \
 
 RUN set -e \
     && cd /hyrax/olfs \
-    && echo "OLFS: Building ANT target: ${OLFS_BUILD_TARGET}" \
-    && ant ${OLFS_BUILD_TARGET}
+    && export time_now=`date` \
+    && export hyrax_version="${time_now} ${HYRAX_VERSION_BASE}" \
+    && echo "OLFS: Building ANT target: ${OLFS_BUILD_TARGET} hyrax_version: ${hyrax_version}" \
+    && ant -DHYRAX_VERSION="${hyrax_version}" -DOLFS_VERSION="${OLFS_BRANCH}" ${OLFS_BUILD_TARGET}
 #
 # Unpack the OLFS war file into the HYRAX_DEPLOYMENT_CONTEXT
 #
@@ -447,11 +453,17 @@ USER bes
 # project
 #
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
-ENV TEST_INSTALL_DIR="/hyrax/hyrax_regression_tests"
+ENV TEST_INSTALL_DIR="/hyrax_regression_tests"
+USER root
 RUN set -e \
-    && echo "Retrieving, and building hyrax regression tests." \
-    && echo "Hyrax regression tests will be in: ${TEST_INSTALL_DIR}" \
+    && echo "HYRAX_REGRESSION_TESTS: Retrieving, and building hyrax regression tests." \
+    && echo "HYRAX_REGRESSION_TESTS: Hyrax regression tests will be in: ${TEST_INSTALL_DIR}" \
     && mkdir -p ${TEST_INSTALL_DIR} \
+    && chown -R bes:bes ${TEST_INSTALL_DIR}
+USER bes
+
+RUN set -e \
+    && echo "HYRAX_REGRESSION_TESTS: Retrieving, and building hyrax regression tests." \
     && git clone -v https://github.com/opendap/hyrax_regression_tests ${TEST_INSTALL_DIR} \
     && cd ${TEST_INSTALL_DIR} \
     && git checkout master \
@@ -464,14 +476,24 @@ RUN set -e \
 RUN set -e \
     && cd ${TEST_INSTALL_DIR} \
     && make testsuite > mk.log 2>&1 \
-    && echo "SUCCESS: hyrax_regression_tests ready!"
+    && echo "HYRAX_REGRESSION_TESTS: hyrax_regression_tests are ready!"
 ################################################################
 
 
 USER root
 
 COPY entrypoint.sh /
-RUN  set -e && chmod +x /entrypoint.sh
+RUN set -e \
+    && which sed \
+    && ls -l /entrypoint.sh
+
+RUN set -e \
+    && cat /entrypoint.sh | sed \
+        -e "s+HYRAX_DEPLOYMENT_CONTEXT+${HYRAX_DEPLOYMENT_CONTEXT}+g" \
+        -e "s+HYRAX_BUILD_PREFIX+${prefix}+g" > /foo \
+    && mv /foo /entrypoint.sh \
+    && chmod +x /entrypoint.sh
+
 ENTRYPOINT [ "/entrypoint.sh" ]
 
 EXPOSE 8080

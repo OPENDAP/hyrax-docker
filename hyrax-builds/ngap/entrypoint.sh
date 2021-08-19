@@ -59,9 +59,8 @@ fi
 ################################################################################
 
 
-
 ################################################################################
-# Inject Tomcat's context.xml configuratio document to configure the Tomcat to
+# Inject Tomcat's context.xml configuration document to configure the Tomcat to
 # utilize Session Management in the NGAP environment.
 #
 tomcat_context_xml_file="/usr/share/tomcat/conf/context.xml"
@@ -74,41 +73,44 @@ fi
 ################################################################################
 
 
-
 ################################################################################
 # Inject an NGAP Cumulus Configuration
-# Only create the /etc/bes/site.conf file if all the necessary environment
+# Only amend the /etc/bes/site.conf file if all the necessary environment
 # variables are defined
 #
-#if [ $S3_DISTRIBUTION_ENDPOINT ] && [ -n $S3_DISTRIBUTION_ENDPOINT ] &&  \
-#   [ $S3_REFRESH_MARGIN ] && [ -n $S3_REFRESH_MARGIN ] && \
-#   [ $S3_AWS_REGION ] && [ -n $S3_AWS_REGION ] && \
-#   [ $S3_BASE_URL ] && [ -n $S3_BASE_URL ]; then
-#    echo "NGAP.S3.distribution.endpoint.url=${S3_DISTRIBUTION_ENDPOINT}" >> /etc/bes/site.conf
-#    echo "NGAP.S3.refresh.margin=${S3_REFRESH_MARGIN}" >> /etc/bes/site.conf
-#    echo "NGAP.S3.region=${S3_AWS_REGION}" >> /etc/bes/site.conf
-#    echo "NGAP.S3.url.base=${S3_BASE_URL}" >> /etc/bes/site.conf
+#if [ -n "${S3_DISTRIBUTION_ENDPOINT}" ] &&  \
+#   [ -n "${S3_REFRESH_MARGIN}" ] && \
+#   [ -n "${S3_AWS_REGION}" ] && \
+#   [ -n "${S3_BASE_URL}" ]; then
+#
+#  echo "Amending BES site.conf file." >&2
+#  {
+#    echo "NGAP.S3.distribution.endpoint.url=${S3_DISTRIBUTION_ENDPOINT}"
+#    echo "NGAP.S3.refresh.margin=${S3_REFRESH_MARGIN}"
+#    echo "NGAP.S3.region=${S3_AWS_REGION}"
+#    echo "NGAP.S3.url.base=${S3_BASE_URL}"
+#  } | tee -a "${bes_site_conf_file}" >&2
 #fi
 ################################################################################
 
 if [ -n "${SERVER_HELP_EMAIL}" ] ; then
-    echo "Found exisiting SERVER_HELP_EMAIL: ${SERVER_HELP_EMAIL}"
+    echo "Found existing SERVER_HELP_EMAIL: ${SERVER_HELP_EMAIL}" >&2
 else
     SERVER_HELP_EMAIL="not_set"
-     echo "SERVER_HELP_EMAIL is ${SERVER_HELP_EMAIL}"
+     echo "SERVER_HELP_EMAIL is ${SERVER_HELP_EMAIL}" >&2
 fi
 if [ -n "${FOLLOW_SYMLINKS}" ] ; then
-    echo "Found existing FOLLOW_SYMLINKS: ${FOLLOW_SYMLINKS}"
+    echo "Found existing FOLLOW_SYMLINKS: ${FOLLOW_SYMLINKS}" >&2
 else
     FOLLOW_SYMLINKS="not_set";
-     echo "FOLLOW_SYMLINKS is $FOLLOW_SYMLINKS"
+     echo "FOLLOW_SYMLINKS is $FOLLOW_SYMLINKS" >&2
 fi
 
 if [ -n "${NCWMS_BASE}" ] ; then
-    echo "Found exisiting NCWMS_BASE: ${NCWMS_BASE}"
+    echo "Found existing NCWMS_BASE: ${NCWMS_BASE}" >&2
 else
     NCWMS_BASE="https://localhost:8080"
-    echo "Assigning default NCWMS_BASE: ${NCWMS_BASE}"
+    echo "Assigning default NCWMS_BASE: ${NCWMS_BASE}" >&2
 fi
 debug=false;
 
@@ -148,29 +150,29 @@ done
 if [ $debug = true ];then
     echo "CATALINA_HOME: ${CATALINA_HOME}"  >&2
     ls -l "$CATALINA_HOME" "$CATALINA_HOME/bin"  >&2
+    ls -l "$CATALINA_HOME/webapps/"  >&2
 fi
 
-DEFAULT_CONF_DIR="${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf"
-VIEWERS_XML="${DEFAULT_CONF_DIR}/viewers.xml"
 if [ $debug = true ];then
-    echo "NCWMS_BASE: ${NCWMS_BASE}"  >&2
-    echo "Setting ncWMS access URLs in viewers.xml (if needed)."  >&2
-    ls -l "${VIEWERS_XML}" >&2
+    echo "NCWMS: Using NCWMS_BASE: ${NCWMS_BASE}"  >&2
+    echo "NCWMS: Setting ncWMS access URLs in viewers.xml (if needed)."  >&2
 fi
 
 sed -i "s+@NCWMS_BASE@+${NCWMS_BASE}+g" "${VIEWERS_XML}";
 
-if [ $debug = true ];then
-    echo "${VIEWERS_XML} - "  >&2
-    cat "${VIEWERS_XML}" >&2
-fi
+# while true; do sleep 1; done
 
-LOGBACK_XML="${DEFAULT_CONF_DIR}/logback.xml"
-NGAP_LOGBACK_XML="${DEFAULT_CONF_DIR}/logback-ngap.xml"
-if [ $debug = true ];then
-    cp "${NGAP_LOGBACK_XML}" "${LOGBACK_XML}"
-    echo "Enabled Logback (slf4j) debug logging for NGAP."  >&2
-    cat "${LOGBACK_XML}"  >&2
+viewers_xml=$(find ${CATALINA_HOME}/webapps/ -name viewers.xml -print)
+echo "viewers_xml: ${viewers_xml}"
+if test -n "$viewers_xml"; then
+  echo "NCWMS: Located viewers.xml here: ${viewers_xml}"
+  sed -i "s+@NCWMS_BASE@+$NCWMS_BASE+g" ${viewers_xml}
+  if [ $debug = true ]; then
+      echo "${viewers_xml}" >&2
+      cat ${viewers_xml} >&2
+  fi
+else
+  echo "NCWMS: Failed to locate viewers.xml in: ${CATALINA_HOME}/webapps Skipping."
 fi
 
 # modify bes.conf based on environment variables before startup.
@@ -191,7 +193,7 @@ fi
 /usr/bin/besctl start -d "/dev/null,timing" >&2
 status=$?
 if [ $status -ne 0 ]; then
-    echo "Failed to start BES: $status" >&2
+    echo "ERROR: Failed to start BES: $status" >&2
     exit $status
 fi
 besd_pid=`ps aux | grep /usr/bin/besdaemon | grep -v grep | awk '{print $2;}' - `;
@@ -203,7 +205,7 @@ echo "The BES is UP! pid: $besd_pid" >&2
 status=$?
 tomcat_pid=$!
 if [ $status -ne 0 ]; then
-    echo "Failed to start Tomcat: $status" >&2
+    echo "ERROR: Failed to start Tomcat: $status" >&2
     exit $status
 fi
 echo "Tomcat is UP! pid: $tomcat_pid" >&2
@@ -219,9 +221,9 @@ while /bin/true; do
     TOMCAT_STATUS=$?
 
     if [ $BESD_STATUS -ne 0 ]; then
-        echo "BESD_STATUS: $BESD_STATUS bes_pid:$bes_pid" >&2
-        echo "The BES daemon appears to have died! Exiting." >&2
-        exit -1;
+        echo "ERROR: BESD_STATUS: $BESD_STATUS bes_pid:$bes_pid" >&2
+        echo "ERROR: The BES daemon appears to have died! Exiting." >&2
+        exit 1;
     fi
     if [ $TOMCAT_STATUS -ne 0 ]; then
         echo "TOMCAT_STATUS: $TOMCAT_STATUS tomcat_pid:$tomcat_pid" >&2
@@ -229,11 +231,11 @@ while /bin/true; do
         echo "Tomcat Console Log [BEGIN]" >&2
         cat /usr/share/tomcat/logs/console.log >&2
         echo "Tomcat Console Log [END]" >&2
-        exit -2;
+        exit 2
     fi
 
     if [ $debug = true ];then
-        echo "-----------------------------------------------------------"  >&2
+        echo "-------------------------------------------------------------------"  >&2
         date >&2
         echo "BESD_STATUS: $BESD_STATUS  besd_pid:$besd_pid" >&2
         echo "TOMCAT_STATUS: $TOMCAT_STATUS tomcat_pid:$tomcat_pid" >&2
