@@ -160,7 +160,9 @@ if [ $debug = true ];then
     ls -l "${VIEWERS_XML}" >&2
 fi
 
-sed -i "s+@NCWMS_BASE@+${NCWMS_BASE}+g" "${VIEWERS_XML}";
+if test -f "${VIEWERS_XML}"l then
+    sed -i "s+@NCWMS_BASE@+${NCWMS_BASE}+g" "${VIEWERS_XML}";
+fi
 
 if [ $debug = true ];then
     echo "${VIEWERS_XML} - "  >&2
