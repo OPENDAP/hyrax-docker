@@ -187,6 +187,11 @@ RUN set -e \
     && echo "LIBDAP4: make install" >&2 \
     && make install
 
+RUN set -e \
+    && cd /hyrax/libdap4 \
+    && echo "LIBDAP4: make clean" >&2 \
+    && make clean
+
 ###############################################################
 
 ###############################################################
@@ -276,6 +281,12 @@ RUN set -e \
     && cd /hyrax/bes \
     && echo "BES: make install" >&2 \
     && make install
+
+# And then we cleanup.
+RUN set -e \
+    && cd /hyrax/bes \
+    && echo "BES: make clean" >&2 \
+    && make clean
 #
 # Update the BES configuration to use the new bes user and group.
 RUN set -e \

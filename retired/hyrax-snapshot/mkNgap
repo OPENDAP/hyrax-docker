@@ -1,0 +1,9 @@
+#!/bin/bash
+
+docker rm -f $(docker ps -aq);
+
+docker build ngap -t opendap/hyrax:ngap-snapshot \
+    --build-arg AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
+    --build-arg AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+
+docker run -d -h ngap  -p 8080:8080 --name=ngap opendap/hyrax:ngap-snapshot

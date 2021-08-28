@@ -16,15 +16,16 @@ set -e
 echo "CATALINA_HOME: ${CATALINA_HOME}"
 export PATH=${CATALINA_HOME}/bin:$PATH
 
-export prefix=HYRAX_BUILD_PREFIX
+export prefix="HYRAX_BUILD_PREFIX"
 echo "prefix: ${prefix}"
 
 export PATH=$prefix/bin:$prefix/deps/bin:$PATH
 echo "PATH: ${PATH}"
 
-export DEPLOYMENT_CONTEXT=HYRAX_DEPLOYMENT_CONTEXT
+export DEPLOYMENT_CONTEXT="HYRAX_DEPLOYMENT_CONTEXT"
 echo "DEPLOYMENT_CONTEXT: ${DEPLOYMENT_CONTEXT}"
 
+while true ; do sleep 1; done
 
 ################################################################################
 # Inject one set of credentials into .netrc
