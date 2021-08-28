@@ -150,29 +150,31 @@ done
 if [ $debug = true ];then
     echo "CATALINA_HOME: ${CATALINA_HOME}"  >&2
     ls -l "$CATALINA_HOME" "$CATALINA_HOME/bin"  >&2
-    ls -l "$CATALINA_HOME/webapps/"  >&2
 fi
 
+DEFAULT_CONF_DIR="${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf"
+VIEWERS_XML="${DEFAULT_CONF_DIR}/viewers.xml"
 if [ $debug = true ];then
     echo "NCWMS: Using NCWMS_BASE: ${NCWMS_BASE}"  >&2
     echo "NCWMS: Setting ncWMS access URLs in viewers.xml (if needed)."  >&2
+    ls -l "${VIEWERS_XML}" >&2
 fi
 
 sed -i "s+@NCWMS_BASE@+${NCWMS_BASE}+g" "${VIEWERS_XML}";
 
+if [ $debug = true ];then
+    echo "${VIEWERS_XML} - "  >&2
+    cat "${VIEWERS_XML}" >&2
+fi
+
 # while true; do sleep 1; done
 
-viewers_xml=$(find ${CATALINA_HOME}/webapps/ -name viewers.xml -print)
-echo "viewers_xml: ${viewers_xml}"
-if test -n "$viewers_xml"; then
-  echo "NCWMS: Located viewers.xml here: ${viewers_xml}"
-  sed -i "s+@NCWMS_BASE@+$NCWMS_BASE+g" ${viewers_xml}
-  if [ $debug = true ]; then
-      echo "${viewers_xml}" >&2
-      cat ${viewers_xml} >&2
-  fi
-else
-  echo "NCWMS: Failed to locate viewers.xml in: ${CATALINA_HOME}/webapps Skipping."
+LOGBACK_XML="${DEFAULT_CONF_DIR}/logback.xml"
+NGAP_LOGBACK_XML="${DEFAULT_CONF_DIR}/logback-ngap.xml"
+if [ $debug = true ];then
+    cp "${NGAP_LOGBACK_XML}" "${LOGBACK_XML}"
+    echo "Enabled Logback (slf4j) debug logging for NGAP."  >&2
+    cat "${LOGBACK_XML}"  >&2
 fi
 
 # modify bes.conf based on environment variables before startup.
