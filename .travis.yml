@@ -49,6 +49,8 @@ stages:
     if:  branch = master
   - name: test
     if: branch = master
+  - name: disabled
+    if: branch = disabled
 
 jobs:
   include:
@@ -67,7 +69,7 @@ jobs:
         - docker tag ${SNAPSHOT_IMAGE_TAG} ${BUILD_VERSION_TAG}
         - docker image ls -a
 
-    - stage: build
+    - stage: disabled
       name: "opendap/olfs:snapshot"
       script:
         - export SNAPSHOT_IMAGE_TAG=opendap/olfs:snapshot
