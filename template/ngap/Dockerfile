@@ -119,7 +119,7 @@ RUN set -e \
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 ENV LIBDAP_RPM="https://www.opendap.org/pub/binary/hyrax-${HYRAX_VERSION}/centos-7.x/libdap-${LIBDAP_VERSION}.el7.x86_64.rpm"
 ENV BES_RPM="https://www.opendap.org/pub/binary/hyrax-${HYRAX_VERSION}/centos-7.x/bes-${BES_VERSION}.static.el7.x86_64.rpm"
-ENV NGAP_PACKAGE="https://www.opendap.org/pub/olfs/ngap-${OLFS_VERSION}-webapp.tgz"
+ENV NGAP_PACKAGE="https://www.opendap.org/pub/olfs/ngap-${HYRAX_VERSION_LABEL}-webapp.tgz"
 ###############################################################
 
 
@@ -161,16 +161,16 @@ RUN echo "besdaemon is here: "`which besdaemon`
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 RUN set -e \
     && echo "Retrieving, verifying, and installing NGAP package: ${NGAP_PACKAGE}" \
-    && curl -sfSL ${NGAP_PACKAGE} > ngap-${OLFS_VERSION}.tgz \
-    && curl -sfSL ${NGAP_PACKAGE}.sig > ngap-${OLFS_VERSION}.tgz.sig \
+    && curl -sfSL ${NGAP_PACKAGE} > ngap-${HYRAX_VERSION_LABEL}.tgz \
+    && curl -sfSL ${NGAP_PACKAGE}.sig > ngap-${HYRAX_VERSION_LABEL}.tgz.sig \
     && echo "Verifying tarball..." \
-    && gpg --verify ngap-${OLFS_VERSION}.tgz.sig ngap-${OLFS_VERSION}.tgz \
+    && gpg --verify ngap-${HYRAX_VERSION_LABEL}.tgz.sig ngap-${HYRAX_VERSION_LABEL}.tgz \
     && echo "Unpacking tarball..." \
-    && tar -C /dev/shm -xzf ngap-${OLFS_VERSION}.tgz \
+    && tar -C /dev/shm -xzf ngap-${HYRAX_VERSION_LABEL}.tgz \
     && echo "Unpacking warfile..." \
-    && unzip -o /dev/shm/ngap-${OLFS_VERSION}-webapp/${DEFAULT_NGAP_DEPLOYMENT_CONTEXT}.war -d ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/ \
+    && unzip -o /dev/shm/ngap-${HYRAX_VERSION_LABEL}-webapp/${DEFAULT_NGAP_DEPLOYMENT_CONTEXT}.war -d ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/ \
     && echo "Cleaning up." \
-    && rm -rf /dev/shm/* ngap-${OLFS_VERSION}.tgz*
+    && rm -rf /dev/shm/* ngap-${HYRAX_VERSION_LABEL}.tgz*
 #
 #
 # Fix ownership and access permissions
