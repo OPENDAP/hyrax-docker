@@ -38,7 +38,7 @@ env:
     - OLFS_DISTRO="olfs-${OLFS_VERSION}-webapp.tgz"
     - OLFS_DISTRO_URL="s3://opendap.travis.build/${OLFS_DISTRO}"
     - NGAP_DISTRO="ngap-${OLFS_VERSION}-webapp.tgz"
-    - NGAP_DISTRO_URL="s3://opendap.travis.build/${OLFS_DISTRO}"
+    - NGAP_DISTRO_URL="s3://opendap.travis.build/${NGAP_DISTRO}"
     - ROBOTS_DISTRO="robots-olfs-${OLFS_VERSION}-webapp.tgz"
     - ROBOTS_DISTRO_URL="s3://opendap.travis.build/${ROBOTS_DISTRO}"
     - LIBDAP_RPM="libdap-${LIBDAP_VERSION}.el7.x86_64.rpm"
