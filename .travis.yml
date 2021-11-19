@@ -38,7 +38,7 @@ env:
     - OLFS_DISTRO="olfs-${OLFS_VERSION}-webapp.tgz"
     - OLFS_DISTRO_URL="s3://opendap.travis.build/${OLFS_DISTRO}"
     - ROBOTS_DISTRO="robots-olfs-${OLFS_VERSION}-webapp.tgz"
-    - ROBOTS_DISTRO_URL="s3://opendap.travis.build/${OLFS_DISTRO}"
+    - ROBOTS_DISTRO_URL="s3://opendap.travis.build/${ROBOTS_DISTRO}"
     - LIBDAP_RPM="libdap-${LIBDAP_VERSION}.el7.x86_64.rpm"
     - LIBDAP_RPM_URL="s3://opendap.travis.build/${LIBDAP_RPM}"
     - BES_RPM="bes-${BES_VERSION}.static.el7.x86_64.rpm"
@@ -109,7 +109,7 @@ jobs:
         - cd hyrax-builds
         - cp ./${LIBDAP_RPM} ./hyrax
         - cp ./${BES_RPM} ./hyrax
-        - cp ./${OLFS_DISTRO}.tgz ./hyrax
+        - cp ./${OLFS_DISTRO} ./hyrax
         - docker build
           --build-arg RELEASE_DATE
           --build-arg HYRAX_VERSION
@@ -128,7 +128,7 @@ jobs:
         - cd hyrax-builds
         - cp ./${LIBDAP_RPM} ./hyrax
         - cp ./${BES_RPM} ./hyrax
-        - cp ./${OLFS_DISTRO}.tgz ./hyrax
+        - cp ./${OLFS_DISTRO} ./hyrax
         - docker build
           --build-arg RELEASE_DATE
           --build-arg HYRAX_VERSION
@@ -148,7 +148,7 @@ jobs:
         - cd hyrax-builds
         - cp ./${LIBDAP_RPM} ./ngap
         - cp ./${BES_RPM} ./ngap
-        - cp ./${OLFS_DISTRO}.tgz ./ngap
+        - cp ./${OLFS_DISTRO} ./ngap
         - docker build --build-arg RELEASE_DATE
           --build-arg RELEASE_DATE
           --build-arg HYRAX_VERSION
