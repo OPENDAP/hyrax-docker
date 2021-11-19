@@ -62,7 +62,7 @@ ARG NGAP_DISTRO
 ENV NGAP_DISTRO=${NGAP_DISTRO:-"ngap-${OLFS_VERSION}-webapp"}
 RUN echo "NGAP_DISTRO: ${NGAP_DISTRO}"
 COPY ${NGAP_DISTRO}.tgz /${NGAP_DISTRO}.tgz
-RUN echo ls -l
+RUN tar -tf /${NGAP_DISTRO}.tgz
 
 ARG TOMCAT_CONNECTION_TIMEOUT_MS
 ENV TOMCAT_CONNECTION_TIMEOUT_MS=${TOMCAT_CONNECTION_TIMEOUT_MS:-"1000000"}
@@ -127,6 +127,7 @@ ENV ROOT=/dev/shm
 
 # NGAP package uses the OLFS_VERSION number. jhrg 4/2/21
 RUN echo "Installing the latest NGAP distribution (${NGAP_DISTRO})."
+RUN set -e && echo "working dir: "$(pwd)
 RUN set -e && ls -l
 RUN set -e && echo "##############################################"
 RUN set -e && tar -C ${ROOT} -xzvf ./${NGAP_DISTRO}.tgz
