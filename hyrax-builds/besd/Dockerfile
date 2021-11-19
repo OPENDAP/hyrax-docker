@@ -57,12 +57,13 @@ RUN set -e \
     && yum -y update \
     && yum clean all
 
+COPY libdap.rpm /libdap.rpm
+COPY bes.rpm /bes.rpm
+
 ###############################################################
 # Retrieve and install the latest libdap snapshot
 RUN set -e \
     && echo "Installing libdap snapshot rpm." \
-    && pwd  \
-    && ls -l  \
     && ls -l ./libdap* \
     && yum -y install ./libdap.rpm \
     && rm -f ./libdap.rpm
