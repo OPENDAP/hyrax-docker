@@ -91,6 +91,7 @@ jobs:
         - cd hyrax-builds
         - cp ./${OLFS_DISTRO} ./olfs
         - docker build --build-arg RELEASE_DATE
+          --build-arg HYRAX_VERSION
           --build-arg OLFS_VERSION
           -t "${SNAPSHOT_IMAGE_TAG}" olfs
         - docker tag ${SNAPSHOT_IMAGE_TAG} ${BUILD_VERSION_TAG}
@@ -107,6 +108,7 @@ jobs:
         - cp ./${OLFS_DISTRO} ./hyrax
         - docker build
           --build-arg RELEASE_DATE
+          --build-arg HYRAX_VERSION
           --build-arg LIBDAP_VERSION
           --build-arg BES_VERSION
           --build-arg OLFS_VERSION
@@ -125,6 +127,7 @@ jobs:
         - cp ./${OLFS_DISTRO} ./hyrax
         - docker build
           --build-arg RELEASE_DATE
+          --build-arg HYRAX_VERSION
           --build-arg LIBDAP_VERSION
           --build-arg BES_VERSION
           --build-arg OLFS_VERSION
@@ -143,6 +146,8 @@ jobs:
         - cp ./${BES_RPM} ./hyrax
         - cp ./${OLFS_DISTRO} ./hyrax
         - docker build --build-arg RELEASE_DATE
+          --build-arg RELEASE_DATE
+          --build-arg HYRAX_VERSION
           --build-arg LIBDAP_VERSION
           --build-arg BES_VERSION
           --build-arg OLFS_VERSION
