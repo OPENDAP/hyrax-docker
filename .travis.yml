@@ -42,7 +42,6 @@ env:
     - BES_RPM="bes-${BES_VERSION}.static.el7.x86_64.rpm"
     - BES_RPM_URL="s3://opendap.travis.build/${BES_RPM}"
 
-  aws --region=us-east-1 s3 cp ${OLFS_PACKAGE} ./olfs-${OLFS_VERSION}-webapp.tgz
 before_install:
   - pip3 install awscli
 
