@@ -127,15 +127,15 @@ ENV ROOT=/dev/shm
 
 # NGAP package uses the OLFS_VERSION number. jhrg 4/2/21
 RUN echo "Installing the latest NGAP distribution (${NGAP_DISTRO})."
-RUN set -e && ls -l \
-RUN set -e && echo "##############################################" \
-RUN set -e && tar -C ${ROOT} -xzvf ./${NGAP_DISTRO}.tgz \
-RUN set -e && ls -l ${ROOT} \
-RUN set -e && echo "##############################################" \
-RUN set -e && echo "Unpacking warfile..." \
-RUN set -e && unzip -o ${ROOT}/${NGAP_DISTRO}/${DEFAULT_NGAP_DEPLOYMENT_CONTEXT}.war -d ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/ \
-RUN set -e && echo "##############################################" \
-RUN set -e && echo "Cleaning up." \
+RUN set -e && ls -l
+RUN set -e && echo "##############################################"
+RUN set -e && tar -C ${ROOT} -xzvf ./${NGAP_DISTRO}.tgz
+RUN set -e && ls -l ${ROOT}
+RUN set -e && echo "##############################################"
+RUN set -e && echo "Unpacking warfile..."
+RUN set -e && unzip -o ${ROOT}/${NGAP_DISTRO}/${DEFAULT_NGAP_DEPLOYMENT_CONTEXT}.war -d ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/
+RUN set -e && echo "##############################################"
+RUN set -e && echo "Cleaning up."
 RUN set -e && rm -rf ${ROOT}/${NGAP_DISTRO} ./${NGAP_DISTRO}.tgz
 
 # Fix ownership and access permissions
