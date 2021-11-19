@@ -132,7 +132,8 @@ ENV ROOT=/dev/shm
 
 RUN echo "Installing the latest olfs distribution (${OLFS_VERSION})."
 RUN set -e \
-    && ls -l ./olfs* \
+    && echo "working_dir: "`pwd` \
+    && ls -l . \
     && tar -C ${ROOT} -xzvf ./${OLFS_DISTRO}.tgz \
     && ls -l ${ROOT} \
     && echo "Unpacking warfile..." \
