@@ -31,9 +31,17 @@ ARG LIBDAP_VERSION
 ENV LIBDAP_VERSION=${LIBDAP_VERSION:-"unknown"}
 RUN echo "LIBDAP_VERSION: ${LIBDAP_VERSION}"
 
+ARG LIBDAP_RPM
+ENV LIBDAP_RPM=${LIBDAP_RPM:-"./libdap-snapshot.rpm"}
+RUN echo "LIBDAP_RPM: ${LIBDAP_RPM}"
+
 ARG BES_VERSION
 ENV BES_VERSION=${BES_VERSION:-"unknown"}
 RUN echo "BES_VERSION: ${BES_VERSION}"
+
+ARG BES_RPM
+ENV BES_RPM=${BES_RPM:-"./besd-snapshot.rpm"}
+RUN echo "BES_RPM: ${BES_RPM}"
 
 # SNAPSHOT URLs
 ENV LIBDAP_RPM="s3://opendap.travis.build/libdap-${LIBDAP_VERSION}.el7.x86_64.rpm"
@@ -57,25 +65,25 @@ RUN set -e \
     && yum -y update \
     && yum clean all
 
-COPY ../libdap.rpm /libdap.rpm
-COPY ../bes.rpm /bes.rpm
+COPY  /libdap.rpm
+COPY ./bes.rpm /bes.rpm
 
 ###############################################################
 # Retrieve and install the latest libdap snapshot
 RUN set -e \
     && echo "Installing libdap snapshot rpm." \
     && ls -l ./libdap* \
-    && yum -y install ./libdap.rpm \
-    && rm -f ./libdap.rpm
+    && yum -y install ./${LIBDAP_RPM} \
+    && rm -f ./${LIBDAP_RPM}
 
 
 ###############################################################
 # Retrieve and install the latest BES snapshot
 RUN set -e \
-    && echo "Retrieving, and installing besd snapshot. rpm: $BES_RPM" \
+    && echo "Install the besd snapshot rpm." \
     && ls -l ./bes* \
-    && yum -y install ./bes.rpm \
-    && rm -f ./bes.rpm
+    && yum -y install ./${BES_RPM} \
+    && rm -f ./${BES_RPM}
 
 # Clear these values so they do not persist in the container!
 #ENV AWS_ACCESS_KEY_ID=
