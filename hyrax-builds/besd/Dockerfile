@@ -19,13 +19,13 @@ ARG RELEASE_DATE
 ENV RELEASE_DATE ${RELEASE_DATE:-"unknown"}
 RUN echo "RELEASE_DATE: ${RELEASE_DATE}"
 
-ARG AWS_ACCESS_KEY_ID
-ENV AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-"unknown"}
-RUN echo "AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}"
+#ARG AWS_ACCESS_KEY_ID
+#ENV AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-"unknown"}
+#RUN echo "AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}"
 
-ARG AWS_SECRET_ACCESS_KEY
-ENV AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-"unknown"}
-RUN echo "AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}"
+#ARG AWS_SECRET_ACCESS_KEY
+#ENV AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-"unknown"}
+#RUN echo "AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}"
 
 ARG LIBDAP_VERSION
 ENV LIBDAP_VERSION=${LIBDAP_VERSION:-"unknown"}
@@ -77,12 +77,12 @@ RUN set -e \
     && rm -f bes.*
 
 # Clear these values so they do not persist in the container!
-ENV AWS_ACCESS_KEY_ID=
-ENV AWS_SECRET_ACCESS_KEY=
-RUN echo "unset AWS_ACCESS_KEY_ID"     >> ~/.bash_profile
-RUN echo "unset AWS_SECRET_ACCESS_KEY" >> ~/.bash_profile
-RUN echo "unset AWS_ACCESS_KEY_ID"     >> ~/.bashrc
-RUN echo "unset AWS_SECRET_ACCESS_KEY" >> ~/.bashrc
+#ENV AWS_ACCESS_KEY_ID=
+#ENV AWS_SECRET_ACCESS_KEY=
+#RUN echo "unset AWS_ACCESS_KEY_ID"     >> ~/.bash_profile
+#RUN echo "unset AWS_SECRET_ACCESS_KEY" >> ~/.bash_profile
+#RUN echo "unset AWS_ACCESS_KEY_ID"     >> ~/.bashrc
+#RUN echo "unset AWS_SECRET_ACCESS_KEY" >> ~/.bashrc
 
 RUN echo "besdaemon is here: "`which besdaemon`
 
