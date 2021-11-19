@@ -61,20 +61,18 @@ RUN set -e \
 # Retrieve and install the latest libdap snapshot
 RUN set -e \
     && echo "Retrieving, and installing libdap snapshot. rpm: $LIBDAP_RPM" \
-    && aws --region=us-east-1 s3 cp ${LIBDAP_RPM}  ./libdap.rpm\
-    && ls -l ./libdap* \
-    && yum -y install ./libdap.rpm \
-    && rm -f libdap.*
+    && ls -l ../libdap* \
+    && yum -y install ../libdap.rpm \
+    && rm -f ../libdap.rpm
 
 
 ###############################################################
 # Retrieve and install the latest BES snapshot
 RUN set -e \
     && echo "Retrieving, and installing besd snapshot. rpm: $BES_RPM" \
-    && aws --region=us-east-1 s3 cp ${BES_RPM}  ./bes.rpm\
-    && ls -l ./bes* \
-    && yum -y install ./bes.rpm \
-    && rm -f bes.*
+    && ls -l ../bes* \
+    && yum -y install ../bes.rpm \
+    && rm -f ../bes.rpm
 
 # Clear these values so they do not persist in the container!
 #ENV AWS_ACCESS_KEY_ID=

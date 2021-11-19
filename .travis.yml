@@ -35,6 +35,8 @@ env:
     - BES_VERSION=$(grep "bes-" ${VERSION_FILE} | awk '{print $1;}' - | sed "s/bes-//g")
     - OLFS_VERSION=$(grep "olfs-" ${VERSION_FILE} | awk '{print $1;}' - | sed "s/olfs-//g")
     - HYRAX_VERSION=$(grep "hyrax-" ${VERSION_FILE} | awk '{print $1;}' - | sed "s/hyrax-//g")
+    - LIBDAP_RPM="s3://opendap.travis.build/libdap-${LIBDAP_VERSION}.el7.x86_64.rpm"
+    - BES_RPM="s3://opendap.travis.build/bes-${BES_VERSION}.static.el7.x86_64.rpm"
 
 before_install:
   - pip3 install awscli
@@ -43,6 +45,11 @@ install:
   - echo "print env:"
   - printenv
   - echo $DOCKER_HUB_PSWD | docker login -u $DOCKER_HUB_UID --password-stdin
+  - echo "Retrieving libdap RPM"
+  - aws --region=us-east-1 s3 cp ${LIBDAP_RPM} ./hyrax-builds/libdap.rpm
+  - echo "Retrieving BES RPM"
+  - aws --region=us-east-1 s3 cp ${BES_RPM} ./hyrax-builds/bes.rpm
+
 
 stages:
   - name: build
@@ -60,11 +67,10 @@ jobs:
         - export SNAPSHOT_IMAGE_TAG=opendap/besd:snapshot
         - export BUILD_VERSION_TAG=opendap/besd:${BES_VERSION}
         - cd hyrax-builds
-        - docker build
-            --build-arg RELEASE_DATE
-            --build-arg LIBDAP_VERSION
-            --build-arg BES_VERSION
-            -t "${SNAPSHOT_IMAGE_TAG}" besd
+        - docker build --build-arg RELEASE_DATE
+                        --build-arg LIBDAP_VERSION
+                        --build-arg BES_VERSION
+                        -t "${SNAPSHOT_IMAGE_TAG}" besd
         - docker tag ${SNAPSHOT_IMAGE_TAG} ${BUILD_VERSION_TAG}
         - docker image ls -a
 
