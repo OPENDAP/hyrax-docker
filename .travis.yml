@@ -37,6 +37,8 @@ env:
     - OLFS_VERSION=$(grep "olfs-" ${VERSION_FILE} | awk '{print $1;}' - | sed "s/olfs-//g")
     - OLFS_DISTRO="olfs-${OLFS_VERSION}-webapp.tgz"
     - OLFS_DISTRO_URL="s3://opendap.travis.build/${OLFS_DISTRO}"
+    - ROBOTS_DISTRO="robots-olfs-${OLFS_VERSION}-webapp.tgz"
+    - ROBOTS_DISTRO_URL="s3://opendap.travis.build/${OLFS_DISTRO}"
     - LIBDAP_RPM="libdap-${LIBDAP_VERSION}.el7.x86_64.rpm"
     - LIBDAP_RPM_URL="s3://opendap.travis.build/${LIBDAP_RPM}"
     - BES_RPM="bes-${BES_VERSION}.static.el7.x86_64.rpm"
@@ -55,6 +57,8 @@ install:
   - aws --region=us-east-1 s3 cp ${BES_RPM_URL} ./hyrax-builds/${BES_RPM}
   - echo "Retrieving OLFS Distribution file ${OLFS_DISTRO}"
   - aws --region=us-east-1 s3 cp ${OLFS_DISTRO_URL} ./hyrax-builds/${OLFS_DISTRO}
+  - echo "Retrieving ROBOTS Distribution file ${OLFS_DISTRO}"
+  - aws --region=us-east-1 s3 cp ${ROBOTS_DISTRO_URL} ./hyrax-builds/${ROBOTS_DISTRO}
 
 
 stages:
@@ -89,7 +93,7 @@ jobs:
         - export SNAPSHOT_IMAGE_TAG=opendap/olfs:snapshot
         - export BUILD_VERSION_TAG=opendap/olfs:${OLFS_VERSION}
         - cd hyrax-builds
-        - cp ./${OLFS_DISTRO}.tgz ./olfs
+        - cp ./${OLFS_DISTRO} ./olfs
         - docker build --build-arg RELEASE_DATE
           --build-arg HYRAX_VERSION
           --build-arg OLFS_VERSION
