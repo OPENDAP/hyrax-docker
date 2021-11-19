@@ -102,9 +102,9 @@ jobs:
         - export SNAPSHOT_IMAGE_TAG=opendap/hyrax:snapshot
         - export BUILD_VERSION_TAG=opendap/hyrax:${HYRAX_VERSION}
         - cd hyrax-builds
-        - cp ./${LIBDAP_RPM} ./besd
-        - cp ./${BES_RPM} ./besd
-        - cp ./${OLFS_DISTRO} ./olfs
+        - cp ./${LIBDAP_RPM} ./hyrax
+        - cp ./${BES_RPM} ./hyrax
+        - cp ./${OLFS_DISTRO} ./hyrax
         - docker build
           --build-arg RELEASE_DATE
           --build-arg LIBDAP_VERSION
@@ -120,6 +120,9 @@ jobs:
         - export SNAPSHOT_IMAGE_TAG=opendap/hyrax_ncwms:snapshot
         - export BUILD_VERSION_TAG=opendap/hyrax_ncwms:${HYRAX_VERSION}
         - cd hyrax-builds
+        - cp ./${LIBDAP_RPM} ./hyrax
+        - cp ./${BES_RPM} ./hyrax
+        - cp ./${OLFS_DISTRO} ./hyrax
         - docker build
           --build-arg RELEASE_DATE
           --build-arg LIBDAP_VERSION
@@ -136,6 +139,9 @@ jobs:
         - export SNAPSHOT_IMAGE_TAG=opendap/hyrax:ngap-snapshot
         - export BUILD_VERSION_TAG=opendap/hyrax:ngap-${HYRAX_VERSION}
         - cd hyrax-builds
+        - cp ./${LIBDAP_RPM} ./hyrax
+        - cp ./${BES_RPM} ./hyrax
+        - cp ./${OLFS_DISTRO} ./hyrax
         - docker build --build-arg RELEASE_DATE
           --build-arg LIBDAP_VERSION
           --build-arg BES_VERSION
