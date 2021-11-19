@@ -110,6 +110,7 @@ jobs:
         - cp ./${LIBDAP_RPM} ./hyrax
         - cp ./${BES_RPM} ./hyrax
         - cp ./${OLFS_DISTRO} ./hyrax
+        - cp ./${ROBOTS_DISTRO} ./hyrax
         - docker build
           --build-arg RELEASE_DATE
           --build-arg HYRAX_VERSION
