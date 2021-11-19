@@ -19,29 +19,21 @@ ARG RELEASE_DATE
 ENV RELEASE_DATE ${RELEASE_DATE:-"unknown"}
 RUN echo "RELEASE_DATE: ${RELEASE_DATE}"
 
-#ARG AWS_ACCESS_KEY_ID
-#ENV AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-"unknown"}
-#RUN echo "AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}"
-
-#ARG AWS_SECRET_ACCESS_KEY
-#ENV AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-"unknown"}
-#RUN echo "AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}"
-
 ARG LIBDAP_VERSION
-ENV LIBDAP_VERSION=${LIBDAP_VERSION:-"unknown"}
+ENV LIBDAP_VERSION=${LIBDAP_VERSION:-"snapshot"}
 RUN echo "LIBDAP_VERSION: ${LIBDAP_VERSION}"
 
 ARG LIBDAP_RPM
-ENV LIBDAP_RPM=${LIBDAP_RPM:-"./libdap-snapshot.rpm"}
+ENV LIBDAP_RPM=${LIBDAP_RPM:-"./libdap-${LIBDAP_VERSION}.el7.x86_64.rpm"}
 RUN echo "LIBDAP_RPM: ${LIBDAP_RPM}"
 COPY ${LIBDAP_RPM} /${LIBDAP_RPM}
 
 ARG BES_VERSION
-ENV BES_VERSION=${BES_VERSION:-"./bes-snapshot.rpm"}
+ENV BES_VERSION=${BES_VERSION:-"snapshot"}
 RUN echo "BES_VERSION: ${BES_VERSION}"
 
 ARG BES_RPM
-ENV BES_RPM=${BES_RPM:-"./besd-snapshot.rpm"}
+ENV BES_RPM=${BES_RPM:-"./bes-${BES_VERSION}.static.el7.x86_64.rpm"}
 RUN echo "BES_RPM: ${BES_RPM}"
 COPY ${BES_RPM} /${BES_RPM}
 
@@ -68,7 +60,7 @@ RUN set -e \
 ###############################################################
 # Retrieve and install the latest libdap snapshot
 RUN set -e \
-    && echo "Installing libdap snapshot rpm." \
+    && echo "Installing libdap snapshot rpm. ${LIBDAP_RPM}" \
     && ls -l ./libdap* \
     && yum -y install ./${LIBDAP_RPM} \
     && rm -f ./${LIBDAP_RPM}
@@ -77,7 +69,7 @@ RUN set -e \
 ###############################################################
 # Retrieve and install the latest BES snapshot
 RUN set -e \
-    && echo "Install the besd snapshot rpm." \
+    && echo "Install the besd rpm ${BES_RPM} " \
     && ls -l ./bes* \
     && yum -y install ./${BES_RPM} \
     && rm -f ./${BES_RPM}

@@ -10,17 +10,13 @@ ARG RELEASE_DATE
 ENV RELEASE_DATE ${RELEASE_DATE:-"unknown"}
 RUN echo "RELEASE_DATE: ${RELEASE_DATE}"
 
-ARG AWS_ACCESS_KEY_ID
-ENV AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-"unknown"}
-RUN echo "AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}"
-
-ARG AWS_SECRET_ACCESS_KEY
-ENV AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-"unknown"}
-RUN echo "AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}"
-
 ARG OLFS_VERSION
 ENV OLFS_VERSION=${OLFS_VERSION:-"unknown"}
 RUN echo "OLFS_VERSION: ${OLFS_VERSION}"
+
+ARG OLFS_DISTRO
+ENV OLFS_DISTRO=${OLFS_DISTRO:-"./olfs-${OLFS_VERSION}-webapp"}
+RUN echo "OLFS_DISTRO: ${OLFS_DISTRO}"
 
 LABEL vendor="OPeNDAP"
 LABEL org.opendap.olfs.version=${OLFS_VERSION}
@@ -72,24 +68,16 @@ RUN echo "OLFS_VERSION: ${OLFS_VERSION}"
 #     (cd ${CATALINA_HOME}/webapps/opendap/ && jar -xf /dev/shm/olfs-snapshot-webapp/opendap.war)
 #
 ENV ROOT=/dev/shm
-RUN echo "Retrieving and installing the latest olfs snapshot (${OLFS_VERSION})."
+RUN echo "Installing the latest olfs snapshot (${OLFS_VERSION})."
 RUN set -e \
-    && aws --region=us-east-1 s3 cp ${OLFS_PACKAGE} ./olfs-${OLFS_VERSION}-webapp.tgz \
-    && tar -C ${ROOT} -xzvf ./olfs-${OLFS_VERSION}-webapp.tgz \
+    && tar -C ${ROOT} -xzvf ./${OLFS_DISTRO}.tgz \
     && ls -l ${ROOT} \
     && echo "Unpacking warfile..." \
     && mkdir -p ${CATALINA_HOME}/webapps/opendap/ \
-    && (cd ${CATALINA_HOME}/webapps/opendap/ && jar -xf ${ROOT}/olfs-${OLFS_VERSION}-webapp/opendap.war) \
+    && (cd ${CATALINA_HOME}/webapps/opendap/ && jar -xf ${ROOT}/${OLFS_DISTRO}/opendap.war) \
     && echo "Cleaning up." \
-    && rm -rf ${ROOT}/olfs-${OLFS_VERSION}-webapp ./olfs-${OLFS_VERSION}-webapp.tgz
+    && rm -rf ${ROOT}/${OLFS_DISTRO} ./${OLFS_DISTRO}.tgz
 
-# Clear these values so they do not persist in the container!
-ENV AWS_ACCESS_KEY_ID=""
-ENV AWS_SECRET_ACCESS_KEY=""
-RUN echo "unset AWS_ACCESS_KEY_ID"     >> ~/.bash_profile
-RUN echo "unset AWS_SECRET_ACCESS_KEY" >> ~/.bash_profile
-RUN echo "unset AWS_ACCESS_KEY_ID"     >> ~/.bashrc
-RUN echo "unset AWS_SECRET_ACCESS_KEY" >> ~/.bashrc
 
 # set host for bes that olfs will contact - this is expected to be over docker's internal network
 ARG BES_HOST
