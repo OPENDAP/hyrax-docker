@@ -44,8 +44,8 @@ ENV BES_RPM=${BES_RPM:-"./besd-snapshot.rpm"}
 RUN echo "BES_RPM: ${BES_RPM}"
 
 # SNAPSHOT URLs
-ENV LIBDAP_RPM="s3://opendap.travis.build/libdap-${LIBDAP_VERSION}.el7.x86_64.rpm"
-ENV BES_RPM="s3://opendap.travis.build/bes-${BES_VERSION}.static.el7.x86_64.rpm"
+#ENV LIBDAP_RPM="s3://opendap.travis.build/libdap-${LIBDAP_VERSION}.el7.x86_64.rpm"
+#ENV BES_RPM="s3://opendap.travis.build/bes-${BES_VERSION}.static.el7.x86_64.rpm"
 
 LABEL vendor="OPeNDAP"
 LABEL org.opendap.besdaemon.version=${BES_VERSION}

@@ -69,8 +69,8 @@ jobs:
         - export SNAPSHOT_IMAGE_TAG=opendap/besd:snapshot
         - export BUILD_VERSION_TAG=opendap/besd:${BES_VERSION}
         - cd hyrax-builds
-        - cp ${LIBDAP_RPM} ./besd
-        - cp ${BES_RPM} ./besd
+        - cp ./${LIBDAP_RPM} ./besd
+        - cp ./${BES_RPM} ./besd
         - docker build
           --build-arg RELEASE_DATE
           --build-arg LIBDAP_VERSION
