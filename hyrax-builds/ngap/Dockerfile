@@ -130,8 +130,10 @@ RUN echo "Installing the latest NGAP distribution (${NGAP_DISTRO})."
 RUN set -e && echo "working dir: "$(pwd)"    ROOT: ${ROOT}"
 RUN set -e && ls -l "${ROOT}"
 RUN set -e && echo "##############################################"
+RUN set -e && echo "working dir: "$(pwd)"    ROOT: ${ROOT}"
 RUN set -e && tar -C "${ROOT}" -xzvf ./${NGAP_DISTRO}.tgz
 RUN set -e && ls -l "${ROOT}"
+RUN set -e && echo "working dir: "$(pwd)"    ROOT: ${ROOT}"
 RUN set -e && echo "##############################################"
 RUN set -e && echo "Unpacking warfile..."
 RUN set -e && unzip -o ${ROOT}/${NGAP_DISTRO}/${DEFAULT_NGAP_DEPLOYMENT_CONTEXT}.war -d ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/
