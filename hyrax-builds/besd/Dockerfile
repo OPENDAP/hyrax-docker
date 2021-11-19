@@ -34,18 +34,17 @@ RUN echo "LIBDAP_VERSION: ${LIBDAP_VERSION}"
 ARG LIBDAP_RPM
 ENV LIBDAP_RPM=${LIBDAP_RPM:-"./libdap-snapshot.rpm"}
 RUN echo "LIBDAP_RPM: ${LIBDAP_RPM}"
+COPY ${LIBDAP_RPM} /${LIBDAP_RPM}
 
 ARG BES_VERSION
-ENV BES_VERSION=${BES_VERSION:-"unknown"}
+ENV BES_VERSION=${BES_VERSION:-"./bes-snapshot.rpm"}
 RUN echo "BES_VERSION: ${BES_VERSION}"
 
 ARG BES_RPM
 ENV BES_RPM=${BES_RPM:-"./besd-snapshot.rpm"}
 RUN echo "BES_RPM: ${BES_RPM}"
+COPY ${BES_RPM} /${BES_RPM}
 
-# SNAPSHOT URLs
-#ENV LIBDAP_RPM="s3://opendap.travis.build/libdap-${LIBDAP_VERSION}.el7.x86_64.rpm"
-#ENV BES_RPM="s3://opendap.travis.build/bes-${BES_VERSION}.static.el7.x86_64.rpm"
 
 LABEL vendor="OPeNDAP"
 LABEL org.opendap.besdaemon.version=${BES_VERSION}
@@ -65,8 +64,6 @@ RUN set -e \
     && yum -y update \
     && yum clean all
 
-COPY ${LIBDAP_RPM} /${LIBDAP_RPM}
-COPY ${BES_RPM} /${BES_RPM}
 
 ###############################################################
 # Retrieve and install the latest libdap snapshot
