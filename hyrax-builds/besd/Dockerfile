@@ -60,7 +60,9 @@ RUN set -e \
 ###############################################################
 # Retrieve and install the latest libdap snapshot
 RUN set -e \
-    && echo "Retrieving, and installing libdap snapshot. rpm: $LIBDAP_RPM" \
+    && echo "Installing libdap snapshot rpm." \
+    && pwd  \
+    && ls -l  \
     && ls -l ./libdap* \
     && yum -y install ./libdap.rpm \
     && rm -f ./libdap.rpm
