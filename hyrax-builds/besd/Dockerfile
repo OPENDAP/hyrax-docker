@@ -70,9 +70,9 @@ RUN set -e \
 # Retrieve and install the latest BES snapshot
 RUN set -e \
     && echo "Retrieving, and installing besd snapshot. rpm: $BES_RPM" \
-    && ls -l ../bes* \
-    && yum -y install ../bes.rpm \
-    && rm -f ../bes.rpm
+    && ls -l ./bes* \
+    && yum -y install ./bes.rpm \
+    && rm -f ./bes.rpm
 
 # Clear these values so they do not persist in the container!
 #ENV AWS_ACCESS_KEY_ID=
