@@ -68,15 +68,15 @@ RUN echo "OLFS_VERSION: ${OLFS_VERSION}"
 #     (cd ${CATALINA_HOME}/webapps/opendap/ && jar -xf /dev/shm/olfs-snapshot-webapp/opendap.war)
 #
 ENV ROOT=/dev/shm
-RUN echo "Installing the latest olfs snapshot (${OLFS_VERSION})."
+RUN echo "Installing the latest olfs snapshot (${OLFS_VERSION}.tgz)."
 RUN set -e \
-    && tar -C ${ROOT} -xzvf ./${OLFS_DISTRO}.tgz \
+    && tar -C ${ROOT} -xzvf /${OLFS_DISTRO}.tgz \
     && ls -l ${ROOT} \
     && echo "Unpacking warfile..." \
     && mkdir -p ${CATALINA_HOME}/webapps/opendap/ \
     && (cd ${CATALINA_HOME}/webapps/opendap/ && jar -xf ${ROOT}/${OLFS_DISTRO}/opendap.war) \
     && echo "Cleaning up." \
-    && rm -rf ${ROOT}/${OLFS_DISTRO} ./${OLFS_DISTRO}.tgz
+    && rm -rf ${ROOT}/${OLFS_DISTRO} /${OLFS_DISTRO}.tgz
 
 
 # set host for bes that olfs will contact - this is expected to be over docker's internal network
