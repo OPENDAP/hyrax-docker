@@ -24,36 +24,45 @@ ENV DEPLOYMENT_CONTEXT ${DEPLOYMENT_CONTEXT:-"ROOT"}
 RUN echo "DEPLOYMENT_CONTEXT: ${DEPLOYMENT_CONTEXT}"
 
 RUN export NOW=`date +%s`
-# HYRAX VERSION INFO
-ENV OLFS_VERSION=snapshot
 
+#
+# Hyrax Components Version Negotiation
+#
 ARG RELEASE_DATE
-ENV RELEASE_DATE ${RELEASE_DATE:-"unknown"}
+ENV RELEASE_DATE ${RELEASE_DATE:-"${NOW}"}
 RUN echo "RELEASE_DATE: ${RELEASE_DATE}"
 
-ARG AWS_ACCESS_KEY_ID
-ENV AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-"unknown"}
-RUN echo "AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}"
-
-ARG AWS_SECRET_ACCESS_KEY
-ENV AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-"unknown"}
-RUN echo "AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}"
+ARG HYRAX_VERSION
+ENV HYRAX_VERSION=${HYRAX_VERSION:-"snapshot"}
+RUN echo "HYRAX_VERSION: ${HYRAX_VERSION}"
 
 ARG LIBDAP_VERSION
-ENV LIBDAP_VERSION=${LIBDAP_VERSION:-"unknown"}
+ENV LIBDAP_VERSION=${LIBDAP_VERSION:-"snapshot"}
 RUN echo "LIBDAP_VERSION: ${LIBDAP_VERSION}"
 
+ARG LIBDAP_RPM
+ENV LIBDAP_RPM=${LIBDAP_RPM:-"libdap-${LIBDAP_VERSION}.el7.x86_64.rpm"}
+RUN echo "LIBDAP_RPM: ${LIBDAP_RPM}"
+COPY ${LIBDAP_RPM} /${LIBDAP_RPM}
+
 ARG BES_VERSION
-ENV BES_VERSION=${BES_VERSION:-"unknown"}
+ENV BES_VERSION=${BES_VERSION:-"snapshot"}
 RUN echo "BES_VERSION: ${BES_VERSION}"
+
+ARG BES_RPM
+ENV BES_RPM=${BES_RPM:-"bes-${BES_VERSION}.static.el7.x86_64.rpm"}
+RUN echo "BES_RPM: ${BES_RPM}"
+COPY ${BES_RPM} /${BES_RPM}
 
 ARG OLFS_VERSION
 ENV OLFS_VERSION=${OLFS_VERSION:-"unknown"}
 RUN echo "OLFS_VERSION: ${OLFS_VERSION}"
 
-ARG HYRAX_VERSION
-ENV HYRAX_VERSION=${HYRAX_VERSION:-"unknown"}
-RUN echo "HYRAX_VERSION: ${HYRAX_VERSION}"
+ARG NGAP_DISTRO
+ENV NGAP_DISTRO=${NGAP_DISTRO:-"ngap-${OLFS_VERSION}-webapp"}
+RUN echo "NGAP_DISTRO: ${NGAP_DISTRO}"
+COPY ${NGAP_DISTRO}.tgz /${NGAP_DISTRO}.tgz
+RUN tar -tf /${NGAP_DISTRO}.tgz
 
 ARG TOMCAT_CONNECTION_TIMEOUT_MS
 ENV TOMCAT_CONNECTION_TIMEOUT_MS=${TOMCAT_CONNECTION_TIMEOUT_MS:-"1000000"}
@@ -92,31 +101,22 @@ RUN echo "CATALINA_HOME: $CATALINA_HOME"
 
 
 ################################################################
-# SNAPSHOT URLs
-#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
-ENV LIBDAP_RPM="s3://opendap.travis.build/libdap-${LIBDAP_VERSION}.el7.x86_64.rpm"
-ENV BES_RPM="s3://opendap.travis.build/bes-${BES_VERSION}.static.el7.x86_64.rpm"
-ENV NGAP_PACKAGE="s3://opendap.travis.build/ngap-${OLFS_VERSION}-webapp.tgz"
-
-################################################################
 # Retrieve and install the latest libdap snapshot
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 RUN set -e \
-    && echo "Retrieving, and installing the latest libdap snapshot. rpm: $LIBDAP_RPM" \
-    && aws --region=us-east-1 s3 cp ${LIBDAP_RPM}  ./libdap.rpm \
+    && echo "Installing the latest libdap snapshot. rpm: ${LIBDAP_RPM}" \
     && ls -l ./libdap* \
-    && yum -y install ./libdap.rpm \
-    && rm -f libdap.*
+    && yum -y install ./${LIBDAP_RPM} \
+    && rm -f ./${LIBDAP_RPM}
 
 ################################################################
 # Retrieve and install the latest BES snapshot
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 RUN set -e \
     && echo "Retrieving, and installing the latest besd snapshot. rpm: $BES_RPM" \
-    && aws --region=us-east-1 s3 cp ${BES_RPM}  ./bes.rpm\
     && ls -l ./bes* \
-    && yum -y install ./bes.rpm \
-    && rm -f bes.*
+    && yum -y install ./${BES_RPM} \
+    && rm -f ./${BES_RPM}
 
 RUN echo "besdaemon is here: "`which besdaemon`
 
@@ -126,15 +126,15 @@ RUN echo "besdaemon is here: "`which besdaemon`
 ENV ROOT=/dev/shm
 
 # NGAP package uses the OLFS_VERSION number. jhrg 4/2/21
-RUN echo "Retrieving and installing the latest ngap snapshot (${OLFS_VERSION})."
 RUN set -e \
-    && aws --region=us-east-1 s3 cp ${NGAP_PACKAGE} ./ngap-${OLFS_VERSION}-webapp.tgz \
-    && tar -C ${ROOT} -xzvf ./ngap-${OLFS_VERSION}-webapp.tgz \
-    && ls -l ${ROOT} \
+    && echo "Installing the latest NGAP distribution (${NGAP_DISTRO})." \
+    && echo "working dir: "$(pwd)"    ROOT: ${ROOT}" \
+    && tar -C "${ROOT}" -xzvf /${NGAP_DISTRO}.tgz \
+    && ls -l "${ROOT}" \
     && echo "Unpacking warfile..." \
-    && unzip -o ${ROOT}/ngap-${OLFS_VERSION}-webapp/${DEFAULT_NGAP_DEPLOYMENT_CONTEXT}.war -d ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/ \
+    && unzip -o ${ROOT}/${NGAP_DISTRO}/${DEFAULT_NGAP_DEPLOYMENT_CONTEXT}.war -d ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/ \
     && echo "Cleaning up." \
-    && rm -rf ${ROOT}/ngap-${OLFS_VERSION}-webapp ./ngap-${OLFS_VERSION}-webapp.tgz
+    && rm -rf ${ROOT}/${NGAP_DISTRO} ./${NGAP_DISTRO}.tgz
 
 # Fix ownership and access permissions
 RUN set -e \
@@ -142,13 +142,7 @@ RUN set -e \
     && chown -R tomcat:tomcat ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/logs \
     && chmod 700 ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/logs
 
-# Clear these values so they do not persist in the container!
-ENV AWS_ACCESS_KEY_ID=
-ENV AWS_SECRET_ACCESS_KEY=
-RUN echo "unset AWS_ACCESS_KEY_ID"     >> ~/.bash_profile
-RUN echo "unset AWS_SECRET_ACCESS_KEY" >> ~/.bash_profile
-RUN echo "unset AWS_ACCESS_KEY_ID"     >> ~/.bashrc
-RUN echo "unset AWS_SECRET_ACCESS_KEY" >> ~/.bashrc
+
 
 # Install our modified server.xml so that the server compresses responses and
 # sets the connectionTimeout to 1000 seconds

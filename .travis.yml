@@ -33,8 +33,18 @@ env:
     - VERSION_FILE=snapshot.time
     - LIBDAP_VERSION=$(grep "libdap4-" ${VERSION_FILE} | awk '{print $1;}' - | sed "s/libdap4-//g")
     - BES_VERSION=$(grep "bes-" ${VERSION_FILE} | awk '{print $1;}' - | sed "s/bes-//g")
-    - OLFS_VERSION=$(grep "olfs-" ${VERSION_FILE} | awk '{print $1;}' - | sed "s/olfs-//g")
     - HYRAX_VERSION=$(grep "hyrax-" ${VERSION_FILE} | awk '{print $1;}' - | sed "s/hyrax-//g")
+    - OLFS_VERSION=$(grep "olfs-" ${VERSION_FILE} | awk '{print $1;}' - | sed "s/olfs-//g")
+    - OLFS_DISTRO="olfs-${OLFS_VERSION}-webapp.tgz"
+    - OLFS_DISTRO_URL="s3://opendap.travis.build/${OLFS_DISTRO}"
+    - NGAP_DISTRO="ngap-${OLFS_VERSION}-webapp.tgz"
+    - NGAP_DISTRO_URL="s3://opendap.travis.build/${NGAP_DISTRO}"
+    - ROBOTS_DISTRO="robots-olfs-${OLFS_VERSION}-webapp.tgz"
+    - ROBOTS_DISTRO_URL="s3://opendap.travis.build/${ROBOTS_DISTRO}"
+    - LIBDAP_RPM="libdap-${LIBDAP_VERSION}.el7.x86_64.rpm"
+    - LIBDAP_RPM_URL="s3://opendap.travis.build/${LIBDAP_RPM}"
+    - BES_RPM="bes-${BES_VERSION}.static.el7.x86_64.rpm"
+    - BES_RPM_URL="s3://opendap.travis.build/${BES_RPM}"
 
 before_install:
   - pip3 install awscli
@@ -43,6 +53,18 @@ install:
   - echo "print env:"
   - printenv
   - echo $DOCKER_HUB_PSWD | docker login -u $DOCKER_HUB_UID --password-stdin
+  - echo "Retrieving libdap RPM ${LIBDAP_RPM}"
+  - aws --region=us-east-1 s3 cp ${LIBDAP_RPM_URL} ./hyrax-builds/${LIBDAP_RPM}
+  - echo "Retrieving BES RPM ${BES_RPM}"
+  - aws --region=us-east-1 s3 cp ${BES_RPM_URL} ./hyrax-builds/${BES_RPM}
+  - echo "Retrieving OLFS Distribution file ${OLFS_DISTRO}"
+  - aws --region=us-east-1 s3 cp ${OLFS_DISTRO_URL} ./hyrax-builds/${OLFS_DISTRO}
+  - echo "Retrieving ROBOTS Distribution file ${ROBOTS_DISTRO}"
+  - aws --region=us-east-1 s3 cp ${ROBOTS_DISTRO_URL} ./hyrax-builds/${ROBOTS_DISTRO}
+  - echo "Retrieving NGAP Distribution file ${NGAP_DISTRO}"
+  - aws --region=us-east-1 s3 cp ${NGAP_DISTRO_URL} ./hyrax-builds/${NGAP_DISTRO}
+  - ls -l ./hyrax-builds
+
 
 stages:
   - name: build
@@ -60,26 +82,27 @@ jobs:
         - export SNAPSHOT_IMAGE_TAG=opendap/besd:snapshot
         - export BUILD_VERSION_TAG=opendap/besd:${BES_VERSION}
         - cd hyrax-builds
-        - docker build --build-arg RELEASE_DATE
-                        --build-arg AWS_ACCESS_KEY_ID
-                        --build-arg AWS_SECRET_ACCESS_KEY
-                        --build-arg LIBDAP_VERSION
-                        --build-arg BES_VERSION
-                        -t "${SNAPSHOT_IMAGE_TAG}" besd
+        - cp ./${LIBDAP_RPM} ./besd
+        - cp ./${BES_RPM} ./besd
+        - docker build
+          --build-arg RELEASE_DATE
+          --build-arg LIBDAP_VERSION
+          --build-arg BES_VERSION
+          -t "${SNAPSHOT_IMAGE_TAG}" besd
         - docker tag ${SNAPSHOT_IMAGE_TAG} ${BUILD_VERSION_TAG}
         - docker image ls -a
 
-    - stage: disabled
+    - stage: build
       name: "opendap/olfs:snapshot"
       script:
         - export SNAPSHOT_IMAGE_TAG=opendap/olfs:snapshot
         - export BUILD_VERSION_TAG=opendap/olfs:${OLFS_VERSION}
         - cd hyrax-builds
+        - cp ./${OLFS_DISTRO} ./olfs
         - docker build --build-arg RELEASE_DATE
-                        --build-arg AWS_ACCESS_KEY_ID
-                        --build-arg AWS_SECRET_ACCESS_KEY
-                        --build-arg OLFS_VERSION
-                        -t "${SNAPSHOT_IMAGE_TAG}" olfs
+          --build-arg HYRAX_VERSION
+          --build-arg OLFS_VERSION
+          -t "${SNAPSHOT_IMAGE_TAG}" olfs
         - docker tag ${SNAPSHOT_IMAGE_TAG} ${BUILD_VERSION_TAG}
         - docker image ls -a
 
@@ -89,13 +112,17 @@ jobs:
         - export SNAPSHOT_IMAGE_TAG=opendap/hyrax:snapshot
         - export BUILD_VERSION_TAG=opendap/hyrax:${HYRAX_VERSION}
         - cd hyrax-builds
-        - docker build --build-arg RELEASE_DATE
-                        --build-arg AWS_ACCESS_KEY_ID
-                        --build-arg AWS_SECRET_ACCESS_KEY
-                        --build-arg LIBDAP_VERSION
-                        --build-arg BES_VERSION
-                        --build-arg OLFS_VERSION
-                        --tag "${SNAPSHOT_IMAGE_TAG}" hyrax
+        - cp ./${LIBDAP_RPM} ./hyrax
+        - cp ./${BES_RPM} ./hyrax
+        - cp ./${OLFS_DISTRO} ./hyrax
+        - cp ./${ROBOTS_DISTRO} ./hyrax
+        - docker build
+          --build-arg RELEASE_DATE
+          --build-arg HYRAX_VERSION
+          --build-arg LIBDAP_VERSION
+          --build-arg BES_VERSION
+          --build-arg OLFS_VERSION
+          --tag "${SNAPSHOT_IMAGE_TAG}" hyrax
         - docker tag ${SNAPSHOT_IMAGE_TAG} ${BUILD_VERSION_TAG}
         - docker image ls -a
 
@@ -105,14 +132,18 @@ jobs:
         - export SNAPSHOT_IMAGE_TAG=opendap/hyrax_ncwms:snapshot
         - export BUILD_VERSION_TAG=opendap/hyrax_ncwms:${HYRAX_VERSION}
         - cd hyrax-builds
-        - docker build --build-arg RELEASE_DATE
-                        --build-arg AWS_ACCESS_KEY_ID
-                        --build-arg AWS_SECRET_ACCESS_KEY
-                        --build-arg LIBDAP_VERSION
-                        --build-arg BES_VERSION
-                        --build-arg OLFS_VERSION
-                        --build-arg USE_NCWMS=true
-                        --tag "${SNAPSHOT_IMAGE_TAG}" hyrax
+        - cp ./${LIBDAP_RPM} ./hyrax
+        - cp ./${BES_RPM} ./hyrax
+        - cp ./${OLFS_DISTRO} ./hyrax
+        - cp ./${ROBOTS_DISTRO} ./hyrax
+        - docker build
+          --build-arg RELEASE_DATE
+          --build-arg HYRAX_VERSION
+          --build-arg LIBDAP_VERSION
+          --build-arg BES_VERSION
+          --build-arg OLFS_VERSION
+          --build-arg USE_NCWMS=true
+          --tag "${SNAPSHOT_IMAGE_TAG}" hyrax
         - docker tag ${SNAPSHOT_IMAGE_TAG} ${BUILD_VERSION_TAG}
         - docker image ls -a
 
@@ -122,12 +153,17 @@ jobs:
         - export SNAPSHOT_IMAGE_TAG=opendap/hyrax:ngap-snapshot
         - export BUILD_VERSION_TAG=opendap/hyrax:ngap-${HYRAX_VERSION}
         - cd hyrax-builds
+        - ls -l
+        - cp ./${LIBDAP_RPM} ./ngap
+        - cp ./${BES_RPM} ./ngap
+        - cp ./${NGAP_DISTRO} ./ngap
         - docker build --build-arg RELEASE_DATE
-          --build-arg AWS_ACCESS_KEY_ID
-          --build-arg AWS_SECRET_ACCESS_KEY
+          --build-arg RELEASE_DATE
+          --build-arg HYRAX_VERSION
           --build-arg LIBDAP_VERSION
           --build-arg BES_VERSION
           --build-arg OLFS_VERSION
+          --build-arg USE_NCWMS=true
           --tag "${SNAPSHOT_IMAGE_TAG}" ngap
         - docker tag ${SNAPSHOT_IMAGE_TAG} ${BUILD_VERSION_TAG}
         - docker image ls -a

@@ -19,25 +19,24 @@ ARG RELEASE_DATE
 ENV RELEASE_DATE ${RELEASE_DATE:-"unknown"}
 RUN echo "RELEASE_DATE: ${RELEASE_DATE}"
 
-ARG AWS_ACCESS_KEY_ID
-ENV AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-"unknown"}
-RUN echo "AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}"
-
-ARG AWS_SECRET_ACCESS_KEY
-ENV AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-"unknown"}
-RUN echo "AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}"
-
 ARG LIBDAP_VERSION
-ENV LIBDAP_VERSION=${LIBDAP_VERSION:-"unknown"}
+ENV LIBDAP_VERSION=${LIBDAP_VERSION:-"snapshot"}
 RUN echo "LIBDAP_VERSION: ${LIBDAP_VERSION}"
 
+ARG LIBDAP_RPM
+ENV LIBDAP_RPM=${LIBDAP_RPM:-"./libdap-${LIBDAP_VERSION}.el7.x86_64.rpm"}
+RUN echo "LIBDAP_RPM: ${LIBDAP_RPM}"
+COPY ${LIBDAP_RPM} /${LIBDAP_RPM}
+
 ARG BES_VERSION
-ENV BES_VERSION=${BES_VERSION:-"unknown"}
+ENV BES_VERSION=${BES_VERSION:-"snapshot"}
 RUN echo "BES_VERSION: ${BES_VERSION}"
 
-# SNAPSHOT URLs
-ENV LIBDAP_RPM="s3://opendap.travis.build/libdap-${LIBDAP_VERSION}.el7.x86_64.rpm"
-ENV BES_RPM="s3://opendap.travis.build/bes-${BES_VERSION}.static.el7.x86_64.rpm"
+ARG BES_RPM
+ENV BES_RPM=${BES_RPM:-"./bes-${BES_VERSION}.static.el7.x86_64.rpm"}
+RUN echo "BES_RPM: ${BES_RPM}"
+COPY ${BES_RPM} /${BES_RPM}
+
 
 LABEL vendor="OPeNDAP"
 LABEL org.opendap.besdaemon.version=${BES_VERSION}
@@ -57,32 +56,31 @@ RUN set -e \
     && yum -y update \
     && yum clean all
 
+
 ###############################################################
 # Retrieve and install the latest libdap snapshot
 RUN set -e \
-    && echo "Retrieving, and installing libdap snapshot. rpm: $LIBDAP_RPM" \
-    && aws --region=us-east-1 s3 cp ${LIBDAP_RPM}  ./libdap.rpm\
+    && echo "Installing libdap snapshot rpm. ${LIBDAP_RPM}" \
     && ls -l ./libdap* \
-    && yum -y install ./libdap.rpm \
-    && rm -f libdap.*
+    && yum -y install ./${LIBDAP_RPM} \
+    && rm -f ./${LIBDAP_RPM}
 
 
 ###############################################################
 # Retrieve and install the latest BES snapshot
 RUN set -e \
-    && echo "Retrieving, and installing besd snapshot. rpm: $BES_RPM" \
-    && aws --region=us-east-1 s3 cp ${BES_RPM}  ./bes.rpm\
+    && echo "Install the besd rpm ${BES_RPM} " \
     && ls -l ./bes* \
-    && yum -y install ./bes.rpm \
-    && rm -f bes.*
+    && yum -y install ./${BES_RPM} \
+    && rm -f ./${BES_RPM}
 
 # Clear these values so they do not persist in the container!
-ENV AWS_ACCESS_KEY_ID=
-ENV AWS_SECRET_ACCESS_KEY=
-RUN echo "unset AWS_ACCESS_KEY_ID"     >> ~/.bash_profile
-RUN echo "unset AWS_SECRET_ACCESS_KEY" >> ~/.bash_profile
-RUN echo "unset AWS_ACCESS_KEY_ID"     >> ~/.bashrc
-RUN echo "unset AWS_SECRET_ACCESS_KEY" >> ~/.bashrc
+#ENV AWS_ACCESS_KEY_ID=
+#ENV AWS_SECRET_ACCESS_KEY=
+#RUN echo "unset AWS_ACCESS_KEY_ID"     >> ~/.bash_profile
+#RUN echo "unset AWS_SECRET_ACCESS_KEY" >> ~/.bash_profile
+#RUN echo "unset AWS_ACCESS_KEY_ID"     >> ~/.bashrc
+#RUN echo "unset AWS_SECRET_ACCESS_KEY" >> ~/.bashrc
 
 RUN echo "besdaemon is here: "`which besdaemon`
 

@@ -18,32 +18,44 @@ FROM centos:7
 RUN export NOW=`date +%s`
 
 ARG RELEASE_DATE
-ENV RELEASE_DATE ${RELEASE_DATE:-"unknown"}
+ENV RELEASE_DATE ${RELEASE_DATE:-"${NOW}"}
 RUN echo "RELEASE_DATE: ${RELEASE_DATE}"
 
-ARG AWS_ACCESS_KEY_ID
-ENV AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-"unknown"}
-RUN echo "AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}"
-
-ARG AWS_SECRET_ACCESS_KEY
-ENV AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-"unknown"}
-RUN echo "AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}"
+ARG HYRAX_VERSION
+ENV HYRAX_VERSION=${HYRAX_VERSION:-"snapshot"}
+RUN echo "HYRAX_VERSION: ${HYRAX_VERSION}"
 
 ARG LIBDAP_VERSION
-ENV LIBDAP_VERSION=${LIBDAP_VERSION:-"unknown"}
+ENV LIBDAP_VERSION=${LIBDAP_VERSION:-"snapshot"}
 RUN echo "LIBDAP_VERSION: ${LIBDAP_VERSION}"
 
+ARG LIBDAP_RPM
+ENV LIBDAP_RPM=${LIBDAP_RPM:-"libdap-${LIBDAP_VERSION}.el7.x86_64.rpm"}
+RUN echo "LIBDAP_RPM: ${LIBDAP_RPM}"
+COPY ${LIBDAP_RPM} /${LIBDAP_RPM}
+
 ARG BES_VERSION
-ENV BES_VERSION=${BES_VERSION:-"unknown"}
+ENV BES_VERSION=${BES_VERSION:-"snapshot"}
 RUN echo "BES_VERSION: ${BES_VERSION}"
 
+ARG BES_RPM
+ENV BES_RPM=${BES_RPM:-"bes-${BES_VERSION}.static.el7.x86_64.rpm"}
+RUN echo "BES_RPM: ${BES_RPM}"
+COPY ${BES_RPM} /${BES_RPM}
+
 ARG OLFS_VERSION
-ENV OLFS_VERSION=${OLFS_VERSION:-"unknown"}
+ENV OLFS_VERSION=${OLFS_VERSION:-"snapshot"}
 RUN echo "OLFS_VERSION: ${OLFS_VERSION}"
 
-ARG HYRAX_VERSION
-ENV HYRAX_VERSION=${HYRAX_VERSION:-"unknown"}
-RUN echo "HYRAX_VERSION: ${HYRAX_VERSION}"
+ARG OLFS_DISTRO
+ENV OLFS_DISTRO=${OLFS_DISTRO:-"olfs-${OLFS_VERSION}-webapp"}
+RUN echo "OLFS_DISTRO: ${OLFS_DISTRO}"
+COPY ${OLFS_DISTRO}.tgz /${OLFS_DISTRO}.tgz
+
+ARG ROBOTS_DISTRO
+ENV ROBOTS_DISTRO=${ROBOTS_DISTRO:-"robots-olfs-${OLFS_VERSION}-webapp"}
+RUN echo "ROBOTS_DISTRO: ${ROBOTS_DISTRO}"
+COPY ${ROBOTS_DISTRO}.tgz /${ROBOTS_DISTRO}.tgz
 
 LABEL vendor="OPeNDAP"
 LABEL org.opendap.hyrax.version=${HYRAX_VERSION}
@@ -92,62 +104,56 @@ ENV CATALINA_HOME /usr/share/tomcat
 ENV PATH $CATALINA_HOME/bin:$PATH
 RUN echo "CATALINA_HOME: $CATALINA_HOME"
 
-################################################################
-# SNAPSHOT URLs
-#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
-ENV LIBDAP_RPM="s3://opendap.travis.build/libdap-${LIBDAP_VERSION}.el7.x86_64.rpm"
-ENV BES_RPM="s3://opendap.travis.build/bes-${BES_VERSION}.static.el7.x86_64.rpm"
-ENV OLFS_PACKAGE="s3://opendap.travis.build/olfs-${OLFS_VERSION}-webapp.tgz"
-ENV ROBOTS_PACKAGE="s3://opendap.travis.build/robots-olfs-${OLFS_VERSION}-webapp.tgz"
 
 ################################################################
-# Retrieve and install the latest libdap snapshot
+# Install the latest libdap snapshot
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 RUN set -e \
-    && echo "Retrieving, and installing the latest libdap snapshot. rpm: $LIBDAP_RPM" \
-    && aws --region=us-east-1 s3 cp ${LIBDAP_RPM}  ./libdap.rpm \
+    && echo "Installing the libdap rpm: ${LIBDAP_RPM}" \
     && ls -l ./libdap* \
-    && yum -y install ./libdap.rpm \
-    && rm -f libdap.*
+    && yum -y install ./${LIBDAP_RPM} \
+    && rm -f ./${LIBDAP_RPM}
+
+RUN echo "libdap4 is installed."
 
 ################################################################
-# Retrieve and install the latest BES snapshot
+# Install the latest BES snapshot
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 RUN set -e \
-    && echo "Retrieving, and installing the latest besd snapshot. rpm: $BES_RPM" \
-    && aws --region=us-east-1 s3 cp ${BES_RPM}  ./bes.rpm \
+    && echo "Installing the latest BES rpm: ${BES_RPM}" \
     && ls -l ./bes* \
-    && yum -y install ./bes.rpm \
-    && rm -f bes.*
+    && yum -y install ./${BES_RPM} \
+    && rm -f ./${BES_RPM}
 
 RUN echo "besdaemon is here: "`which besdaemon`
 
 ################################################################
-# Retrieve, verify, and install the OLFS web application
+# Install the OLFS web application
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 ENV ROOT=/dev/shm
 
-RUN echo "Retrieving and installing the latest olfs snapshot (${OLFS_VERSION})."
+RUN echo "Installing the latest olfs distribution (${OLFS_VERSION})."
 RUN set -e \
-    && aws --region=us-east-1 s3 cp ${OLFS_PACKAGE} ./olfs-${OLFS_VERSION}-webapp.tgz \
-    && tar -C ${ROOT} -xzvf ./olfs-${OLFS_VERSION}-webapp.tgz \
+    && echo "working_dir: "`pwd` \
+    && ls -l . \
+    && tar -C ${ROOT} -xzvf ./${OLFS_DISTRO}.tgz \
     && ls -l ${ROOT} \
     && echo "Unpacking warfile..." \
     && mkdir -p ${CATALINA_HOME}/webapps/opendap/ \
     # && (cd ${CATALINA_HOME}/webapps/opendap/ && jar -xf ${ROOT}/olfs-${OLFS_VERSION}-webapp/opendap.war) \
-    && unzip -o ${ROOT}/olfs-${OLFS_VERSION}-webapp/opendap.war -d ${CATALINA_HOME}/webapps/opendap/ \
+    && unzip -o ${ROOT}/${OLFS_DISTRO}/opendap.war -d ${CATALINA_HOME}/webapps/opendap/ \
     && echo "Cleaning up." \
-    && rm -rf ${ROOT}/olfs-${OLFS_VERSION}-webapp ./olfs-${OLFS_VERSION}-webapp.tgz
+    && rm -rf ${ROOT}/${OLFS_DISTRO} ./${OLFS_DISTRO}.tgz
 
 RUN set -e \
-    && echo "Retrieving and installing the latest dynamic robots.txt snapshot (${OLFS_VERSION})." \
-    && aws --region=us-east-1 s3 cp ${ROBOTS_PACKAGE}  ./robots-olfs-${OLFS_VERSION}-webapp.tgz\
-    && tar -C ${ROOT} -xzf robots-olfs-${OLFS_VERSION}-webapp.tgz \
-    && ls -l ${ROOT}/robots-olfs-${OLFS_VERSION}-webapp \
+    && echo "Installing the latest dynamic robots.txt distribution (${OLFS_VERSION})." \
+    && ls -l ./robots* \
+    && tar -C ${ROOT} -xzf ./${ROBOTS_DISTRO}.tgz \
+    && ls -l ${ROOT}/${ROBOTS_DISTRO} \
     && echo "Unpacking dynamic robots.txt warfile..." \
-    && unzip -o ${ROOT}/robots-olfs-${OLFS_VERSION}-webapp/ROOT.war -d ${CATALINA_HOME}/webapps/ROOT/ \
+    && unzip -o ${ROOT}/${ROBOTS_DISTRO}/ROOT.war -d ${CATALINA_HOME}/webapps/ROOT/ \
     && echo "Cleaning up dynamic robots.txt snapshot..." \
-    && rm -rf ${ROOT}/* robots-olfs-${OLFS_VERSION}-webapp.tgz
+    && rm -rf ${ROOT}/${ROBOTS_DISTRO} ${ROBOTS_DISTRO}.tgz
 
 # Fix ownership and access permissions
 RUN set -e \
@@ -155,13 +161,6 @@ RUN set -e \
     && chown -R tomcat:tomcat ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs \
     && chmod 700 ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs 
 
-# Clear these values so they do not persist in the container!
-ENV AWS_ACCESS_KEY_ID=
-ENV AWS_SECRET_ACCESS_KEY=
-RUN echo "unset AWS_ACCESS_KEY_ID"     >> ~/.bash_profile
-RUN echo "unset AWS_SECRET_ACCESS_KEY" >> ~/.bash_profile
-RUN echo "unset AWS_ACCESS_KEY_ID"     >> ~/.bashrc
-RUN echo "unset AWS_SECRET_ACCESS_KEY" >> ~/.bashrc
 
 ################################################################
 # retrieve and install the ncWMS web application
