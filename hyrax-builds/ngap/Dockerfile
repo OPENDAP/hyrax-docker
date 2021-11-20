@@ -129,16 +129,10 @@ ENV ROOT=/dev/shm
 RUN set -e \
     && echo "Installing the latest NGAP distribution (${NGAP_DISTRO})." \
     && echo "working dir: "$(pwd)"    ROOT: ${ROOT}" \
-    && ls -l "${ROOT}" \
-    && echo "##############################################" \
-    && echo "working dir: "$(pwd)"    ROOT: ${ROOT}" \
     && tar -C "${ROOT}" -xzvf /${NGAP_DISTRO}.tgz \
     && ls -l "${ROOT}" \
-    && echo "working dir: "$(pwd)"    ROOT: ${ROOT}" \
-    && echo "##############################################" \
     && echo "Unpacking warfile..." \
     && unzip -o ${ROOT}/${NGAP_DISTRO}/${DEFAULT_NGAP_DEPLOYMENT_CONTEXT}.war -d ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/ \
-    && echo "##############################################" \
     && echo "Cleaning up." \
     && rm -rf ${ROOT}/${NGAP_DISTRO} ./${NGAP_DISTRO}.tgz
 
