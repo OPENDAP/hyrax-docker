@@ -97,9 +97,9 @@ jobs:
           --tag "${SNAPSHOT_IMAGE_TAG}" hyrax
         - docker tag ${SNAPSHOT_IMAGE_TAG} ${BUILD_VERSION_TAG}
         - docker image ls -a
-        - echo "Running Test Script"
         - cd ..
-        - ./regression_test_script
+        - echo "Running Test Script"
+        - ./regression_test_script -e http://foo
 
     - stage: build
       name: "opendap/besd:snapshot"
