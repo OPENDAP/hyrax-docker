@@ -98,6 +98,7 @@ jobs:
         - docker tag ${SNAPSHOT_IMAGE_TAG} ${BUILD_VERSION_TAG}
         - docker image ls -a
         - echo "Running Test Script"
+        - cd ..
         - ./regression_test_script
 
     - stage: build
