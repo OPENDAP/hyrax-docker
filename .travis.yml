@@ -68,7 +68,7 @@ install:
 
 stages:
   - name: build_and_test
-    if:  branch = test_before_deploy
+    if:  branch = master
   - name: build
     if:  branch = master
   - name: test
