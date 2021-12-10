@@ -91,7 +91,7 @@ function waitForHyrax() {
 }
 
 # get the image
-docker pull ${test_image_name};
+# docker pull ${test_image_name};
 
 # Dump all other containers
 containers=$(docker ps -aq);
