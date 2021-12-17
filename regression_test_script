@@ -90,8 +90,6 @@ function waitForHyrax() {
     echo "Hyrax has arrived!"
 }
 
-# get the image
-docker pull ${test_image_name};
 
 # Dump all other containers
 containers=$(docker ps -aq);

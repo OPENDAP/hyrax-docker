@@ -67,15 +67,40 @@ install:
 
 
 stages:
+  - name: build_and_test_hyrax_service
+    if:  branch = master
   - name: build
     if:  branch = master
-  - name: test
+  - name: test_deployed_image
     if: branch = master
   - name: disabled
     if: branch = disabled
 
 jobs:
   include:
+    - stage: build_and_test_hyrax_service
+      name: "Build opendap/hyrax:snapshot and run regression tests"
+      script:
+        - export SNAPSHOT_IMAGE_TAG=opendap/hyrax:snapshot
+        - export BUILD_VERSION_TAG=opendap/hyrax:${HYRAX_VERSION}
+        - cd hyrax-builds
+        - cp ./${LIBDAP_RPM} ./hyrax
+        - cp ./${BES_RPM} ./hyrax
+        - cp ./${OLFS_DISTRO} ./hyrax
+        - cp ./${ROBOTS_DISTRO} ./hyrax
+        - docker build
+          --build-arg RELEASE_DATE
+          --build-arg HYRAX_VERSION
+          --build-arg LIBDAP_VERSION
+          --build-arg BES_VERSION
+          --build-arg OLFS_VERSION
+          --tag "${SNAPSHOT_IMAGE_TAG}" hyrax
+        - docker tag ${SNAPSHOT_IMAGE_TAG} ${BUILD_VERSION_TAG}
+        - docker image ls -a
+        - cd ..
+        - echo "Running Test Script"
+        - ./regression_test_script -i ${SNAPSHOT_IMAGE_TAG}
+
     - stage: build
       name: "opendap/besd:snapshot"
       script:
@@ -103,26 +128,6 @@ jobs:
           --build-arg HYRAX_VERSION
           --build-arg OLFS_VERSION
           -t "${SNAPSHOT_IMAGE_TAG}" olfs
-        - docker tag ${SNAPSHOT_IMAGE_TAG} ${BUILD_VERSION_TAG}
-        - docker image ls -a
-
-    - stage: build
-      name: "opendap/hyrax:snapshot"
-      script:
-        - export SNAPSHOT_IMAGE_TAG=opendap/hyrax:snapshot
-        - export BUILD_VERSION_TAG=opendap/hyrax:${HYRAX_VERSION}
-        - cd hyrax-builds
-        - cp ./${LIBDAP_RPM} ./hyrax
-        - cp ./${BES_RPM} ./hyrax
-        - cp ./${OLFS_DISTRO} ./hyrax
-        - cp ./${ROBOTS_DISTRO} ./hyrax
-        - docker build
-          --build-arg RELEASE_DATE
-          --build-arg HYRAX_VERSION
-          --build-arg LIBDAP_VERSION
-          --build-arg BES_VERSION
-          --build-arg OLFS_VERSION
-          --tag "${SNAPSHOT_IMAGE_TAG}" hyrax
         - docker tag ${SNAPSHOT_IMAGE_TAG} ${BUILD_VERSION_TAG}
         - docker image ls -a
 
@@ -168,8 +173,8 @@ jobs:
         - docker tag ${SNAPSHOT_IMAGE_TAG} ${BUILD_VERSION_TAG}
         - docker image ls -a
 
-    - stage: test
-      name: "Hyrax Regression Tests"
+    - stage: test_deployed_image
+      name: "Test Deployed Image"
       script:
         - echo "Running Test Script"
         - ./regression_test_script
