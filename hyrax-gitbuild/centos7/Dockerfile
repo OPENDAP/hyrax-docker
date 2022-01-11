@@ -285,8 +285,8 @@ RUN set -e \
 # And then we cleanup.
 RUN set -e \
     && cd /hyrax/bes \
-    && echo "BES: make clean" >&2 \
-    && make clean
+    && echo "BES: make -k clean" >&2 \
+    && make -k clean
 #
 # Update the BES configuration to use the new bes user and group.
 RUN set -e \
