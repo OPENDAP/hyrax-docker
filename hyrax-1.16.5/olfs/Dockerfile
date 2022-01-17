@@ -8,14 +8,14 @@ FROM tomcat:8
 MAINTAINER support@opendap.org
 
 # HYRAX VERSION INFO
-ENV HYRAX_VERSION=HYRAX_MAJOR_VERSION_TEMPLATE
-ENV OLFS_VERSION=OLFS_VERSION_TEMPLATE
-ENV RELEASE_DATE=RELEASE_DATE_TEMPLATE
+ENV HYRAX_VERSION=1.16
+ENV OLFS_VERSION=1.18.10
+ENV RELEASE_DATE=2022-01-04
 
 
 LABEL vendor="OPeNDAP Incorporated"
-LABEL org.opendap.olfs.version=OLFS_VERSION_TEMPLATE
-LABEL org.opendap.olfs.release-date=RELEASE_DATE_TEMPLATE
+LABEL org.opendap.olfs.version=1.18.10
+LABEL org.opendap.olfs.release-date=2022-01-04
 LABEL org.opendap.hyrax.version.is-production="true"
 
 USER root
