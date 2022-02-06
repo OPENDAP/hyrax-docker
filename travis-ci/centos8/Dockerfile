@@ -13,6 +13,14 @@
 # it for debugging stuff.
 #
 # Set one or more individual labels
+#
+# RedHat host their own docker repo for our friend CentOS:
+#   https://quay.io/repository/centos/centos
+# Where one can go to get the stream8 and stream9 versions of CentOS docker
+# images:
+#   https://quay.io/repository/centos/centos?tag=stream8&tab=tags
+#
+# And so we use that for our FROM reference
 FROM quay.io/centos/centos:stream8
 
 ENV MAKE "make"
@@ -66,10 +74,6 @@ RUN set -e \
        jasper-devel \
        libtirpc-devel
 
-#RUN set -e \
-#    && yum -y install \
-#        libicu-devel \
-#        libicu
 
 RUN set -e \
     && yum -y update \
