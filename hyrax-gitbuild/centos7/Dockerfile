@@ -206,10 +206,11 @@ RUN set -e \
     && echo "Cloned BES project." >&2
 #
 # Update the BES submodules
-RUN set -e \
-    && echo "BES: Updating Git Submodules." >&2 \
-    && cd /hyrax/bes \
-    && git submodule update --init
+#RUN set -e \
+#    && echo "BES: Updating Git Submodules." >&2 \
+#    && cd /hyrax/bes \
+#    && git submodule update --init
+
 #
 # Now we check out the requested BES branch
 #
@@ -228,33 +229,38 @@ RUN set -e \
 #
 # @FIXME This checkout code does not work if the branch is not "master"
 #
-ARG H4_BRANCH
-ENV H4_BRANCH ${H4_BRANCH:-"master"}
-RUN set -e && \
-    echo "H4_BRANCH: ${H4_BRANCH}" >&2
+#ARG H4_BRANCH
+#ENV H4_BRANCH ${H4_BRANCH:-"master"}
+#RUN set -e && \
+#    echo "H4_BRANCH: ${H4_BRANCH}" >&2
 #
+
 # Checkout the branch
-RUN set -e \
-    && cd /hyrax/bes/modules/hdf4_handler \
-    && echo "BES: Checking out hdf4_handler branch: ${H4_BRANCH}" >&2 \
-    && git checkout ${H4_BRANCH} \
-    && git branch
+#RUN set -e \
+#    && cd /hyrax/bes/modules/hdf4_handler \
+#    && echo "BES: Checking out hdf4_handler branch: ${H4_BRANCH}" >&2 \
+#    && git checkout ${H4_BRANCH} \
+#    && git branch
+
+
 #
 # Now we check out the requested hdf5_handler branch
 #
 # @FIXME This checkout code does not work if the branch is not "master"
 #
-ARG H5_BRANCH
-ENV H5_BRANCH ${H5_BRANCH:-"master"}
-RUN set -e && \
-    echo "H5_BRANCH: ${H5_BRANCH}"  >&2
+#ARG H5_BRANCH
+#ENV H5_BRANCH ${H5_BRANCH:-"master"}
+#RUN set -e && \
+#    echo "H5_BRANCH: ${H5_BRANCH}"  >&2
+
 #
 # Checkout the branch
-RUN set -e \
-    && cd /hyrax/bes/modules/hdf5_handler \
-    && echo "BES: Checking out hdf5_handler branch: ${H5_BRANCH}" >&2 \
-    && git checkout ${H5_BRANCH} \
-    && git branch
+#RUN set -e \
+#    && cd /hyrax/bes/modules/hdf5_handler \
+#    && echo "BES: Checking out hdf5_handler branch: ${H5_BRANCH}" >&2 \
+#    && git checkout ${H5_BRANCH} \
+#    && git branch
+
 #
 # And we run configure
 RUN set -e \
