@@ -35,14 +35,17 @@ USER root
 #    && dnf --disablerepo '*' --enablerepo=extras swap centos-linux-repos centos-stream-repos \
 #    && dnf distro-sync
 
-RUN set -e \
-    && yum clean all \
-    && yum -y update
+# See https://beenje.github.io/blog/posts/dockerfile-anti-patterns-and-best-practices/
+# RUN set -e \
+#     && yum clean all \
+#    && yum -y update
+
+# RUN set -e \
+#    && yum config-manager --set-enabled powertools
 
 RUN set -e \
     && yum config-manager --set-enabled powertools
-
-RUN set -e \
+    && yum -y update \
     && yum -y install \
        java-1.8.0-openjdk \
        java-1.8.0-openjdk-devel \
@@ -72,13 +75,23 @@ RUN set -e \
        bc \
        openjpeg2-devel \
        jasper-devel \
-       libtirpc-devel
-
-
-RUN set -e \
-    && yum -y update \
+       libtirpc \
+       libtirpc-devel \
+       sqlite-libs \
+       sqlite-devel \
     && yum clean all
 
+# Above, we need both the libtirpc and it's -devel companion. Added sqlite-libs and -devel \
+# for the gdal4 build on Stream8. jhrg 2/7/22
+
+# RUN set -e \
+#    && yum -y update \
+#    && yum clean all
+
+# The following may work when commands are all in one Dockerfile, but the env vars do not show up
+# in the container when you run it. jhrg 2/7/22
+# And the path should be /usr/include/tirpc and we may need to add /usr/include/tirpc/rpc as well.
+#
 RUN set -e \
     && export CPPFLAGS=-I/usr/include/tirpc \
     && export LDADD=-ltirpc

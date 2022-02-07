@@ -1,0 +1,146 @@
+
+Working on an M1
+docker build --tag c8-2 --platform linux/arm64 .
+
+docker run --interactive --tty --platform linux/arm64 c8-2
+
+[root@eeabc5846473 /]# printenv
+LANG=C.utf8
+HOSTNAME=eeabc5846473
+which_declare=declare -f
+container=oci
+PWD=/
+HOME=/root
+TERM=xterm
+SHLVL=1
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+MAKE=make
+LESSOPEN=||/usr/bin/lesspipe.sh %s
+BASH_FUNC_which%%=() {  ( alias;
+ eval ${which_declare} ) | /usr/bin/which --tty-only --read-alias --read-functions --show-tilde --show-dot $@
+}
+_=/usr/bin/printenv
+
+[root@eeabc5846473 /]# alias pd=pushd
+[root@eeabc5846473 /]# alias pp=popd
+[root@eeabc5846473 /]# rpm -qil libtirpc
+Name        : libtirpc
+Version     : 1.1.4
+...
+
+[root@eeabc5846473 /]# export CPPFLAGS=-I/usr/include/tirpc
+[root@eeabc5846473 /]# export LDADD=-ltirpc
+[root@eeabc5846473 /]# pd home
+[root@eeabc5846473 home]# git clone https://github.com/OPENDAP/hyrax
+[root@eeabc5846473 home]# pd hyrax/
+/home/hyrax /home /
+[root@eeabc5846473 hyrax]# source spath.sh
+[root@eeabc5846473 hyrax]# ./hyrax_clone.sh
+
+Just to be sure we have then environment vars set:
+[root@eeabc5846473 hyrax]# printenv
+LD_LIBRARY_PATH=/home/hyrax/build/deps/lib
+LANG=C.utf8
+prefix=/home/hyrax/build
+HOSTNAME=eeabc5846473
+OLDPWD=/home
+CONFIG_SITE=/home/hyrax/config.site
+which_declare=declare -f
+container=oci
+PWD=/home/hyrax
+HOME=/root
+LDADD=-ltirpc
+TERM=xterm
+SHLVL=1
+CPPFLAGS=-I/usr/include/tirpc
+PATH=/home/hyrax/build/bin:/home/hyrax/build/deps/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+TESTSUITEFLAGS=--jobs=9
+MAKE=make
+LESSOPEN=||/usr/bin/lesspipe.sh %s
+BASH_FUNC_which%%=() {  ( alias;
+ eval ${which_declare} ) | /usr/bin/which --tty-only --read-alias --read-functions --show-tilde --show-dot $@
+}
+_=/usr/bin/printenv
+
+Yes, we do (prefix, LDADD, CPPFLAGS, PATH)
+
+Build hyrax-dependencies as we do in travis for travis:
+
+export CONFIGURE_FLAGS="--disable-shared"       # static libraries only for the deps.
+
+# these are the newest linux targets and assume at least C7 and a valid bison.
+make -j16 ci-part-1
+make -j16 ci-part-2
+make -j16 ci-part-3
+make -j16 ci-part-4
+
+[root@eeabc5846473 hyrax-dependencies]# export CONFIGURE_FLAGS="--disable-shared"
+[root@eeabc5846473 hyrax-dependencies]# make -j16 ci-part-1
+make -j16 --jobserver-auth=3,4 gridfields
+make[1]: warning: -j16 forced in submake: resetting jobserver mode.
+make[1]: Entering directory '/home/hyrax/hyrax-dependencies'
+tar -xzf downloads/gridfields-1.0.5.tar.gz -C src
+echo timestamp > src/gridfields-1.0.5-stamp
+....
+
+fails
+
+[root@eeabc5846473 hyrax-dependencies]# export CONFIGURE_FLAGS="--disable-shared --build=arm64-unknown-linux-gnu"
+[root@eeabc5846473 hyrax-dependencies]# make -j16 ci-part-1
+...
+- Installing: /home/hyrax/build/deps/include/VarStr.h
+-- Installing: /home/hyrax/build/deps/include/VarStr.hpp
+-- Installing: /home/hyrax/build/deps/include/VarStr.hxx
+-- Installing: /home/hyrax/build/deps/include/erfa.h
+-- Installing: /home/hyrax/build/deps/lib/libSTARE.a
+make[2]: Leaving directory '/home/hyrax/hyrax-dependencies/src/STARE-1.1.0/build'
+echo timestamp > stare-install-stamp
+make[1]: Leaving directory '/home/hyrax/hyrax-dependencies'
+
+[root@eeabc5846473 hyrax-dependencies]# ls $prefix/deps
+bin  include  lib
+[root@eeabc5846473 hyrax-dependencies]# ls $prefix/deps/lib
+libSTARE.a  libgridfields.a  libgridfields.la
+[root@eeabc5846473 hyrax-dependencies]# ls $prefix/deps/include/
+BitField.h		      KeyPair.h		     SpatialEdge.h	   SpatialVector.hxx
+...
+[root@eeabc5846473 hyrax-dependencies]# ls $prefix/deps/bin
+gridfields-config
+[root@eeabc5846473 hyrax-dependencies]#
+
+There is some obscure error in hdf4 because it does not want to compile 'arm64-unknown-linux-gnu'.
+I'm not sure why that's needed, but I'm moving on.
+
+[root@eeabc5846473 hyrax-dependencies]# make -j16 ci-part-3
+...
+
+[root@eeabc5846473 hyrax-dependencies]# ls -l $prefix/deps/lib
+total 37404
+-rw-r--r-- 1 root root 23357146 Feb  7 23:22 libSTARE.a
+-rw-r--r-- 1 root root  1385484 Feb  7 23:22 libgridfields.a
+-rwxr-xr-x 1 root root      895 Feb  7 23:22 libgridfields.la
+-rw-r--r-- 1 root root 10938754 Feb  7 23:36 libhdf5.a
+-rwxr-xr-x 1 root root      891 Feb  7 23:36 libhdf5.la
+-rw-r--r-- 1 root root     3091 Feb  7 23:36 libhdf5.settings
+-rw-r--r-- 1 root root   225882 Feb  7 23:36 libhdf5_hl.a
+-rwxr-xr-x 1 root root      938 Feb  7 23:36 libhdf5_hl.la
+-rw-r--r-- 1 root root   221046 Feb  7 23:25 libjpeg.a
+-rw-r--r-- 1 root root  2133850 Feb  7 23:37 libnetcdf.a
+-rwxr-xr-x 1 root root     1027 Feb  7 23:37 libnetcdf.la
+-rw-r--r-- 1 root root     1095 Feb  7 23:37 libnetcdf.settings
+drwxr-xr-x 2 root root     4096 Feb  7 23:37 pkgconfig
+[root@eeabc5846473 hyrax-dependencies]#
+
+[root@eeabc5846473 hyrax-dependencies]# make -j16 ci-part-4
+
+...
+  CXX      iso19111/c_api.lo
+  CXX      projections/aeqd.lo
+  CXX      projections/gnom.lo
+  CXX      projections/laea.lo
+g++: fatal error: Killed signal terminated program cc1plus
+
+Try building on linux or intel OSX - the odd host name errors are too hard to debug.
+
+
+
