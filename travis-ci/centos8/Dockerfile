@@ -31,17 +31,12 @@ MAINTAINER support@opendap.org
 
 USER root
 
-#RUN set -e \
-#    && dnf --disablerepo '*' --enablerepo=extras swap centos-linux-repos centos-stream-repos \
-#    && dnf distro-sync
-
 # See https://beenje.github.io/blog/posts/dockerfile-anti-patterns-and-best-practices/
-# RUN set -e \
-#     && yum clean all \
-#    && yum -y update
+# for information about running clean in the same RUN command as the other yum operations.
+# jhrg 2/7/22
 
-# RUN set -e \
-#    && yum config-manager --set-enabled powertools
+# Build up the packages for this image. This includes all the code needed to build
+# hyrax.
 
 RUN set -e \
     && yum config-manager --set-enabled powertools
@@ -58,7 +53,6 @@ RUN set -e \
        autoconf \
        automake \
        libtool \
-       emacs \
        openssl-devel \
        libuuid-devel \
        readline-devel \
@@ -71,30 +65,31 @@ RUN set -e \
        libicu-devel \
        cppunit \
        cppunit-devel \
-       vim \
        bc \
        openjpeg2-devel \
-       jasper-devel \
        libtirpc \
        libtirpc-devel \
        sqlite-libs \
        sqlite-devel \
+       python39 \
     && yum clean all
 
-# Above, we need both the libtirpc and it's -devel companion. Added sqlite-libs and -devel \
-# for the gdal4 build on Stream8. jhrg 2/7/22
+# Removed        jasper-devel
 
-# RUN set -e \
-#    && yum -y update \
-#    && yum clean all
-
-# The following may work when commands are all in one Dockerfile, but the env vars do not show up
-# in the container when you run it. jhrg 2/7/22
-# And the path should be /usr/include/tirpc and we may need to add /usr/include/tirpc/rpc as well.
-#
+# Now build the C++ parts of the server.
 RUN set -e \
+    && alias pd=pushd && alias pp=popd \
+    && git clone https://github.com/OPENDAP/hyrax \
+    && pd hyrax && source spath.sh && ./hyrax_clone.sh \
+    && export CONFIGURE_FLAGS="--disable-shared" \
     && export CPPFLAGS=-I/usr/include/tirpc \
-    && export LDADD=-ltirpc
+    && export LDFLAGS=-ltirpc \
+    && pd hyrax-dependencies \
+    && make -j16 ci-part-1 \
+    && make -j16 ci-part-2 \
+    && make -j16 ci-part-3 \
+    && make -j16 ci-part-4 \
+    && make list-built
 
 ENTRYPOINT [ "/bin/bash" ]
 
