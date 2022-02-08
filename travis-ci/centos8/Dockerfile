@@ -78,13 +78,14 @@ RUN set -e \
 
 # Now build the C++ parts of the server.
 RUN set -e \
-    && alias pd=pushd && alias pp=popd \
     && git clone https://github.com/OPENDAP/hyrax \
-    && pd hyrax && source spath.sh && ./hyrax_clone.sh \
+    && cd hyrax \
+    && source spath.sh \
+    && ./hyrax_clone.sh \
     && export CONFIGURE_FLAGS="--disable-shared" \
     && export CPPFLAGS=-I/usr/include/tirpc \
     && export LDFLAGS=-ltirpc \
-    && pd hyrax-dependencies \
+    && cd hyrax-dependencies \
     && make -j16 ci-part-1 \
     && make -j16 ci-part-2 \
     && make -j16 ci-part-3 \
