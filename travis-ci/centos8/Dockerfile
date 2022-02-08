@@ -118,7 +118,7 @@ RUN set -e \
     && autoreconf --force --install --verbose \
     && ./configure --prefix=$prefix \
     && make -j16 \
-    && make -j16 check 2>>&1 | tee check.log \
+    && make -j16 check 2>&1 | tee check.log \
     && make install \
     && make clean
 
@@ -134,9 +134,17 @@ RUN set -e \
     && autoreconf --force --install --verbose \
     && ./configure --prefix=$prefix --with-dependencies=$prefix/deps \
     && make -j16 \
-    && make -j16 check 2>>&1 | tee check.log \
+    && make -j16 check 2>&1 | tee check.log \
     && make install \
     && make clean
+
+RUN set -e \
+    && cd /home/hyrax \
+    && pwd \
+    && ls -l \
+    && source ./spath.sh \
+    && cd olfs \
+    && ant server -DHYRAX_VERSION="Docker-1.16.5"
 
 ENTRYPOINT [ "/bin/bash" ]
 
