@@ -71,6 +71,7 @@ RUN set -e \
        git \
        libtool \
        python39 \
+       rpm-build redhat-rpm-config rpm-devel \
        bzip2 bzip2-devel \
        cppunit cppunit-devel \
        curl-devel \

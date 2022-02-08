@@ -31,5 +31,15 @@ the Hyrax server.
 We build use 'Dockerfile' to build an image that is stored n our DockerHub
 repo and pull that for the Travis builds.
 
+Notes specific to CS8
+
+CS8 lacks the Sun XDR/RPC libraries by default. Use the Yum PowerTools repo
+to load the tirpc libraries (two packages - one for the runtime and one for
+the development headers, etc.).
+
+To get both libdap4 and hdf4 to _use_ these, set the environment variables
+CPPFLAGS and LDFLAGS. These need to be exported if set in the Dockerfile
+RUN instruction.
+
 jhrg 2/8/22
 
