@@ -36,6 +36,16 @@ USER root
 # for information about running clean in the same RUN command as the other yum operations.
 # jhrg 2/7/22
 
+# 'Tricks' used in this file:
+# Environment variables don't persist across RUN statements, so they have to be reset
+# for each 'RUN' instruction/block.
+# The documentation https://docs.docker.com/ engine/reference/builder/#environment-replacement)
+# says that the ENV instruction is not supported by the RUN command, but later on, implies it
+# is supported. I used "export ..." in the RUN instructions only because it makes what we're
+# doing in each instruction easier to follow. There is some repeating of values, so I might
+# coalesse those to ENV or ARG instuctions once this thing is working.
+# To get the bash 'source' command to work, the script must be named, e.g., ./spath.sh
+
 # Build up the packages for this image. This includes all the code needed to build
 # hyrax.
 
@@ -76,25 +86,57 @@ RUN set -e \
        python39 \
     && yum clean all
 
-# Now build the C++ parts of the server.
+# Now build dependencies. Note that CONFIGURE_FLAGS="--disable-shared" means
+# the build will make only static libraries for the dependencies. That is
+# good for the RPM pacakges NASA uses, but will result in a larger container
+# if this is used for other purposes. jhrg 2/8/22
 RUN set -e \
     && cd /home \
-    && pwd \
     && git clone https://github.com/OPENDAP/hyrax \
     && cd hyrax \
-    && pwd \
-    && ls -l \
     && source ./spath.sh \
     && ./hyrax_clone.sh \
-    && export CONFIGURE_FLAGS="--disable-shared" \
-    && export CPPFLAGS=-I/usr/include/tirpc \
-    && export LDFLAGS=-ltirpc \
+    && CONFIGURE_FLAGS="--disable-shared" \
+    && CPPFLAGS=-I/usr/include/tirpc \
+    && LDFLAGS=-ltirpc \
     && cd hyrax-dependencies \
     && make -j16 ci-part-1 \
     && make -j16 ci-part-2 \
     && make -j16 ci-part-3 \
     && make -j16 ci-part-4 \
     && make list-built
+
+# Build libdap4. Build a production version of the library.
+RUN set -e \
+    && cd /home/hyrax \
+    && pwd \
+    && ls -l \
+    && source ./spath.sh \
+    && CPPFLAGS=-I/usr/include/tirpc \
+    && LDFLAGS=-ltirpc \
+    && cd libdap4 \
+    && autoreconf --force --install --verbose \
+    && ./configure --prefix=$prefix \
+    && make -j16 \
+    && make -j16 check 2>>&1 | tee check.log \
+    && make install \
+    && make clean
+
+# Build BES. Build a production version of the server.
+RUN set -e \
+    && cd /home/hyrax \
+    && pwd \
+    && ls -l \
+    && source ./spath.sh \
+    && CPPFLAGS=-I/usr/include/tirpc \
+    && LDFLAGS=-ltirpc \
+    && cd bes \
+    && autoreconf --force --install --verbose \
+    && ./configure --prefix=$prefix --with-dependencies=$prefix/deps \
+    && make -j16 \
+    && make -j16 check 2>>&1 | tee check.log \
+    && make install \
+    && make clean
 
 ENTRYPOINT [ "/bin/bash" ]
 
