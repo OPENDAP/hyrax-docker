@@ -109,8 +109,6 @@ RUN set -e \
 # Build libdap4. Build a production version of the library.
 RUN set -e \
     && cd /home/hyrax \
-    && pwd \
-    && ls -l \
     && source ./spath.sh \
     && export CPPFLAGS=-I/usr/include/tirpc \
     && export LDFLAGS=-ltirpc \
@@ -125,8 +123,6 @@ RUN set -e \
 # Build BES. Build a production version of the server.
 RUN set -e \
     && cd /home/hyrax \
-    && pwd \
-    && ls -l \
     && source ./spath.sh \
     && export CPPFLAGS=-I/usr/include/tirpc \
     && export LDFLAGS=-ltirpc \
@@ -137,6 +133,14 @@ RUN set -e \
     && make -j16 check 2>&1 | tee check.log \
     && make install \
     && make clean
+
+RUN set -e \
+    && cd /home/hyrax \
+    && pwd \
+    && ls -l \
+    && source ./spath.sh \
+    && cd olfs \
+    && ant server -DHYRAX_VERSION="Docker-1.16.5"
 
 ENTRYPOINT [ "/bin/bash" ]
 
