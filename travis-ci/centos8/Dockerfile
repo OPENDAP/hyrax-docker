@@ -23,6 +23,7 @@
 # And so we use that for our FROM reference
 FROM quay.io/centos/centos:stream8
 
+# Maybe the CPPFLAGS adn LDFLAGS should go here? jhrg
 ENV MAKE "make"
 
 LABEL vendor="OPeNDAP Incorporated"
@@ -78,8 +79,12 @@ RUN set -e \
 
 # Now build the C++ parts of the server.
 RUN set -e \
+    && cd /home \
+    && pwd \
     && git clone https://github.com/OPENDAP/hyrax \
     && cd hyrax \
+    && pwd \
+    && ls -l \
     && source spath.sh \
     && ./hyrax_clone.sh \
     && export CONFIGURE_FLAGS="--disable-shared" \
