@@ -54,6 +54,7 @@ RUN set -e \
        autoconf \
        automake \
        libtool \
+       jasper-devel \
        openssl-devel \
        libuuid-devel \
        readline-devel \
@@ -75,8 +76,6 @@ RUN set -e \
        python39 \
     && yum clean all
 
-# Removed        jasper-devel
-
 # Now build the C++ parts of the server.
 RUN set -e \
     && cd /home \
@@ -85,7 +84,7 @@ RUN set -e \
     && cd hyrax \
     && pwd \
     && ls -l \
-    && source spath.sh \
+    && source ./spath.sh \
     && ./hyrax_clone.sh \
     && export CONFIGURE_FLAGS="--disable-shared" \
     && export CPPFLAGS=-I/usr/include/tirpc \
