@@ -109,8 +109,6 @@ RUN set -e \
 # Build libdap4. Build a production version of the library.
 RUN set -e \
     && cd /home/hyrax \
-    && pwd \
-    && ls -l \
     && source ./spath.sh \
     && export CPPFLAGS=-I/usr/include/tirpc \
     && export LDFLAGS=-ltirpc \
@@ -125,8 +123,6 @@ RUN set -e \
 # Build BES. Build a production version of the server.
 RUN set -e \
     && cd /home/hyrax \
-    && pwd \
-    && ls -l \
     && source ./spath.sh \
     && export CPPFLAGS=-I/usr/include/tirpc \
     && export LDFLAGS=-ltirpc \
