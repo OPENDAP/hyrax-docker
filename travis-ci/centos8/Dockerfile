@@ -39,7 +39,7 @@ USER root
 # hyrax.
 
 RUN set -e \
-    && yum config-manager --set-enabled powertools
+    && yum config-manager --set-enabled powertools \
     && yum -y update \
     && yum -y install \
        java-1.8.0-openjdk \
