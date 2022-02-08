@@ -24,7 +24,9 @@
 FROM quay.io/centos/centos:stream8
 
 # Only the first is used as of 2/8/22. jhrg
-ARG HYRAX_VERSION="Not.A.Release-Docker"
+# For the base image/container, these are not used. jhrg 2/8/222
+
+# ARG HYRAX_VERSION="Not.A.Release-Docker"
 # ARG OLFS_VERSION="default"
 # ARG LIBDAP_VERSION="default"
 # ARG BES_VERSION="default"
@@ -88,6 +90,63 @@ RUN set -e \
        sqlite-libs sqlite-devel \
        zlib-devel \
     && yum clean all
+
+# Now build dependencies. Note that CONFIGURE_FLAGS="--disable-shared" means
+# the build will make only static libraries for the dependencies. That is
+# good for the RPM pacakges NASA uses, but will result in a larger container
+# if this is used for other purposes. jhrg 2/8/22
+RUN set -e \
+    && cd /home \
+    && git clone https://github.com/OPENDAP/hyrax \
+    && cd hyrax \
+    && source ./spath.sh \
+    && ./hyrax_clone.sh \
+    && export CONFIGURE_FLAGS="--disable-shared" \
+    && export CPPFLAGS=-I/usr/include/tirpc \
+    && export LDFLAGS=-ltirpc \
+    && cd hyrax-dependencies \
+    && make -j16 ci-part-1 \
+    && make -j16 ci-part-2 \
+    && make -j16 ci-part-3 \
+    && make -j16 ci-part-4 \
+    && make list-built
+
+# Build libdap4. Build a production version of the library.
+RUN set -e \
+    && cd /home/hyrax \
+    && source ./spath.sh \
+    && export CPPFLAGS=-I/usr/include/tirpc \
+    && export LDFLAGS=-ltirpc \
+    && cd libdap4 \
+    && autoreconf --force --install --verbose \
+    && ./configure --prefix=$prefix \
+    && make -j16 \
+    && make -j16 check 2>&1 | tee check.log \
+    && make install \
+    && make clean
+
+# Build BES. Build a production version of the server.
+RUN set -e \
+    && cd /home/hyrax \
+    && source ./spath.sh \
+    && export CPPFLAGS=-I/usr/include/tirpc \
+    && export LDFLAGS=-ltirpc \
+    && cd bes \
+    && autoreconf --force --install --verbose \
+    && ./configure --prefix=$prefix --with-dependencies=$prefix/deps \
+    && make -j16 \
+    && make -j16 check 2>&1 | tee check.log \
+    && make install \
+    && make clean
+
+# Build the OLFS.
+RUN set -e \
+    && cd /home/hyrax \
+    && pwd \
+    && ls -l \
+    && source ./spath.sh \
+    && cd olfs \
+    && ant server -DHYRAX_VERSION=${HYRAX_VERSION}
 
 ENTRYPOINT [ "/bin/bash" ]
 
