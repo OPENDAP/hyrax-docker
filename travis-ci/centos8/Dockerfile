@@ -96,9 +96,9 @@ RUN set -e \
     && cd hyrax \
     && source ./spath.sh \
     && ./hyrax_clone.sh \
-    && CONFIGURE_FLAGS="--disable-shared" \
-    && CPPFLAGS=-I/usr/include/tirpc \
-    && LDFLAGS=-ltirpc \
+    && export CONFIGURE_FLAGS="--disable-shared" \
+    && export CPPFLAGS=-I/usr/include/tirpc \
+    && export LDFLAGS=-ltirpc \
     && cd hyrax-dependencies \
     && make -j16 ci-part-1 \
     && make -j16 ci-part-2 \
@@ -112,8 +112,8 @@ RUN set -e \
     && pwd \
     && ls -l \
     && source ./spath.sh \
-    && CPPFLAGS=-I/usr/include/tirpc \
-    && LDFLAGS=-ltirpc \
+    && export CPPFLAGS=-I/usr/include/tirpc \
+    && export LDFLAGS=-ltirpc \
     && cd libdap4 \
     && autoreconf --force --install --verbose \
     && ./configure --prefix=$prefix \
@@ -128,8 +128,8 @@ RUN set -e \
     && pwd \
     && ls -l \
     && source ./spath.sh \
-    && CPPFLAGS=-I/usr/include/tirpc \
-    && LDFLAGS=-ltirpc \
+    && export CPPFLAGS=-I/usr/include/tirpc \
+    && export LDFLAGS=-ltirpc \
     && cd bes \
     && autoreconf --force --install --verbose \
     && ./configure --prefix=$prefix --with-dependencies=$prefix/deps \
