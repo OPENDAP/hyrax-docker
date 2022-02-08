@@ -118,7 +118,7 @@ RUN set -e \
     && autoreconf --force --install --verbose \
     && ./configure --prefix=$prefix \
     && make -j16 \
-    && make -j16 check 2>>&1 | tee check.log \
+    && make -j16 check 2>&1 | tee check.log \
     && make install \
     && make clean
 
@@ -134,7 +134,7 @@ RUN set -e \
     && autoreconf --force --install --verbose \
     && ./configure --prefix=$prefix --with-dependencies=$prefix/deps \
     && make -j16 \
-    && make -j16 check 2>>&1 | tee check.log \
+    && make -j16 check 2>&1 | tee check.log \
     && make install \
     && make clean
 
