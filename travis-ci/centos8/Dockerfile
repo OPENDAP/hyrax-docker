@@ -23,10 +23,13 @@
 # And so we use that for our FROM reference
 FROM quay.io/centos/centos:stream8
 
-# Maybe the CPPFLAGS adn LDFLAGS should go here? jhrg
-ENV MAKE "make"
+# Only the first is used as of 2/8/22. jhrg
+ARG HYRAX_VERSION="Not.A.Release-Docker"
+# ARG OLFS_VERSION="default"
+# ARG LIBDAP_VERSION="default"
+# ARG BES_VERSION="default"
 
-LABEL vendor="OPeNDAP Incorporated"
+LABEL vendor="OPeNDAP"
 
 MAINTAINER support@opendap.org
 
@@ -47,43 +50,42 @@ USER root
 # To get the bash 'source' command to work, the script must be named, e.g., ./spath.sh
 
 # Build up the packages for this image. This includes all the code needed to build
-# hyrax.
+# hyrax. We use 'powertools' because it holds the tirpc library which we need for XDR (used
+# by both hdf4 and libdap4).
+#
+# Packages in in alphabetical order with the command line ones first and then the libraries,
+# with some wiggle room on 'libraries.'
 
 RUN set -e \
     && yum config-manager --set-enabled powertools \
     && yum -y update \
     && yum -y install \
-       java-1.8.0-openjdk \
-       java-1.8.0-openjdk-devel \
        ant \
-       git \
-       gcc-c++ \
-       flex \
-       bison \
-       cmake \
        autoconf \
        automake \
-       libtool \
-       jasper-devel \
-       openssl-devel \
-       libuuid-devel \
-       readline-devel \
-       zlib-devel \
-       bzip2 \
-       bzip2-devel \
-       libjpeg-devel \
-       libxml2-devel \
-       curl-devel \
-       libicu-devel \
-       cppunit \
-       cppunit-devel \
        bc \
-       openjpeg2-devel \
-       libtirpc \
-       libtirpc-devel \
-       sqlite-libs \
-       sqlite-devel \
+       bison \
+       cmake \
+       flex \
+       gcc-c++ \
+       git \
+       libtool \
        python39 \
+       bzip2 bzip2-devel \
+       cppunit cppunit-devel \
+       curl-devel \
+       jasper-devel \
+       java-1.8.0-openjdk java-1.8.0-openjdk-devel \
+       openjpeg2-devel \
+       openssl-devel \
+       libicu-devel \
+       libjpeg-devel \
+       libtirpc libtirpc-devel \
+       libuuid-devel \
+       libxml2-devel \
+       readline-devel \
+       sqlite-libs sqlite-devel \
+       zlib-devel \
     && yum clean all
 
 # Now build dependencies. Note that CONFIGURE_FLAGS="--disable-shared" means
@@ -134,13 +136,14 @@ RUN set -e \
     && make install \
     && make clean
 
+# Build the OLFS.
 RUN set -e \
     && cd /home/hyrax \
     && pwd \
     && ls -l \
     && source ./spath.sh \
     && cd olfs \
-    && ant server -DHYRAX_VERSION="Docker-1.16.5"
+    && ant server -DHYRAX_VERSION=${HYRAX_VERSION}
 
 ENTRYPOINT [ "/bin/bash" ]
 
