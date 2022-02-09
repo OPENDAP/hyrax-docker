@@ -87,7 +87,7 @@ RUN set -e \
        sqlite-libs sqlite-devel \
        zlib-devel \
     && yum clean all \
-    && pip3 install awscli
+    && pip3 install --user awscli
 
 ENTRYPOINT [ "/bin/bash" ]
 

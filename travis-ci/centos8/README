@@ -61,11 +61,11 @@ Look at the result
 
 Rename our new image so we can push it (NB: '8a6' is shorthand for the full image id)
 
-    docker tag 8a6 opendap/centos-stream8_hyrax_builder:1.1
+    docker tag 8a6 opendap/centos-stream8_hyrax_builder:1.x
 
 Push
 
-    docker push opendap/centos-stream8_hyrax_builder:1.1
+    docker push opendap/centos-stream8_hyrax_builder:1.x
 
 jhrg 2/8/22
 
