@@ -31,7 +31,7 @@ the Hyrax server.
 We build use 'Dockerfile' to build an image that is stored n our DockerHub
 repo and pull that for the Travis builds.
 
-Notes specific to CS8
+## Notes specific to CS8
 
 CS8 lacks the Sun XDR/RPC libraries by default. Use the Yum PowerTools repo
 to load the tirpc libraries (two packages - one for the runtime and one for
@@ -40,6 +40,32 @@ the development headers, etc.).
 To get both libdap4 and hdf4 to _use_ these, set the environment variables
 CPPFLAGS and LDFLAGS. These need to be exported if set in the Dockerfile
 RUN instruction.
+
+## Building images
+
+I built the images we use for the travis CI/CD builds using 'build' and
+then tagging the result with 'opendap/<name>' and manually bumping the
+version/suffix.
+
+Build
+
+    docker build --tag c8-5 .
+
+Look at the result
+
+    docker image ls
+
+    REPOSITORY                             TAG              IMAGE ID       CREATED          SIZE
+    c8-5                                   latest           8a6f62480aaa   11 minutes ago   1.41GB
+    opendap/centos-stream8_hyrax_builder   1.0              c9ac0a82aa28   21 hours ago     1.31GB
+
+Rename our new image so we can push it (NB: '8a6' is shorthand for the full image id)
+
+    docker tag 8a6 opendap/centos-stream8_hyrax_builder:1.1
+
+Push
+
+    docker push opendap/centos-stream8_hyrax_builder:1.1
 
 jhrg 2/8/22
 

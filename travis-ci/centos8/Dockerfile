@@ -2,7 +2,6 @@
 # 
 # Dockerfile for single container Hyrax
 #
-#
 # Some shell state reference:
 # set -f # "set -o noglob"  Disable file name generation using metacharacters (globbing).
 # set -v # "set -o verbose" Prints shell input lines as they are read.
@@ -87,7 +86,8 @@ RUN set -e \
        readline-devel \
        sqlite-libs sqlite-devel \
        zlib-devel \
-    && yum clean all
+    && yum clean all \
+    && pip3 install awscli
 
 ENTRYPOINT [ "/bin/bash" ]
 
