@@ -63,13 +63,13 @@ while getopts "e:sdi:k:r:" opt; do
       ;;
     \?)
       echo "Invalid option: -$OPTARG" >&2
-      echo "options: [-e email_address] [-s] [-d] "
-      echo " -e xxx where xxx is the email address of the admin contact for the server."
-      echo " -s When present causes the BES to follow symbolic links."
-      echo " -d Enables debugging output for this script."
-      echo " -i Pass in an AWS CLI AWS_ACCESS_KEY_ID." >&2
-      echo " -k Pass in an AWS CLI AWS_SECRET_ACCESS_KEY." >&2
-      echo " -r Pass in an AWS CLI AWS_DEFAULT_REGION." >&2
+      echo "options: [-e xxx] [-s] [-d] [-i xxx] [-k xxx] [-r xxx]" >&2
+      echo " -e xxx where xxx is the email address of the admin contact for the server." >&2
+      echo " -s When present causes the BES to follow symbolic links." >&2
+      echo " -d Enables debugging output for this script." >&2
+      echo " -i xxx Where xxx is an AWS CLI AWS_ACCESS_KEY_ID." >&2
+      echo " -k xxx Where xxx is an AWS CLI AWS_SECRET_ACCESS_KEY." >&2
+      echo " -r xxx Where xxx is an AWS CLI AWS_DEFAULT_REGION." >&2
       exit 2;
       ;;
   esac

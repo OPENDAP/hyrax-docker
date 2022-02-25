@@ -105,17 +105,18 @@ while getopts "de:sn:i:k:r:" opt; do
       AWS_DEFAULT_REGION="${OPTARG}"
       echo "Found command line value for AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}" >&2;
       ;;
+
     \?)
       echo "Invalid option: -$OPTARG" >&2
-      echo "options: [-e xxx] [-s] [-n yyy] [-d] "  >&2
-      echo " -e xxx where xxx is the email address of the admin contact for the server."
-      echo " -s When present causes the BES to follow symbolic links."
+      echo "options: [-e xxx] [-n yyy] [-s] [-d] [-i xxx] [-k xxx] [-r xxx]" >&2
+      echo " -e xxx where xxx is the email address of the admin contact for the server." >&2
+      echo " -s When present causes the BES to follow symbolic links." >&2
       echo " -n yyy where yyy is the protocol, server and port part "  >&2
       echo "    of the ncWMS service (for example http://foo.com:8090)."  >&2
       echo " -d Enables debugging output for this script."  >&2
-      echo " -i Pass in an AWS CLI AWS_ACCESS_KEY_ID." >&2
-      echo " -k Pass in an AWS CLI AWS_SECRET_ACCESS_KEY." >&2
-      echo " -r Pass in an AWS CLI AWS_DEFAULT_REGION." >&2
+      echo " -i xxx Where xxx is an AWS CLI AWS_ACCESS_KEY_ID." >&2
+      echo " -k xxx Where xxx is an AWS CLI AWS_SECRET_ACCESS_KEY." >&2
+      echo " -r xxx Where xxx is an AWS CLI AWS_DEFAULT_REGION." >&2
       echo "EXITING NOW"  >&2
       exit 2;
       ;;
