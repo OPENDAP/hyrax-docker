@@ -60,14 +60,7 @@ RUN set -e && \
 
 # Update and install the needful.
 RUN set -e \
-    && yum -y install \
-            tomcat \
-            unzip  \
-            which \
-            autoconf \
-            automake \
-            git \
-            bc \
+    && yum -y install tomcat unzip which autoconf automake awscli git bc \
     && yum -y update \
     && yum clean all 
 
