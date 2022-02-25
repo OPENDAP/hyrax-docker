@@ -63,21 +63,18 @@ else
      echo "Assigning default NCWMS_BASE: $NCWMS_BASE"  
 fi
 
-if [ $AWS_SECRET_KEY ] && [ -n $AWS_SECRET_KEY ] ; then
-    echo "Found exisiting AWS_SECRET_KEY: $AWS_SECRET_KEY"
-else
-    AWS_SECRET_KEY="not_set";
-     echo "AWS_SECRET_KEY is $AWS_SECRET_KEY"
-fi
-if [ $AWS_CONFIG_FILE ] && [ -n $AWS_CONFIG_FILE ] ; then
-    echo "Found exisiting AWS_SECRET_KEY: $AWS_CONFIG_FILE"
-else
-    $AWS_CONFIG_FILE="not_set";
-     echo "AWS_SECRET_KEY is $AWS_CONFIG_FILE"
-fi
+AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:-<not set>}"
+echo "AWS_SECRET_ACCESS_KEY is ${AWS_SECRET_ACCESS_KEY}"
+
+AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID:-<not set>}"
+echo "AWS_ACCESS_KEY_ID is ${AWS_ACCESS_KEY_ID}"
+
+AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION:-<not set>}"
+echo "AWS_DEFAULT_REGION is ${AWS_DEFAULT_REGION}"
+
 debug=false;
 
-while getopts "de:sn:ki" opt; do
+while getopts "de:sn:i:k:r:" opt; do
   echo "Processing command line opt: ${opt}" >&2
   case $opt in
     e)
@@ -97,24 +94,29 @@ while getopts "de:sn:ki" opt; do
       echo "Debug is enabled" >&2;
       ;;
     k)
-      AWS_SECRET_KEY="${OPTARG}"
-      echo "AWS_SECRET_KEY: #{AWS_SECRET_KEY}" >&2;
+      AWS_SECRET_ACCESS_KEY="${OPTARG}"
+      echo "Found command line value for AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}" >&2;
       ;;
     i)
-      AWS_CONFIG_FILE="${OPTARG}"
-      echo "Using config file: #{AWS_CONFIG_FILE}" >&2;
+      AWS_ACCESS_KEY_ID="${OPTARG}"
+      echo "Found command line value for AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}" >&2;
       ;;
+    r)
+      AWS_DEFAULT_REGION="${OPTARG}"
+      echo "Found command line value for AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}" >&2;
+      ;;
+
     \?)
       echo "Invalid option: -$OPTARG" >&2
-      echo "options: [-e xxx] [-s] [-n yyy] [-d] "  >&2
-      echo " -e xxx where xxx is the email address of the admin contact for the server."
-      echo " -s When present causes the BES to follow symbolic links."
+      echo "options: [-e xxx] [-n yyy] [-s] [-d] [-i xxx] [-k xxx] [-r xxx]" >&2
+      echo " -e xxx where xxx is the email address of the admin contact for the server." >&2
+      echo " -s When present causes the BES to follow symbolic links." >&2
       echo " -n yyy where yyy is the protocol, server and port part "  >&2
       echo "    of the ncWMS service (for example http://foo.com:8090)."  >&2
       echo " -d Enables debugging output for this script."  >&2
-      echo " -k Pass in your AWS CLI key. As long as docker has AWS CLI support you should
-              be able to export the environment variables when docker is launched" >&2
-      echo " -i Use the AWS config file from your machine" >&2
+      echo " -i xxx Where xxx is an AWS CLI AWS_ACCESS_KEY_ID." >&2
+      echo " -k xxx Where xxx is an AWS CLI AWS_SECRET_ACCESS_KEY." >&2
+      echo " -r xxx Where xxx is an AWS CLI AWS_DEFAULT_REGION." >&2
       echo "EXITING NOW"  >&2
       exit 2;
       ;;
