@@ -14,20 +14,20 @@ set -e
 
 
 if [ $SERVER_HELP_EMAIL ] && [ -n $SERVER_HELP_EMAIL ] ; then    
-    echo "Found exisiting SERVER_HELP_EMAIL: $SERVER_HELP_EMAIL"  
+    echo "Found existing SERVER_HELP_EMAIL: $SERVER_HELP_EMAIL"
 else 
     SERVER_HELP_EMAIL="not_set"
      echo "SERVER_HELP_EMAIL is $SERVER_HELP_EMAIL"  
 fi
 if [ $FOLLOW_SYMLINKS ] && [ -n $FOLLOW_SYMLINKS ] ; then    
-    echo "Found exisiting FOLLOW_SYMLINKS: $FOLLOW_SYMLINKS"  
+    echo "Found existing FOLLOW_SYMLINKS: $FOLLOW_SYMLINKS"
 else 
     FOLLOW_SYMLINKS="not_set";
      echo "FOLLOW_SYMLINKS is $FOLLOW_SYMLINKS"  
 fi
 
 if [ $NCWMS_BASE ] && [ -n $NCWMS_BASE ] ; then    
-    echo "Found exisiting NCWMS_BASE: $NCWMS_BASE"  
+    echo "Found existing NCWMS_BASE: $NCWMS_BASE"
 else 
     NCWMS_BASE="https://localhost:8080"
      echo "Assigning default NCWMS_BASE: $NCWMS_BASE"  
@@ -147,7 +147,5 @@ while /bin/true; do
         echo "BESD_STATUS: $BESD_STATUS  besd_pid:$besd_pid" >&2
         echo "TOMCAT_STATUS: $TOMCAT_STATUS tomcat_pid:$tomcat_pid" >&2
     fi
-
-    
 done
  
