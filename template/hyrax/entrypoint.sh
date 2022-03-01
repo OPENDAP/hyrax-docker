@@ -56,12 +56,15 @@ else
      echo "FOLLOW_SYMLINKS is $FOLLOW_SYMLINKS"  
 fi
 
-if [ $NCWMS_BASE ] && [ -n $NCWMS_BASE ] ; then    
-    echo "Found exisiting NCWMS_BASE: $NCWMS_BASE"  
-else 
-    NCWMS_BASE="https://localhost:8080"
-     echo "Assigning default NCWMS_BASE: $NCWMS_BASE"  
-fi
+NCWMS_BASE="${NCWMS_BASE:-https://localhost:8080}"
+echo "Using NCWMS_BASE: ${NCWMS_BASE}"
+
+#if [ $NCWMS_BASE ] && [ -n $NCWMS_BASE ] ; then
+#    echo "Found exisiting NCWMS_BASE: $NCWMS_BASE"
+#else
+#    NCWMS_BASE="https://localhost:8080"
+#     echo "Assigning default NCWMS_BASE: $NCWMS_BASE"
+#fi
 
 AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:-<not set>}"
 echo "AWS_SECRET_ACCESS_KEY is ${AWS_SECRET_ACCESS_KEY}"
