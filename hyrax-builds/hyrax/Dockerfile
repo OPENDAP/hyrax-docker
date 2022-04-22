@@ -13,7 +13,7 @@
 # it for debugging stuff.
 #
 # Set one or more individual labels
-FROM centos:7
+FROM centos:8
 
 RUN export NOW=`date +%s`
 
