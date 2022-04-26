@@ -41,9 +41,9 @@ env:
     - NGAP_DISTRO_URL="s3://opendap.travis.build/${NGAP_DISTRO}"
     - ROBOTS_DISTRO="robots-olfs-${OLFS_VERSION}-webapp.tgz"
     - ROBOTS_DISTRO_URL="s3://opendap.travis.build/${ROBOTS_DISTRO}"
-    - LIBDAP_RPM="libdap-${LIBDAP_VERSION}.el7.x86_64.rpm"
+    - LIBDAP_RPM="libdap-${LIBDAP_VERSION}.el8.x86_64.rpm"
     - LIBDAP_RPM_URL="s3://opendap.travis.build/${LIBDAP_RPM}"
-    - BES_RPM="bes-${BES_VERSION}.static.el7.x86_64.rpm"
+    - BES_RPM="bes-${BES_VERSION}.static.el8.x86_64.rpm"
     - BES_RPM_URL="s3://opendap.travis.build/${BES_RPM}"
 
 before_install:
