@@ -145,6 +145,9 @@ fi
 echo "Tomcat is UP! pid: $tomcat_pid"; >&2
 
 # TEMPORARY
+mkdir /tmp/hyrax_fonc
+chown bes /tmp/hyrax_fonc
+chgrp bes /tmp/hyrax_fonc
 /cleanup_files.sh "" 10 &
 # TEMPORARY
 
