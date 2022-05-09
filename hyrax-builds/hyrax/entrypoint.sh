@@ -144,6 +144,10 @@ if [ $status -ne 0 ]; then
 fi
 echo "Tomcat is UP! pid: $tomcat_pid"; >&2
 
+# TEMPORARY
+/cleanup_files.sh &
+# TEMPORARY
+
 echo "Hyrax Has Arrived..."; >&2
 
 while /bin/true; do
