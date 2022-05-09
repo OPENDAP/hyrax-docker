@@ -13,10 +13,10 @@
 # it for debugging stuff.
 #
 # Set one or more individual labels
-FROM centos:7
+FROM rockylinux:8
 
 # HYRAX VERSION INFO
-ENV HYRAX_VERSION=1.16
+ENV HYRAX_VERSION=rocky8
 ENV HYRAX_VERSION_LABEL=1.16.3
 ENV LIBDAP_VERSION=3.20.7-1
 ENV BES_VERSION=3.20.8-1

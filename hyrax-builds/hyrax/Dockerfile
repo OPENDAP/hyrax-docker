@@ -13,7 +13,7 @@
 # it for debugging stuff.
 #
 # Set one or more individual labels
-FROM centos:8
+FROM rockylinux:8
 
 RUN export NOW=`date +%s`
 
@@ -87,15 +87,23 @@ ARG DEVELOPER_MODE
 ENV DEVELOPER_MODE ${DEVELOPER_MODE:-"false"}
 RUN if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else echo "DEVELOPER_MODE: DISABLED"; fi
 
+#Get mirrorlist before running yum
+#RUN cd /etc/yum.repos.d/
+#RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
+#RUN sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
 
 # Update and install the needful.
-RUN yum -y install tomcat unzip which awscli autoconf automake git bc
+RUN dnf -y update
+RUN dnf -y install make wget unzip which autoconf automake git bc
 # Installing autoconf automake git bc for the tests install. The tests
 # are installed in the container but not run until a later stage of the
 # Travis build (or at a later time). They need to be part of the container,
 # howerver, to be run, so install them as part of this Dockerfile.
-RUN yum -y update
-RUN yum clean all
+RUN dnf clean all
+
+RUN wget https://archive.apache.org/dist/tomcat/tomcat-9/v9.0.33/bin/apache-tomcat-9.0.33.tar.gz
+RUN tar xvf apache-tomcat-9.0.33.tar.gz -C /usr/share/
+RUN ln -s /usr/share/apache-tomcat-9.0.33/ /usr/share/tomcat
 
 # Tomcat environment (Tomcat installed above by via yum)
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
@@ -104,6 +112,8 @@ ENV CATALINA_HOME /usr/share/tomcat
 ENV PATH $CATALINA_HOME/bin:$PATH
 RUN echo "CATALINA_HOME: $CATALINA_HOME"
 
+RUN useradd -r tomcat
+
 
 ################################################################
 # Install the latest libdap snapshot
@@ -111,7 +121,7 @@ RUN echo "CATALINA_HOME: $CATALINA_HOME"
 RUN set -e \
     && echo "Installing the libdap rpm: ${LIBDAP_RPM}" \
     && ls -l ./libdap* \
-    && yum -y install ./${LIBDAP_RPM} \
+    && dnf -y install ./${LIBDAP_RPM} \
     && rm -f ./${LIBDAP_RPM}
 
 RUN echo "libdap4 is installed."
@@ -122,7 +132,7 @@ RUN echo "libdap4 is installed."
 RUN set -e \
     && echo "Installing the latest BES rpm: ${BES_RPM}" \
     && ls -l ./bes* \
-    && yum -y install ./${BES_RPM} \
+    && dnf -y install ./${BES_RPM} \
     && rm -f ./${BES_RPM}
 
 RUN echo "besdaemon is here: "`which besdaemon`
@@ -203,7 +213,6 @@ RUN if [ $USE_NCWMS = "true" ]; then \
     else \
         echo "Skipping OLFS/ncWMS confguration installation."; \
     fi
-    
 
 # Install our modified server.xml so that the server compresses responses.
 COPY tomcat7-server.xml /
