@@ -7,7 +7,7 @@
 # from the distributions.
 #
 #
-verbose="${verbose:-}"
+verbose=
 default_dir="/tmp/hyrax_fonc"
 default_interval="60" # minutes
 default_log="/var/log/bes/nc_cleanup.log"
@@ -25,14 +25,14 @@ if test -n "${verbose}"; then echo "#     INTERVAL: ${INTERVAL}m"; fi
 CLEANUP_LOG="${3:-$default_log}"
 if test -n "${verbose}"; then echo "#  CLEANUP_LOG: ${CLEANUP_LOG}"; fi
 
-SLEEP_TIME=$(echo "${INTERVAL}*60" | bc)
+SLEEP_TIME=$(echo "${INTERVAL}*60/2" | bc)
 if test -n "${verbose}"; then echo "#   SLEEP_TIME: ${SLEEP_TIME}s"; fi
 if test -n "${verbose}"; then echo "#"; fi
 
 
 while true 
 do
-    orphaned_files=$(find ${TARGET_DIR} -type f -mmin ${INTERVAL})
+    orphaned_files=$(find ${TARGET_DIR} -type f -mmin +${INTERVAL})
     if test -n "${verbose}"; then echo "orphaned_files: "${orphaned_files}; fi
 
     if test -n "${orphaned_files}"; 
