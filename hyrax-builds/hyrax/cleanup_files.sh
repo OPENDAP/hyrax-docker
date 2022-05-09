@@ -7,7 +7,7 @@
 # from the distributions.
 #
 #
-verbose=
+verbose=true
 default_dir="/tmp/hyrax_fonc"
 default_interval="60" # minutes
 default_log="/var/log/bes/nc_cleanup.log"
@@ -32,22 +32,25 @@ if test -n "${verbose}"; then echo "#"; fi
 
 while true 
 do
-    orphaned_files=$(find ${TARGET_DIR} -type f -mmin +${INTERVAL})
-    if test -n "${verbose}"; then echo "orphaned_files: "${orphaned_files}; fi
-
-    if test -n "${orphaned_files}"; 
+    if test -d ${TARGET_DIR};
     then
-        echo "########################################################################################" >> "${CLEANUP_LOG}"
-        echo "# "$(date)" BEGIN File Cleanup of ${TARGET_DIR} " >> "${CLEANUP_LOG}"
-        for file in ${orphaned_files}
-        do
-            target=$(ls -l "${file}")
-            rm -f "${file}"
-            echo $(date)" removed: ${target}" 2>&1 >> "${CLEANUP_LOG}"
-        done
-        echo "#" >> "${CLEANUP_LOG}"
+        orphaned_files=$(find ${TARGET_DIR} -type f -mmin +${INTERVAL})
+        if test -n "${verbose}"; then echo "orphaned_files: "${orphaned_files}; fi
+
+        if test -n "${orphaned_files}";
+        then
+            echo "########################################################################################" >> "${CLEANUP_LOG}"
+            echo "# "$(date)" BEGIN File Cleanup of ${TARGET_DIR} " >> "${CLEANUP_LOG}"
+            for file in ${orphaned_files}
+            do
+                target=$(ls -l "${file}")
+                rm -f "${file}"
+                echo $(date)" removed: ${target}" 2>&1 >> "${CLEANUP_LOG}"
+            done
+            echo "#" >> "${CLEANUP_LOG}"
+        fi
+
     fi
-    
     sleep "${SLEEP_TIME}"
 
 done
