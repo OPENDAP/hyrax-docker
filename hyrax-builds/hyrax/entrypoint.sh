@@ -145,7 +145,7 @@ fi
 echo "Tomcat is UP! pid: $tomcat_pid"; >&2
 
 # TEMPORARY
-/cleanup_files.sh "" 10 >&2 &
+/cleanup_files.sh >&2 &
 # TEMPORARY
 
 echo "Hyrax Has Arrived..."; >&2

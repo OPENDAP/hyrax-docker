@@ -200,6 +200,16 @@ RUN set -e \
 
 COPY beslog2json.awk /
 RUN  set -e && chmod +x beslog2json.awk
+
+################################################################
+# TEMPORARY
+# Grab the cleanup files script for managing orphaned files
+# from fileout_netcdf
+COPY cleanup_files.sh /
+RUN chmod +x /cleanup_files.sh
+# TEMPORARY
+################################################################
+
 COPY entrypoint.sh /
 RUN  set -e && chmod +x /entrypoint.sh
 ENTRYPOINT [ "/entrypoint.sh" ]
