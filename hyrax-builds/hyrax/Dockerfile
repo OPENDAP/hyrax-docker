@@ -13,7 +13,7 @@
 # it for debugging stuff.
 #
 # Set one or more individual labels
-FROM rockylinux:8
+FROM centos:7
 
 RUN export NOW=`date +%s`
 
@@ -30,7 +30,7 @@ ENV LIBDAP_VERSION=${LIBDAP_VERSION:-"snapshot"}
 RUN echo "LIBDAP_VERSION: ${LIBDAP_VERSION}"
 
 ARG LIBDAP_RPM
-ENV LIBDAP_RPM=${LIBDAP_RPM:-"libdap-${LIBDAP_VERSION}.el8.x86_64.rpm"}
+ENV LIBDAP_RPM=${LIBDAP_RPM:-"libdap-${LIBDAP_VERSION}.el7.x86_64.rpm"}
 RUN echo "LIBDAP_RPM: ${LIBDAP_RPM}"
 COPY ${LIBDAP_RPM} /${LIBDAP_RPM}
 
@@ -39,7 +39,7 @@ ENV BES_VERSION=${BES_VERSION:-"snapshot"}
 RUN echo "BES_VERSION: ${BES_VERSION}"
 
 ARG BES_RPM
-ENV BES_RPM=${BES_RPM:-"bes-${BES_VERSION}.static.el8.x86_64.rpm"}
+ENV BES_RPM=${BES_RPM:-"bes-${BES_VERSION}.static.el7.x86_64.rpm"}
 RUN echo "BES_RPM: ${BES_RPM}"
 COPY ${BES_RPM} /${BES_RPM}
 
@@ -87,23 +87,15 @@ ARG DEVELOPER_MODE
 ENV DEVELOPER_MODE ${DEVELOPER_MODE:-"false"}
 RUN if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else echo "DEVELOPER_MODE: DISABLED"; fi
 
-#Get mirrorlist before running yum
-#RUN cd /etc/yum.repos.d/
-#RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
-#RUN sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
 
 # Update and install the needful.
-RUN dnf -y update
-RUN dnf -y install make wget unzip which autoconf automake git bc
+RUN yum -y install tomcat unzip which awscli autoconf automake git bc
 # Installing autoconf automake git bc for the tests install. The tests
 # are installed in the container but not run until a later stage of the
 # Travis build (or at a later time). They need to be part of the container,
 # howerver, to be run, so install them as part of this Dockerfile.
-RUN dnf clean all
-
-RUN wget https://archive.apache.org/dist/tomcat/tomcat-9/v9.0.33/bin/apache-tomcat-9.0.33.tar.gz
-RUN tar xvf apache-tomcat-9.0.33.tar.gz -C /usr/share/
-RUN ln -s /usr/share/apache-tomcat-9.0.33/ /usr/share/tomcat
+RUN yum -y update
+RUN yum clean all
 
 # Tomcat environment (Tomcat installed above by via yum)
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
@@ -112,8 +104,6 @@ ENV CATALINA_HOME /usr/share/tomcat
 ENV PATH $CATALINA_HOME/bin:$PATH
 RUN echo "CATALINA_HOME: $CATALINA_HOME"
 
-RUN useradd -r tomcat
-
 
 ################################################################
 # Install the latest libdap snapshot
@@ -121,7 +111,7 @@ RUN useradd -r tomcat
 RUN set -e \
     && echo "Installing the libdap rpm: ${LIBDAP_RPM}" \
     && ls -l ./libdap* \
-    && dnf -y install ./${LIBDAP_RPM} \
+    && yum -y install ./${LIBDAP_RPM} \
     && rm -f ./${LIBDAP_RPM}
 
 RUN echo "libdap4 is installed."
@@ -132,7 +122,7 @@ RUN echo "libdap4 is installed."
 RUN set -e \
     && echo "Installing the latest BES rpm: ${BES_RPM}" \
     && ls -l ./bes* \
-    && dnf -y install ./${BES_RPM} \
+    && yum -y install ./${BES_RPM} \
     && rm -f ./${BES_RPM}
 
 RUN echo "besdaemon is here: "`which besdaemon`
@@ -214,6 +204,7 @@ RUN if [ $USE_NCWMS = "true" ]; then \
         echo "Skipping OLFS/ncWMS confguration installation."; \
     fi
 
+
 # Install our modified server.xml so that the server compresses responses.
 COPY tomcat7-server.xml /
 RUN set -e \
@@ -244,8 +235,6 @@ RUN set -e \
     && make testsuite > mk.log 2>&1 \
     && echo "SUCCESS: hyrax_regression_tests ready!"
 ################################################################
-
-RUN ls -l /usr/libexec/
 
 ################################################################
 # TEMPORARY

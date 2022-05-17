@@ -135,8 +135,7 @@ echo "The BES is UP! pid: $besd_pid"; >&2
 
 
 # Start Tomcat process
-#/usr/libexec/tomcat/server start > /var/log/tomcat/console.log 2>&1 &
-/usr/local/tomcat/bin/startup.sh > /var/log/tomcat/console.log 2>&1 &
+/usr/libexec/tomcat/server start > /var/log/tomcat/console.log 2>&1 &
 status=$?
 tomcat_pid=$!
 if [ $status -ne 0 ]; then
