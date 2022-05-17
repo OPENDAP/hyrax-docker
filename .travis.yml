@@ -41,10 +41,14 @@ env:
     - NGAP_DISTRO_URL="s3://opendap.travis.build/${NGAP_DISTRO}"
     - ROBOTS_DISTRO="robots-olfs-${OLFS_VERSION}-webapp.tgz"
     - ROBOTS_DISTRO_URL="s3://opendap.travis.build/${ROBOTS_DISTRO}"
-    - LIBDAP_RPM="libdap-${LIBDAP_VERSION}.el8.x86_64.rpm"
-    - LIBDAP_RPM_URL="s3://opendap.travis.build/${LIBDAP_RPM}"
-    - BES_RPM="bes-${BES_VERSION}.static.el8.x86_64.rpm"
-    - BES_RPM_URL="s3://opendap.travis.build/${BES_RPM}"
+    - LIBDAP_C7_RPM="libdap-${LIBDAP_VERSION}.el7.x86_64.rpm"
+    - LIBDAP_C7_RPM_URL="s3://opendap.travis.build/${LIBDAP_C7_RPM}"
+    - LIBDAP_RH8_RPM="libdap-${LIBDAP_VERSION}.el8.x86_64.rpm"
+    - LIBDAP_RH8_RPM_URL="s3://opendap.travis.build/${LIBDAP_RH8_RPM}"
+    - BES_C7_RPM="bes-${BES_VERSION}.static.el7.x86_64.rpm"
+    - BES_C7_RPM_URL="s3://opendap.travis.build/${BES_C7_RPM}"
+    - BES_RH8_RPM="bes-${BES_VERSION}.static.el8.x86_64.rpm"
+    - BES_RH8_RPM_URL="s3://opendap.travis.build/${BES_RH8_RPM}"
 
 before_install:
   - pip3 install awscli
@@ -53,10 +57,14 @@ install:
   - echo "print env:"
   - printenv
   - echo $DOCKER_HUB_PSWD | docker login -u $DOCKER_HUB_UID --password-stdin
-  - echo "Retrieving libdap RPM ${LIBDAP_RPM}"
-  - aws --region=us-east-1 s3 cp ${LIBDAP_RPM_URL} ./hyrax-builds/${LIBDAP_RPM}
-  - echo "Retrieving BES RPM ${BES_RPM}"
-  - aws --region=us-east-1 s3 cp ${BES_RPM_URL} ./hyrax-builds/${BES_RPM}
+  - echo "Retrieving libdap C7 RPM ${LIBDAP_C7_RPM}"
+  - aws --region=us-east-1 s3 cp ${LIBDAP_C7_RPM_URL} ./hyrax-builds/${LIBDAP_C7_RPM}
+  - echo "Retrieving libdap RH8 RPM ${LIBDAP_RH8_RPM}"
+  - aws --region=us-east-1 s3 cp ${LIBDAP_RH8_RPM_URL} ./hyrax-builds/${LIBDAP_RH8_RPM}
+  - echo "Retrieving BES C7 RPM ${BES_C7_RPM}"
+  - aws --region=us-east-1 s3 cp ${BES_C7_RPM_URL} ./hyrax-builds/${BES_C7_RPM}
+  - echo "Retrieving BES RH8 RPM ${BES_RH8_RPM}"
+  - aws --region=us-east-1 s3 cp ${BES_RH8_RPM_URL} ./hyrax-builds/${BES_RH8_RPM}
   - echo "Retrieving OLFS Distribution file ${OLFS_DISTRO}"
   - aws --region=us-east-1 s3 cp ${OLFS_DISTRO_URL} ./hyrax-builds/${OLFS_DISTRO}
   - echo "Retrieving ROBOTS Distribution file ${ROBOTS_DISTRO}"
@@ -67,6 +75,8 @@ install:
 
 
 stages:
+  - name: rh8
+    if:  branch = master
   - name: build_and_test_hyrax_service
     if:  branch = master
   - name: build
@@ -78,14 +88,37 @@ stages:
 
 jobs:
   include:
-    - stage: build_and_test_hyrax_service
-      name: "Build opendap/hyrax:snapshot and run regression tests"
+    - stage: RH8
+      name: "Build RH8 opendap/hyrax:snapshot and run regression tests"
       script:
         - export SNAPSHOT_IMAGE_TAG=opendap/hyrax:snapshot
         - export BUILD_VERSION_TAG=opendap/hyrax:${HYRAX_VERSION}
         - cd hyrax-builds
-        - cp ./${LIBDAP_RPM} ./hyrax
-        - cp ./${BES_RPM} ./hyrax
+        - cp ./${LIBDAP_RH8_RPM} ./hyrax-rh8
+        - cp ./${BES_RH8_RPM} ./hyrax-rh8
+        - cp ./${OLFS_DISTRO} ./hyrax-rh8
+        - cp ./${ROBOTS_DISTRO} ./hyrax-rh8
+        - docker build
+          --build-arg RELEASE_DATE
+          --build-arg HYRAX_VERSION
+          --build-arg LIBDAP_VERSION
+          --build-arg BES_VERSION
+          --build-arg OLFS_VERSION
+          --tag "${SNAPSHOT_IMAGE_TAG}" hyrax-rh8
+        - docker tag ${SNAPSHOT_IMAGE_TAG} ${BUILD_VERSION_TAG}
+        - docker image ls -a
+        - cd ..
+        - echo "Running Test Script"
+        - ./regression_test_script -i ${SNAPSHOT_IMAGE_TAG}
+
+    - stage: build_and_test_hyrax_service
+      name: "Build CentOS-7 opendap/hyrax:snapshot and run regression tests"
+      script:
+        - export SNAPSHOT_IMAGE_TAG=opendap/hyrax:snapshot
+        - export BUILD_VERSION_TAG=opendap/hyrax:${HYRAX_VERSION}
+        - cd hyrax-builds
+        - cp ./${LIBDAP_C7_RPM} ./hyrax
+        - cp ./${BES_C7_RPM} ./hyrax
         - cp ./${OLFS_DISTRO} ./hyrax
         - cp ./${ROBOTS_DISTRO} ./hyrax
         - docker build
@@ -107,8 +140,8 @@ jobs:
         - export SNAPSHOT_IMAGE_TAG=opendap/besd:snapshot
         - export BUILD_VERSION_TAG=opendap/besd:${BES_VERSION}
         - cd hyrax-builds
-        - cp ./${LIBDAP_RPM} ./besd
-        - cp ./${BES_RPM} ./besd
+        - cp ./${LIBDAP_C7_RPM} ./besd
+        - cp ./${BES_C7_RPM} ./besd
         - docker build
           --build-arg RELEASE_DATE
           --build-arg LIBDAP_VERSION
@@ -137,8 +170,8 @@ jobs:
         - export SNAPSHOT_IMAGE_TAG=opendap/hyrax_ncwms:snapshot
         - export BUILD_VERSION_TAG=opendap/hyrax_ncwms:${HYRAX_VERSION}
         - cd hyrax-builds
-        - cp ./${LIBDAP_RPM} ./hyrax
-        - cp ./${BES_RPM} ./hyrax
+        - cp ./${LIBDAP_C7_RPM} ./hyrax
+        - cp ./${BES_C7_RPM} ./hyrax
         - cp ./${OLFS_DISTRO} ./hyrax
         - cp ./${ROBOTS_DISTRO} ./hyrax
         - docker build
@@ -159,8 +192,8 @@ jobs:
         - export BUILD_VERSION_TAG=opendap/hyrax:ngap-${HYRAX_VERSION}
         - cd hyrax-builds
         - ls -l
-        - cp ./${LIBDAP_RPM} ./ngap
-        - cp ./${BES_RPM} ./ngap
+        - cp ./${LIBDAP_C7_RPM} ./ngap
+        - cp ./${BES_C7_RPM} ./ngap
         - cp ./${NGAP_DISTRO} ./ngap
         - docker build --build-arg RELEASE_DATE
           --build-arg RELEASE_DATE

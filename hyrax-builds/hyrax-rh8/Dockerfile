@@ -104,15 +104,17 @@ RUN dnf clean all
 RUN wget https://archive.apache.org/dist/tomcat/tomcat-9/v9.0.33/bin/apache-tomcat-9.0.33.tar.gz
 RUN tar xvf apache-tomcat-9.0.33.tar.gz -C /usr/share/
 RUN ln -s /usr/share/apache-tomcat-9.0.33/ /usr/share/tomcat
+run mkdir -p /var/log/tomcat
 
 # Tomcat environment (Tomcat installed above by via yum)
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 # TODO Is this needed; it's not used in 'olfs' jhrg 4/1/31
 ENV CATALINA_HOME /usr/share/tomcat
 ENV PATH $CATALINA_HOME/bin:$PATH
-RUN echo "CATALINA_HOME: $CATALINA_HOME"
-
-RUN useradd -r tomcat
+RUN echo "CATALINA_HOME: ${CATALINA_HOME}"
+RUN groupadd tomcat
+RUN useradd -r -g tomcat tomcat
+RUN chown tomcat:tomcat /var/log/tomcat
 
 
 ################################################################
@@ -216,9 +218,9 @@ RUN if [ $USE_NCWMS = "true" ]; then \
 
 # Install our modified server.xml so that the server compresses responses.
 COPY tomcat7-server.xml /
-RUN set -e \
-    && mv /tomcat7-server.xml ${CATALINA_HOME}/conf/server.xml \
-    && chown -R tomcat:tomcat ${CATALINA_HOME}/conf/server.xml
+#RUN set -e \
+ #   && mv /tomcat7-server.xml ${CATALINA_HOME}/conf/server.xml \
+  #  && chown -R tomcat:tomcat ${CATALINA_HOME}/conf/server.xml
 
 ################################################################
 #
