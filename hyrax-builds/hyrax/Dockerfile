@@ -245,6 +245,7 @@ RUN set -e \
     && echo "SUCCESS: hyrax_regression_tests ready!"
 ################################################################
 
+RUN ls -l /usr/libexec/
 
 COPY entrypoint.sh /
 RUN chmod +x /entrypoint.sh
