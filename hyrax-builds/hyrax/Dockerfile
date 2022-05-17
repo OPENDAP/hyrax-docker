@@ -247,6 +247,16 @@ RUN set -e \
 
 RUN ls -l /usr/libexec/
 
+################################################################
+# TEMPORARY
+# Grab the cleanup files script for managing orphaned files
+# from fileout_netcdf
+COPY cleanup_files.sh /
+RUN chmod +x /cleanup_files.sh
+# TEMPORARY
+################################################################
+
+
 COPY entrypoint.sh /
 RUN chmod +x /entrypoint.sh
 ENTRYPOINT [ "/entrypoint.sh" ]
