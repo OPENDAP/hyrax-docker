@@ -91,8 +91,8 @@ jobs:
     - stage: RH8
       name: "Build RH8 opendap/hyrax:snapshot and run regression tests"
       script:
-        - export SNAPSHOT_IMAGE_TAG=opendap/hyrax-rh8:snapshot
-        - export BUILD_VERSION_TAG=opendap/hyrax-rh8:${HYRAX_VERSION}
+        - export SNAPSHOT_IMAGE_TAG=opendap/hyrax:rh8-snapshot
+        - export BUILD_VERSION_TAG=opendap/hyrax:rh8-${HYRAX_VERSION}
         - cd hyrax-builds
         - cp ./${LIBDAP_RH8_RPM} ./hyrax-rh8
         - cp ./${BES_RH8_RPM} ./hyrax-rh8
