@@ -75,7 +75,7 @@ install:
 
 
 stages:
-  - name: rh8
+  - name: RH8
     if:  branch = master
   - name: build_and_test_hyrax_service
     if:  branch = master
