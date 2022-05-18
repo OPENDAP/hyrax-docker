@@ -12,49 +12,29 @@ echo "Greetings, I am "`whoami`".";   >&2
 set -e
 #set -x
 
+
+export JAVA_HOME="${JAVA_HOME:-/etc/alternatives/jre}"
 echo "JAVA_HOME: ${JAVA_HOME}" >&2
 
-
-SLEEP_INTERVAL="${SLEEP_INTERVAL:-60}"
+export SLEEP_INTERVAL="${SLEEP_INTERVAL:-60}"
 echo "SLEEP_INTERVAL: ${SLEEP_INTERVAL} seconds." >&2
 
-SERVER_HELP_EMAIL="${SERVER_HELP_EMAIL:-not_set}"
+export SERVER_HELP_EMAIL="${SERVER_HELP_EMAIL:-not_set}"
 echo "SERVER_HELP_EMAIL: ${SERVER_HELP_EMAIL}" >&2
 
-#if [ $SERVER_HELP_EMAIL ] && [ -n $SERVER_HELP_EMAIL ] ; then
-#    echo "Found existing SERVER_HELP_EMAIL: $SERVER_HELP_EMAIL"
-#else
-#    SERVER_HELP_EMAIL="not_set"
-#     echo "SERVER_HELP_EMAIL is $SERVER_HELP_EMAIL"
-#fi
-
-FOLLOW_SYMLINKS="${FOLLOW_SYMLINKS:-not_set}"
+export FOLLOW_SYMLINKS="${FOLLOW_SYMLINKS:-not_set}"
 echo "FOLLOW_SYMLINKS: ${FOLLOW_SYMLINKS}" >&2
 
-#if [ $FOLLOW_SYMLINKS ] && [ -n $FOLLOW_SYMLINKS ] ; then
-#    echo "Found existing FOLLOW_SYMLINKS: $FOLLOW_SYMLINKS"
-#else
-#    FOLLOW_SYMLINKS="not_set";
-#     echo "FOLLOW_SYMLINKS is $FOLLOW_SYMLINKS"
-#fi
-
-NCWMS_BASE="${NCWMS_BASE:-https://localhost:8080}"
+export NCWMS_BASE="${NCWMS_BASE:-https://localhost:8080}"
 echo "NCWMS_BASE: ${NCWMS_BASE}" >&2
 
-#if [ $NCWMS_BASE ] && [ -n $NCWMS_BASE ] ; then
-#    echo "Found existing NCWMS_BASE: $NCWMS_BASE"
-#else
-#    NCWMS_BASE="https://localhost:8080"
-#     echo "Assigning default NCWMS_BASE: $NCWMS_BASE"
-#fi
-
-AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:-<not set>}"
+export AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:-<not set>}"
 echo "AWS_SECRET_ACCESS_KEY is ${AWS_SECRET_ACCESS_KEY}" >&2
 
-AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID:-<not set>}"
+export AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID:-<not set>}"
 echo "AWS_ACCESS_KEY_ID is ${AWS_ACCESS_KEY_ID}" >&2
 
-AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION:-<not set>}"
+export AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION:-<not set>}"
 echo "AWS_DEFAULT_REGION is ${AWS_DEFAULT_REGION}" >&2
 
 
@@ -64,31 +44,31 @@ while getopts "de:sn:i:k:r:" opt; do
   echo "Processing command line opt: ${opt}" >&2
   case $opt in
     e)
-      echo "Setting server admin contact email to: $OPTARG" >&2
-      SERVER_HELP_EMAIL=$OPTARG
+      export SERVER_HELP_EMAIL=$OPTARG
+      echo "Set server admin contact email to: ${SERVER_HELP_EMAIL}" >&2
       ;;
     s)
-      echo "Setting FollowSymLinks to: Yes" >&2
-      FOLLOW_SYMLINKS="Yes"
+      export FOLLOW_SYMLINKS="Yes"
+      echo "Set FollowSymLinks to: ${FOLLOW_SYMLINKS}" >&2
       ;;
     n)
-      echo "Setting ncWMS public facing service base to : $OPTARG" >&2
-      NCWMS_BASE=$OPTARG
+      export NCWMS_BASE=$OPTARG
+      echo "Set ncWMS public facing service base to : ${NCWMS_BASE}" >&2
       ;;
     d)
-      debug=true;
+      export debug=true;
       echo "Debug is enabled" >&2;
       ;;
     k)
-      AWS_SECRET_ACCESS_KEY="${OPTARG}"
+      export AWS_SECRET_ACCESS_KEY="${OPTARG}"
       echo "Found command line value for AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}" >&2;
       ;;
     i)
-      AWS_ACCESS_KEY_ID="${OPTARG}"
+      export AWS_ACCESS_KEY_ID="${OPTARG}"
       echo "Found command line value for AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}" >&2;
       ;;
     r)
-      AWS_DEFAULT_REGION="${OPTARG}"
+      export AWS_DEFAULT_REGION="${OPTARG}"
       echo "Found command line value for AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}" >&2;
       ;;
 
@@ -152,7 +132,7 @@ echo "The BES is UP! pid: $besd_pid"; >&2
 # Start Tomcat process
 #/usr/libexec/tomcat/server start 2>&1 > /var/log/tomcat/console.log  &
 echo "Starting Tomcat..." >&2
-/usr/share/tomcat/bin/startup.sh  > /var/log/tomcat/console.log 2>&1 &
+/usr/share/tomcat/bin/startup.sh 2>&1 > /var/log/tomcat/console.log &
 status=$?
 tomcat_pid=$!
 if [ $status -ne 0 ]; then
