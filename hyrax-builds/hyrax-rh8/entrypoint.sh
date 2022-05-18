@@ -12,35 +12,50 @@ echo "Greetings, I am "`whoami`".";   >&2
 set -e
 #set -x
 
+echo "JAVA_HOME: ${JAVA_HOME}" >&2
 
-if [ $SERVER_HELP_EMAIL ] && [ -n $SERVER_HELP_EMAIL ] ; then    
-    echo "Found existing SERVER_HELP_EMAIL: $SERVER_HELP_EMAIL"
-else 
-    SERVER_HELP_EMAIL="not_set"
-     echo "SERVER_HELP_EMAIL is $SERVER_HELP_EMAIL"  
-fi
-if [ $FOLLOW_SYMLINKS ] && [ -n $FOLLOW_SYMLINKS ] ; then    
-    echo "Found existing FOLLOW_SYMLINKS: $FOLLOW_SYMLINKS"
-else 
-    FOLLOW_SYMLINKS="not_set";
-     echo "FOLLOW_SYMLINKS is $FOLLOW_SYMLINKS"  
-fi
 
-if [ $NCWMS_BASE ] && [ -n $NCWMS_BASE ] ; then    
-    echo "Found existing NCWMS_BASE: $NCWMS_BASE"
-else 
-    NCWMS_BASE="https://localhost:8080"
-     echo "Assigning default NCWMS_BASE: $NCWMS_BASE"  
-fi
+SLEEP_INTERVAL="${SLEEP_INTERVAL:-60}"
+echo "SLEEP_INTERVAL: ${SLEEP_INTERVAL} seconds." >&2
+
+SERVER_HELP_EMAIL="${SERVER_HELP_EMAIL:-not_set}"
+echo "SERVER_HELP_EMAIL: ${SERVER_HELP_EMAIL}" >&2
+
+#if [ $SERVER_HELP_EMAIL ] && [ -n $SERVER_HELP_EMAIL ] ; then
+#    echo "Found existing SERVER_HELP_EMAIL: $SERVER_HELP_EMAIL"
+#else
+#    SERVER_HELP_EMAIL="not_set"
+#     echo "SERVER_HELP_EMAIL is $SERVER_HELP_EMAIL"
+#fi
+
+FOLLOW_SYMLINKS="${FOLLOW_SYMLINKS:-not_set}"
+echo "FOLLOW_SYMLINKS: ${FOLLOW_SYMLINKS}" >&2
+
+#if [ $FOLLOW_SYMLINKS ] && [ -n $FOLLOW_SYMLINKS ] ; then
+#    echo "Found existing FOLLOW_SYMLINKS: $FOLLOW_SYMLINKS"
+#else
+#    FOLLOW_SYMLINKS="not_set";
+#     echo "FOLLOW_SYMLINKS is $FOLLOW_SYMLINKS"
+#fi
+
+NCWMS_BASE="${NCWMS_BASE:-https://localhost:8080}"
+echo "NCWMS_BASE: ${NCWMS_BASE}" >&2
+
+#if [ $NCWMS_BASE ] && [ -n $NCWMS_BASE ] ; then
+#    echo "Found existing NCWMS_BASE: $NCWMS_BASE"
+#else
+#    NCWMS_BASE="https://localhost:8080"
+#     echo "Assigning default NCWMS_BASE: $NCWMS_BASE"
+#fi
 
 AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:-<not set>}"
-echo "AWS_SECRET_ACCESS_KEY is ${AWS_SECRET_ACCESS_KEY}"
+echo "AWS_SECRET_ACCESS_KEY is ${AWS_SECRET_ACCESS_KEY}" >&2
 
 AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID:-<not set>}"
-echo "AWS_ACCESS_KEY_ID is ${AWS_ACCESS_KEY_ID}"
+echo "AWS_ACCESS_KEY_ID is ${AWS_ACCESS_KEY_ID}" >&2
 
 AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION:-<not set>}"
-echo "AWS_DEFAULT_REGION is ${AWS_DEFAULT_REGION}"
+echo "AWS_DEFAULT_REGION is ${AWS_DEFAULT_REGION}" >&2
 
 
 debug=false;
@@ -117,7 +132,7 @@ if [ $SERVER_HELP_EMAIL != "not_set" ]; then
     sed -i "s/admin.email.address@your.domain.name/$SERVER_HELP_EMAIL/" /etc/bes/bes.conf
 fi
 if [ $FOLLOW_SYMLINKS != "not_set" ]; then
-    echo "Setting BES FollowSymLinks to YES."
+    echo "Setting BES FollowSymLinks to YES." >&2
     sed -i "s/^BES.Catalog.catalog.FollowSymLinks=No/BES.Catalog.catalog.FollowSymLinks=Yes/" /etc/bes/bes.conf
 fi
 
@@ -136,7 +151,8 @@ echo "The BES is UP! pid: $besd_pid"; >&2
 
 # Start Tomcat process
 #/usr/libexec/tomcat/server start > /var/log/tomcat/console.log 2>&1 &
-/usr/share/tomcat/bin/startup.sh > /var/log/tomcat/console.log 2>&1 &
+echo "Starting Tomcat..." >&2
+/usr/share/tomcat/bin/startup.sh  >&2 # > /var/log/tomcat/console.log 2>&1 &
 status=$?
 tomcat_pid=$!
 if [ $status -ne 0 ]; then
@@ -152,7 +168,7 @@ echo "Tomcat is UP! pid: $tomcat_pid"; >&2
 echo "Hyrax Has Arrived..."; >&2
 
 while /bin/true; do
-    sleep 60
+    sleep ${SLEEP_INTERVAL}
     besd_ps=`ps -f $besd_pid`;
     BESD_STATUS=$?
     
