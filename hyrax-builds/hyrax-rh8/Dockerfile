@@ -94,7 +94,7 @@ RUN if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else ec
 
 # Update and install the needful.
 RUN dnf -y update
-RUN dnf -y install make wget unzip which autoconf automake git bc
+RUN dnf -y install make wget unzip which autoconf automake java emacs vim git bc
 # Installing autoconf automake git bc for the tests install. The tests
 # are installed in the container but not run until a later stage of the
 # Travis build (or at a later time). They need to be part of the container,
