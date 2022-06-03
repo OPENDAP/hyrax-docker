@@ -32,7 +32,8 @@ RUN echo "LIBDAP_VERSION: ${LIBDAP_VERSION}"
 ARG LIBDAP_RPM
 ENV LIBDAP_RPM=${LIBDAP_RPM:-"libdap-${LIBDAP_VERSION}.el8.x86_64.rpm"}
 RUN echo "LIBDAP_RPM: ${LIBDAP_RPM}"
-COPY ${LIBDAP_RPM} /${LIBDAP_RPM}
+COPY ${LIBDAP_RPM} libdap-devel-* libdap-debuginfo-* /
+RUN ls -l /libdap-*  >&2
 
 ARG BES_VERSION
 ENV BES_VERSION=${BES_VERSION:-"snapshot"}
@@ -41,7 +42,8 @@ RUN echo "BES_VERSION: ${BES_VERSION}"
 ARG BES_RPM
 ENV BES_RPM=${BES_RPM:-"bes-${BES_VERSION}.static.el8.x86_64.rpm"}
 RUN echo "BES_RPM: ${BES_RPM}"
-COPY ${BES_RPM} /${BES_RPM}
+COPY ${BES_RPM} bes-devel-* bes-debuginfo-* /
+RUN ls -l /bes-* >&2
 
 ARG OLFS_VERSION
 ENV OLFS_VERSION=${OLFS_VERSION:-"snapshot"}
@@ -94,7 +96,7 @@ RUN if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else ec
 
 # Update and install the needful.
 RUN dnf -y update
-RUN dnf -y install make wget unzip which autoconf automake java emacs vim git bc
+RUN dnf -y install make wget unzip which autoconf automake java emacs vim git bc valgrind gdb
 # Installing autoconf automake git bc for the tests install. The tests
 # are installed in the container but not run until a later stage of the
 # Travis build (or at a later time). They need to be part of the container,
@@ -123,8 +125,8 @@ RUN chown tomcat:tomcat /var/log/tomcat
 RUN set -e \
     && echo "Installing the libdap rpm: ${LIBDAP_RPM}" \
     && ls -l ./libdap* \
-    && dnf -y install ./${LIBDAP_RPM} \
-    && rm -f ./${LIBDAP_RPM}
+    && dnf -y install ./libdap-*.rpm
+#    && rm -f ./${LIBDAP_RPM}
 
 RUN echo "libdap4 is installed."
 
@@ -134,8 +136,8 @@ RUN echo "libdap4 is installed."
 RUN set -e \
     && echo "Installing the latest BES rpm: ${BES_RPM}" \
     && ls -l ./bes* \
-    && dnf -y install ./${BES_RPM} \
-    && rm -f ./${BES_RPM}
+    && dnf -y install ./bes-*.rpm
+#    && rm -f ./${BES_RPM}
 
 RUN echo "besdaemon is here: "`which besdaemon`
 
