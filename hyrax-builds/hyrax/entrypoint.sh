@@ -33,14 +33,14 @@ else
      echo "Assigning default NCWMS_BASE: $NCWMS_BASE"  
 fi
 
-AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:-<not set>}"
-echo "AWS_SECRET_ACCESS_KEY is ${AWS_SECRET_ACCESS_KEY}"
-
-AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID:-<not set>}"
-echo "AWS_ACCESS_KEY_ID is ${AWS_ACCESS_KEY_ID}"
-
-AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION:-<not set>}"
-echo "AWS_DEFAULT_REGION is ${AWS_DEFAULT_REGION}"
+#AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:-<not set>}"
+#echo "AWS_SECRET_ACCESS_KEY is ${AWS_SECRET_ACCESS_KEY}"
+#
+#AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID:-<not set>}"
+#echo "AWS_ACCESS_KEY_ID is ${AWS_ACCESS_KEY_ID}"
+#
+#AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION:-<not set>}"
+#echo "AWS_DEFAULT_REGION is ${AWS_DEFAULT_REGION}"
 
 
 debug=false;
@@ -121,6 +121,11 @@ if [ $FOLLOW_SYMLINKS != "not_set" ]; then
     sed -i "s/^BES.Catalog.catalog.FollowSymLinks=No/BES.Catalog.catalog.FollowSymLinks=Yes/" /etc/bes/bes.conf
 fi
 
+aws configure list >&2
+status=$?
+if [ $status -ne 0 ]; then
+    echo "Problem with AWS CLI!" >&2
+fi
 
 # Start the BES daemon process
 # /usr/bin/besdaemon -i /usr -c /etc/bes/bes.conf -r /var/run/bes.pid
