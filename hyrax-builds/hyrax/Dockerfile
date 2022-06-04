@@ -89,13 +89,15 @@ RUN if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else ec
 
 
 # Update and install the needful.
-RUN yum -y install tomcat unzip which awscli autoconf automake git bc
+RUN yum -y install tomcat unzip which python3 autoconf automake git bc
 # Installing autoconf automake git bc for the tests install. The tests
 # are installed in the container but not run until a later stage of the
 # Travis build (or at a later time). They need to be part of the container,
 # howerver, to be run, so install them as part of this Dockerfile.
 RUN yum -y update
 RUN yum clean all
+
+RUN python3 -m pip install awscli
 
 # Tomcat environment (Tomcat installed above by via yum)
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -

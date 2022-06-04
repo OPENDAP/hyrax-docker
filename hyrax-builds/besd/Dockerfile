@@ -49,10 +49,11 @@ USER root
 
 # Update and install the needful.
 RUN set -e \
-    && yum -y install which awscli bc \
+    && yum -y install which python3 bc \
     && yum -y update \
     && yum clean all
 
+RUN python3 -m pip install awscli
 
 ###############################################################
 # Retrieve and install the latest libdap snapshot
@@ -61,7 +62,6 @@ RUN set -e \
     && ls -l ./libdap* \
     && yum -y install ./${LIBDAP_RPM} \
     && rm -f ./${LIBDAP_RPM}
-
 
 ###############################################################
 # Retrieve and install the latest BES snapshot
