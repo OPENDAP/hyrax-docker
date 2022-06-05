@@ -57,12 +57,12 @@ ENV DEVELOPER_MODE ${DEVELOPER_MODE:-"false"}
 RUN set -e && \
     if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else echo "DEVELOPER_MODE: DISABLED"; fi
 
-
 # Update and install the needful.
 RUN set -e \
-    && yum -y install tomcat unzip which autoconf automake awscli git bc \
+    && yum -y install tomcat unzip which autoconf automake python3 git bc \
     && yum -y update \
-    && yum clean all 
+    && yum clean all \
+    && python3 -m pip install awscli
 
 # Tomcat environment (Tomcat installed above by via yum)
 ENV CATALINA_HOME /usr/share/tomcat

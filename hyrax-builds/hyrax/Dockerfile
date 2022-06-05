@@ -101,7 +101,7 @@ RUN python3 -m pip install awscli
 
 # Tomcat environment (Tomcat installed above by via yum)
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
-# TODO Is this needed; it's not used in 'olfs' jhrg 4/1/31
+# TODO Is this needed; it's not used in 'olfs' jhrg 4/1/21
 ENV CATALINA_HOME /usr/share/tomcat
 ENV PATH $CATALINA_HOME/bin:$PATH
 RUN echo "CATALINA_HOME: $CATALINA_HOME"

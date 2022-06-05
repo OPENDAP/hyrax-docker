@@ -86,20 +86,20 @@ RUN set -e \
         tomcat \
         unzip  \
         which \
-        awscli \
+        python3 \
         autoconf \
         automake \
         git \
         bc \
     && yum -y update \
-    && yum clean all 
+    && yum clean all \
+    && python3 -m pip install awscli
 
 # Tomcat environment (Tomcat installed above by via yum)
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 ENV CATALINA_HOME /usr/share/tomcat
 ENV PATH $CATALINA_HOME/bin:$PATH
 RUN echo "CATALINA_HOME: $CATALINA_HOME"
-
 
 ################################################################
 # Install the OPeNDAP security public key.
