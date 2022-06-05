@@ -93,7 +93,8 @@ RUN if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else ec
 # are installed in the container but not run until a later stage of the
 # Travis build (or at a later time). They need to be part of the container,
 # howerver, to be run, so install them as part of this Dockerfile.
-RUN set -e \yum -y install tomcat unzip which python3 autoconf automake git bc \
+RUN set -e \
+    && yum -y install tomcat unzip which python3 autoconf automake git bc \
     && yum -y update \
     && yum clean all \
     && python3 -m pip install awscli
