@@ -51,9 +51,8 @@ USER root
 RUN set -e \
     && yum -y install which python3 bc \
     && yum -y update \
-    && yum clean all
-
-RUN python3 -m pip install awscli
+    && yum clean all \
+    && python3 -m pip install awscli
 
 ###############################################################
 # Retrieve and install the latest libdap snapshot

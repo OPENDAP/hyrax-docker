@@ -88,7 +88,7 @@ RUN set -e && \
 # Travis build (or at a later time). They need to be part of the container,
 # howerver, to be run, so install them as part of this Dockerfile.
 RUN set -e \
-    && yum -y install tomcat unzip which python3 autoconf automake git bc emacs vim
+    && yum -y install tomcat unzip which python3 autoconf automake git bc emacs vim \
     && yum -y update \
     && python3 -m pip install awscli
 
