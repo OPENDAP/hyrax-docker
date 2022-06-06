@@ -57,7 +57,7 @@ ENV ROBOTS_DISTRO=${ROBOTS_DISTRO:-"robots-olfs-${OLFS_VERSION}-webapp"}
 RUN echo "ROBOTS_DISTRO: ${ROBOTS_DISTRO}"
 COPY ${ROBOTS_DISTRO}.tgz /${ROBOTS_DISTRO}.tgz
 
-LABEL vendor="OPeNDAP"
+LABEL vendor="OPeNDAP Incorporated"
 LABEL org.opendap.hyrax.version=${HYRAX_VERSION}
 LABEL org.opendap.hyrax.release-date=RELEASE_DATE
 LABEL org.opendap.hyrax.version.is-production="false"
@@ -94,7 +94,7 @@ RUN if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else ec
 # Travis build (or at a later time). They need to be part of the container,
 # howerver, to be run, so install them as part of this Dockerfile.
 RUN set -e \
-    && yum -y install tomcat unzip which python3 autoconf automake git bc \
+    && yum -y install tomcat unzip which autoconf automake python3 git bc emacs vim \
     && yum -y update \
     && yum clean all \
     && python3 -m pip install awscli
@@ -190,7 +190,7 @@ RUN if [ ${DEVELOPER_MODE} = "true" ] && [ $USE_NCWMS = "true" ]; then \
     
 #
 # make ncWMS work without further configuration 
-# We will need to adjust this target if we
+# @TODO We will need to adjust this target if we
 # decide to run as a different (not root) user.
 COPY ncWMS_config.xml /root/.ncWMS2/config.xml
 RUN  chmod +r /root/.ncWMS2/config.xml
@@ -212,6 +212,9 @@ COPY tomcat7-server.xml /
 RUN set -e \
     && mv /tomcat7-server.xml ${CATALINA_HOME}/conf/server.xml \
     && chown -R tomcat:tomcat ${CATALINA_HOME}/conf/server.xml
+
+###############################################################
+
 
 ################################################################
 #

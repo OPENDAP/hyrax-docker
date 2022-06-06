@@ -14,33 +14,25 @@ set -e
 
 
 if [ $SERVER_HELP_EMAIL ] && [ -n $SERVER_HELP_EMAIL ] ; then    
-    echo "Found existing SERVER_HELP_EMAIL: $SERVER_HELP_EMAIL"
+    echo "Found existing SERVER_HELP_EMAIL: $SERVER_HELP_EMAIL" >&2
 else 
     SERVER_HELP_EMAIL="not_set"
      echo "SERVER_HELP_EMAIL is $SERVER_HELP_EMAIL"  
 fi
 if [ $FOLLOW_SYMLINKS ] && [ -n $FOLLOW_SYMLINKS ] ; then    
-    echo "Found existing FOLLOW_SYMLINKS: $FOLLOW_SYMLINKS"
+    echo "Found existing FOLLOW_SYMLINKS: $FOLLOW_SYMLINKS" >&2
 else 
     FOLLOW_SYMLINKS="not_set";
      echo "FOLLOW_SYMLINKS is $FOLLOW_SYMLINKS"  
 fi
 
 if [ $NCWMS_BASE ] && [ -n $NCWMS_BASE ] ; then    
-    echo "Found existing NCWMS_BASE: $NCWMS_BASE"
+    echo "Found existing NCWMS_BASE: $NCWMS_BASE" >&2
 else 
     NCWMS_BASE="https://localhost:8080"
-     echo "Assigning default NCWMS_BASE: $NCWMS_BASE"  
+     echo "Assigning default NCWMS_BASE: $NCWMS_BASE"   >&2
 fi
 
-#AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:-<not set>}"
-#echo "AWS_SECRET_ACCESS_KEY is ${AWS_SECRET_ACCESS_KEY}"
-#
-#AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID:-<not set>}"
-#echo "AWS_ACCESS_KEY_ID is ${AWS_ACCESS_KEY_ID}"
-#
-#AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION:-<not set>}"
-#echo "AWS_DEFAULT_REGION is ${AWS_DEFAULT_REGION}"
 
 
 debug=false;
@@ -94,6 +86,7 @@ while getopts "de:sn:i:k:r:" opt; do
   esac
 done
 
+
 if [ $debug = true ];then
     echo "CATALINA_HOME: ${CATALINA_HOME}";  >&2
     ls -l "$CATALINA_HOME" "$CATALINA_HOME/bin"  >&2
@@ -121,6 +114,9 @@ if [ $FOLLOW_SYMLINKS != "not_set" ]; then
     sed -i "s/^BES.Catalog.catalog.FollowSymLinks=No/BES.Catalog.catalog.FollowSymLinks=Yes/" /etc/bes/bes.conf
 fi
 
+echo "AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}" >&2
+echo "AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}"  >&2
+echo "AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}" >&2
 aws configure list >&2
 status=$?
 if [ $status -ne 0 ]; then

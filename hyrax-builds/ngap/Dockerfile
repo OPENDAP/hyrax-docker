@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 ###############################################################################################
 # 
-# Dockerfile for single container Hyrax
-#
+# Dockerfile for the NGAP deployment Hyrax container
 #
 # Some shell state reference:
 # set -f # "set -o noglob"  Disable file name generation using metacharacters (globbing).
@@ -82,6 +81,7 @@ ENV DEVELOPER_MODE ${DEVELOPER_MODE:-"false"}
 RUN set -e && \
     if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else echo "DEVELOPER_MODE: DISABLED"; fi
 
+################################################################
 # Update and install the needful.
 # Installing autoconf automake git bc for the tests install. The tests
 # are installed in the container but not run until a later stage of the
@@ -140,6 +140,7 @@ RUN set -e \
     && mkdir -p ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/logs \
     && chown -R tomcat:tomcat ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/logs \
     && chmod 700 ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/logs
+################################################################
 
 
 
@@ -149,6 +150,7 @@ COPY tomcat7-server.xml /
 RUN set -e \
     && mv /tomcat7-server.xml ${CATALINA_HOME}/conf/server.xml \
     && chown -R tomcat:tomcat ${CATALINA_HOME}/conf/server.xml
+################################################################
 
 # Install our modified tomcat.conf so that the server use the memory.
 COPY tomcat.conf /
