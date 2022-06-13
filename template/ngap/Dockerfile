@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 ###############################################################################################
 # 
-# Dockerfile for single container Hyrax
+# Dockerfile for the NGAP deployment Hyrax container
 #
 #
 # Some shell state reference:
@@ -38,13 +38,6 @@ ARG RELEASE_DATE
 ENV RELEASE_DATE ${RELEASE_DATE:-"unknown"}
 RUN echo "RELEASE_DATE: ${RELEASE_DATE}"
 
-ARG AWS_ACCESS_KEY_ID
-ENV AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-"unknown"}
-RUN echo "AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}"
-
-ARG AWS_SECRET_ACCESS_KEY
-ENV AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-"unknown"}
-RUN echo "AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}"
 
 LABEL vendor="OPeNDAP Incorporated"
 LABEL org.opendap.hyrax.version=snapshot
@@ -55,51 +48,30 @@ MAINTAINER support@opendap.org
 
 USER root
 
-#
-# The --build-arg USE_NCWMS can be set to "true" in order to 
-# add the ncWMS application to the build.
-ARG USE_NCWMS
-ENV USE_NCWMS ${USE_NCWMS:-"false"}
-RUN set -e && \
-    if [ $USE_NCWMS = "true" ];then echo "NCWMS: ENABLED"; else echo "NCWMS: DISABLED"; fi
-
-#
-# The --build-arg NCWMS_BASE can be set to the base URL for ncWMS.
-# The entrypoint.sh code defaults it to
-# the URL: https://localhost:8080 if the environment variable NCWMS_BASE
-# is not in the shell from which the entrypoint.sh script is called.
-ARG NCWMS_BASE
-ENV NCWMS_BASE ${NCWMS_BASE:-"https://localhost:8080"}
-RUN set -e && \
-    if [ $USE_NCWMS = "true" ];then echo "NCWMS_BASE: {$NCWMS_BASE}"; fi
-
-
 ARG DEVELOPER_MODE
 ENV DEVELOPER_MODE ${DEVELOPER_MODE:-"false"}
 RUN set -e && \
     if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else echo "DEVELOPER_MODE: DISABLED"; fi
 
 
+################################################################
 # Update and install the needful.
+# Installing autoconf automake git bc for the tests install. The tests
+# are installed in the container but not run until a later stage of the
+# Travis build (or at a later time). They need to be part of the container,
+# howerver, to be run, so install them as part of this Dockerfile.
 RUN set -e \
-    && yum -y install \
-        tomcat \
-        unzip  \
-        which \
-        awscli \
-        autoconf \
-        automake \
-        git \
-        bc \
+    && yum -y install tomcat unzip which python3 autoconf automake git bc emacs vim \
     && yum -y update \
-    && yum clean all 
+    && yum clean all \
+    && python3 -m pip install awscli
 
+################################################################
 # Tomcat environment (Tomcat installed above by via yum)
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 ENV CATALINA_HOME /usr/share/tomcat
 ENV PATH $CATALINA_HOME/bin:$PATH
 RUN echo "CATALINA_HOME: $CATALINA_HOME"
-
 
 ################################################################
 # Install the OPeNDAP security public key.
@@ -178,71 +150,41 @@ RUN set -e \
     && mkdir -p ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/logs \
     && chown -R tomcat:tomcat ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/logs \
     && chmod 700 ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/logs
-#
-# Clear these values so they do not persist in the container!
-ENV AWS_ACCESS_KEY_ID=
-ENV AWS_SECRET_ACCESS_KEY=
-RUN echo "unset AWS_ACCESS_KEY_ID"     >> ~/.bash_profile
-RUN echo "unset AWS_SECRET_ACCESS_KEY" >> ~/.bash_profile
-RUN echo "unset AWS_ACCESS_KEY_ID"     >> ~/.bashrc
-RUN echo "unset AWS_SECRET_ACCESS_KEY" >> ~/.bashrc
 ################################################################
 
 
+
 ################################################################
-# retrieve and install the ncWMS web application
-#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
-
-# This is ncWMS-2.4.2
-ENV NCWMS_WAR_URL=https://github.com/Reading-eScience-Centre/ncwms/releases/download/ncwms-2.4.2/ncWMS2.war
-
-RUN set -e \
-    && if [ $USE_NCWMS = "true" ]; then \
-        echo "Installing ncWMS..."; \
-        curl -sfSL ${NCWMS_WAR_URL} -o /dev/shm/ncWMS.war; \
-        unzip -o /dev/shm/ncWMS.war -d ${CATALINA_HOME}/webapps/ncWMS2/; \
-        rm -rf /dev/shm/*; \
-    else \
-        echo "ncWMS will NOT be installed."; \
-    fi
-
-# set a default ncWMS admin if DEVELOPER_MODE is enabled.
-RUN set -e \
-    && if [ ${DEVELOPER_MODE} = "true" ] && [ $USE_NCWMS = "true" ]; then \
-        echo "DEVELOPER MODE: Adding ncWMS admin credentials"; \
-        sed -i 'sX</tomcat-users>X<role rolename="ncWMS-admin"/> <user username="admin" password="admin" roles="ncWMS-admin"/> </tomcat-users>X' ${CATALINA_HOME}/conf/tomcat-users.xml; \
-    else \
-        echo "No ncWMS admin credentials installed."; \
-    fi
-    
-#
-# make ncWMS work without further configuration 
-# @TODO We will need to adjust this target if we 
-# decide to run as a different (not root) user.
-COPY ncWMS_config.xml /root/.ncWMS2/config.xml
-RUN  chmod +r /root/.ncWMS2/config.xml
-
-COPY olfs_viewers.xml /tmp/olfs_viewers.xml
-RUN set -e \
-    && if [ $USE_NCWMS = "true" ]; then \
-        # If we're installing ncWMS then we copy 
-        # to the server a viewers.xml which has
-        # been templated so that the ncWMS host can be installed 
-        # at startup.        
-        mv /tmp/olfs_viewers.xml ${CATALINA_HOME}/webapps/ROOT/WEB-INF/conf/viewers.xml; \
-    else \
-        echo "Skipping OLFS/ncWMS confguration installation."; \
-    fi
-    
-
-# Install our modified server.xml so that the server compresses responses.
+# Install our modified server.xml so that the server compresses responses and
+# sets the connectionTimeout to 1000 seconds
 COPY tomcat7-server.xml /
 RUN set -e \
     && mv /tomcat7-server.xml ${CATALINA_HOME}/conf/server.xml \
     && chown -R tomcat:tomcat ${CATALINA_HOME}/conf/server.xml
-
 ################################################################
 
+################################################################
+# Install our modified tomcat.conf so that the server use the memory.
+COPY tomcat.conf /
+RUN set -e \
+    && mv /tomcat.conf /etc/tomcat/tomcat.conf \
+    && chown -R tomcat:tomcat /etc/tomcat/tomcat.conf
+
+# Install Session Manager jars into the Tomcat: ${CATALINA_HOME}/lib
+RUN set -e \
+    && echo "Installing Session Manager jar files. Cloning OLFS..." \
+    && git clone --depth 1 https://github.com/OPENDAP/olfs \
+    && echo "Copying elasticache client" \
+    && cp olfs/resources/ngap/lib/elasticache-java-cluster-client-1.1.2.jar ${CATALINA_HOME}/lib \
+    && echo "Copying memcached Session Manager" \
+    && cp olfs/resources/ngap/lib/memcached-session-manager-2.3.2.jar ${CATALINA_HOME}/lib \
+    && echo "Copying memcached Session Manager TC7" \
+    && cp olfs/resources/ngap/lib/memcached-session-manager-tc7-2.3.2.jar ${CATALINA_HOME}/lib \
+    && chown -R tomcat:tomcat  ${CATALINA_HOME}/lib \
+    && rm -rfv olfs
+
+RUN yum clean all
+################################################################
 
 ################################################################
 #
@@ -270,8 +212,18 @@ RUN set -e \
     && cd ${TEST_INSTALL_DIR} \
     && make testsuite > mk.log 2>&1 \
     && echo "SUCCESS: hyrax_regression_tests ready!"
-################################################################
 
+COPY beslog2json.awk /
+RUN  set -e && chmod +x beslog2json.awk
+
+################################################################
+# TEMPORARY
+# Grab the cleanup files script for managing orphaned files
+# from fileout_netcdf
+COPY cleanup_files.sh /
+RUN chmod +x /cleanup_files.sh
+# TEMPORARY
+################################################################
 
 COPY entrypoint.sh /
 RUN  set -e && chmod +x /entrypoint.sh

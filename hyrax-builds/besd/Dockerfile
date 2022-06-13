@@ -38,7 +38,7 @@ RUN echo "BES_RPM: ${BES_RPM}"
 COPY ${BES_RPM} /${BES_RPM}
 
 
-LABEL vendor="OPeNDAP"
+LABEL vendor="OPeNDAP Incorporated"
 LABEL org.opendap.besdaemon.version=${BES_VERSION}
 LABEL org.opendap.besdaemon.release-date=RELEASE_DATE
 LABEL org.opendap.hyrax.version.is-production="false"
@@ -49,10 +49,10 @@ USER root
 
 # Update and install the needful.
 RUN set -e \
-    && yum -y install which awscli bc \
+    && yum -y install which bc python3 emacs vim\
     && yum -y update \
-    && yum clean all
-
+    && yum clean all \
+    && python3 -m pip install awscli
 
 ###############################################################
 # Retrieve and install the latest libdap snapshot
@@ -62,7 +62,6 @@ RUN set -e \
     && yum -y install ./${LIBDAP_RPM} \
     && rm -f ./${LIBDAP_RPM}
 
-
 ###############################################################
 # Retrieve and install the latest BES snapshot
 RUN set -e \
@@ -71,13 +70,6 @@ RUN set -e \
     && yum -y install ./${BES_RPM} \
     && rm -f ./${BES_RPM}
 
-# Clear these values so they do not persist in the container!
-#ENV AWS_ACCESS_KEY_ID=
-#ENV AWS_SECRET_ACCESS_KEY=
-#RUN echo "unset AWS_ACCESS_KEY_ID"     >> ~/.bash_profile
-#RUN echo "unset AWS_SECRET_ACCESS_KEY" >> ~/.bash_profile
-#RUN echo "unset AWS_ACCESS_KEY_ID"     >> ~/.bashrc
-#RUN echo "unset AWS_SECRET_ACCESS_KEY" >> ~/.bashrc
 
 RUN echo "besdaemon is here: "`which besdaemon`
 

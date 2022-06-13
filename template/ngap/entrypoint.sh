@@ -1,6 +1,6 @@
 #!/bin/bash
-# This is the entrypoint.sh file for the single container Hyrax.
-
+# This is the entrypoint.sh file for the NGAP deployment Hyrax container
+#
 # set -f # "set -o noglob"  Disable file name generation using metacharacters (globbing).
 # set -v # "set -o verbose" Prints shell input lines as they are read.
 # set -x # "set -o xtrace"  Print command traces before executing command.
@@ -53,47 +53,64 @@ bes_site_conf_file="/etc/bes/site.conf"
 if [ -n "${BES_SITE_CONF}" ] ; then
     # echo "${BES_SITE_CONF}" > ${bes_site_conf_file}
     echo "${BES_SITE_CONF}" | sed -e "s+BES.LogName=stdout+BES.LogName=/var/log/bes/bes.log+g" > ${bes_site_conf_file}
-    echo "${bes_site_conf_file} -" >&2
+    echo "${bes_site_conf_file} - " >&2
     cat ${bes_site_conf_file} >&2
 fi
 ################################################################################
 
 
+################################################################################
+# Inject Tomcat's context.xml configuration document to configure the Tomcat to
+# utilize Session Management in the NGAP environment.
+#
+tomcat_context_xml_file="/usr/share/tomcat/conf/context.xml"
+# Test if the bes.conf env variable is set (by way of not unset) and not empty
+if [ -n "${TOMCAT_CONTEXT_XML}" ] ; then
+    echo "${TOMCAT_CONTEXT_XML}" > ${tomcat_context_xml_file}
+    echo "${tomcat_context_xml_file} - " >&2
+    cat ${tomcat_context_xml_file} >&2
+fi
+################################################################################
+
 
 ################################################################################
 # Inject an NGAP Cumulus Configuration
-# Only create the /etc/bes/site.conf file if all the necessary environment
+# Only amend the /etc/bes/site.conf file if all the necessary environment
 # variables are defined
 #
-#if [ $S3_DISTRIBUTION_ENDPOINT ] && [ -n $S3_DISTRIBUTION_ENDPOINT ] &&  \
-#   [ $S3_REFRESH_MARGIN ] && [ -n $S3_REFRESH_MARGIN ] && \
-#   [ $S3_AWS_REGION ] && [ -n $S3_AWS_REGION ] && \
-#   [ $S3_BASE_URL ] && [ -n $S3_BASE_URL ]; then
-#    echo "NGAP.S3.distribution.endpoint.url=${S3_DISTRIBUTION_ENDPOINT}" >> /etc/bes/site.conf
-#    echo "NGAP.S3.refresh.margin=${S3_REFRESH_MARGIN}" >> /etc/bes/site.conf
-#    echo "NGAP.S3.region=${S3_AWS_REGION}" >> /etc/bes/site.conf
-#    echo "NGAP.S3.url.base=${S3_BASE_URL}" >> /etc/bes/site.conf
+#if [ -n "${S3_DISTRIBUTION_ENDPOINT}" ] &&  \
+#   [ -n "${S3_REFRESH_MARGIN}" ] && \
+#   [ -n "${S3_AWS_REGION}" ] && \
+#   [ -n "${S3_BASE_URL}" ]; then
+#
+#  echo "Amending BES site.conf file." >&2
+#  {
+#    echo "NGAP.S3.distribution.endpoint.url=${S3_DISTRIBUTION_ENDPOINT}"
+#    echo "NGAP.S3.refresh.margin=${S3_REFRESH_MARGIN}"
+#    echo "NGAP.S3.region=${S3_AWS_REGION}"
+#    echo "NGAP.S3.url.base=${S3_BASE_URL}"
+#  } | tee -a "${bes_site_conf_file}" >&2
 #fi
 ################################################################################
 
 if [ -n "${SERVER_HELP_EMAIL}" ] ; then
-    echo "Found exisiting SERVER_HELP_EMAIL: ${SERVER_HELP_EMAIL}"
+    echo "Found existing SERVER_HELP_EMAIL: ${SERVER_HELP_EMAIL}" >&2
 else
     SERVER_HELP_EMAIL="not_set"
-     echo "SERVER_HELP_EMAIL is ${SERVER_HELP_EMAIL}"
+     echo "SERVER_HELP_EMAIL is ${SERVER_HELP_EMAIL}" >&2
 fi
 if [ -n "${FOLLOW_SYMLINKS}" ] ; then
-    echo "Found existing FOLLOW_SYMLINKS: ${FOLLOW_SYMLINKS}"
+    echo "Found existing FOLLOW_SYMLINKS: ${FOLLOW_SYMLINKS}" >&2
 else
     FOLLOW_SYMLINKS="not_set";
-     echo "FOLLOW_SYMLINKS is $FOLLOW_SYMLINKS"
+     echo "FOLLOW_SYMLINKS is $FOLLOW_SYMLINKS" >&2
 fi
 
 if [ -n "${NCWMS_BASE}" ] ; then
-    echo "Found exisiting NCWMS_BASE: ${NCWMS_BASE}"
+    echo "Found existing NCWMS_BASE: ${NCWMS_BASE}" >&2
 else
     NCWMS_BASE="https://localhost:8080"
-    echo "Assigning default NCWMS_BASE: ${NCWMS_BASE}"
+    echo "Assigning default NCWMS_BASE: ${NCWMS_BASE}" >&2
 fi
 debug=false;
 
@@ -136,19 +153,8 @@ if [ $debug = true ];then
 fi
 
 DEFAULT_CONF_DIR="${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf"
-VIEWERS_XML="${DEFAULT_CONF_DIR}/viewers.xml"
-if [ $debug = true ];then
-    echo "NCWMS_BASE: ${NCWMS_BASE}"  >&2
-    echo "Setting ncWMS access URLs in viewers.xml (if needed)."  >&2
-    ls -l "${VIEWERS_XML}" >&2
-fi
 
-sed -i "s+@NCWMS_BASE@+${NCWMS_BASE}+g" "${VIEWERS_XML}";
-
-if [ $debug = true ];then
-    echo "${VIEWERS_XML} - "  >&2
-    cat "${VIEWERS_XML}" >&2
-fi
+# while true; do sleep 1; done
 
 LOGBACK_XML="${DEFAULT_CONF_DIR}/logback.xml"
 NGAP_LOGBACK_XML="${DEFAULT_CONF_DIR}/logback-ngap.xml"
@@ -161,13 +167,22 @@ fi
 # modify bes.conf based on environment variables before startup.
 #
 if [ "${SERVER_HELP_EMAIL}" != "not_set" ]; then
-    echo "Setting Admin Contact To: ${SERVER_HELP_EMAIL}"
+    echo "Setting Admin Contact To: ${SERVER_HELP_EMAIL}" >&2
     sed -i "s/admin.email.address@your.domain.name/${SERVER_HELP_EMAIL}/" /etc/bes/bes.conf
 fi
 
 if [ "${FOLLOW_SYMLINKS}" != "not_set" ]; then
-    echo "Setting BES FollowSymLinks to YES."
+    echo "Setting BES FollowSymLinks to YES." >&2
     sed -i "s/^BES.Catalog.catalog.FollowSymLinks=No/BES.Catalog.catalog.FollowSymLinks=Yes/" /etc/bes/bes.conf
+fi
+
+echo "AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}" >&2
+echo "AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}"  >&2
+echo "AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}" >&2
+aws configure list >&2
+status=$?
+if [ $status -ne 0 ]; then
+    echo "Problem with AWS CLI!" >&2
 fi
 
 
@@ -176,7 +191,7 @@ fi
 /usr/bin/besctl start;
 status=$?
 if [ $status -ne 0 ]; then
-    echo "Failed to start BES: $status" >&2
+    echo "ERROR: Failed to start BES: $status" >&2
     exit $status
 fi
 besd_pid=`ps aux | grep /usr/bin/besdaemon | grep -v grep | awk '{print $2;}' - `;
@@ -188,10 +203,14 @@ echo "The BES is UP! pid: $besd_pid" >&2
 status=$?
 tomcat_pid=$!
 if [ $status -ne 0 ]; then
-    echo "Failed to start Tomcat: $status" >&2
+    echo "ERROR: Failed to start Tomcat: $status" >&2
     exit $status
 fi
 echo "Tomcat is UP! pid: $tomcat_pid" >&2
+
+# TEMPORARY
+/cleanup_files.sh >&2 &
+# TEMPORARY
 
 echo "Hyrax Has Arrived..." >&2
 
@@ -204,27 +223,27 @@ while /bin/true; do
     TOMCAT_STATUS=$?
 
     if [ $BESD_STATUS -ne 0 ]; then
-        echo "BESD_STATUS: $BESD_STATUS bes_pid:$bes_pid" >&2
-        echo "The BES daemon appears to have died! Exiting." >&2
-        exit -1;
+        echo "ERROR: BESD_STATUS: $BESD_STATUS bes_pid:$bes_pid" >&2
+        echo "ERROR: The BES daemon appears to have died! Exiting." >&2
+        exit 1;
     fi
     if [ $TOMCAT_STATUS -ne 0 ]; then
-        echo "TOMCAT_STATUS: $TOMCAT_STATUS tomcat_pid:$tomcat_pid" >&2
-        echo "Tomcat appears to have died! Exiting." >&2
-        echo "Tomcat Console Log [BEGIN]" >&2
+        echo "ERROR: TOMCAT_STATUS: $TOMCAT_STATUS tomcat_pid:$tomcat_pid" >&2
+        echo "ERROR: Tomcat appears to have died! Exiting." >&2
+        echo "ERROR: Tomcat Console Log [BEGIN]" >&2
         cat /usr/share/tomcat/logs/console.log >&2
-        echo "Tomcat Console Log [END]" >&2
-        exit -2;
+        echo "ERROR: Tomcat Console Log [END]" >&2
+        exit 2
     fi
 
     if [ $debug = true ];then
-        echo "-----------------------------------------------------------"  >&2
+        echo "-------------------------------------------------------------------"  >&2
         date >&2
         echo "BESD_STATUS: $BESD_STATUS  besd_pid:$besd_pid" >&2
         echo "TOMCAT_STATUS: $TOMCAT_STATUS tomcat_pid:$tomcat_pid" >&2
     fi
 
-    tail -f /var/log/bes/bes.log
+    tail -f /var/log/bes/bes.log | awk -f beslog2json.awk
 
 done
 

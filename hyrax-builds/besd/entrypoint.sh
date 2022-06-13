@@ -24,14 +24,15 @@ else
     echo "FOLLOW_SYMLINKS is $FOLLOW_SYMLINKS"
 fi
 
-AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:-<not set>}"
-echo "AWS_SECRET_ACCESS_KEY is ${AWS_SECRET_ACCESS_KEY}"
+#AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:-<not set>}"
+#echo "AWS_SECRET_ACCESS_KEY is ${AWS_SECRET_ACCESS_KEY}"
+#
+#AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID:-<not set>}"
+#echo "AWS_ACCESS_KEY_ID is ${AWS_ACCESS_KEY_ID}"
+#
+#AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION:-<not set>}"
+#echo "AWS_DEFAULT_REGION is ${AWS_DEFAULT_REGION}"
 
-AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID:-<not set>}"
-echo "AWS_ACCESS_KEY_ID is ${AWS_ACCESS_KEY_ID}"
-
-AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION:-<not set>}"
-echo "AWS_DEFAULT_REGION is ${AWS_DEFAULT_REGION}"
 
 debug=false;
 
@@ -74,6 +75,13 @@ while getopts "e:sdi:k:r:" opt; do
       ;;
   esac
 done
+
+aws configure list
+status=$?
+if [ $status -ne 0 ]; then
+    echo "Problem with AWS CLI!" >&2
+fi
+
 set -e
 # echo "$@"
 
@@ -82,11 +90,11 @@ set -e
 # the Docker file to "not_set" and are overriden by the commandline here
 #
 if [ $SERVER_HELP_EMAIL != "not_set" ]; then
-    echo "Setting Admin Contact To: $SERVER_HELP_EMAIL"
+    echo "Setting Admin Contact To: $SERVER_HELP_EMAIL" >&2
     sed -i "s/admin.email.address@your.domain.name/$SERVER_HELP_EMAIL/" /etc/bes/bes.conf
 fi
 if [ $FOLLOW_SYMLINKS != "not_set" ]; then
-    echo "Setting BES FollowSymLinks to YES."
+    echo "Setting BES FollowSymLinks to YES." >&2
     sed -i "s/^BES.Catalog.catalog.FollowSymLinks=No/BES.Catalog.catalog.FollowSymLinks=Yes/" /etc/bes/bes.conf
 fi
 
@@ -96,27 +104,27 @@ fi
 /usr/bin/besctl start; 
 status=$?
 if [ $status -ne 0 ]; then
-    echo "Failed to start BES: $status"
+    echo "Failed to start BES: $status" >&2
     exit $status
 fi
 
 besd_pid=`ps aux | grep /usr/bin/besdaemon | grep -v grep | awk '{print $2;}' - `;
-echo "The besdaemon is UP! pid: $besd_pid";
+echo "The besdaemon is UP! pid: $besd_pid"  >&2
 
-echo "BES Has Arrived...";
+echo "BES Has Arrived..."  >&2
 
 while /bin/true; do
     sleep 60
     besd_ps=`ps -f $besd_pid`;
     BESD_STATUS=$?
     if [ $BESD_STATUS -ne 0 ]; then
-        echo "BESD_STATUS: $BESD_STATUS bes_pid:$bes_pid"
-        echo "The BES daemon appears to have died! Exiting."
+        echo "BESD_STATUS: $BESD_STATUS bes_pid:$bes_pid" >&2
+        echo "The BES daemon appears to have died! Exiting."  >&2
         exit -1;
     fi
     if [ $debug = true ];then 
-        echo "-------------------------------------------------------------------"
-        date
-        echo "BESD_STATUS: $BESD_STATUS  besd_pid:$besd_pid"
+        echo "-------------------------------------------------------------------" >&2
+        date >&2
+        echo "BESD_STATUS: $BESD_STATUS  besd_pid:$besd_pid" >&2
     fi
 done 

@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 ###############################################################################################
 # 
-# Dockerfile for single container Hyrax
-#
+# Dockerfile for the NGAP deployment Hyrax container
 #
 # Some shell state reference:
 # set -f # "set -o noglob"  Disable file name generation using metacharacters (globbing).
@@ -82,15 +81,16 @@ ENV DEVELOPER_MODE ${DEVELOPER_MODE:-"false"}
 RUN set -e && \
     if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else echo "DEVELOPER_MODE: DISABLED"; fi
 
-
+################################################################
 # Update and install the needful.
-RUN yum -y install tomcat unzip which awscli autoconf automake git bc emacs vim
 # Installing autoconf automake git bc for the tests install. The tests
 # are installed in the container but not run until a later stage of the
 # Travis build (or at a later time). They need to be part of the container,
 # howerver, to be run, so install them as part of this Dockerfile.
-RUN yum -y update
-
+RUN set -e \
+    && yum -y install tomcat unzip which python3 autoconf automake git bc emacs vim \
+    && yum -y update \
+    && python3 -m pip install awscli
 
 ################################################################
 # Tomcat environment (Tomcat installed above by via yum)
@@ -98,7 +98,6 @@ RUN yum -y update
 ENV CATALINA_HOME /usr/share/tomcat
 ENV PATH $CATALINA_HOME/bin:$PATH
 RUN echo "CATALINA_HOME: $CATALINA_HOME"
-
 
 ################################################################
 # Retrieve and install the latest libdap snapshot
@@ -141,6 +140,7 @@ RUN set -e \
     && mkdir -p ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/logs \
     && chown -R tomcat:tomcat ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/logs \
     && chmod 700 ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/logs
+################################################################
 
 
 
@@ -150,6 +150,7 @@ COPY tomcat7-server.xml /
 RUN set -e \
     && mv /tomcat7-server.xml ${CATALINA_HOME}/conf/server.xml \
     && chown -R tomcat:tomcat ${CATALINA_HOME}/conf/server.xml
+################################################################
 
 # Install our modified tomcat.conf so that the server use the memory.
 COPY tomcat.conf /
