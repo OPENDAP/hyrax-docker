@@ -9,7 +9,7 @@
 #echo "entrypoint.sh  command line: \"$@\""
 echo "############################## HYRAX ##################################";   >&2
 echo "Greetings, I am "`whoami`".";   >&2
-set -e
+# set -e
 #set -x
 
 
@@ -149,11 +149,14 @@ echo "Hyrax Has Arrived..."; >&2
 
 while /bin/true; do
     sleep ${SLEEP_INTERVAL}
+    echo "Checking Hyrax Operational State..." >&2
     besd_ps=`ps -f $besd_pid`;
     BESD_STATUS=$?
-    
+    echo "BESD_STATUS: ${BESD_STATUS}" >&2
+
     tomcat_ps=`ps -f $tomcat_pid`;
     TOMCAT_STATUS=$?
+    echo "TOMCAT_STATUS: ${TOMCAT_STATUS}" >&2
 
     if [ $BESD_STATUS -ne 0 ]; then
         echo "BESD_STATUS: $BESD_STATUS bes_pid:$bes_pid" >&2
@@ -164,9 +167,15 @@ while /bin/true; do
         echo "TOMCAT_STATUS: $TOMCAT_STATUS tomcat_pid:$tomcat_pid" >&2
         echo "Tomcat appears to have died! Exiting." >&2
         echo "Tomcat Console Log [BEGIN]" >&2
-        cat /usr/share/tomcat/logs/console.log >&2
+        cat /var/log/tomcat/console.log >&2
         echo "Tomcat Console Log [END]" >&2
-        exit -2;
+        echo "catalina.out [BEGIN]" >&2
+        cat /usr/share/tomcat/logs/catalina.out >&2
+        echo "catalina.out [END]" >&2
+        echo "localhost.log [BEGIN]" >&2
+        cat /usr/share/tomcat/logs/localhost* >&2
+        echo "localhost.log [END]" >&2
+        #exit -2;
     fi
     
     if [ $debug = true ];then

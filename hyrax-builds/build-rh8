@@ -1,42 +1,79 @@
 #!/bin/bash
 
-#export RELEASE_DATE=TheEndOfTime
-#export HYRAX_VERSION=1.16.6
-#export LIBDAP_VERSION=3.20.9-81
-#export BES_VERSION=3.20.10-374
-#export OLFS_VERSION=1.18.10-227
+export docker_name="hyrax-rh8"
+export IMAGE_TAG="opendap/${docker_name}:snapshot"
+export SLEEP_INTERVAL=10
 
-export RELEASE_DATE=$(cat ../snapshot.time | grep hyrax | awk '{print $2;}')
-export HYRAX_VERSION=$(cat ../snapshot.time | grep hyrax | awk '{print $1;}')
-export OLFS_VERSION=$(cat ../snapshot.time | grep olfs | awk '{print $1;}')
-export BES_VERSION=$(cat ../snapshot.time | grep bes | awk '{print $1;}')
-export LIBDAP_VERSION=$(cat ../snapshot.time | grep libdap4 | awk '{print $1;}')
+export RELEASE_DATE=""
+export HYRAX_VERSION=""
+export OLFS_VERSION=""
+export BES_VERSION=""
+export LIBDAP_VERSION=""
 
-export IMAGE_TAG="opendap/hyrax:rh8-snapshot"
+RELEASE_DATE=$(cat ../snapshot.time | grep hyrax | awk '{print $2;}')
+HYRAX_VERSION=$(cat ../snapshot.time | grep hyrax | awk '{print $1;}')
+OLFS_VERSION=$(cat ../snapshot.time | grep olfs | sed "s/olfs-//g" | awk '{print $1;}')
+BES_VERSION=$(cat ../snapshot.time | grep bes | sed "s/bes-//g" | awk '{print $1;}')
+LIBDAP_VERSION=$(cat ../snapshot.time | grep libdap4 | sed "s/libdap4-//g"| awk '{print $1;}')
 
+
+function show_version(){
+    echo "  RELEASE_DATE: ${RELEASE_DATE}"
+    echo " HYRAX_VERSION: ${HYRAX_VERSION}"
+    echo "  OLFS_VERSION: ${OLFS_VERSION}"
+    echo "   BES_VERSION: ${BES_VERSION}"
+    echo "LIBDAP_VERSION: ${LIBDAP_VERSION}"
+}
+
+function s3_pull(){
+    local bucket_name="${1}"
+    local object_name="${2}"
+    local target_dir="${3}"
+    aws s3 cp "s3://${bucket_name}/${object_name}" "${target_dir}/${object_name}"
+}
 
 function get_hyrax_distro() {
-aws s3 cp s3://opendap.travis.build/libdap-${LIBDAP_VERSION}.el8.x86_64.rpm .
-aws s3 cp s3://opendap.travis.build/libdap-devel-${LIBDAP_VERSION}.el8.x86_64.rpm .
-aws s3 cp s3://opendap.travis.build/libdap-debuginfo-${LIBDAP_VERSION}.el8.x86_64.rpm .
+    set -e
+    local build_bucket="opendap.travis.build"
 
-aws s3 cp s3://opendap.travis.build/bes-${BES_VERSION}.static.el8.x86_64.rpm .
-aws s3 cp s3://opendap.travis.build/bes-devel-${BES_VERSION}.static.el8.x86_64.rpm .
-aws s3 cp s3://opendap.travis.build/bes-debuginfo-${BES_VERSION}.static.el8.x86_64.rpm .
+    s3_pull "${build_bucket}" \
+            "libdap-${LIBDAP_VERSION}.el8.x86_64.rpm" \
+            "${docker_name}"
+    s3_pull "${build_bucket}" \
+            "libdap-devel-${LIBDAP_VERSION}.el8.x86_64.rpm" \
+            "${docker_name}"
+    s3_pull "${build_bucket}" \
+            "libdap-debuginfo-${LIBDAP_VERSION}.el8.x86_64.rpm" \
+            "${docker_name}"
 
-aws s3 cp s3://opendap.travis.build/olfs-${OLFS_VERSION}-webapp.tgz .
-aws s3 cp s3://opendap.travis.build/robots-olfs-${OLFS_VERSION}-webapp.tgz .
+    s3_pull "${build_bucket}" \
+            "bes-${BES_VERSION}.static.el8.x86_64.rpm" \
+            "${docker_name}"
+    s3_pull "${build_bucket}" \
+            "bes-devel-${BES_VERSION}.static.el8.x86_64.rpm" \
+            "${docker_name}"
+    s3_pull "${build_bucket}" \
+            "bes-debuginfo-${BES_VERSION}.static.el8.x86_64.rpm" \
+            "${docker_name}"
+
+    s3_pull "${build_bucket}" \
+            "olfs-${OLFS_VERSION}-webapp.tgz" \
+            "${docker_name}"
+    s3_pull "${build_bucket}" \
+            "robots-olfs-${OLFS_VERSION}-webapp.tgz" \
+            "${docker_name}"
+    set +e
 }
 
 function build_hyrax_rh8() {
     docker build --platform linux/amd64 \
+        --no-cache \
         --build-arg RELEASE_DATE \
         --build-arg HYRAX_VERSION \
         --build-arg LIBDAP_VERSION \
         --build-arg BES_VERSION \
         --build-arg OLFS_VERSION \
         --tag "${IMAGE_TAG}" hyrax-rh8
-#        --no-cache \
 }
 function get_platform(){
     local platform=""
@@ -48,7 +85,6 @@ function start_hyrax_rh8(){
     local platform=""
     platform=$(get_platform)
 
-    local SLEEP_INTERVAL=1000
     # docker run -d -h hyrax -p 8080:8080 --name=hyrax "${IMAGE_TAG}"
     docker run \
         -d\
@@ -60,7 +96,29 @@ function start_hyrax_rh8(){
         "${IMAGE_TAG}"
 }
 
+function debug_hyrax_rh8(){
+    local platform=""
+    platform=$(get_platform)
 
+    # docker run -d -h hyrax -p 8080:8080 --name=hyrax "${IMAGE_TAG}"
+    docker run \
+        -h hyrax \
+        -p 8080:8080 \
+        --name=hyrax \
+        --platform linux/amd64 \
+        --env SLEEP_INTERVAL \
+        "${IMAGE_TAG}"
+}
+
+
+function main() {
+    show_version
+    # get_hyrax_distro
+    build_hyrax_rh8
+}
+
+
+main
 
 
 

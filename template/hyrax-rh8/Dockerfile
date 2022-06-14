@@ -96,16 +96,21 @@ RUN if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else ec
 
 # Update and install the needful.
 RUN dnf -y update
-RUN dnf -y install make wget unzip which autoconf automake java emacs vim git bc valgrind gdb
+RUN dnf -y install make wget unzip which autoconf automake java emacs vim python3 git bc valgrind gdb
+
 # Installing autoconf automake git bc for the tests install. The tests
 # are installed in the container but not run until a later stage of the
 # Travis build (or at a later time). They need to be part of the container,
 # howerver, to be run, so install them as part of this Dockerfile.
 RUN dnf clean all
 
+# We need AWS CLI so we get it from python3 pip
+RUN python3 -m pip install awscli
+
 RUN wget https://archive.apache.org/dist/tomcat/tomcat-9/v9.0.33/bin/apache-tomcat-9.0.33.tar.gz
 RUN tar xvf apache-tomcat-9.0.33.tar.gz -C /usr/share/
 RUN ln -s /usr/share/apache-tomcat-9.0.33/ /usr/share/tomcat
+RUN rm -rvf /usr/share/tomcat/webapps/*
 run mkdir -p /var/log/tomcat
 
 # Tomcat environment (Tomcat installed above by via yum)
@@ -116,7 +121,7 @@ ENV PATH $CATALINA_HOME/bin:$PATH
 RUN echo "CATALINA_HOME: ${CATALINA_HOME}"
 RUN groupadd tomcat
 RUN useradd -r -g tomcat tomcat
-RUN chown tomcat:tomcat /var/log/tomcat
+RUN chown -R tomcat:tomcat /var/log/tomcat /usr/share/tomcat
 
 
 ################################################################
