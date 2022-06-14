@@ -182,13 +182,19 @@ fi
 # modify bes.conf based on environment variables before startup.
 #
 if [ "${SERVER_HELP_EMAIL}" != "not_set" ]; then
-    echo "Setting Admin Contact To: ${SERVER_HELP_EMAIL}"
+    echo "Setting Admin Contact To: ${SERVER_HELP_EMAIL}" >&2
     sed -i "s/admin.email.address@your.domain.name/${SERVER_HELP_EMAIL}/" /etc/bes/bes.conf
 fi
 
 if [ "${FOLLOW_SYMLINKS}" != "not_set" ]; then
-    echo "Setting BES FollowSymLinks to YES."
+    echo "Setting BES FollowSymLinks to YES." >&2
     sed -i "s/^BES.Catalog.catalog.FollowSymLinks=No/BES.Catalog.catalog.FollowSymLinks=Yes/" /etc/bes/bes.conf
+fi
+
+aws configure list >&2
+status=$?
+if [ $status -ne 0 ]; then
+    echo "Problem with AWS CLI!" >&2
 fi
 
 

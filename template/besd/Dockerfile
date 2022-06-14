@@ -39,9 +39,10 @@ USER root
 
 # Update and install the needful.
 RUN set -e \
-    && yum -y install which bc awscli \
+    && yum -y install which bc python3 \
     && yum -y update \
-    && yum clean all
+    && yum clean all \
+    && python3 -m pip install awscli
 
 # Installs the OPeNDAP security public key.
 # TODO: We should get this from a well known key-server instead.

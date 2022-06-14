@@ -44,40 +44,24 @@ fi
 
 
 if [ $SERVER_HELP_EMAIL ] && [ -n $SERVER_HELP_EMAIL ] ; then    
-    echo "Found exisiting SERVER_HELP_EMAIL: $SERVER_HELP_EMAIL"  
+    echo "Found existing SERVER_HELP_EMAIL: $SERVER_HELP_EMAIL" >&2
 else 
     SERVER_HELP_EMAIL="not_set"
      echo "SERVER_HELP_EMAIL is $SERVER_HELP_EMAIL"  
 fi
 if [ $FOLLOW_SYMLINKS ] && [ -n $FOLLOW_SYMLINKS ] ; then    
-    echo "Found exisiting FOLLOW_SYMLINKS: $FOLLOW_SYMLINKS"  
+    echo "Found existing FOLLOW_SYMLINKS: $FOLLOW_SYMLINKS" >&2
 else 
     FOLLOW_SYMLINKS="not_set";
      echo "FOLLOW_SYMLINKS is $FOLLOW_SYMLINKS"  
 fi
 
-NCWMS_BASE="${NCWMS_BASE:-https://localhost:8080}"
-echo "Using NCWMS_BASE: ${NCWMS_BASE}"
 
-#if [ $NCWMS_BASE ] && [ -n $NCWMS_BASE ] ; then
-#    echo "Found exisiting NCWMS_BASE: $NCWMS_BASE"
-#else
-#    NCWMS_BASE="https://localhost:8080"
-#     echo "Assigning default NCWMS_BASE: $NCWMS_BASE"
-#fi
 
-AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:-<not set>}"
-echo "AWS_SECRET_ACCESS_KEY is ${AWS_SECRET_ACCESS_KEY}"
-
-AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID:-<not set>}"
-echo "AWS_ACCESS_KEY_ID is ${AWS_ACCESS_KEY_ID}"
-
-AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION:-<not set>}"
-echo "AWS_DEFAULT_REGION is ${AWS_DEFAULT_REGION}"
 
 debug=false;
 
-while getopts "de:sn:i:k:r:" opt; do
+while getopts "de:si:k:r:" opt; do
   echo "Processing command line opt: ${opt}" >&2
   case $opt in
     e)
@@ -87,10 +71,6 @@ while getopts "de:sn:i:k:r:" opt; do
     s)
       echo "Setting FollowSymLinks to: Yes" >&2
       FOLLOW_SYMLINKS="Yes"
-      ;;
-    n)
-      echo "Setting ncWMS public facing service base to : $OPTARG" >&2
-      NCWMS_BASE=$OPTARG
       ;;
     d)
       debug=true;
@@ -126,6 +106,7 @@ while getopts "de:sn:i:k:r:" opt; do
   esac
 done
 
+
 if [ $debug = true ];then
     echo "CATALINA_HOME: ${CATALINA_HOME}";  >&2
     ls -l "$CATALINA_HOME" "$CATALINA_HOME/bin"  >&2
@@ -153,10 +134,18 @@ if [ $FOLLOW_SYMLINKS != "not_set" ]; then
     sed -i "s/^BES.Catalog.catalog.FollowSymLinks=No/BES.Catalog.catalog.FollowSymLinks=Yes/" /etc/bes/bes.conf
 fi
 
+echo "AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}" >&2
+echo "AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}"  >&2
+echo "AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}" >&2
+aws configure list >&2
+status=$?
+if [ $status -ne 0 ]; then
+    echo "Problem with AWS CLI!" >&2
+fi
 
 # Start the BES daemon process
 # /usr/bin/besdaemon -i /usr -c /etc/bes/bes.conf -r /var/run/bes.pid
-/usr/bin/besctl start; 
+/usr/bin/besctl start;
 status=$?
 if [ $status -ne 0 ]; then
     echo "Failed to start BES: $status" >&2
@@ -175,6 +164,10 @@ if [ $status -ne 0 ]; then
     exit $status
 fi
 echo "Tomcat is UP! pid: $tomcat_pid"; >&2
+
+# TEMPORARY
+/cleanup_files.sh >&2 &
+# TEMPORARY
 
 echo "Hyrax Has Arrived..."; >&2
 
@@ -206,7 +199,5 @@ while /bin/true; do
         echo "BESD_STATUS: $BESD_STATUS  besd_pid:$besd_pid" >&2
         echo "TOMCAT_STATUS: $TOMCAT_STATUS tomcat_pid:$tomcat_pid" >&2
     fi
-
-    
 done
  
