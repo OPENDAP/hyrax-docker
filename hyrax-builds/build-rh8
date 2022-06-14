@@ -1,0 +1,66 @@
+#!/bin/bash
+
+#export RELEASE_DATE=TheEndOfTime
+#export HYRAX_VERSION=1.16.6
+#export LIBDAP_VERSION=3.20.9-81
+#export BES_VERSION=3.20.10-374
+#export OLFS_VERSION=1.18.10-227
+
+export RELEASE_DATE=$(cat ../snapshot.time | grep hyrax | awk '{print $2;}')
+export HYRAX_VERSION=$(cat ../snapshot.time | grep hyrax | awk '{print $1;}')
+export OLFS_VERSION=$(cat ../snapshot.time | grep olfs | awk '{print $1;}')
+export BES_VERSION=$(cat ../snapshot.time | grep bes | awk '{print $1;}')
+export LIBDAP_VERSION=$(cat ../snapshot.time | grep libdap4 | awk '{print $1;}')
+
+export IMAGE_TAG="opendap/hyrax:rh8-snapshot"
+
+
+function get_hyrax_distro() {
+aws s3 cp s3://opendap.travis.build/libdap-${LIBDAP_VERSION}.el8.x86_64.rpm .
+aws s3 cp s3://opendap.travis.build/libdap-devel-${LIBDAP_VERSION}.el8.x86_64.rpm .
+aws s3 cp s3://opendap.travis.build/libdap-debuginfo-${LIBDAP_VERSION}.el8.x86_64.rpm .
+
+aws s3 cp s3://opendap.travis.build/bes-${BES_VERSION}.static.el8.x86_64.rpm .
+aws s3 cp s3://opendap.travis.build/bes-devel-${BES_VERSION}.static.el8.x86_64.rpm .
+aws s3 cp s3://opendap.travis.build/bes-debuginfo-${BES_VERSION}.static.el8.x86_64.rpm .
+
+aws s3 cp s3://opendap.travis.build/olfs-${OLFS_VERSION}-webapp.tgz .
+aws s3 cp s3://opendap.travis.build/robots-olfs-${OLFS_VERSION}-webapp.tgz .
+}
+
+function build_hyrax_rh8() {
+    docker build --platform linux/amd64 \
+        --build-arg RELEASE_DATE \
+        --build-arg HYRAX_VERSION \
+        --build-arg LIBDAP_VERSION \
+        --build-arg BES_VERSION \
+        --build-arg OLFS_VERSION \
+        --tag "${IMAGE_TAG}" hyrax-rh8
+#        --no-cache \
+}
+function get_platform(){
+    local platform=""
+    if test `uname -m` = "arm64" ; then platform="--platform linux/amd64"; fi
+    echo "${platform}"
+}
+
+function start_hyrax_rh8(){
+    local platform=""
+    platform=$(get_platform)
+
+    local SLEEP_INTERVAL=1000
+    # docker run -d -h hyrax -p 8080:8080 --name=hyrax "${IMAGE_TAG}"
+    docker run \
+        -d\
+        -h hyrax \
+        -p 8080:8080 \
+        --name=hyrax \
+        --platform linux/amd64 \
+        --env SLEEP_INTERVAL \
+        "${IMAGE_TAG}"
+}
+
+
+
+
+
