@@ -2,7 +2,7 @@
 
 export docker_name="hyrax-rh8"
 export IMAGE_TAG="opendap/${docker_name}:snapshot"
-export SLEEP_INTERVAL=10
+export SLEEP_INTERVAL=100
 
 export RELEASE_DATE=""
 export HYRAX_VERSION=""
@@ -66,8 +66,8 @@ function get_hyrax_distro() {
 }
 
 function build_hyrax_rh8() {
-    docker build --platform linux/amd64 \
-        --no-cache \
+#        --no-cache \
+        docker build --platform linux/amd64 \
         --build-arg RELEASE_DATE \
         --build-arg HYRAX_VERSION \
         --build-arg LIBDAP_VERSION \
@@ -91,7 +91,6 @@ function start_hyrax_rh8(){
         -h hyrax \
         -p 8080:8080 \
         --name=hyrax \
-        --platform linux/amd64 \
         --env SLEEP_INTERVAL \
         "${IMAGE_TAG}"
 }

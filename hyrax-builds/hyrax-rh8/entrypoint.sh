@@ -10,7 +10,7 @@
 echo "############################## HYRAX ##################################";   >&2
 echo "Greetings, I am "`whoami`".";   >&2
 # set -e
-#set -x
+# set -x
 
 
 export JAVA_HOME="${JAVA_HOME:-/etc/alternatives/jre}"
@@ -105,6 +105,7 @@ if [ $debug = true ];then
     cat ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml; >&2
 fi
 
+#-------------------------------------------------------------------------------
 # modify bes.conf based on environment variables before startup.
 #
 if [ $SERVER_HELP_EMAIL != "not_set" ]; then
@@ -116,7 +117,11 @@ if [ $FOLLOW_SYMLINKS != "not_set" ]; then
     sed -i "s/^BES.Catalog.catalog.FollowSymLinks=No/BES.Catalog.catalog.FollowSymLinks=Yes/" /etc/bes/bes.conf
 fi
 
+echo "JAVA: "
+java -version
 
+
+#-------------------------------------------------------------------------------
 # Start the BES daemon process
 # /usr/bin/besdaemon -i /usr -c /etc/bes/bes.conf -r /var/run/bes.pid
 /usr/bin/besctl start;
@@ -128,18 +133,34 @@ fi
 besd_pid=`ps aux | grep /usr/bin/besdaemon | grep -v grep | awk '{print $2;}' - `;
 echo "The BES is UP! pid: $besd_pid"; >&2
 
-
+#-------------------------------------------------------------------------------
 # Start Tomcat process
-#/usr/libexec/tomcat/server start 2>&1 > /var/log/tomcat/console.log  &
+#
+export OLFS_CONF="${CATALINA_HOME}/webapps/opendap/WEB-INF/conf"
+mv ${OLFS_CONF}/logback.xml ${OLFS_CONF}/logback.xml.OFF
 echo "Starting Tomcat..." >&2
-/usr/share/tomcat/bin/startup.sh 2>&1 > /var/log/tomcat/console.log &
+#systemctl start tomcat
+${CATALINA_HOME}/bin/startup.sh 2>&1 > /var/log/tomcat/console.log &
 status=$?
 tomcat_pid=$!
 if [ $status -ne 0 ]; then
     echo "Failed to start Tomcat: $status" >&2
     exit $status
 fi
-echo "Tomcat is UP! pid: $tomcat_pid"; >&2
+# When we launch tomcat the initial pid gets "retired" because it spawns a
+# secondary processes.
+echo "Tomcat started first pid: ${tomcat_pid}"; >&2
+last_pid="${tomcat_pid}"
+while test $last_pid -eq $tomcat_pid
+do
+    tomcat_ps=$(ps aux | grep tomcat | grep -v grep)
+    echo "tomcat_ps: ${tomcat_ps}"
+    tomcat_pid=$(echo ${tomcat_ps} | awk '{print $2}')
+    echo "tomcat_pid: ${tomcat_pid}"
+    sleep 1
+done
+# New pid and we should be good to go.
+echo "Tomcat is UP! pid: ${tomcat_pid}"; >&2
 
 # TEMPORARY
 /cleanup_files.sh >&2 &
@@ -147,6 +168,8 @@ echo "Tomcat is UP! pid: $tomcat_pid"; >&2
 
 echo "Hyrax Has Arrived..."; >&2
 
+#-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 while /bin/true; do
     sleep ${SLEEP_INTERVAL}
     echo "Checking Hyrax Operational State..." >&2
@@ -154,28 +177,28 @@ while /bin/true; do
     BESD_STATUS=$?
     echo "BESD_STATUS: ${BESD_STATUS}" >&2
 
-    tomcat_ps=`ps -f $tomcat_pid`;
+    tomcat_ps=$(ps -f "${tomcat_pid}");
     TOMCAT_STATUS=$?
     echo "TOMCAT_STATUS: ${TOMCAT_STATUS}" >&2
 
     if [ $BESD_STATUS -ne 0 ]; then
         echo "BESD_STATUS: $BESD_STATUS bes_pid:$bes_pid" >&2
         echo "The BES daemon appears to have died! Exiting." >&2
-        exit -1;
+        exit 1;
     fi
     if [ $TOMCAT_STATUS -ne 0 ]; then
         echo "TOMCAT_STATUS: $TOMCAT_STATUS tomcat_pid:$tomcat_pid" >&2
         echo "Tomcat appears to have died! Exiting." >&2
-        echo "Tomcat Console Log [BEGIN]" >&2
-        cat /var/log/tomcat/console.log >&2
-        echo "Tomcat Console Log [END]" >&2
-        echo "catalina.out [BEGIN]" >&2
-        cat /usr/share/tomcat/logs/catalina.out >&2
-        echo "catalina.out [END]" >&2
-        echo "localhost.log [BEGIN]" >&2
-        cat /usr/share/tomcat/logs/localhost* >&2
-        echo "localhost.log [END]" >&2
-        #exit -2;
+        #echo "Tomcat Console Log [BEGIN]" >&2
+        #cat /var/log/tomcat/console.log >&2
+        #echo "Tomcat Console Log [END]" >&2
+        #echo "catalina.out [BEGIN]" >&2
+        #cat /usr/share/tomcat/logs/catalina.out >&2
+        #echo "catalina.out [END]" >&2
+        #echo "localhost.log [BEGIN]" >&2
+        #cat /usr/share/tomcat/logs/localhost* >&2
+        #echo "localhost.log [END]" >&2
+        exit 2;
     fi
     
     if [ $debug = true ];then
@@ -185,4 +208,6 @@ while /bin/true; do
         echo "TOMCAT_STATUS: $TOMCAT_STATUS tomcat_pid:$tomcat_pid" >&2
     fi
 done
- 
+#-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
+

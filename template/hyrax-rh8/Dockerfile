@@ -15,8 +15,9 @@
 # Set one or more individual labels
 FROM rockylinux:8
 
-RUN export NOW=`date +%s`
+ENV TOMCAT_VERSION="9.0.64"
 
+RUN export NOW=`date +%s`
 ARG RELEASE_DATE
 ENV RELEASE_DATE ${RELEASE_DATE:-"${NOW}"}
 RUN echo "RELEASE_DATE: ${RELEASE_DATE}"
@@ -95,9 +96,9 @@ RUN if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else ec
 #RUN sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
 
 # Update and install the needful.
-RUN dnf -y update
-RUN dnf -y install make wget unzip which autoconf automake java emacs vim python3 git bc valgrind gdb
-
+RUN dnf update  -y
+RUN dnf install -y make wget unzip which autoconf automake emacs vim python3 git bc valgrind gdb
+RUN dnf install -y java-11-openjdk-devel
 # Installing autoconf automake git bc for the tests install. The tests
 # are installed in the container but not run until a later stage of the
 # Travis build (or at a later time). They need to be part of the container,
@@ -107,21 +108,32 @@ RUN dnf clean all
 # We need AWS CLI so we get it from python3 pip
 RUN python3 -m pip install awscli
 
-RUN wget https://archive.apache.org/dist/tomcat/tomcat-9/v9.0.33/bin/apache-tomcat-9.0.33.tar.gz
-RUN tar xvf apache-tomcat-9.0.33.tar.gz -C /usr/share/
-RUN ln -s /usr/share/apache-tomcat-9.0.33/ /usr/share/tomcat
-RUN rm -rvf /usr/share/tomcat/webapps/*
-run mkdir -p /var/log/tomcat
 
-# Tomcat environment (Tomcat installed above by via yum)
+
+################################################################
+# Setup Tomcat
+#
+# Make tomcat user and group
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
-# TODO Is this needed; it's not used in 'olfs' jhrg 4/1/31
-ENV CATALINA_HOME /usr/share/tomcat
+RUN groupadd tomcat
+# RUN useradd -r -g tomcat tomcat
+RUN useradd -m -U -d /usr/share/tomcat -s /bin/false tomcat
+#
+# Get and install the Tomcat package directly from Apache
+RUN curl -o tomcat.tgz https://archive.apache.org/dist/tomcat/tomcat-9/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz
+RUN tar xvf tomcat.tgz -C /usr/share/tomcat
+RUN ln -s /usr/share/apache-tomcat-${TOMCAT_VERSION} /usr/share/tomcat/latest
+RUN rm -rvf /usr/share/tomcat/latest/webapps/*
+run mkdir -p /var/log/tomcat
+RUN chown -R tomcat:tomcat /var/log/tomcat /usr/share/tomcat
+COPY tomcat.service /etc/systemd/system/tomcat.service
+RUN systemctl enable tomcat
+RUN firewall-cmd --add-port 8080/tcp --permanent
+RUN firewall-cmd --reload
+
+ENV CATALINA_HOME /usr/share/tomcat/latest
 ENV PATH $CATALINA_HOME/bin:$PATH
 RUN echo "CATALINA_HOME: ${CATALINA_HOME}"
-RUN groupadd tomcat
-RUN useradd -r -g tomcat tomcat
-RUN chown -R tomcat:tomcat /var/log/tomcat /usr/share/tomcat
 
 
 ################################################################
