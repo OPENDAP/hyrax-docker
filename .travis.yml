@@ -73,7 +73,6 @@ install:
   - aws --region=us-east-1 s3 cp ${NGAP_DISTRO_URL} ./hyrax-builds/${NGAP_DISTRO}
   - ls -l ./hyrax-builds
 
-
 stages:
   - name: RH8
     if:  branch = master
