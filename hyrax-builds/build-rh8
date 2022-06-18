@@ -44,7 +44,7 @@ function s3_pull(){
 function get_hyrax_distro() {
     set -e
     local build_bucket="opendap.travis.build"
-    
+
     rm -fv "${docker_name}/*.rpm"
     rm -fv "${docker_name}/olfs*.tgz"
     rm -fv "${docker_name}/robots*.tgz"
