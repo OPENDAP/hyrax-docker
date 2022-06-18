@@ -1,8 +1,5 @@
 #!/bin/bash
 
-export docker_name="hyrax-rh8"
-export IMAGE_TAG="opendap/${docker_name}:snapshot"
-export SLEEP_INTERVAL=100
 
 export RELEASE_DATE=""
 export HYRAX_VERSION=""
@@ -16,13 +13,25 @@ OLFS_VERSION=$(cat ../snapshot.time | grep olfs | sed "s/olfs-//g" | awk '{print
 BES_VERSION=$(cat ../snapshot.time | grep bes | sed "s/bes-//g" | awk '{print $1;}')
 LIBDAP_VERSION=$(cat ../snapshot.time | grep libdap4 | sed "s/libdap4-//g"| awk '{print $1;}')
 
+export docker_name="hyrax-rh8"
+export SNAPSHOT_TAG="opendap/${docker_name}:snapshot"
+export HYRAX_VERSION_NUMBER=$(echo "${HYRAX_VERSION}" | sed "s/hyrax-//g" )
+export IMAGE_TAG="opendap/${docker_name}:${HYRAX_VERSION_NUMBER}"
+export SLEEP_INTERVAL=1000
+
 
 function show_version(){
-    echo "  RELEASE_DATE: ${RELEASE_DATE}"
-    echo " HYRAX_VERSION: ${HYRAX_VERSION}"
-    echo "  OLFS_VERSION: ${OLFS_VERSION}"
-    echo "   BES_VERSION: ${BES_VERSION}"
-    echo "LIBDAP_VERSION: ${LIBDAP_VERSION}"
+    echo "################################################################"
+    echo "#   RELEASE_DATE: ${RELEASE_DATE}"
+    echo "#  HYRAX_VERSION: ${HYRAX_VERSION}"
+    echo "#   OLFS_VERSION: ${OLFS_VERSION}"
+    echo "#    BES_VERSION: ${BES_VERSION}"
+    echo "# LIBDAP_VERSION: ${LIBDAP_VERSION}"
+    echo "#    docker_name: ${docker_name}"
+    echo "#      IMAGE_TAG: ${IMAGE_TAG}"
+    echo "#   SNAPSHOT_TAG: ${SNAPSHOT_TAG}"
+    echo "# SLEEP_INTERVAL: ${SLEEP_INTERVAL}"
+    echo "################################################################"
 }
 
 function s3_pull(){
@@ -35,6 +44,10 @@ function s3_pull(){
 function get_hyrax_distro() {
     set -e
     local build_bucket="opendap.travis.build"
+    
+    rm -fv "${docker_name}/*.rpm"
+    rm -fv "${docker_name}/olfs*.tgz"
+    rm -fv "${docker_name}/robots*.tgz"
 
     s3_pull "${build_bucket}" \
             "libdap-${LIBDAP_VERSION}.el8.x86_64.rpm" \
@@ -67,13 +80,14 @@ function get_hyrax_distro() {
 
 function build_hyrax_rh8() {
 #        --no-cache \
-        docker build --platform linux/amd64 \
+        docker build  \
+        --platform linux/amd64 \
         --build-arg RELEASE_DATE \
         --build-arg HYRAX_VERSION \
         --build-arg LIBDAP_VERSION \
         --build-arg BES_VERSION \
         --build-arg OLFS_VERSION \
-        --tag "${IMAGE_TAG}" hyrax-rh8
+        --tag "${IMAGE_TAG}" --tag "${SNAPSHOT_TAG}" hyrax-rh8
 }
 function get_platform(){
     local platform=""
@@ -112,7 +126,7 @@ function debug_hyrax_rh8(){
 
 function main() {
     show_version
-    # get_hyrax_distro
+    get_hyrax_distro
     build_hyrax_rh8
 }
 

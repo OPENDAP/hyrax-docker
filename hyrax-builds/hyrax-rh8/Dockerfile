@@ -97,7 +97,7 @@ RUN if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else ec
 
 # Update and install the needful.
 RUN dnf update  -y
-RUN dnf install -y make wget unzip which autoconf automake emacs vim python3 git bc valgrind gdb
+RUN dnf install -y make curl unzip which autoconf automake emacs vim python3 git bc valgrind gdb
 RUN dnf install -y java-11-openjdk-devel
 # Installing autoconf automake git bc for the tests install. The tests
 # are installed in the container but not run until a later stage of the
