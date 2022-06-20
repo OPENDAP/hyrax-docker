@@ -15,9 +15,7 @@ export HYRAX_VERSION_NUMBER=""
 RELEASE_DATE=$(cat ../snapshot.time | grep hyrax | awk '{print $2;}')
 HYRAX_VERSION=$(cat ../snapshot.time | grep hyrax | awk '{print $1;}')
 HYRAX_VERSION_NUMBER=$(echo "${HYRAX_VERSION}" | sed "s/hyrax-//g" )
-
 OLFS_VERSION=$(cat ../snapshot.time | grep olfs | sed "s/olfs-//g" | awk '{print $1;}')
-
 BES_VERSION=$(cat ../snapshot.time | grep bes | sed "s/bes-//g" | awk '{print $1;}')
 LIBDAP_VERSION=$(cat ../snapshot.time | grep libdap4 | sed "s/libdap4-//g"| awk '{print $1;}')
 
@@ -278,7 +276,8 @@ function build_rh8() {
 }
 
 
-# main
+
+
 
 
 

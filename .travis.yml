@@ -93,11 +93,15 @@ jobs:
         - export SNAPSHOT_IMAGE_TAG=opendap/hyrax:rh8-snapshot
         - export BUILD_VERSION_TAG=opendap/hyrax:rh8-${HYRAX_VERSION}
         - cd hyrax-builds
+        - export TOMCAT_VERSION="9.0.64"
+        - source build-rh8
+        - get_tomcat_distro "hyrax-rh8" "${TOMCAT_VERSION}"
         - cp ./${LIBDAP_RH8_RPM} ./hyrax-rh8
         - cp ./${BES_RH8_RPM} ./hyrax-rh8
         - cp ./${OLFS_DISTRO} ./hyrax-rh8
         - cp ./${ROBOTS_DISTRO} ./hyrax-rh8
         - docker build
+          --build-arg TOMCAT_VERSION
           --build-arg RELEASE_DATE
           --build-arg HYRAX_VERSION
           --build-arg LIBDAP_VERSION
