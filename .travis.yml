@@ -92,7 +92,7 @@ stages:
 
 jobs:
   include:
-    - stage: RH8
+    - stage: build_and_test_hyrax_service
       name: "Build RH8 opendap/hyrax:snapshot and run regression tests"
       script:
         - export SNAPSHOT_IMAGE_TAG=opendap/hyrax:rh8-snapshot
