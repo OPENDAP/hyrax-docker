@@ -197,6 +197,12 @@ RUN set -e \
     && chown -R tomcat:tomcat ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs \
     && chmod 700 ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs 
 
+################################################################
+# Clean up the Hyrax distribution binaries.
+#
+RUN rm -vf /libdap*.rpm /bes*.rpm /olfs*.tgz /robots*.tgz /apache*
+#
+################################################################
 
 ################################################################
 # retrieve and install the ncWMS web application
