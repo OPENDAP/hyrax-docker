@@ -41,14 +41,14 @@ function show_version(){
     echo "#" >&2
 }
 
-function pgp_cmd(){
-    local pgp_cmd="pgp"
-    uname -a | grep "Darwin" > /dev/null
-    if test $? -eq 0; then
-        pgp_cmd="gpg"
-    fi
-    echo "${pgp_cmd}"
-}
+#function pgp_cmd(){
+#    local pgp_cmd="pgp"
+#    uname -a | grep "Darwin" > /dev/null
+#    if test $? -eq 0; then
+#        pgp_cmd="gpg"
+#    fi
+#    echo "${pgp_cmd}"
+#}
 
 
 function get_tomcat_distro(){
@@ -108,7 +108,7 @@ function get_tomcat_distro(){
     fi
 
     echo "Importing Tomcat public keys from ${tomcat_keys_file} source: ${tomcat_keys_url}" >&2
-    $(pgp_cmd) --import "${tomcat_keys_file}" >&2
+    gpg --import "${tomcat_keys_file}" >&2
     if test $? -ne 0 ; then
         echo "ERROR! Failed to import Tomcat public keys!" >&2
         return 2
@@ -119,13 +119,12 @@ function get_tomcat_distro(){
     echo "#    distribution file: ${tomcat_distro_file}" >&2
     echo "#            signature: ${tomcat_sig_file}" >&2
 
-    $(pgp_cmd) --verify "${tomcat_sig_file}" "${tomcat_distro_file}" >&2
+    gpg --verify "${tomcat_sig_file}" "${tomcat_distro_file}" >&2
     if test $? -ne 0 ; then
         echo "ERROR! Failed to verify Tomcat distribution!" >&2
         return 2
     fi
     echo "#" >&2
-
     return 0
 }
 
