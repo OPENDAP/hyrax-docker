@@ -1,7 +1,7 @@
 #!/bin/bash
 HR="###########################################################################"
 export DOCKER_NAME=${DOCKER_NAME:-"hyrax-rh8"}
-export TOMCAT_VERSION=${TOMCAT_VERSION:-"9.0.64"}
+export TOMCAT_MAJOR_VERSION=${TOMCAT_MAJOR_VERSION:-"9"}
 export SLEEP_INTERVAL=${SLEEP_INTERVAL:-60}
 export NO_CACHE=${NO_CACHE:-""}
 
@@ -25,99 +25,110 @@ export IMAGE_TAG="opendap/${DOCKER_NAME}:${HYRAX_VERSION_NUMBER}"
 
 function show_version(){
     echo "${HR}" >&2
-    echo "#   RELEASE_DATE: ${RELEASE_DATE}" >&2
-    echo "#  HYRAX_VERSION: ${HYRAX_VERSION}" >&2
-    echo "#   OLFS_VERSION: ${OLFS_VERSION}" >&2
-    echo "#    BES_VERSION: ${BES_VERSION}" >&2
-    echo "# LIBDAP_VERSION: ${LIBDAP_VERSION}" >&2
-    echo "#    DOCKER_NAME: ${DOCKER_NAME}" >&2
-    echo "#      IMAGE_TAG: ${IMAGE_TAG}" >&2
-    echo "#   SNAPSHOT_TAG: ${SNAPSHOT_TAG}" >&2
-    echo "# SLEEP_INTERVAL: ${SLEEP_INTERVAL}" >&2
+    echo "#         RELEASE_DATE: ${RELEASE_DATE}" >&2
+    echo "#        HYRAX_VERSION: ${HYRAX_VERSION}" >&2
+    echo "#         OLFS_VERSION: ${OLFS_VERSION}" >&2
+    echo "#          BES_VERSION: ${BES_VERSION}" >&2
+    echo "#       LIBDAP_VERSION: ${LIBDAP_VERSION}" >&2
+    echo "#          DOCKER_NAME: ${DOCKER_NAME}" >&2
+    echo "#            IMAGE_TAG: ${IMAGE_TAG}" >&2
+    echo "#         SNAPSHOT_TAG: ${SNAPSHOT_TAG}" >&2
+    echo "#       SLEEP_INTERVAL: ${SLEEP_INTERVAL}" >&2
     echo "#" >&2
-    echo "# TOMCAT_VERSION: ${TOMCAT_VERSION}" >&2
+    echo "# TOMCAT_MAJOR_VERSION: ${TOMCAT_MAJOR_VERSION}" >&2
     echo "#" >&2
-    echo "#       NO_CACHE: ${NO_CACHE}" >&2
+    echo "#             NO_CACHE: ${NO_CACHE}" >&2
     echo "#" >&2
 }
 
-#function pgp_cmd(){
-#    local pgp_cmd="pgp"
-#    uname -a | grep "Darwin" > /dev/null
-#    if test $? -eq 0; then
-#        pgp_cmd="gpg"
-#    fi
-#    echo "${pgp_cmd}"
-#}
+function get_latest_tomcat_version(){
+    local tomcat_major_version="${1}"
 
+    local github_tomcat_url="https://api.github.com/repos/apache/tomcat/tags?per_page=100"
+    local tomcat_version=""
+    tomcat_version=$(curl -s "${github_tomcat_url}" | \
+        jq -r '.[] | .name' | sort -V | \
+        grep "^${tomcat_major_version}" | tail -n 1)
+
+    echo "#   Using tomcat_version: ${tomcat_version}" >&2
+    echo "${tomcat_version}"
+}
 
 function get_tomcat_distro(){
     echo "${HR}" >&2
     echo "# TASK: get_tomcat_distro()" >&2
 
     local target_dir="${1}"
-    echo "#           target_dir: ${target_dir}" >&2
+    echo "#             target_dir: ${target_dir}" >&2
 
-    local tomcat_version="${2}"
-    echo "#       tomcat_version: ${tomcat_version}" >&2
+    local tomcat_major_version="${2}"
+    echo "#   tomcat_major_version: ${tomcat_major_version}" >&2
+
+    local latest_tomcat_version=""
+    latest_tomcat_version=$(get_latest_tomcat_version "${tomcat_major_version}")
 
     local silent="-s"
 
-    local tomcat_major_version=""
-    tomcat_major_version=$(echo "${tomcat_version}" | awk 'BEGIN{FS=".";}{print $1;}')
-    echo "# tomcat_major_version: ${tomcat_major_version}" >&2
-
-    local tomcat_distro="apache-tomcat-${tomcat_version}.tar.gz"
-    echo "#        tomcat_distro: ${tomcat_distro}" >&2
+    local tomcat_distro="apache-tomcat-${latest_tomcat_version}.tar.gz"
+    echo "#          tomcat_distro: ${tomcat_distro}" >&2
 
     local tomcat_major_url="https://archive.apache.org/dist/tomcat/tomcat-${tomcat_major_version}"
-    echo "#     tomcat_major_url: ${tomcat_major_url}" >&2
+    echo "#       tomcat_major_url: ${tomcat_major_url}" >&2
 
-    local tomcat_distro_url="${tomcat_major_url}/v${tomcat_version}/bin/${tomcat_distro}"
-    echo "#    tomcat_distro_url: ${tomcat_distro_url}" >&2
+    local tomcat_distro_url="${tomcat_major_url}/v${latest_tomcat_version}/bin/${tomcat_distro}"
+    echo "#      tomcat_distro_url: ${tomcat_distro_url}" >&2
     local tomcat_distro_file="${target_dir}/${tomcat_distro}"
-    echo "#   tomcat_distro_file: ${tomcat_distro_file}" >&2
-
+    echo "#     tomcat_distro_file: ${tomcat_distro_file}" >&2
 
     local tomcat_sig_url="${tomcat_distro_url}.asc"
-    echo "#       tomcat_sig_url: ${tomcat_sig_url}" >&2
+    echo "#         tomcat_sig_url: ${tomcat_sig_url}" >&2
     local tomcat_sig_file="${tomcat_distro_file}.asc"
-    echo "#      tomcat_sig_file: ${tomcat_sig_file}" >&2
+    echo "#        tomcat_sig_file: ${tomcat_sig_file}" >&2
 
     local tomcat_keys_url="${tomcat_major_url}/KEYS"
-    echo "#      tomcat_keys_url: ${tomcat_keys_url}" >&2
+    echo "#        tomcat_keys_url: ${tomcat_keys_url}" >&2
     local tomcat_keys_file="${target_dir}/apache_tomcat_keys"
-    echo "#     tomcat_keys_file: ${tomcat_keys_file}" >&2
+    echo "#       tomcat_keys_file: ${tomcat_keys_file}" >&2
 
+    echo "#" >&2
+    echo "#        cURL retrieving: ${tomcat_distro_url}" >&2
     curl ${silent} -o "${tomcat_distro_file}" "${tomcat_distro_url}"
     if test $? -ne 0; then
         echo "ERROR! Failed to retrieve Tomcat distribution from ${tomcat_distro_url}" >&2
         return 2
     fi
 
+    echo "#" >&2
+    echo "#        cURL retrieving: ${tomcat_sig_url}" >&2
     curl ${silent} -o "${tomcat_sig_file}" "${tomcat_sig_url}"
     if test $? -ne 0; then
         echo "ERROR! Failed to retrieve Tomcat distribution signature from ${tomcat_sig_url}" >&2
         return 2
     fi
 
+    echo "#" >&2
+    echo "#        cURL retrieving: ${tomcat_keys_url}" >&2
     curl ${silent} -o "${tomcat_keys_file}" "${tomcat_keys_url}"
     if test $? -ne 0; then
         echo "ERROR! Failed to retrieve Tomcat public keys from ${tomcat_keys_url}" >&2
         return 2
     fi
 
-    echo "Importing Tomcat public keys from ${tomcat_keys_file} source: ${tomcat_keys_url}" >&2
+    echo "#" >&2
+    echo "# Importing Tomcat public keys:" >&2
+    echo "#        Local keys file: ${tomcat_keys_file}" >&2
+    echo "#                 Source: ${tomcat_keys_url}" >&2
     gpg --import "${tomcat_keys_file}" >&2
     if test $? -ne 0 ; then
         echo "ERROR! Failed to import Tomcat public keys!" >&2
         return 2
     fi
 
+    echo "#" >&2
     echo "# Verifying Tomcat distribution:" >&2
-    echo "#   Tomcat public keys: ${tomcat_keys_file}" >&2
-    echo "#    distribution file: ${tomcat_distro_file}" >&2
-    echo "#            signature: ${tomcat_sig_file}" >&2
+    echo "#     Tomcat public keys: ${tomcat_keys_file}" >&2
+    echo "#      distribution file: ${tomcat_distro_file}" >&2
+    echo "#              signature: ${tomcat_sig_file}" >&2
 
     gpg --verify "${tomcat_sig_file}" "${tomcat_distro_file}" >&2
     if test $? -ne 0 ; then
@@ -267,11 +278,11 @@ function cleanup_build_files(){
 
 function build_rh8() {
     local log_file="brh8.log"
-    show_version 2>&1 | tee "${log_file}"
-    get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_VERSION}" 2>&1 | tee -a "${log_file}"
-    get_hyrax_distro "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}"
-    build_hyrax 2>&1 | tee -a "${log_file}"
-    cleanup_build_files 2>&1 | tee -a "${log_file}"
+    show_version 2>&1 | tee "${log_file}" >&2
+    get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_MAJOR_VERSION}" 2>&1 | tee -a "${log_file}" >&2
+    get_hyrax_distro "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}" >&2
+    build_hyrax 2>&1 | tee -a "${log_file}" >&2
+    cleanup_build_files 2>&1 | tee -a "${log_file}" >&2
 }
 
 

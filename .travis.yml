@@ -55,6 +55,7 @@ env:
     - BES_C7_RPM_URL="s3://opendap.travis.build/${BES_C7_RPM}"
     - BES_RH8_RPM="bes-${BES_VERSION}.static.el8.x86_64.rpm"
     - BES_RH8_RPM_URL="s3://opendap.travis.build/${BES_RH8_RPM}"
+    - TOMCAT_MAJOR_VERSION=9
 
 before_install:
   - pip3 install awscli
@@ -62,8 +63,6 @@ before_install:
 install:
   - echo "print env:"
   - printenv
-  - export tomcat_version=$(curl -s 'https://api.github.com/repos/apache/tomcat/tags?per_page=100' | jq -r '.[] | .name' | sort -V | grep ^9 | tail -n 1)
-  - echo "tomcat_version: ${tomcat_version}"
   - echo $DOCKER_HUB_PSWD | docker login -u $DOCKER_HUB_UID --password-stdin
   - echo "Retrieving libdap C7 RPM ${LIBDAP_C7_RPM}"
   - aws --region=us-east-1 s3 cp ${LIBDAP_C7_RPM_URL} ./hyrax-builds/${LIBDAP_C7_RPM}
@@ -101,9 +100,8 @@ jobs:
         - export SNAPSHOT_IMAGE_TAG=opendap/hyrax:rh8-snapshot
         - export BUILD_VERSION_TAG=opendap/hyrax:rh8-${HYRAX_VERSION}
         - cd hyrax-builds
-        - export TOMCAT_VERSION="9.0.64"
         - source build-rh8
-        - get_tomcat_distro "hyrax-rh8" "${TOMCAT_VERSION}"
+        - get_tomcat_distro "hyrax-rh8" "${TOMCAT_MAJOR_VERSION}"
         - cp ./${LIBDAP_RH8_RPM} ./hyrax-rh8
         - cp ./${BES_RH8_RPM} ./hyrax-rh8
         - cp ./${OLFS_DISTRO} ./hyrax-rh8
