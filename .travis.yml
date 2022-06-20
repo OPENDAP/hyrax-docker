@@ -23,7 +23,7 @@ addons:
   apt:
     packages:
       - gnupg
-      - jquery
+      - jq
 
 env:
   global:
