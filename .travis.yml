@@ -23,6 +23,7 @@ addons:
   apt:
     packages:
       - gnupg
+      - jquery
 
 env:
   global:
@@ -61,6 +62,8 @@ before_install:
 install:
   - echo "print env:"
   - printenv
+  - export tomcat_version=$(curl -s 'https://api.github.com/repos/apache/tomcat/tags?per_page=100' | jq -r '.[] | .name' | sort -V | grep ^9 | tail -n 1)
+  - echo "tomcat_version: ${tomcat_version}"
   - echo $DOCKER_HUB_PSWD | docker login -u $DOCKER_HUB_UID --password-stdin
   - echo "Retrieving libdap C7 RPM ${LIBDAP_C7_RPM}"
   - aws --region=us-east-1 s3 cp ${LIBDAP_C7_RPM_URL} ./hyrax-builds/${LIBDAP_C7_RPM}
@@ -93,7 +96,7 @@ stages:
 jobs:
   include:
     - stage: build_and_test_hyrax_service
-      name: "Build RH8 opendap/hyrax:snapshot and run regression tests"
+      name: "Build RH8 Hyrax Image and run regression tests"
       script:
         - export SNAPSHOT_IMAGE_TAG=opendap/hyrax:rh8-snapshot
         - export BUILD_VERSION_TAG=opendap/hyrax:rh8-${HYRAX_VERSION}
@@ -120,7 +123,7 @@ jobs:
         - ./regression_test_script -i ${SNAPSHOT_IMAGE_TAG}
 
     - stage: build_and_test_hyrax_service
-      name: "Build CentOS-7 opendap/hyrax:snapshot and run regression tests"
+      name: "Build CentOS-7 Hyrax Image and run regression tests"
       script:
         - export SNAPSHOT_IMAGE_TAG=opendap/hyrax:snapshot
         - export BUILD_VERSION_TAG=opendap/hyrax:${HYRAX_VERSION}
