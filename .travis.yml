@@ -22,7 +22,7 @@ notifications:
 addons:
   apt:
     packages:
-      - gpg
+      - gnupg
 
 env:
   global:
