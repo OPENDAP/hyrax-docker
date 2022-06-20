@@ -22,7 +22,7 @@ notifications:
 addons:
   apt:
     packages:
-      - pgp
+      - gpg
 
 env:
   global:
