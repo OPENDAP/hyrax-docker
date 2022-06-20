@@ -19,6 +19,11 @@ notifications:
     - ndp@opendap.org
     - jgallagher@opendap.org
 
+addons:
+  apt:
+    packages:
+      - pgp
+
 env:
   global:
     # AWS_ACCESS_KEY_ID for the user 'travis-hyrax-docker'
