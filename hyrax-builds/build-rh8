@@ -1,93 +1,206 @@
 #!/bin/bash
-
+HR="###########################################################################"
+export DOCKER_NAME=${DOCKER_NAME:-"hyrax-rh8"}
+export TOMCAT_VERSION=${TOMCAT_VERSION:-"9.0.64"}
+export SLEEP_INTERVAL=${SLEEP_INTERVAL:-60}
+export NO_CACHE=${NO_CACHE:-""}
 
 export RELEASE_DATE=""
 export HYRAX_VERSION=""
 export OLFS_VERSION=""
 export BES_VERSION=""
 export LIBDAP_VERSION=""
+export HYRAX_VERSION_NUMBER=""
 
 RELEASE_DATE=$(cat ../snapshot.time | grep hyrax | awk '{print $2;}')
 HYRAX_VERSION=$(cat ../snapshot.time | grep hyrax | awk '{print $1;}')
+HYRAX_VERSION_NUMBER=$(echo "${HYRAX_VERSION}" | sed "s/hyrax-//g" )
+
 OLFS_VERSION=$(cat ../snapshot.time | grep olfs | sed "s/olfs-//g" | awk '{print $1;}')
+
 BES_VERSION=$(cat ../snapshot.time | grep bes | sed "s/bes-//g" | awk '{print $1;}')
 LIBDAP_VERSION=$(cat ../snapshot.time | grep libdap4 | sed "s/libdap4-//g"| awk '{print $1;}')
 
-export docker_name="hyrax-rh8"
-export SNAPSHOT_TAG="opendap/${docker_name}:snapshot"
-export HYRAX_VERSION_NUMBER=$(echo "${HYRAX_VERSION}" | sed "s/hyrax-//g" )
-export IMAGE_TAG="opendap/${docker_name}:${HYRAX_VERSION_NUMBER}"
-export SLEEP_INTERVAL=1000
+export SNAPSHOT_TAG="opendap/${DOCKER_NAME}:snapshot"
+export IMAGE_TAG="opendap/${DOCKER_NAME}:${HYRAX_VERSION_NUMBER}"
 
 
 function show_version(){
-    echo "################################################################"
-    echo "#   RELEASE_DATE: ${RELEASE_DATE}"
-    echo "#  HYRAX_VERSION: ${HYRAX_VERSION}"
-    echo "#   OLFS_VERSION: ${OLFS_VERSION}"
-    echo "#    BES_VERSION: ${BES_VERSION}"
-    echo "# LIBDAP_VERSION: ${LIBDAP_VERSION}"
-    echo "#    docker_name: ${docker_name}"
-    echo "#      IMAGE_TAG: ${IMAGE_TAG}"
-    echo "#   SNAPSHOT_TAG: ${SNAPSHOT_TAG}"
-    echo "# SLEEP_INTERVAL: ${SLEEP_INTERVAL}"
-    echo "################################################################"
+    echo "${HR}" >&2
+    echo "#   RELEASE_DATE: ${RELEASE_DATE}" >&2
+    echo "#  HYRAX_VERSION: ${HYRAX_VERSION}" >&2
+    echo "#   OLFS_VERSION: ${OLFS_VERSION}" >&2
+    echo "#    BES_VERSION: ${BES_VERSION}" >&2
+    echo "# LIBDAP_VERSION: ${LIBDAP_VERSION}" >&2
+    echo "#    DOCKER_NAME: ${DOCKER_NAME}" >&2
+    echo "#      IMAGE_TAG: ${IMAGE_TAG}" >&2
+    echo "#   SNAPSHOT_TAG: ${SNAPSHOT_TAG}" >&2
+    echo "# SLEEP_INTERVAL: ${SLEEP_INTERVAL}" >&2
+    echo "#" >&2
+    echo "# TOMCAT_VERSION: ${TOMCAT_VERSION}" >&2
+    echo "#" >&2
+    echo "#       NO_CACHE: ${NO_CACHE}" >&2
+    echo "#" >&2
 }
+
+function pgp_cmd(){
+    local pgp_cmd="pgp"
+    uname -a | grep "Darwin" > /dev/null
+    if test $? -eq 0; then
+        pgp_cmd="gpg"
+    fi
+    echo "${pgp_cmd}"
+}
+
+
+function get_tomcat_distro(){
+    echo "${HR}" >&2
+    echo "# TASK: get_tomcat_distro()" >&2
+
+    local target_dir="${1}"
+    echo "#           target_dir: ${target_dir}" >&2
+
+    local tomcat_version="${2}"
+    echo "#       tomcat_version: ${tomcat_version}" >&2
+
+    local silent="-s"
+
+    local tomcat_major_version=""
+    tomcat_major_version=$(echo "${tomcat_version}" | awk 'BEGIN{FS=".";}{print $1;}')
+    echo "# tomcat_major_version: ${tomcat_major_version}" >&2
+
+    local tomcat_distro="apache-tomcat-${tomcat_version}.tar.gz"
+    echo "#        tomcat_distro: ${tomcat_distro}" >&2
+
+    local tomcat_major_url="https://archive.apache.org/dist/tomcat/tomcat-${tomcat_major_version}"
+    echo "#     tomcat_major_url: ${tomcat_major_url}" >&2
+
+    local tomcat_distro_url="${tomcat_major_url}/v${tomcat_version}/bin/${tomcat_distro}"
+    echo "#    tomcat_distro_url: ${tomcat_distro_url}" >&2
+    local tomcat_distro_file="${target_dir}/${tomcat_distro}"
+    echo "#   tomcat_distro_file: ${tomcat_distro_file}" >&2
+
+
+    local tomcat_sig_url="${tomcat_distro_url}.asc"
+    echo "#       tomcat_sig_url: ${tomcat_sig_url}" >&2
+    local tomcat_sig_file="${tomcat_distro_file}.asc"
+    echo "#      tomcat_sig_file: ${tomcat_sig_file}" >&2
+
+    local tomcat_keys_url="${tomcat_major_url}/KEYS"
+    echo "#      tomcat_keys_url: ${tomcat_keys_url}" >&2
+    local tomcat_keys_file="${target_dir}/apache_tomcat_keys"
+    echo "#     tomcat_keys_file: ${tomcat_keys_file}" >&2
+
+    curl ${silent} -o "${tomcat_distro_file}" "${tomcat_distro_url}"
+    if test $? -ne 0; then
+        echo "ERROR! Failed to retrieve Tomcat distribution from ${tomcat_distro_url}" >&2
+        return 2
+    fi
+
+    curl ${silent} -o "${tomcat_sig_file}" "${tomcat_sig_url}"
+    if test $? -ne 0; then
+        echo "ERROR! Failed to retrieve Tomcat distribution signature from ${tomcat_sig_url}" >&2
+        return 2
+    fi
+
+    curl ${silent} -o "${tomcat_keys_file}" "${tomcat_keys_url}"
+    if test $? -ne 0; then
+        echo "ERROR! Failed to retrieve Tomcat public keys from ${tomcat_keys_url}" >&2
+        return 2
+    fi
+
+    echo "Importing Tomcat public keys from ${tomcat_keys_file} source: ${tomcat_keys_url}" >&2
+    $(pgp_cmd) --import "${tomcat_keys_file}" >&2
+    if test $? -ne 0 ; then
+        echo "ERROR! Failed to import Tomcat public keys!" >&2
+        return 2
+    fi
+
+    echo "# Verifying Tomcat distribution:" >&2
+    echo "#   Tomcat public keys: ${tomcat_keys_file}" >&2
+    echo "#    distribution file: ${tomcat_distro_file}" >&2
+    echo "#            signature: ${tomcat_sig_file}" >&2
+
+    $(pgp_cmd) --verify "${tomcat_sig_file}" "${tomcat_distro_file}" >&2
+    if test $? -ne 0 ; then
+        echo "ERROR! Failed to verify Tomcat distribution!" >&2
+        return 2
+    fi
+    echo "#" >&2
+
+    return 0
+}
+
+
 
 function s3_pull(){
     local bucket_name="${1}"
     local object_name="${2}"
     local target_dir="${3}"
-    aws s3 cp "s3://${bucket_name}/${object_name}" "${target_dir}/${object_name}"
+    echo "# S3 - Retrieving ${object_name} from ${bucket_name}" >&2
+    aws s3 cp "s3://${bucket_name}/${object_name}" "${target_dir}/${object_name}" >&2
+    echo "#" >&2
 }
 
 function get_hyrax_distro() {
+    echo "${HR}" >&2
+    echo "# TASK: get_hyrax_distro()" >&2
+
+    local target_dir="${1}"
     set -e
     local build_bucket="opendap.travis.build"
 
-    rm -fv "${docker_name}/*.rpm"
-    rm -fv "${docker_name}/olfs*.tgz"
-    rm -fv "${docker_name}/robots*.tgz"
+    rm -fv "${target_dir}/*.rpm"
+    rm -fv "${target_dir}/olfs*.tgz"
+    rm -fv "${target_dir}/robots*.tgz"
 
     s3_pull "${build_bucket}" \
             "libdap-${LIBDAP_VERSION}.el8.x86_64.rpm" \
-            "${docker_name}"
+            "${target_dir}"
     s3_pull "${build_bucket}" \
             "libdap-devel-${LIBDAP_VERSION}.el8.x86_64.rpm" \
-            "${docker_name}"
+            "${target_dir}"
     s3_pull "${build_bucket}" \
             "libdap-debuginfo-${LIBDAP_VERSION}.el8.x86_64.rpm" \
-            "${docker_name}"
+            "${target_dir}"
 
     s3_pull "${build_bucket}" \
             "bes-${BES_VERSION}.static.el8.x86_64.rpm" \
-            "${docker_name}"
+            "${target_dir}"
     s3_pull "${build_bucket}" \
             "bes-devel-${BES_VERSION}.static.el8.x86_64.rpm" \
-            "${docker_name}"
+            "${target_dir}"
     s3_pull "${build_bucket}" \
             "bes-debuginfo-${BES_VERSION}.static.el8.x86_64.rpm" \
-            "${docker_name}"
+            "${target_dir}"
 
     s3_pull "${build_bucket}" \
             "olfs-${OLFS_VERSION}-webapp.tgz" \
-            "${docker_name}"
+            "${target_dir}"
     s3_pull "${build_bucket}" \
             "robots-olfs-${OLFS_VERSION}-webapp.tgz" \
-            "${docker_name}"
+            "${target_dir}"
     set +e
+    echo "#" >&2
 }
 
-function build_hyrax_rh8() {
+function build_hyrax() {
+    echo "${HR}" >&2
+    echo "# TASK: build_hyrax_rh8()" >&2
 #        --no-cache \
-        docker build  \
+        docker build ${NO_CACHE}\
         --platform linux/amd64 \
+        --build-arg TOMCAT_VERSION \
         --build-arg RELEASE_DATE \
         --build-arg HYRAX_VERSION \
         --build-arg LIBDAP_VERSION \
         --build-arg BES_VERSION \
         --build-arg OLFS_VERSION \
-        --tag "${IMAGE_TAG}" --tag "${SNAPSHOT_TAG}" hyrax-rh8
+        --tag "${IMAGE_TAG}" \
+        --tag "${SNAPSHOT_TAG}" \
+        ${DOCKER_NAME}
+    echo "#" >&2
+    echo "#" >&2
 }
 function get_platform(){
     local platform=""
@@ -95,43 +208,77 @@ function get_platform(){
     echo "${platform}"
 }
 
-function start_hyrax_rh8(){
+
+function start_hyrax(){
+    local image_tag="${1}"
+
+    echo "${HR}" >&2
+    echo "# TASK: start_hyrax()" >&2
+    echo "#   Starting docker image: ${image_tag}" >&2
     local platform=""
     platform=$(get_platform)
+    echo "#                platform: ${platform}" >&2
 
     # docker run -d -h hyrax -p 8080:8080 --name=hyrax "${IMAGE_TAG}"
     docker run \
         -d\
+        ${platform} \
         -h hyrax \
         -p 8080:8080 \
         --name=hyrax \
         --env SLEEP_INTERVAL \
         "${IMAGE_TAG}"
+
+    echo "#" >&2
 }
 
-function debug_hyrax_rh8(){
+function debug_hyrax(){
+    local image_tag="${1}"
+
+    echo "${HR}" >&2
+    echo "# TASK: debug_hyrax()" >&2
+    echo "#   Starting docker image: ${image_tag}" >&2
     local platform=""
     platform=$(get_platform)
+    echo "#                platform: ${platform}" >&2
 
     # docker run -d -h hyrax -p 8080:8080 --name=hyrax "${IMAGE_TAG}"
     docker run \
+        ${platform} \
         -h hyrax \
         -p 8080:8080 \
         --name=hyrax \
-        --platform linux/amd64 \
         --env SLEEP_INTERVAL \
-        "${IMAGE_TAG}"
+        "${image_tag}"
+}
+
+function cleanup_build_files(){
+    echo "${HR}" >&2
+    echo "# TASK: cleanup_build_files()" >&2
+    echo "#     Cleaning ${DOCKER_NAME}" >&2
+    local build_files=""
+    build_files="${build_files} ${DOCKER_NAME}/*.rpm"
+    build_files="${build_files} ${DOCKER_NAME}/olfs*.tgz"
+    build_files="${build_files} ${DOCKER_NAME}/robots*.tgz"
+    build_files="${build_files} ${DOCKER_NAME}/apache*"
+    # ls -Gl ${build_files} >&2
+    rm -fv ${build_files} >&2
+    echo "#" >&2
+    echo "# DONE: cleanup_build_files()" >&2
+    echo "#" >&2
+}
+
+function build_rh8() {
+    local log_file="brh8.log"
+    show_version 2>&1 | tee "${log_file}"
+    get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_VERSION}" 2>&1 | tee -a "${log_file}"
+    get_hyrax_distro "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}"
+    build_hyrax 2>&1 | tee -a "${log_file}"
+    cleanup_build_files 2>&1 | tee -a "${log_file}"
 }
 
 
-function main() {
-    show_version
-    get_hyrax_distro
-    build_hyrax_rh8
-}
-
-
-main
+# main
 
 
 

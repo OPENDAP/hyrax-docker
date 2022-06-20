@@ -15,12 +15,18 @@
 # Set one or more individual labels
 FROM rockylinux:8
 
-ENV TOMCAT_VERSION="9.0.64"
 
 RUN export NOW=`date +%s`
 ARG RELEASE_DATE
 ENV RELEASE_DATE ${RELEASE_DATE:-"${NOW}"}
 RUN echo "RELEASE_DATE: ${RELEASE_DATE}"
+
+ARG TOMCAT_VERSION
+ENV TOMCAT_VERSION ${TOMCAT_VERSION:-"9.0.64"}
+RUN echo "TOMCAT_VERSION: ${TOMCAT_VERSION}"
+ENV TOMCAT_DISTRO="apache-tomcat-${TOMCAT_VERSION}"
+COPY "${TOMCAT_DISTRO}.tar.gz" /
+RUN ls -l /apache-tomcat-*  >&2
 
 ARG HYRAX_VERSION
 ENV HYRAX_VERSION=${HYRAX_VERSION:-"snapshot"}
@@ -133,25 +139,30 @@ RUN echo "besdaemon is here: "`which besdaemon`
 #
 # Make tomcat user and group
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
-# RUN groupadd tomcat
-# RUN useradd -r -g tomcat tomcat
 RUN useradd -m -U -d /home/tomcat -s /bin/false tomcat
 #
 # Get and install the Tomcat package directly from Apache
-RUN curl -o tomcat.tgz https://archive.apache.org/dist/tomcat/tomcat-9/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz
-RUN tar xvf tomcat.tgz -C /home/tomcat
-RUN ln -s /home/tomcat/apache-tomcat-${TOMCAT_VERSION} /usr/share/tomcat
-RUN rm -rvf /usr/share/tomcat/latest/webapps/*
+#RUN curl -o tomcat.tgz https://archive.apache.org/dist/tomcat/tomcat-9/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz
+RUN tar xvf "${TOMCAT_DISTRO}.tar.gz" -C /home/tomcat
+RUN ln -s /home/tomcat/${TOMCAT_DISTRO} /usr/share/tomcat
+RUN rm -rvf /usr/share/tomcat/webapps/*
 run mkdir -p /var/log/tomcat
 RUN chown -R tomcat:tomcat /var/log/tomcat /home/tomcat
 COPY tomcat.service /etc/systemd/system/tomcat.service
-RUN systemctl enable tomcat
+RUN systemctl enable tomcat >&2
 #RUN firewall-cmd --add-port 8080/tcp --permanent
 #RUN firewall-cmd --reload
 
 ENV CATALINA_HOME /usr/share/tomcat
 ENV PATH $CATALINA_HOME/bin:$PATH
 RUN echo "CATALINA_HOME: ${CATALINA_HOME}"
+
+# Install our modified server.xml so that the server compresses responses.
+COPY tomcat9-server.xml /
+RUN set -e \
+    && mv /tomcat9-server.xml ${CATALINA_HOME}/conf/server.xml \
+    && chown -R tomcat:tomcat ${CATALINA_HOME}/conf/server.xml
+
 
 ################################################################
 # Install the OLFS web application
@@ -228,12 +239,6 @@ RUN if [ $USE_NCWMS = "true" ]; then \
     else \
         echo "Skipping OLFS/ncWMS confguration installation."; \
     fi
-
-# Install our modified server.xml so that the server compresses responses.
-COPY tomcat7-server.xml /
-#RUN set -e \
- #   && mv /tomcat7-server.xml ${CATALINA_HOME}/conf/server.xml \
-  #  && chown -R tomcat:tomcat ${CATALINA_HOME}/conf/server.xml
 
 ################################################################
 #
