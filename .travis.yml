@@ -97,13 +97,13 @@ jobs:
     - stage: build_and_test_hyrax_service
       name: "Build RH8 Hyrax Image and run regression tests"
       script:
+        - export DOCKER_DIR="hyrax-rh8"
         - export SNAPSHOT_IMAGE_TAG=opendap/hyrax:rh8-snapshot
         - export BUILD_VERSION_TAG=opendap/hyrax:rh8-${HYRAX_VERSION}
-        - export DOCKER_DIR="hyrax-rh8"
         - cd hyrax-builds
-        - source build-rh8
-        - export TOMCAT_LATEST=$(get_latest_tomcat_version "${TOMCAT_MAJOR_VERSION}")
-        - get_tomcat_distro "${DOCKER_DIR}" "${TOMCAT_LATEST}"
+        - source ./build-rh8
+        - export TOMCAT_VERSION=$(get_latest_tomcat_version "${TOMCAT_MAJOR_VERSION}")
+        - get_tomcat_distro "${DOCKER_DIR}" "${TOMCAT_VERSION}"
         - cp "./${LIBDAP_RH8_RPM}" "${DOCKER_DIR}"
         - cp "./${BES_RH8_RPM}" "${DOCKER_DIR}"
         - cp "./${OLFS_DISTRO}" "${DOCKER_DIR}"
@@ -115,7 +115,7 @@ jobs:
           --build-arg LIBDAP_VERSION
           --build-arg BES_VERSION
           --build-arg OLFS_VERSION
-          --tag "${SNAPSHOT_IMAGE_TAG}" hyrax-rh8
+          --tag "${SNAPSHOT_IMAGE_TAG}" "${DOCKER_DIR}"
         - docker tag ${SNAPSHOT_IMAGE_TAG} ${BUILD_VERSION_TAG}
         - docker image ls -a
         - cd ..
