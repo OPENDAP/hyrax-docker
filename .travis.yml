@@ -99,13 +99,15 @@ jobs:
       script:
         - export SNAPSHOT_IMAGE_TAG=opendap/hyrax:rh8-snapshot
         - export BUILD_VERSION_TAG=opendap/hyrax:rh8-${HYRAX_VERSION}
+        - export DOCKER_DIR="hyrax-rh8"
         - cd hyrax-builds
         - source build-rh8
-        - get_tomcat_distro "hyrax-rh8" "${TOMCAT_MAJOR_VERSION}"
-        - cp ./${LIBDAP_RH8_RPM} ./hyrax-rh8
-        - cp ./${BES_RH8_RPM} ./hyrax-rh8
-        - cp ./${OLFS_DISTRO} ./hyrax-rh8
-        - cp ./${ROBOTS_DISTRO} ./hyrax-rh8
+        - export TOMCAT_LATEST=$(get_latest_tomcat_version "${TOMCAT_MAJOR_VERSION}")
+        - get_tomcat_distro "${DOCKER_DIR}" "${TOMCAT_LATEST}"
+        - cp "./${LIBDAP_RH8_RPM}" "${DOCKER_DIR}"
+        - cp "./${BES_RH8_RPM}" "${DOCKER_DIR}"
+        - cp "./${OLFS_DISTRO}" "${DOCKER_DIR}"
+        - cp "./${ROBOTS_DISTRO}" "${DOCKER_DIR}"
         - docker build
           --build-arg TOMCAT_VERSION
           --build-arg RELEASE_DATE

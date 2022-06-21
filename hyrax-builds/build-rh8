@@ -44,16 +44,28 @@ function show_version(){
 function get_latest_tomcat_version(){
     local tomcat_major_version="${1}"
 
-    local github_tomcat_url="https://api.github.com/repos/apache/tomcat/tags?per_page=100"
+    local tomcat_gh_repo="https://api.github.com/repos/apache/tomcat/tags"
+    local per_page_count=100
     local tomcat_version=""
-    tomcat_version=$(curl -s "${github_tomcat_url}" | \
-        jq -r '.[] | .name' | sort -V | \
-        grep "^${tomcat_major_version}" | tail -n 1)
+    tomcat_version=$(curl -s "${tomcat_gh_repo}?per_page=${per_page_count}" | \
+        jq -r '.[] | .name' | \
+        sort -V | \
+        grep "^${tomcat_major_version}" | \
+        tail -n 1 )
 
     echo "#   Using tomcat_version: ${tomcat_version}" >&2
     echo "${tomcat_version}"
 }
 
+
+###########################################################################
+#
+# get_tomcat_distro()
+#     $1 - the directpry into which the Tomcat distribution files
+#          will be placed
+#     $2 - The version number of the Tomcat distribution to retrieve.
+#          Example: 9.0.64
+#
 function get_tomcat_distro(){
     echo "${HR}" >&2
     echo "# TASK: get_tomcat_distro()" >&2
@@ -61,21 +73,23 @@ function get_tomcat_distro(){
     local target_dir="${1}"
     echo "#             target_dir: ${target_dir}" >&2
 
-    local tomcat_major_version="${2}"
+    local tomcat_version="${2}"
+    echo "#         tomcat_version: ${tomcat_version}" >&2
+
+    local tomcat_major_version=""
+    tomcat_major_version=$(echo "${tomcat_version}" | awk 'BEGIN{FS="."}{print $1;}')
     echo "#   tomcat_major_version: ${tomcat_major_version}" >&2
 
-    local latest_tomcat_version=""
-    latest_tomcat_version=$(get_latest_tomcat_version "${tomcat_major_version}")
 
     local silent="-s"
 
-    local tomcat_distro="apache-tomcat-${latest_tomcat_version}.tar.gz"
+    local tomcat_distro="apache-tomcat-${tomcat_version}.tar.gz"
     echo "#          tomcat_distro: ${tomcat_distro}" >&2
 
     local tomcat_major_url="https://archive.apache.org/dist/tomcat/tomcat-${tomcat_major_version}"
     echo "#       tomcat_major_url: ${tomcat_major_url}" >&2
 
-    local tomcat_distro_url="${tomcat_major_url}/v${latest_tomcat_version}/bin/${tomcat_distro}"
+    local tomcat_distro_url="${tomcat_major_url}/v${tomcat_version}/bin/${tomcat_distro}"
     echo "#      tomcat_distro_url: ${tomcat_distro_url}" >&2
     local tomcat_distro_file="${target_dir}/${tomcat_distro}"
     echo "#     tomcat_distro_file: ${tomcat_distro_file}" >&2
