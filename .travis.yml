@@ -56,6 +56,7 @@ env:
     - BES_RH8_RPM="bes-${BES_VERSION}.static.el8.x86_64.rpm"
     - BES_RH8_RPM_URL="s3://opendap.travis.build/${BES_RH8_RPM}"
     - TOMCAT_MAJOR_VERSION=9
+    - S3_BUILD_BUCKET="opendap.travis.build"
 
 before_install:
   - pip3 install awscli
@@ -94,6 +95,40 @@ stages:
 
 jobs:
   include:
+    - stage: RH8
+      name: "Build RH8 Hyrax Image and run regression tests"
+      script:
+        - export DOCKER_DIR="hyrax-rh8"
+        - export SNAPSHOT_IMAGE_TAG=opendap/hyrax:rh8-snapshot
+        - export BUILD_VERSION_TAG=opendap/hyrax:rh8-${HYRAX_VERSION}
+        - cd hyrax-builds
+        - source ./build-rh8
+        - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
+        - get_tomcat_distro "${DOCKER_DIR}" "${TOMCAT_VERSION}"
+        - get_hyrax_distro \
+          "${S3_BUILD_BUCKET}" \
+          "${DOCKER_DIR}" \
+          "el8" \
+          "${LIBDAP_VERSION}" \
+          "${BES_VERSION}" \
+          "${OLFS_VERSION}" \
+          true 2>&1 | tee -a "${log_file}" >&2
+
+        - docker build
+          --build-arg TOMCAT_VERSION
+          --build-arg RELEASE_DATE
+          --build-arg HYRAX_VERSION
+          --build-arg LIBDAP_VERSION
+          --build-arg BES_VERSION
+          --build-arg OLFS_VERSION
+          --tag "${SNAPSHOT_IMAGE_TAG}"
+          --tag "${BUILD_VERSION_TAG}"
+          "${DOCKER_DIR}"
+        - docker image ls -a
+        - cd ..
+        - echo "Running Test Script"
+        - ./regression_test_script -i ${SNAPSHOT_IMAGE_TAG}
+
     - stage: build_and_test_hyrax_service
       name: "Build RH8 Hyrax Image and run regression tests"
       script:
@@ -102,7 +137,7 @@ jobs:
         - export BUILD_VERSION_TAG=opendap/hyrax:rh8-${HYRAX_VERSION}
         - cd hyrax-builds
         - source ./build-rh8
-        - export TOMCAT_VERSION=$(get_latest_tomcat_version "${TOMCAT_MAJOR_VERSION}")
+        - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
         - get_tomcat_distro "${DOCKER_DIR}" "${TOMCAT_VERSION}"
         - cp "./${LIBDAP_RH8_RPM}" "${DOCKER_DIR}"
         - cp "./${BES_RH8_RPM}" "${DOCKER_DIR}"

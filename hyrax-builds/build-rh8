@@ -5,6 +5,7 @@ export TOMCAT_MAJOR_VERSION=${TOMCAT_MAJOR_VERSION:-"9"}
 export SLEEP_INTERVAL=${SLEEP_INTERVAL:-60}
 export NO_CACHE=${NO_CACHE:-""}
 
+export S3_BUILD_BUCKET="opendap.travis.build"
 export RELEASE_DATE=""
 export HYRAX_VERSION=""
 export OLFS_VERSION=""
@@ -41,7 +42,7 @@ function show_version(){
     echo "#" >&2
 }
 
-function get_latest_tomcat_version(){
+function get_latest_tomcat_version_number(){
     local tomcat_major_version="${1}"
 
     local tomcat_gh_repo="https://api.github.com/repos/apache/tomcat/tags"
@@ -58,10 +59,10 @@ function get_latest_tomcat_version(){
 }
 
 
-###########################################################################
+################################################################################
 #
 # get_tomcat_distro()
-#     $1 - the directpry into which the Tomcat distribution files
+#     $1 - the directory into which the Tomcat distribution files
 #          will be placed
 #     $2 - The version number of the Tomcat distribution to retrieve.
 #          Example: 9.0.64
@@ -70,9 +71,13 @@ function get_tomcat_distro(){
     echo "${HR}" >&2
     echo "# TASK: get_tomcat_distro()" >&2
 
+    # $1 - The directory into which the Tomcat distribution files
+    #      will be placed
     local target_dir="${1}"
     echo "#             target_dir: ${target_dir}" >&2
 
+    # $2 - The version number of the Tomcat distribution to retrieve.
+    #       Example: 9.0.64
     local tomcat_version="${2}"
     echo "#         tomcat_version: ${tomcat_version}" >&2
 
@@ -155,6 +160,10 @@ function get_tomcat_distro(){
 
 
 
+################################################################################
+#
+# s3_pull() - Get a thing from an S3 bucket
+#
 function s3_pull(){
     local bucket_name="${1}"
     local object_name="${2}"
@@ -164,43 +173,72 @@ function s3_pull(){
     echo "#" >&2
 }
 
+################################################################################
+#
+# get_hyrax_distro() - Get the rpm and war files need for a Hyrax installation
+#    from the identified S3 bucket.
+#    $1 - The AWS S3 bucket from which to pull the Hyrax components
+#    $2 - The directory into which to place the Hyrax components.
+#    $3 - The linux architecture (aka el7, el8, etc.)
+#    $4 - The libap version number ##.##.##-##
+#    $5 - The bes version number ##.##.##-##
+#    $6 - The olfs version number ##.##.##-##
+#    $7 - A debug flag, if present (i.e. not empty string) then the devel and
+#         debuginfo rpm files for libdap and bes will be retrieved as well.
+#
 function get_hyrax_distro() {
     echo "${HR}" >&2
     echo "# TASK: get_hyrax_distro()" >&2
+    local s3_bucket="${1}"
+    echo "#          s3_bucket: ${s3_bucket}" >&2
+    local target_dir="${2}"
+    echo "#         target_dir: ${target_dir}" >&2
+    local larch="${3}"
+    echo "# linux_architecture: ${larch}" >&2
+    local libdap_version="${4}"
+    echo "#     libdap_version: ${libdap_version}" >&2
+    local bes_version="${5}"
+    echo "#        bes_version: ${bes_version}" >&2
+    local olfs_version="${6}"
+    echo "#       olfs_version: ${olfs_version}" >&2
+    local debug="${7}"
+    echo "#              debug: ${debug}" >&2
 
-    local target_dir="${1}"
     set -e
-    local build_bucket="opendap.travis.build"
 
     rm -fv "${target_dir}/*.rpm"
     rm -fv "${target_dir}/olfs*.tgz"
     rm -fv "${target_dir}/robots*.tgz"
 
-    s3_pull "${build_bucket}" \
-            "libdap-${LIBDAP_VERSION}.el8.x86_64.rpm" \
+    s3_pull "${s3_bucket}" \
+            "libdap-${libdap_version}.${larch}.x86_64.rpm" \
             "${target_dir}"
-    s3_pull "${build_bucket}" \
-            "libdap-devel-${LIBDAP_VERSION}.el8.x86_64.rpm" \
-            "${target_dir}"
-    s3_pull "${build_bucket}" \
-            "libdap-debuginfo-${LIBDAP_VERSION}.el8.x86_64.rpm" \
+    if test -n "${debug}"; then
+        s3_pull "${s3_bucket}" \
+                "libdap-devel-${libdap_version}.${larch}.x86_64.rpm" \
+                "${target_dir}"
+        s3_pull "${s3_bucket}" \
+                "libdap-debuginfo-${libdap_version}.${larch}.x86_64.rpm" \
+                "${target_dir}"
+    fi
+
+    s3_pull "${s3_bucket}" \
+            "bes-${bes_version}.static.${larch}.x86_64.rpm" \
             "${target_dir}"
 
-    s3_pull "${build_bucket}" \
-            "bes-${BES_VERSION}.static.el8.x86_64.rpm" \
+    if test -n "${debug}"; then
+        s3_pull "${s3_bucket}" \
+                "bes-devel-${bes_version}.static.${larch}.x86_64.rpm" \
+                "${target_dir}"
+        s3_pull "${s3_bucket}" \
+                "bes-debuginfo-${bes_version}.static.${larch}.x86_64.rpm" \
+                "${target_dir}"
+    fi
+    s3_pull "${s3_bucket}" \
+            "olfs-${olfs_version}-webapp.tgz" \
             "${target_dir}"
-    s3_pull "${build_bucket}" \
-            "bes-devel-${BES_VERSION}.static.el8.x86_64.rpm" \
-            "${target_dir}"
-    s3_pull "${build_bucket}" \
-            "bes-debuginfo-${BES_VERSION}.static.el8.x86_64.rpm" \
-            "${target_dir}"
-
-    s3_pull "${build_bucket}" \
-            "olfs-${OLFS_VERSION}-webapp.tgz" \
-            "${target_dir}"
-    s3_pull "${build_bucket}" \
-            "robots-olfs-${OLFS_VERSION}-webapp.tgz" \
+    s3_pull "${s3_bucket}" \
+            "robots-olfs-${olfs_version}-webapp.tgz" \
             "${target_dir}"
     set +e
     echo "#" >&2
@@ -293,8 +331,30 @@ function cleanup_build_files(){
 function build_rh8() {
     local log_file="brh8.log"
     show_version 2>&1 | tee "${log_file}" >&2
-    get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_MAJOR_VERSION}" 2>&1 | tee -a "${log_file}" >&2
-    get_hyrax_distro "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}" >&2
+
+    local tomcat_version="unset"
+    tomcat_version=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
+    echo "# Using Tomcat version: ${tomcat_version}" | tee -a "${log_file}" >&2
+    get_tomcat_distro "${DOCKER_NAME}" "${tomcat_version}" 2>&1 | tee -a "${log_file}" >&2
+
+
+#    $1 - The AWS S3 bucket from which to pull the Hyrax components
+#    $2 - The directory into which to place the Hyrax components.
+#    $3 - The linux architecture (aka el7, el8, etc.)
+#    $4 - The libap version number ##.##.##-##
+#    $5 - The bes version number ##.##.##-##
+#    $6 - The olfs version number ##.##.##-##
+#    $7 - A debug flag, if present (i.e. not empty string) then the devel and
+#         debuginfo rpm files for libdap and bes will be retrieved as well.
+    get_hyrax_distro \
+        "${S3_BUILD_BUCKET}" \
+        "${DOCKER_NAME}" \
+        "el8" \
+        "${LIBDAP_VERSION}" \
+        "${BES_VERSION}" \
+        "${OLFS_VERSION}" \
+        true 2>&1 | tee -a "${log_file}" >&2
+
     build_hyrax 2>&1 | tee -a "${log_file}" >&2
     cleanup_build_files 2>&1 | tee -a "${log_file}" >&2
 }
