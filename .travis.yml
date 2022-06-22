@@ -105,13 +105,7 @@ jobs:
         - source ./build-rh8
         - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
         - get_tomcat_distro "${DOCKER_DIR}" "${TOMCAT_VERSION}"
-        - get_hyrax_distro \
-          ${S3_BUILD_BUCKET} \
-          ${DOCKER_DIR} \
-          "el8" \
-          ${LIBDAP_VERSION} \
-          ${BES_VERSION} \
-          ${OLFS_VERSION} \
+        - get_hyrax_distro "${S3_BUILD_BUCKET}" "${DOCKER_DIR}" "el8" "${LIBDAP_VERSION}" "${BES_VERSION}" "${OLFS_VERSION}" \
           true 2>&1 | tee -a "${log_file}" >&2
 
         - docker build
