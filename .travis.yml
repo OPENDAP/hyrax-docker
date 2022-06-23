@@ -82,7 +82,9 @@ install:
   - ls -l ./hyrax-builds
 
 stages:
-  - name: RH8
+  - name: RH8_TEST
+    if:  branch = master
+  - name: RH8_BUILD
     if:  branch = master
   - name: build_and_test_hyrax_service
     if:  branch = master
@@ -95,7 +97,7 @@ stages:
 
 jobs:
   include:
-    - stage: RH8
+    - stage: RH8_TEST
       name: "Build RH8 Hyrax Image and run regression tests"
       script:
         - export DOCKER_DIR="hyrax-rh8"
@@ -105,13 +107,16 @@ jobs:
         - source ./build-rh8
         - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
         - get_tomcat_distro "${DOCKER_DIR}" "${TOMCAT_VERSION}"
-        - get_hyrax_distro
+        - get_besd_distro
           "${S3_BUILD_BUCKET}"
           "${DOCKER_DIR}"
           "el8"
           "${LIBDAP_VERSION}"
-          "${BES_VERSION}"
-          "${OLFS_VERSION}" true 2>&1
+          "${BES_VERSION}" true 2>&1
+        - get_olfs_distro
+          "${S3_BUILD_BUCKET}"
+          "${DOCKER_DIR}"
+          "${OLFS_VERSION}" 2>&1
         - docker build
           --build-arg TOMCAT_VERSION
           --build-arg RELEASE_DATE
@@ -126,6 +131,30 @@ jobs:
         - cd ..
         - echo "Running Test Script"
         - ./regression_test_script -i ${SNAPSHOT_IMAGE_TAG}
+
+    - stage: RH8_BUILD
+      name: "Build RH8 besd image"
+      script:
+        - export DOCKER_DIR="besd-rh8"
+        - export SNAPSHOT_IMAGE_TAG=opendap/besd:rh8-snapshot
+        - export BUILD_VERSION_TAG=opendap/besd:rh8-${HYRAX_VERSION}
+        - cd hyrax-builds
+        - source ./build-rh8
+        - get_besd_distro
+          "${S3_BUILD_BUCKET}"
+          "${DOCKER_DIR}"
+          "el8"
+          "${LIBDAP_VERSION}"
+          "${BES_VERSION}" true 2>&1
+        - docker build
+          --build-arg RELEASE_DATE
+          --build-arg HYRAX_VERSION
+          --build-arg LIBDAP_VERSION
+          --build-arg BES_VERSION
+          --tag "${SNAPSHOT_IMAGE_TAG}"
+          --tag "${BUILD_VERSION_TAG}"
+          "${DOCKER_DIR}"
+        - docker image ls -a
 
     - stage: build_and_test_hyrax_service
       name: "Build RH8 Hyrax Image and run regression tests"

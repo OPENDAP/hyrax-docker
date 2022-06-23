@@ -182,13 +182,12 @@ function s3_pull(){
 #    $3 - The linux architecture (aka el7, el8, etc.)
 #    $4 - The libap version number ##.##.##-##
 #    $5 - The bes version number ##.##.##-##
-#    $6 - The olfs version number ##.##.##-##
-#    $7 - A debug flag, if present (i.e. not empty string) then the devel and
+#    $6 - A debug flag, if present (i.e. not empty string) then the devel and
 #         debuginfo rpm files for libdap and bes will be retrieved as well.
 #
-function get_hyrax_distro() {
+function get_besd_distro() {
     echo "${HR}" >&2
-    echo "# TASK: get_hyrax_distro()" >&2
+    echo "# TASK: get_besd_distro()" >&2
     local s3_bucket="${1}"
     echo "#          s3_bucket: ${s3_bucket}" >&2
     local target_dir="${2}"
@@ -199,16 +198,12 @@ function get_hyrax_distro() {
     echo "#     libdap_version: ${libdap_version}" >&2
     local bes_version="${5}"
     echo "#        bes_version: ${bes_version}" >&2
-    local olfs_version="${6}"
-    echo "#       olfs_version: ${olfs_version}" >&2
-    local debug="${7}"
+    local debug="${6}"
     echo "#              debug: ${debug}" >&2
 
     set -e
 
     rm -fv "${target_dir}/*.rpm"
-    rm -fv "${target_dir}/olfs*.tgz"
-    rm -fv "${target_dir}/robots*.tgz"
 
     s3_pull "${s3_bucket}" \
             "libdap-${libdap_version}.${larch}.x86_64.rpm" \
@@ -234,9 +229,38 @@ function get_hyrax_distro() {
                 "bes-debuginfo-${bes_version}.static.${larch}.x86_64.rpm" \
                 "${target_dir}"
     fi
+
+    set +e
+    echo "#" >&2
+    return 0
+}
+
+
+################################################################################
+#
+# get_hyrax_distro() - Get the rpm and war files need for a Hyrax installation
+#    from the identified S3 bucket.
+#    $1 - The AWS S3 bucket from which to pull the Hyrax components
+#    $2 - The directory into which to place the Hyrax components.
+#    $3 - The olfs version number ##.##.##-##
+#
+function get_olfs_distro() {
+    echo "${HR}" >&2
+    echo "# TASK: get_olfs_distro()" >&2
+    local s3_bucket="${1}"
+    echo "#          s3_bucket: ${s3_bucket}" >&2
+    local target_dir="${2}"
+    echo "#         target_dir: ${target_dir}" >&2
+    local olfs_version="${3}"
+    echo "#       olfs_version: ${olfs_version}" >&2
+
+    set -e
+    rm -fv "${target_dir}/olfs*.tgz"
+
     s3_pull "${s3_bucket}" \
             "olfs-${olfs_version}-webapp.tgz" \
             "${target_dir}"
+
     s3_pull "${s3_bucket}" \
             "robots-olfs-${olfs_version}-webapp.tgz" \
             "${target_dir}"
@@ -244,6 +268,8 @@ function get_hyrax_distro() {
     echo "#" >&2
     return 0
 }
+
+
 
 function build_hyrax() {
     echo "${HR}" >&2
@@ -335,26 +361,21 @@ function build_rh8() {
 
     local tomcat_version="unset"
     tomcat_version=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
-    echo "# Using Tomcat version: ${tomcat_version}" | tee -a "${log_file}" >&2
-    get_tomcat_distro "${DOCKER_NAME}" "${tomcat_version}" 2>&1 | tee -a "${log_file}" >&2
+    get_tomcat_distro \
+        "${DOCKER_NAME}" \
+        "${tomcat_version}" 2>&1 | tee -a "${log_file}" >&2
 
-
-#    $1 - The AWS S3 bucket from which to pull the Hyrax components
-#    $2 - The directory into which to place the Hyrax components.
-#    $3 - The linux architecture (aka el7, el8, etc.)
-#    $4 - The libap version number ##.##.##-##
-#    $5 - The bes version number ##.##.##-##
-#    $6 - The olfs version number ##.##.##-##
-#    $7 - A debug flag, if present (i.e. not empty string) then the devel and
-#         debuginfo rpm files for libdap and bes will be retrieved as well.
-    get_hyrax_distro \
+    get_besd_distro \
         "${S3_BUILD_BUCKET}" \
         "${DOCKER_NAME}" \
         "el8" \
         "${LIBDAP_VERSION}" \
-        "${BES_VERSION}" \
-        "${OLFS_VERSION}" \
-        true 2>&1 | tee -a "${log_file}" >&2
+        "${BES_VERSION}" 2>&1 | tee -a "${log_file}" >&2
+
+    get_olfs_distro \
+        "${S3_BUILD_BUCKET}" \
+        "${DOCKER_NAME}" \
+        "${OLFS_VERSION}" 2>&1 | tee -a "${log_file}" >&2
 
     build_hyrax 2>&1 | tee -a "${log_file}" >&2
     cleanup_build_files 2>&1 | tee -a "${log_file}" >&2
