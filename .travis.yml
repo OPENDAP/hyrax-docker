@@ -189,38 +189,10 @@ jobs:
         - docker image ls -a
 
     - stage: build_and_test_hyrax_service
-      name: "Build RH8 Hyrax Image and run regression tests"
-      script:
-        - export DOCKER_DIR="hyrax-rh8"
-        - export SNAPSHOT_IMAGE_TAG=opendap/hyrax:rh8-snapshot
-        - export BUILD_VERSION_TAG=opendap/hyrax:rh8-${HYRAX_VERSION}
-        - cd hyrax-builds
-        - source ./build-rh8
-        - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
-        - get_tomcat_distro "${DOCKER_DIR}" "${TOMCAT_VERSION}"
-        - cp "./${LIBDAP_RH8_RPM}" "${DOCKER_DIR}"
-        - cp "./${BES_RH8_RPM}" "${DOCKER_DIR}"
-        - cp "./${OLFS_DISTRO}" "${DOCKER_DIR}"
-        - cp "./${ROBOTS_DISTRO}" "${DOCKER_DIR}"
-        - docker build
-          --build-arg TOMCAT_VERSION
-          --build-arg RELEASE_DATE
-          --build-arg HYRAX_VERSION
-          --build-arg LIBDAP_VERSION
-          --build-arg BES_VERSION
-          --build-arg OLFS_VERSION
-          --tag "${SNAPSHOT_IMAGE_TAG}" "${DOCKER_DIR}"
-        - docker tag ${SNAPSHOT_IMAGE_TAG} ${BUILD_VERSION_TAG}
-        - docker image ls -a
-        - cd ..
-        - echo "Running Test Script"
-        - ./regression_test_script -i ${SNAPSHOT_IMAGE_TAG}
-
-    - stage: build_and_test_hyrax_service
       name: "Build CentOS-7 Hyrax Image and run regression tests"
       script:
-        - export SNAPSHOT_IMAGE_TAG=opendap/hyrax:snapshot
-        - export BUILD_VERSION_TAG=opendap/hyrax:${HYRAX_VERSION}
+        - export SNAPSHOT_IMAGE_TAG=opendap/hyrax:c7-snapshot
+        - export BUILD_VERSION_TAG=opendap/hyrax:c7-${HYRAX_VERSION}
         - cd hyrax-builds
         - cp ./${LIBDAP_C7_RPM} ./hyrax
         - cp ./${BES_C7_RPM} ./hyrax
@@ -240,10 +212,10 @@ jobs:
         - ./regression_test_script -i ${SNAPSHOT_IMAGE_TAG}
 
     - stage: build
-      name: "opendap/besd:snapshot"
+      name: "CentOS-7 opendap/besd:snapshot"
       script:
-        - export SNAPSHOT_IMAGE_TAG=opendap/besd:snapshot
-        - export BUILD_VERSION_TAG=opendap/besd:${BES_VERSION}
+        - export SNAPSHOT_IMAGE_TAG=opendap/besd:c7-snapshot
+        - export BUILD_VERSION_TAG=opendap/besd:c7-${BES_VERSION}
         - cd hyrax-builds
         - cp ./${LIBDAP_C7_RPM} ./besd
         - cp ./${BES_C7_RPM} ./besd
@@ -270,10 +242,10 @@ jobs:
         - docker image ls -a
 
     - stage: build
-      name: "opendap/hyrax_ncwms:snapshot"
+      name: "opendap/hyrax_ncwms:c7-snapshot"
       script:
-        - export SNAPSHOT_IMAGE_TAG=opendap/hyrax_ncwms:snapshot
-        - export BUILD_VERSION_TAG=opendap/hyrax_ncwms:${HYRAX_VERSION}
+        - export SNAPSHOT_IMAGE_TAG=opendap/hyrax_ncwms:c7-snapshot
+        - export BUILD_VERSION_TAG=opendap/hyrax_ncwms:c7-${HYRAX_VERSION}
         - cd hyrax-builds
         - cp ./${LIBDAP_C7_RPM} ./hyrax
         - cp ./${BES_C7_RPM} ./hyrax
@@ -291,10 +263,10 @@ jobs:
         - docker image ls -a
 
     - stage: build
-      name: "opendap/hyrax:ngap-snapshot"
+      name: "opendap/hyrax:c7-ngap-snapshot"
       script:
-        - export SNAPSHOT_IMAGE_TAG=opendap/hyrax:ngap-snapshot
-        - export BUILD_VERSION_TAG=opendap/hyrax:ngap-${HYRAX_VERSION}
+        - export SNAPSHOT_IMAGE_TAG=opendap/hyrax:c7-ngap-snapshot
+        - export BUILD_VERSION_TAG=opendap/hyrax:c7-ngap-${HYRAX_VERSION}
         - cd hyrax-builds
         - ls -l
         - cp ./${LIBDAP_C7_RPM} ./ngap
