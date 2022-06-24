@@ -1,7 +1,7 @@
+#!/usr/bin/env bash
 ###############################################################################################
 # 
-# Dockerfile for single container Hyrax
-#
+# Dockerfile for the NGAP deployment Hyrax container
 #
 # Some shell state reference:
 # set -f # "set -o noglob"  Disable file name generation using metacharacters (globbing).
@@ -15,8 +15,18 @@
 # Set one or more individual labels
 FROM rockylinux:8
 
+# ENV DEPLOYMENT_CONTEXT="ROOT"
+ENV DEFAULT_NGAP_DEPLOYMENT_CONTEXT="ngap"
+
+ARG DEPLOYMENT_CONTEXT
+ENV DEPLOYMENT_CONTEXT ${DEPLOYMENT_CONTEXT:-"ROOT"}
+RUN echo "DEPLOYMENT_CONTEXT: ${DEPLOYMENT_CONTEXT}"
 
 RUN export NOW=`date +%s`
+
+#
+# Hyrax Components Version Negotiation
+#
 ARG RELEASE_DATE
 ENV RELEASE_DATE ${RELEASE_DATE:-"${NOW}"}
 RUN echo "RELEASE_DATE: ${RELEASE_DATE}"
@@ -53,18 +63,18 @@ COPY ${BES_RPM} bes-devel-* bes-debuginfo-* /
 RUN ls -l /bes-* >&2
 
 ARG OLFS_VERSION
-ENV OLFS_VERSION=${OLFS_VERSION:-"snapshot"}
+ENV OLFS_VERSION=${OLFS_VERSION:-"unknown"}
 RUN echo "OLFS_VERSION: ${OLFS_VERSION}"
 
-ARG OLFS_DISTRO
-ENV OLFS_DISTRO=${OLFS_DISTRO:-"olfs-${OLFS_VERSION}-webapp"}
-RUN echo "OLFS_DISTRO: ${OLFS_DISTRO}"
-COPY ${OLFS_DISTRO}.tgz /${OLFS_DISTRO}.tgz
+ARG NGAP_DISTRO
+ENV NGAP_DISTRO=${NGAP_DISTRO:-"ngap-${OLFS_VERSION}-webapp"}
+RUN echo "NGAP_DISTRO: ${NGAP_DISTRO}"
+COPY ${NGAP_DISTRO}.tgz /${NGAP_DISTRO}.tgz
+RUN tar -tf /${NGAP_DISTRO}.tgz
 
-ARG ROBOTS_DISTRO
-ENV ROBOTS_DISTRO=${ROBOTS_DISTRO:-"robots-olfs-${OLFS_VERSION}-webapp"}
-RUN echo "ROBOTS_DISTRO: ${ROBOTS_DISTRO}"
-COPY ${ROBOTS_DISTRO}.tgz /${ROBOTS_DISTRO}.tgz
+ARG TOMCAT_CONNECTION_TIMEOUT_MS
+ENV TOMCAT_CONNECTION_TIMEOUT_MS=${TOMCAT_CONNECTION_TIMEOUT_MS:-"1000000"}
+RUN echo "TOMCAT_CONNECTION_TIMEOUT_MS: ${TOMCAT_CONNECTION_TIMEOUT_MS}"
 
 LABEL vendor="OPeNDAP"
 LABEL org.opendap.hyrax.version=${HYRAX_VERSION}
@@ -75,35 +85,13 @@ MAINTAINER support@opendap.org
 
 USER root
 
-#
-# The --build-arg USE_NCWMS can be set to "true" in order to 
-# add the ncWMS application to the build.
-ARG USE_NCWMS
-ENV USE_NCWMS ${USE_NCWMS:-"false"}
-RUN if [ $USE_NCWMS = "true" ];then echo "NCWMS: ENABLED"; else echo "NCWMS: DISABLED"; fi
-
-#
-# The --build-arg NCWMS_BASE can be set to the base URL for ncWMS.
-# The entrypoint.sh code defaults it to
-# the URL: https://localhost:8080 if the environment variable NCWMS_BASE
-# is not in the shell from which the entrypoint.sh script is called.
-ARG NCWMS_BASE
-ENV NCWMS_BASE ${NCWMS_BASE:-"https://localhost:8080"}
-RUN if [ $USE_NCWMS = "true" ];then echo "NCWMS_BASE: {$NCWMS_BASE}"; fi
-
-
 ARG DEVELOPER_MODE
 ENV DEVELOPER_MODE ${DEVELOPER_MODE:-"false"}
-RUN if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else echo "DEVELOPER_MODE: DISABLED"; fi
-
-#Get mirrorlist before running yum
-#RUN cd /etc/yum.repos.d/
-#RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
-#RUN sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+RUN set -e && \
+    if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else echo "DEVELOPER_MODE: DISABLED"; fi
 
 ################################################################
 # Update and install the needful.
-#
 # Installing autoconf automake git bc for the tests install. The tests
 # are installed in the container but not run until a later stage of the
 # Travis build (or at a later time). They need to be part of the container,
@@ -118,12 +106,11 @@ RUN set -e \
 RUN set -e \
     && python3 -m pip install awscli
 
-
 ################################################################
 # Install the latest libdap snapshot
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 RUN set -e \
-    && echo "Installing the libdap rpm: ${LIBDAP_RPM}" \
+    && echo "Installing the libdap rpm: ${LIBDAP_RPM}" >&2 \
     && ls -l ./libdap* \
     && dnf -y install ./libdap-*.rpm \
     && rm -f ./${LIBDAP_RPM}
@@ -134,7 +121,7 @@ RUN echo "libdap4 is installed."
 # Install the latest BES snapshot
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 RUN set -e \
-    && echo "Installing the latest BES rpm: ${BES_RPM}" \
+    && echo "Installing the latest BES rpm: ${BES_RPM}" >&2 \
     && ls -l ./bes* \
     && dnf -y install ./bes-*.rpm \
     && rm -f ./${BES_RPM}
@@ -158,7 +145,7 @@ RUN set -e \
     && mkdir -p /var/log/tomcat \
     && chown -R tomcat:tomcat /var/log/tomcat /home/tomcat
 COPY tomcat.service /etc/systemd/system/tomcat.service
-RUN set -e && systemctl enable tomcat
+RUN set -e && systemctl enable tomcat >&2
 #RUN firewall-cmd --add-port 8080/tcp --permanent
 #RUN firewall-cmd --reload
 
@@ -174,89 +161,54 @@ RUN set -e \
 
 RUN set -e \
     && echo "Cleaning up Tomcat distribution files..." >&2 \
-    && rm -fv "/${TOMCAT_DISTRO}.tar.gz"
+    && rm -fv "/${TOMCAT_DISTRO}.tar.gz"  >&2
 
 ################################################################
-# Install the OLFS web application
+# Retrieve, verify, and install the NGAP/OLFS web application
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 ENV ROOT=/dev/shm
 
-RUN echo "Installing the latest olfs distribution (${OLFS_VERSION})." >&2
+# NGAP package uses the OLFS_VERSION number. jhrg 4/2/21
 RUN set -e \
-    && echo "working_dir: "`pwd`  >&2 \
-    && ls -l . \
-    && tar -C ${ROOT} -xzvf ./${OLFS_DISTRO}.tgz \
-    && ls -l ${ROOT} \
-    && echo "Unpacking warfile..."  >&2 \
-    && mkdir -p $(readlink -f ${CATALINA_HOME})/webapps/opendap/ \
-    && unzip -o ${ROOT}/${OLFS_DISTRO}/opendap.war -d ${CATALINA_HOME}/webapps/opendap/ \
-    && echo "Cleaning up."  >&2 \
-    && rm -rf ${ROOT}/${OLFS_DISTRO} ./${OLFS_DISTRO}.tgz
-
-RUN set -e \
-    && echo "Installing the latest dynamic robots.txt distribution (${OLFS_VERSION})."  >&2 \
-    && ls -l ./robots* \
-    && tar -C ${ROOT} -xzf ./${ROBOTS_DISTRO}.tgz \
-    && ls -l ${ROOT}/${ROBOTS_DISTRO} \
-    && echo "Unpacking dynamic robots.txt warfile..."  >&2 \
-    && unzip -o ${ROOT}/${ROBOTS_DISTRO}/ROOT.war -d ${CATALINA_HOME}/webapps/ROOT/ \
-    && echo "Cleaning up dynamic robots.txt snapshot..."  >&2 \
-    && rm -rf ${ROOT}/${ROBOTS_DISTRO} ${ROBOTS_DISTRO}.tgz
+    && echo "Installing the latest NGAP distribution (${NGAP_DISTRO})." >&2 \
+    && echo "working dir: "$(pwd)"    ROOT: ${ROOT}"  >&2 \
+    && tar -C "${ROOT}" -xzvf /${NGAP_DISTRO}.tgz >&2 \
+    && ls -l "${ROOT}" >&2 \
+    && echo "Unpacking warfile..." >&2 \
+    && unzip -o ${ROOT}/${NGAP_DISTRO}/${DEFAULT_NGAP_DEPLOYMENT_CONTEXT}.war -d ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/ \
+    && echo "Cleaning up." >&2 \
+    && rm -rf ${ROOT}/${NGAP_DISTRO} /${NGAP_DISTRO}.tgz
 
 # Fix ownership and access permissions
 RUN set -e \
-    && mkdir -p ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs \
-    && chown -R tomcat:tomcat ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs \
-    && chmod 700 ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs 
-
-################################################################
-# Clean up the Hyrax distribution binaries.
-#
-RUN rm -vf /libdap*.rpm /bes*.rpm /olfs*.tgz /robots*.tgz /apache*
-#
+    && mkdir -p ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/logs \
+    && chown -R tomcat:tomcat ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/logs \
+    && chmod 700 ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/logs
 ################################################################
 
 ################################################################
-# retrieve and install the ncWMS web application
-#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
-
-# This is ncWMS-2.4.2
-ENV NCWMS_WAR_URL=https://github.com/Reading-eScience-Centre/ncwms/releases/download/ncwms-2.4.2/ncWMS2.war
-
-RUN if [ $USE_NCWMS = "true" ]; then \
-        echo "Installing ncWMS..."; \
-        curl -sfSL ${NCWMS_WAR_URL} -o /dev/shm/ncWMS.war; \
-        unzip -o /dev/shm/ncWMS.war -d ${CATALINA_HOME}/webapps/ncWMS2/; \
-        rm -rf /dev/shm/*; \
-    else \
-        echo "ncWMS will NOT be installed."; \
-    fi
-
-# set a default ncWMS admin if DEVELOPER_MODE is enabled.
-RUN if [ ${DEVELOPER_MODE} = "true" ] && [ $USE_NCWMS = "true" ]; then \
-        echo "DEVELOPER MODE: Adding ncWMS admin credentials"; \
-        sed -i 'sX</tomcat-users>X<role rolename="ncWMS-admin"/> <user username="admin" password="admin" roles="ncWMS-admin"/> </tomcat-users>X' ${CATALINA_HOME}/conf/tomcat-users.xml; \
-    else \
-        echo "No ncWMS admin credentials installed."; \
-    fi
-    
+# Install our modified tomcat.conf so that the server use the memory
+# cached session state and not require sticky sessions to operate
+# behind a load balancer.
 #
-# make ncWMS work without further configuration 
-# We will need to adjust this target if we
-# decide to run as a different (not root) user.
-COPY ncWMS_config.xml /root/.ncWMS2/config.xml
-RUN  chmod +r /root/.ncWMS2/config.xml
-
-COPY olfs_viewers.xml /tmp/olfs_viewers.xml
-RUN if [ $USE_NCWMS = "true" ]; then \
-        # If we're installing ncWMS then we copy 
-        # to the server a viewers.xml which has
-        # been templated so that the ncWMS host can be installed 
-        # at startup.        
-        mv /tmp/olfs_viewers.xml ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml; \
-    else \
-        echo "Skipping OLFS/ncWMS confguration installation."; \
-    fi
+COPY tomcat.conf /
+RUN set -e \
+    && mkdir -p /etc/tomcat \
+    && mv /tomcat.conf /etc/tomcat/tomcat.conf \
+    && chown -R tomcat:tomcat /etc/tomcat
+#
+# Install Memcached Session Manager jars into the Tomcat: ${CATALINA_HOME}/lib
+RUN set -e \
+    && echo "Installing Session Manager jar files. Cloning OLFS..." \
+    && git clone --depth 1 https://github.com/OPENDAP/olfs \
+    && echo "Copying elasticache client" \
+    && cp olfs/resources/ngap/lib/elasticache-java-cluster-client-1.1.2.jar ${CATALINA_HOME}/lib \
+    && echo "Copying memcached Session Manager" \
+    && cp olfs/resources/ngap/lib/memcached-session-manager-2.3.2.jar ${CATALINA_HOME}/lib \
+    && echo "Copying memcached Session Manager TC7" \
+    && cp olfs/resources/ngap/lib/memcached-session-manager-tc7-2.3.2.jar ${CATALINA_HOME}/lib \
+    && chown -R tomcat:tomcat  ${CATALINA_HOME}/lib \
+    && rm -rfv olfs
 
 ################################################################
 #
@@ -271,8 +223,10 @@ RUN set -e \
     && mkdir -p ${TEST_INSTALL_DIR} \
     && git clone -v https://github.com/opendap/hyrax_regression_tests ${TEST_INSTALL_DIR} \
     && cd ${TEST_INSTALL_DIR} \
+    && git status \
     && autoreconf -vif \
     && ./configure
+
 
 # In order to get the executable "testsuite" to build we have to run
 # "make check" But that will fail at build time so the "make check" call
@@ -281,9 +235,9 @@ RUN set -e \
     && cd ${TEST_INSTALL_DIR} \
     && make testsuite > mk.log 2>&1 \
     && echo "SUCCESS: hyrax_regression_tests ready!"
-################################################################
 
-RUN ls -l /usr/libexec/
+COPY beslog2json.awk /
+RUN  set -e && chmod +x beslog2json.awk
 
 ################################################################
 # TEMPORARY
@@ -294,9 +248,8 @@ RUN chmod +x /cleanup_files.sh
 # TEMPORARY
 ################################################################
 
-
 COPY entrypoint.sh /
-RUN chmod +x /entrypoint.sh
+RUN  set -e && chmod +x /entrypoint.sh
 ENTRYPOINT [ "/entrypoint.sh" ]
 
 EXPOSE 8080
@@ -306,7 +259,7 @@ EXPOSE 11002
 
 # can't use USER with entrypoint that needs root
 # use gosu or, as done, enable bes user write so the entrypoint does not need root
-RUN chown -R bes /etc/bes
+RUN  set -e && chown -R bes /etc/bes
 USER root
 
 CMD ["-"]

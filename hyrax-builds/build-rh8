@@ -169,7 +169,7 @@ function s3_pull(){
     local object_name="${2}"
     local target_dir="${3}"
     echo "# S3 - Retrieving ${object_name} from ${bucket_name}" >&2
-    aws s3 cp "s3://${bucket_name}/${object_name}" "${target_dir}/${object_name}" >&2
+    aws s3 cp --quiet "s3://${bucket_name}/${object_name}" "${target_dir}/${object_name}" >&2
     echo "#" >&2
 }
 
@@ -203,8 +203,10 @@ function get_besd_distro() {
 
     set -e
 
+    echo "# Cleaning up..." >&2
     rm -fv "${target_dir}/*.rpm"
 
+    echo "#" >&2
     s3_pull "${s3_bucket}" \
             "libdap-${libdap_version}.${larch}.x86_64.rpm" \
             "${target_dir}"
@@ -238,7 +240,7 @@ function get_besd_distro() {
 
 ################################################################################
 #
-# get_hyrax_distro() - Get the rpm and war files need for a Hyrax installation
+# get_olfs_distro() - Get the rpm and war files need for a Hyrax installation
 #    from the identified S3 bucket.
 #    $1 - The AWS S3 bucket from which to pull the Hyrax components
 #    $2 - The directory into which to place the Hyrax components.
@@ -255,8 +257,10 @@ function get_olfs_distro() {
     echo "#       olfs_version: ${olfs_version}" >&2
 
     set -e
+    echo "# Cleaning up..." >&2
     rm -fv "${target_dir}/olfs*.tgz"
 
+    echo "#" >&2
     s3_pull "${s3_bucket}" \
             "olfs-${olfs_version}-webapp.tgz" \
             "${target_dir}"
@@ -270,10 +274,63 @@ function get_olfs_distro() {
 }
 
 
+################################################################################
+#
+# get_ngap_distro() - Get the rpm and war files need for a Hyrax installation
+#    from the identified S3 bucket.
+#    $1 - The AWS S3 bucket from which to pull the Hyrax components
+#    $2 - The directory into which to place the Hyrax components.
+#    $3 - The olfs version number ##.##.##-##
+#
+function get_ngap_distro() {
+    echo "${HR}" >&2
+    echo "# TASK: get_ngap_distro()" >&2
+    local s3_bucket="${1}"
+    echo "#          s3_bucket: ${s3_bucket}" >&2
+    local target_dir="${2}"
+    echo "#         target_dir: ${target_dir}" >&2
+    local olfs_version="${3}"
+    echo "#       olfs_version: ${olfs_version}" >&2
+
+    set -e
+    echo "# Cleaning up..." >&2
+    rm -fv "${target_dir}/ngap*.tgz"
+
+    echo "#" >&2
+    s3_pull "${s3_bucket}" \
+            "ngap-${olfs_version}-webapp.tgz" \
+            "${target_dir}"
+
+    set +e
+    echo "#" >&2
+    return 0
+}
+
+
+function build_ngap() {
+    echo "${HR}" >&2
+    echo "# TASK: build_ngap_rh8()" >&2
+#        --no-cache \
+        docker build ${NO_CACHE} \
+        --platform linux/amd64 \
+        --build-arg TOMCAT_VERSION \
+        --build-arg RELEASE_DATE \
+        --build-arg HYRAX_VERSION \
+        --build-arg LIBDAP_VERSION \
+        --build-arg BES_VERSION \
+        --build-arg OLFS_VERSION \
+        --tag "${IMAGE_TAG}" \
+        --tag "${SNAPSHOT_TAG}" \
+        ${DOCKER_NAME}
+    echo "#" >&2
+    echo "#" >&2
+}
+
+
 
 function build_hyrax() {
     echo "${HR}" >&2
-    echo "# TASK: build_hyrax_rh8()" >&2
+    echo "# TASK: build_hyrax()" >&2
 #        --no-cache \
         docker build ${NO_CACHE}\
         --platform linux/amd64 \
@@ -346,6 +403,7 @@ function cleanup_build_files(){
     local build_files=""
     build_files="${build_files} ${DOCKER_NAME}/*.rpm"
     build_files="${build_files} ${DOCKER_NAME}/olfs*.tgz"
+    build_files="${build_files} ${DOCKER_NAME}/ngap*.tgz"
     build_files="${build_files} ${DOCKER_NAME}/robots*.tgz"
     build_files="${build_files} ${DOCKER_NAME}/apache*"
     # ls -Gl ${build_files} >&2
@@ -355,7 +413,7 @@ function cleanup_build_files(){
     echo "#" >&2
 }
 
-function build_rh8() {
+function build_hyrax_rh8() {
     local log_file="brh8.log"
     show_version 2>&1 | tee "${log_file}" >&2
 
@@ -377,7 +435,42 @@ function build_rh8() {
         "${DOCKER_NAME}" \
         "${OLFS_VERSION}" 2>&1 | tee -a "${log_file}" >&2
 
+    get_ngap_distro \
+        "${S3_BUILD_BUCKET}" \
+        "${DOCKER_NAME}" \
+        "${OLFS_VERSION}" 2>&1 | tee -a "${log_file}" >&2
+
     build_hyrax 2>&1 | tee -a "${log_file}" >&2
+    cleanup_build_files 2>&1 | tee -a "${log_file}" >&2
+}
+
+
+function build_ngap_rh8() {
+    local log_file="brh8.log"
+
+    export DOCKER_NAME="ngap-rh8"
+    show_version 2>&1 | tee "${log_file}" >&2
+
+
+    local tomcat_version="unset"
+    tomcat_version=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
+    get_tomcat_distro \
+        "${DOCKER_NAME}" \
+        "${tomcat_version}" 2>&1 | tee -a "${log_file}" >&2
+
+    get_besd_distro \
+        "${S3_BUILD_BUCKET}" \
+        "${DOCKER_NAME}" \
+        "el8" \
+        "${LIBDAP_VERSION}" \
+        "${BES_VERSION}" 2>&1 | tee -a "${log_file}" >&2
+
+    get_ngap_distro \
+        "${S3_BUILD_BUCKET}" \
+        "${DOCKER_NAME}" \
+        "${OLFS_VERSION}" 2>&1 | tee -a "${log_file}" >&2
+
+    build_ngap 2>&1 | tee -a "${log_file}" >&2
     cleanup_build_files 2>&1 | tee -a "${log_file}" >&2
 }
 
