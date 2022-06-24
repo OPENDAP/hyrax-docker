@@ -131,6 +131,8 @@ jobs:
         - cd ..
         - echo "Running Test Script"
         - ./regression_test_script -i ${SNAPSHOT_IMAGE_TAG}
+        - docker push ${SNAPSHOT_IMAGE_TAG}
+        - docker push ${BUILD_VERSION_TAG}
 
     - stage: RH8_BUILD
       name: "Build opendap/besd:snapshot (RH8)"
@@ -219,7 +221,7 @@ jobs:
           --tag "${BUILD_VERSION_TAG}"
           "${DOCKER_DIR}"
         - docker image ls -a
-        -
+
     - stage: RH8_BUILD
       name: "Build opendap/olfs:snapshot"
       script:
@@ -237,7 +239,6 @@ jobs:
           --tag "${SNAPSHOT_IMAGE_TAG}"
           --tag "${BUILD_VERSION_TAG}" olfs
         - docker image ls -a
-
 
     - stage: build_and_test_hyrax_service
       name: "Build and Test opendap/hyrax:c7-snapshot (CentOS-7)"
