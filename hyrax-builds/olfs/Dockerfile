@@ -2,8 +2,8 @@
 # Dockerfile for Hyrax OLFS
 ###
 
-# FROM unidata/tomcat-docker:8
-FROM tomcat:8
+#
+FROM tomcat:9
 MAINTAINER support@opendap.org
 
 ARG RELEASE_DATE
