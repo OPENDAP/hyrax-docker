@@ -212,7 +212,7 @@ jobs:
         - ./regression_test_script -i ${SNAPSHOT_IMAGE_TAG}
 
     - stage: build
-      name: "CentOS-7 opendap/besd:snapshot"
+      name: "opendap/besd:c7-snapshot (CentOS-7)"
       script:
         - export SNAPSHOT_IMAGE_TAG=opendap/besd:c7-snapshot
         - export BUILD_VERSION_TAG=opendap/besd:c7-${BES_VERSION}
@@ -242,7 +242,7 @@ jobs:
         - docker image ls -a
 
     - stage: build
-      name: "opendap/hyrax_ncwms:c7-snapshot"
+      name: "opendap/hyrax_ncwms:c7-snapshot (CentOS-7)"
       script:
         - export SNAPSHOT_IMAGE_TAG=opendap/hyrax_ncwms:c7-snapshot
         - export BUILD_VERSION_TAG=opendap/hyrax_ncwms:c7-${HYRAX_VERSION}
@@ -263,7 +263,7 @@ jobs:
         - docker image ls -a
 
     - stage: build
-      name: "opendap/hyrax:c7-ngap-snapshot"
+      name: "opendap/hyrax:c7-ngap-snapshot (CentOS-7)"
       script:
         - export SNAPSHOT_IMAGE_TAG=opendap/hyrax:c7-ngap-snapshot
         - export BUILD_VERSION_TAG=opendap/hyrax:c7-ngap-${HYRAX_VERSION}
@@ -284,7 +284,7 @@ jobs:
         - docker image ls -a
 
     - stage: test_deployed_image
-      name: "Test Deployed Image"
+      name: "Test Deployed Image (CentOS-7)"
       script:
         - echo "Running Test Script"
         - ./regression_test_script
@@ -298,6 +298,6 @@ deploy:
     script: bash ${TRAVIS_BUILD_DIR}/deploy_to_docker_hub.sh
     on:
       branch: master
-      condition: ${TRAVIS_PULL_REQUEST} = "false"
+#      condition: ${TRAVIS_PULL_REQUEST} = "false"
 
 
