@@ -13,7 +13,6 @@ services:
 branches:
   only:
     - master
-    - centos8
 
 notifications:
   email:
@@ -99,7 +98,7 @@ stages:
 jobs:
   include:
     - stage: RH8_TEST
-      name: "Build RH8 Hyrax Image and run regression tests"
+      name: "Build RH8 Hyrax-${HYRAX_VERSION} Image and run regression tests"
       script:
         - export DOCKER_DIR="hyrax-rh8"
         - export SNAPSHOT_IMAGE_TAG=opendap/hyrax:rh8-snapshot
@@ -211,6 +210,7 @@ jobs:
         - cd ..
         - echo "Running Test Script"
         - ./regression_test_script -i ${SNAPSHOT_IMAGE_TAG}
+        - docker push ${SNAPSHOT_IMAGE_TAG}
 
     - stage: build
       name: "opendap/besd:c7-snapshot (CentOS-7)"
