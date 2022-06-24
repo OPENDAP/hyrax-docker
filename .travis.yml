@@ -194,17 +194,17 @@ jobs:
         - export SNAPSHOT_IMAGE_TAG=opendap/hyrax:c7-snapshot
         - export BUILD_VERSION_TAG=opendap/hyrax:c7-${HYRAX_VERSION}
         - cd hyrax-builds
-        - cp ./${LIBDAP_C7_RPM} ./hyrax
-        - cp ./${BES_C7_RPM} ./hyrax
-        - cp ./${OLFS_DISTRO} ./hyrax
-        - cp ./${ROBOTS_DISTRO} ./hyrax
+        - cp ./${LIBDAP_C7_RPM} ./hyrax-c7
+        - cp ./${BES_C7_RPM} ./hyrax-c7
+        - cp ./${OLFS_DISTRO} ./hyrax-c7
+        - cp ./${ROBOTS_DISTRO} ./hyrax-c7
         - docker build
           --build-arg RELEASE_DATE
           --build-arg HYRAX_VERSION
           --build-arg LIBDAP_VERSION
           --build-arg BES_VERSION
           --build-arg OLFS_VERSION
-          --tag "${SNAPSHOT_IMAGE_TAG}" hyrax
+          --tag "${SNAPSHOT_IMAGE_TAG}" hyrax-c7
         - docker tag ${SNAPSHOT_IMAGE_TAG} ${BUILD_VERSION_TAG}
         - docker image ls -a
         - cd ..
@@ -218,13 +218,13 @@ jobs:
         - export SNAPSHOT_IMAGE_TAG=opendap/besd:c7-snapshot
         - export BUILD_VERSION_TAG=opendap/besd:c7-${BES_VERSION}
         - cd hyrax-builds
-        - cp ./${LIBDAP_C7_RPM} ./besd
-        - cp ./${BES_C7_RPM} ./besd
+        - cp ./${LIBDAP_C7_RPM} ./besd-c7
+        - cp ./${BES_C7_RPM} ./besd-c7
         - docker build
           --build-arg RELEASE_DATE
           --build-arg LIBDAP_VERSION
           --build-arg BES_VERSION
-          -t "${SNAPSHOT_IMAGE_TAG}" besd
+          -t "${SNAPSHOT_IMAGE_TAG}" besd-c7
         - docker tag ${SNAPSHOT_IMAGE_TAG} ${BUILD_VERSION_TAG}
         - docker image ls -a
 
@@ -248,10 +248,10 @@ jobs:
         - export SNAPSHOT_IMAGE_TAG=opendap/hyrax_ncwms:c7-snapshot
         - export BUILD_VERSION_TAG=opendap/hyrax_ncwms:c7-${HYRAX_VERSION}
         - cd hyrax-builds
-        - cp ./${LIBDAP_C7_RPM} ./hyrax
-        - cp ./${BES_C7_RPM} ./hyrax
-        - cp ./${OLFS_DISTRO} ./hyrax
-        - cp ./${ROBOTS_DISTRO} ./hyrax
+        - cp ./${LIBDAP_C7_RPM} ./hyrax-c7
+        - cp ./${BES_C7_RPM} ./hyrax-c7
+        - cp ./${OLFS_DISTRO} ./hyrax-c7
+        - cp ./${ROBOTS_DISTRO} ./hyrax-c7
         - docker build
           --build-arg RELEASE_DATE
           --build-arg HYRAX_VERSION
@@ -259,7 +259,7 @@ jobs:
           --build-arg BES_VERSION
           --build-arg OLFS_VERSION
           --build-arg USE_NCWMS=true
-          --tag "${SNAPSHOT_IMAGE_TAG}" hyrax
+          --tag "${SNAPSHOT_IMAGE_TAG}" hyrax-c7
         - docker tag ${SNAPSHOT_IMAGE_TAG} ${BUILD_VERSION_TAG}
         - docker image ls -a
 
@@ -270,9 +270,9 @@ jobs:
         - export BUILD_VERSION_TAG=opendap/hyrax:c7-ngap-${HYRAX_VERSION}
         - cd hyrax-builds
         - ls -l
-        - cp ./${LIBDAP_C7_RPM} ./ngap
-        - cp ./${BES_C7_RPM} ./ngap
-        - cp ./${NGAP_DISTRO} ./ngap
+        - cp ./${LIBDAP_C7_RPM} ./ngap-c7
+        - cp ./${BES_C7_RPM} ./ngap-c7
+        - cp ./${NGAP_DISTRO} ./ngap-c7
         - docker build --build-arg RELEASE_DATE
           --build-arg RELEASE_DATE
           --build-arg HYRAX_VERSION
@@ -280,7 +280,7 @@ jobs:
           --build-arg BES_VERSION
           --build-arg OLFS_VERSION
           --build-arg USE_NCWMS=true
-          --tag "${SNAPSHOT_IMAGE_TAG}" ngap
+          --tag "${SNAPSHOT_IMAGE_TAG}" ngap-c7
         - docker tag ${SNAPSHOT_IMAGE_TAG} ${BUILD_VERSION_TAG}
         - docker image ls -a
 
