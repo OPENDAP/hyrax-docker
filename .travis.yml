@@ -13,6 +13,7 @@ services:
 branches:
   only:
     - master
+    - centos8
 
 notifications:
   email:
