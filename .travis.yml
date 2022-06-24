@@ -234,9 +234,9 @@ jobs:
         - docker build --build-arg RELEASE_DATE
           --build-arg HYRAX_VERSION
           --build-arg OLFS_VERSION
-          -t "${SNAPSHOT_IMAGE_TAG}" olfs
-          - docker tag ${SNAPSHOT_IMAGE_TAG} ${BUILD_VERSION_TAG}
-          - docker image ls -a
+          --tag "${SNAPSHOT_IMAGE_TAG}"
+          --tag "${BUILD_VERSION_TAG}" olfs
+        - docker image ls -a
 
 
     - stage: build_and_test_hyrax_service
