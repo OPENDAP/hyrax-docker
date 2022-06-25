@@ -97,6 +97,10 @@ stages:
 
 jobs:
   include:
+    ############################################################################
+    #
+    # RH8 Builds
+    #
     - stage: RH8_TEST
       name: "Build and Test opendap/hyrax:snapshot (RH8)"
       script:
@@ -106,6 +110,7 @@ jobs:
         - cd hyrax-builds
         - source ./build-rh8
         - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
+        - show_version
         - get_tomcat_distro "${DOCKER_DIR}" "${TOMCAT_VERSION}"
         - get_besd_distro
           "${S3_BUILD_BUCKET}"
@@ -142,6 +147,7 @@ jobs:
         - export BUILD_VERSION_TAG=opendap/besd:${HYRAX_VERSION}
         - cd hyrax-builds
         - source ./build-rh8
+        - show_version
         - get_besd_distro
           "${S3_BUILD_BUCKET}"
           "${DOCKER_DIR}"
@@ -167,6 +173,7 @@ jobs:
         - cd hyrax-builds
         - source ./build-rh8
         - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
+        - show_version
         - get_tomcat_distro "${DOCKER_DIR}" "${TOMCAT_VERSION}"
         - get_besd_distro
           "${S3_BUILD_BUCKET}"
@@ -199,6 +206,7 @@ jobs:
         - cd hyrax-builds
         - source ./build-rh8
         - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
+        - show_version
         - get_tomcat_distro "${DOCKER_DIR}" "${TOMCAT_VERSION}"
         - get_besd_distro
           "${S3_BUILD_BUCKET}"
@@ -229,6 +237,7 @@ jobs:
         - export BUILD_VERSION_TAG=opendap/olfs:${OLFS_VERSION}
         - cd hyrax-builds
         - source ./build-rh8
+        - show_version
         - get_olfs_distro
           "${S3_BUILD_BUCKET}"
           "olfs"
@@ -240,6 +249,18 @@ jobs:
           --tag "${BUILD_VERSION_TAG}" olfs
         - docker image ls -a
 
+
+    - stage: test_deployed_image
+      name: "Test Deployed Image (RH8)"
+      script:
+        - export TEST_IMAGE="opendap/hyrax:snapshot"
+        - echo "Running Hyrax Regression Test Script on ${TEST_IMAGE}"
+        - ./regression_test_script -i "${TEST_IMAGE}"
+
+    ############################################################################
+    #
+    # CentOS-7 Builds
+    #
     - stage: build_and_test_hyrax_service
       name: "Build and Test opendap/hyrax:c7-snapshot (CentOS-7)"
       script:
@@ -324,8 +345,10 @@ jobs:
     - stage: test_deployed_image
       name: "Test Deployed Image (CentOS-7)"
       script:
-        - echo "Running Test Script"
-        - ./regression_test_script
+        - export TEST_IMAGE="opendap/hyrax:c7-snapshot"
+        - echo "Running Hyrax Regression Test Script on ${TEST_IMAGE}"
+        - ./regression_test_script -i "${TEST_IMAGE}"
+
 
 before_deploy:
   - export DOCKER_LOGIN=`aws ecr get-login --region us-east-1 | sed "s/-e none //g"`;
