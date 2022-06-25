@@ -253,7 +253,7 @@ jobs:
     - stage: test_deployed_image
       name: "Test Deployed Image (RH8)"
       script:
-        - export TEST_IMAGE="opendap/hyrax:snapshot"
+        - export TEST_IMAGE=opendap/hyrax:${HYRAX_VERSION}
         - echo "Running Hyrax Regression Test Script on ${TEST_IMAGE}"
         - ./regression_test_script -i "${TEST_IMAGE}"
 
@@ -345,7 +345,7 @@ jobs:
     - stage: disabled
       name: "Test Deployed Image (CentOS-7)"
       script:
-        - export TEST_IMAGE="opendap/hyrax:c7-snapshot"
+        - export TEST_IMAGE=opendap/hyrax:c7-${HYRAX_VERSION}
         - echo "Running Hyrax Regression Test Script on ${TEST_IMAGE}"
         - ./regression_test_script -i "${TEST_IMAGE}"
 
