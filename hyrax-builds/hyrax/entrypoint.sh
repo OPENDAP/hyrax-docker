@@ -56,8 +56,8 @@ while getopts "de:sn:i:k:r:" opt; do
       echo "Set ncWMS public facing service base to : ${NCWMS_BASE}" >&2
       ;;
     d)
-      export debug=true;
-      echo "Debug is enabled" >&2;
+      export debug=true
+      echo "Debug is enabled" >&2
       ;;
     k)
       export AWS_SECRET_ACCESS_KEY="${OPTARG}"
