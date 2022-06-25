@@ -87,9 +87,9 @@ stages:
   - name: RH8_BUILD
     if:  branch = master
   - name: C7_BUILD_AND_TEST
-    if:  branch = master
+    if:  branch = disabled
   - name: C7_BUILD
-    if:  branch = master
+    if:  branch = disabled
   - name: test_deployed_image
     if: branch = master
   - name: disabled
@@ -342,7 +342,7 @@ jobs:
         - docker tag ${SNAPSHOT_IMAGE_TAG} ${BUILD_VERSION_TAG}
         - docker image ls -a
 
-    - stage: test_deployed_image
+    - stage: disabled
       name: "Test Deployed Image (CentOS-7)"
       script:
         - export TEST_IMAGE="opendap/hyrax:c7-snapshot"
