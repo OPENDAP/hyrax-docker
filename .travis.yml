@@ -82,13 +82,13 @@ install:
   - ls -l ./hyrax-builds
 
 stages:
-  - name: RH8_TEST
+  - name: RH8_BUILD_AND_TEST
     if:  branch = master
   - name: RH8_BUILD
     if:  branch = master
-  - name: build_and_test_hyrax_service
+  - name: C7_BUILD_AND_TEST
     if:  branch = master
-  - name: build
+  - name: C7_BUILD
     if:  branch = master
   - name: test_deployed_image
     if: branch = master
@@ -101,7 +101,7 @@ jobs:
     #
     # RH8 Builds
     #
-    - stage: RH8_TEST
+    - stage: RH8_BUILD_AND_TEST
       name: "Build and Test opendap/hyrax:snapshot (RH8)"
       script:
         - export DOCKER_DIR="hyrax"
@@ -261,7 +261,7 @@ jobs:
     #
     # CentOS-7 Builds
     #
-    - stage: build_and_test_hyrax_service
+    - stage: C7_BUILD_AND_TEST
       name: "Build and Test opendap/hyrax:c7-snapshot (CentOS-7)"
       script:
         - export SNAPSHOT_IMAGE_TAG=opendap/hyrax:c7-snapshot
@@ -284,7 +284,7 @@ jobs:
         - echo "Running Test Script"
         - ./regression_test_script -i ${SNAPSHOT_IMAGE_TAG}
 
-    - stage: build
+    - stage: C7_BUILD
       name: "Build opendap/besd:c7-snapshot (CentOS-7)"
       script:
         - export SNAPSHOT_IMAGE_TAG=opendap/besd:c7-snapshot
@@ -300,7 +300,7 @@ jobs:
         - docker tag ${SNAPSHOT_IMAGE_TAG} ${BUILD_VERSION_TAG}
         - docker image ls -a
 
-    - stage: build
+    - stage: C7_BUILD
       name: "Build opendap/hyrax_ncwms:c7-snapshot (CentOS-7)"
       script:
         - export SNAPSHOT_IMAGE_TAG=opendap/hyrax_ncwms:c7-snapshot
@@ -321,7 +321,7 @@ jobs:
         - docker tag ${SNAPSHOT_IMAGE_TAG} ${BUILD_VERSION_TAG}
         - docker image ls -a
 
-    - stage: build
+    - stage: C7_BUILD
       name: "opendap/hyrax:c7-ngap-snapshot (CentOS-7)"
       script:
         - export SNAPSHOT_IMAGE_TAG=opendap/hyrax:c7-ngap-snapshot
