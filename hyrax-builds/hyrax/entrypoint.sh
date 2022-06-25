@@ -95,9 +95,11 @@ if test "${debug}" = "true" ; then
 fi
 
 if test "${debug}" = "true" ; then
-    echo "NCWMS_BASE: ${NCWMS_BASE}"  >&2
-    echo "Setting ncWMS access URLs in viewers.xml (if needed)."  >&2
+    echo "NCWMS: Using NCWMS_BASE: ${NCWMS_BASE}"  >&2
+    echo "NCWMS: Setting ncWMS access URLs in viewers.xml (if needed)."  >&2
+    ls -l "${VIEWERS_XML}" >&2
 fi
+
 
 sed -i "s+@NCWMS_BASE@+$NCWMS_BASE+g" ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml
 if test "${debug}" = "true" ; then
@@ -117,9 +119,14 @@ if test "${FOLLOW_SYMLINKS}" != "not_set" ; then
     sed -i "s/^BES.Catalog.catalog.FollowSymLinks=No/BES.Catalog.catalog.FollowSymLinks=Yes/" /etc/bes/bes.conf
 fi
 
-echo "JAVA: "
+echo "JAVA VERSION: "
 java -version
 
+aws configure list >&2
+status=$?
+if test $status -ne 0 ; then
+    echo "WARNING: Problem with AWS CLI! (status: ${status})" >&2
+fi
 
 #-------------------------------------------------------------------------------
 # Start the BES daemon process
@@ -127,7 +134,7 @@ java -version
 /usr/bin/besctl start
 status=$?
 if test $status -ne 0 ; then
-    echo "Failed to start BES: $status" >&2
+    echo "ERROR: Failed to start BES: $status" >&2
     exit $status
 fi
 besd_pid=`ps aux | grep /usr/bin/besdaemon | grep -v grep | awk '{print $2;}' - `
@@ -137,14 +144,14 @@ echo "The BES is UP! pid: $besd_pid" >&2
 # Start Tomcat process
 #
 export OLFS_CONF="${CATALINA_HOME}/webapps/opendap/WEB-INF/conf"
-mv ${OLFS_CONF}/logback.xml ${OLFS_CONF}/logback.xml.OFF
+# mv ${OLFS_CONF}/logback.xml ${OLFS_CONF}/logback.xml.OFF
 echo "Starting Tomcat..." >&2
 #systemctl start tomcat
 ${CATALINA_HOME}/bin/startup.sh 2>&1 > /var/log/tomcat/console.log &
 status=$?
 tomcat_pid=$!
 if test $status -ne 0 ; then
-    echo "Failed to start Tomcat: $status" >&2
+    echo "ERROR: Failed to start Tomcat: $status" >&2
     exit $status
 fi
 # When we launch tomcat the initial pid gets "retired" because it spawns a
@@ -188,15 +195,15 @@ while /bin/true; do
     if test $TOMCAT_STATUS -ne 0 ; then
         echo "TOMCAT_STATUS: $TOMCAT_STATUS tomcat_pid:$tomcat_pid" >&2
         echo "Tomcat appears to have died! Exiting." >&2
-        #echo "Tomcat Console Log [BEGIN]" >&2
-        #cat /var/log/tomcat/console.log >&2
-        #echo "Tomcat Console Log [END]" >&2
-        #echo "catalina.out [BEGIN]" >&2
-        #cat /usr/share/tomcat/logs/catalina.out >&2
-        #echo "catalina.out [END]" >&2
-        #echo "localhost.log [BEGIN]" >&2
-        #cat /usr/share/tomcat/logs/localhost* >&2
-        #echo "localhost.log [END]" >&2
+        echo "Tomcat Console Log [BEGIN]" >&2
+        cat /var/log/tomcat/console.log >&2
+        echo "Tomcat Console Log [END]" >&2
+        echo "catalina.out [BEGIN]" >&2
+        cat /usr/share/tomcat/logs/catalina.out >&2
+        echo "catalina.out [END]" >&2
+        echo "localhost.log [BEGIN]" >&2
+        cat /usr/share/tomcat/logs/localhost* >&2
+        echo "localhost.log [END]" >&2
         exit 2
     fi
     

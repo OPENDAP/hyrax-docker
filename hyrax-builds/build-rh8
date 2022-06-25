@@ -1,6 +1,6 @@
 #!/bin/bash
 HR="###########################################################################"
-export DOCKER_NAME=${DOCKER_NAME:-"hyrax-rh8"}
+export DOCKER_NAME=${DOCKER_NAME:-"hyrax"}
 export TOMCAT_MAJOR_VERSION=${TOMCAT_MAJOR_VERSION:-"9"}
 export SLEEP_INTERVAL=${SLEEP_INTERVAL:-60}
 export NO_CACHE=${NO_CACHE:-""}
@@ -332,7 +332,7 @@ function build_hyrax() {
     echo "${HR}" >&2
     echo "# TASK: build_hyrax()" >&2
 #        --no-cache \
-        docker build ${NO_CACHE}\
+        docker build ${NO_CACHE} \
         --platform linux/amd64 \
         --build-arg TOMCAT_VERSION \
         --build-arg RELEASE_DATE \
@@ -397,14 +397,16 @@ function debug_hyrax(){
 }
 
 function cleanup_build_files(){
+    local docker_name="${1}"
+
     echo "${HR}" >&2
     echo "# TASK: cleanup_build_files()" >&2
-    echo "#     Cleaning ${DOCKER_NAME}" >&2
+    echo "#     Cleaning ${docker_name}" >&2
     local build_files=""
-    build_files="${build_files} ${DOCKER_NAME}/*.rpm"
-    build_files="${build_files} ${DOCKER_NAME}/olfs*.tgz"
-    build_files="${build_files} ${DOCKER_NAME}/ngap*.tgz"
-    build_files="${build_files} ${DOCKER_NAME}/robots*.tgz"
+    build_files="${build_files} ${docker_name}/*.rpm"
+    build_files="${build_files} ${docker_name}/olfs*.tgz"
+    build_files="${build_files} ${docker_name}/ngap*.tgz"
+    build_files="${build_files} ${docker_name}/robots*.tgz"
     build_files="${build_files} ${DOCKER_NAME}/apache*"
     # ls -Gl ${build_files} >&2
     rm -fv ${build_files} >&2
@@ -413,8 +415,8 @@ function cleanup_build_files(){
     echo "#" >&2
 }
 
-function build_hyrax_rh8() {
-    local log_file="brh8.log"
+function build_hyrax() {
+    local log_file="build_hyrax.log"
     show_version 2>&1 | tee "${log_file}" >&2
 
     local tomcat_version="unset"
@@ -441,14 +443,14 @@ function build_hyrax_rh8() {
         "${OLFS_VERSION}" 2>&1 | tee -a "${log_file}" >&2
 
     build_hyrax 2>&1 | tee -a "${log_file}" >&2
-    cleanup_build_files 2>&1 | tee -a "${log_file}" >&2
+    cleanup_build_files "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}" >&2
 }
 
 
-function build_ngap_rh8() {
-    local log_file="brh8.log"
+function build_ngap() {
+    local log_file="build_ngap.log"
 
-    export DOCKER_NAME="ngap-rh8"
+    export DOCKER_NAME="ngap"
     show_version 2>&1 | tee "${log_file}" >&2
 
 
@@ -471,7 +473,7 @@ function build_ngap_rh8() {
         "${OLFS_VERSION}" 2>&1 | tee -a "${log_file}" >&2
 
     build_ngap 2>&1 | tee -a "${log_file}" >&2
-    cleanup_build_files 2>&1 | tee -a "${log_file}" >&2
+    cleanup_build_files "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}" >&2
 }
 
 

@@ -104,23 +104,23 @@ jobs:
     - stage: RH8_BUILD_AND_TEST
       name: "Build and Test opendap/hyrax:snapshot (RH8)"
       script:
-        - export DOCKER_DIR="hyrax"
+        - export DOCKER_NAME="hyrax"
         - export SNAPSHOT_IMAGE_TAG=opendap/hyrax:snapshot
         - export BUILD_VERSION_TAG=opendap/hyrax:${HYRAX_VERSION}
         - cd hyrax-builds
         - source ./build-rh8
         - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
         - show_version
-        - get_tomcat_distro "${DOCKER_DIR}" "${TOMCAT_VERSION}"
+        - get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_VERSION}"
         - get_besd_distro
           "${S3_BUILD_BUCKET}"
-          "${DOCKER_DIR}"
+          "${DOCKER_NAME}"
           "el8"
           "${LIBDAP_VERSION}"
           "${BES_VERSION}" true 2>&1
         - get_olfs_distro
           "${S3_BUILD_BUCKET}"
-          "${DOCKER_DIR}"
+          "${DOCKER_NAME}"
           "${OLFS_VERSION}" 2>&1
         - docker build
           --build-arg TOMCAT_VERSION
@@ -131,7 +131,7 @@ jobs:
           --build-arg OLFS_VERSION
           --tag "${SNAPSHOT_IMAGE_TAG}"
           --tag "${BUILD_VERSION_TAG}"
-          "${DOCKER_DIR}"
+          "${DOCKER_NAME}"
         - docker image ls -a
         - cd ..
         - echo "Running Test Script"
@@ -140,7 +140,7 @@ jobs:
     - stage: RH8_BUILD
       name: "Build opendap/besd:snapshot (RH8)"
       script:
-        - export DOCKER_DIR="besd"
+        - export DOCKER_NAME="besd"
         - export SNAPSHOT_IMAGE_TAG=opendap/besd:snapshot
         - export BUILD_VERSION_TAG=opendap/besd:${HYRAX_VERSION}
         - cd hyrax-builds
@@ -148,7 +148,7 @@ jobs:
         - show_version
         - get_besd_distro
           "${S3_BUILD_BUCKET}"
-          "${DOCKER_DIR}"
+          "${DOCKER_NAME}"
           "el8"
           "${LIBDAP_VERSION}"
           "${BES_VERSION}" true 2>&1
@@ -159,29 +159,29 @@ jobs:
           --build-arg BES_VERSION
           --tag "${SNAPSHOT_IMAGE_TAG}"
           --tag "${BUILD_VERSION_TAG}"
-          "${DOCKER_DIR}"
+          "${DOCKER_NAME}"
         - docker image ls -a
 
     - stage: RH8_BUILD
       name: "Build opendap/hyrax_ncwms:snapshot (RH8)"
       script:
-        - export DOCKER_DIR="hyrax"
+        - export DOCKER_NAME="hyrax"
         - export SNAPSHOT_IMAGE_TAG=opendap/hyrax_ncwms:snapshot
         - export BUILD_VERSION_TAG=opendap/hyrax_ncwms:${HYRAX_VERSION}
         - cd hyrax-builds
         - source ./build-rh8
         - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
         - show_version
-        - get_tomcat_distro "${DOCKER_DIR}" "${TOMCAT_VERSION}"
+        - get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_VERSION}"
         - get_besd_distro
           "${S3_BUILD_BUCKET}"
-          "${DOCKER_DIR}"
+          "${DOCKER_NAME}"
           "el8"
           "${LIBDAP_VERSION}"
           "${BES_VERSION}" true 2>&1
         - get_olfs_distro
           "${S3_BUILD_BUCKET}"
-          "${DOCKER_DIR}"
+          "${DOCKER_NAME}"
           "${OLFS_VERSION}" 2>&1
         - docker build
           --build-arg RELEASE_DATE
@@ -192,29 +192,29 @@ jobs:
           --build-arg USE_NCWMS=true
           --tag "${SNAPSHOT_IMAGE_TAG}"
           --tag "${BUILD_VERSION_TAG}"
-          "${DOCKER_DIR}"
+          "${DOCKER_NAME}"
         - docker image ls -a
 
     - stage: RH8_BUILD
       name: "Build opendap/hyrax:ngap-snapshot (RH8)"
       script:
-        - export DOCKER_DIR="ngap"
+        - export DOCKER_NAME="ngap"
         - export SNAPSHOT_IMAGE_TAG=opendap/hyrax:ngap-snapshot
         - export BUILD_VERSION_TAG=opendap/hyrax:ngap-${HYRAX_VERSION}
         - cd hyrax-builds
         - source ./build-rh8
         - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
         - show_version
-        - get_tomcat_distro "${DOCKER_DIR}" "${TOMCAT_VERSION}"
+        - get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_VERSION}"
         - get_besd_distro
           "${S3_BUILD_BUCKET}"
-          "${DOCKER_DIR}"
+          "${DOCKER_NAME}"
           "el8"
           "${LIBDAP_VERSION}"
           "${BES_VERSION}" true 2>&1
         - get_ngap_distro
           "${S3_BUILD_BUCKET}"
-          "${DOCKER_DIR}"
+          "${DOCKER_NAME}"
           "${OLFS_VERSION}" 2>&1
         - docker build
           --build-arg TOMCAT_VERSION
@@ -225,7 +225,7 @@ jobs:
           --build-arg OLFS_VERSION
           --tag "${SNAPSHOT_IMAGE_TAG}"
           --tag "${BUILD_VERSION_TAG}"
-          "${DOCKER_DIR}"
+          "${DOCKER_NAME}"
         - docker image ls -a
         - docker push ${SNAPSHOT_IMAGE_TAG}
         - docker push ${BUILD_VERSION_TAG}
@@ -359,6 +359,6 @@ deploy:
     script: bash ${TRAVIS_BUILD_DIR}/deploy_to_docker_hub.sh
     on:
       branch: master
-#      condition: ${TRAVIS_PULL_REQUEST} = "false"
+      condition: ${TRAVIS_PULL_REQUEST} = "false"
 
 

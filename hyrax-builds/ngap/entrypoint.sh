@@ -147,14 +147,14 @@ while getopts "de:sn:" opt; do
   esac
 done
 
-if [ $debug = true ];then
+if test "${debug}" = "true" ; then
     echo "CATALINA_HOME: ${CATALINA_HOME}"  >&2
     ls -l "$CATALINA_HOME" "$CATALINA_HOME/bin"  >&2
 fi
 
 DEFAULT_CONF_DIR="${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf"
 VIEWERS_XML="${DEFAULT_CONF_DIR}/viewers.xml"
-if [ $debug = true ];then
+if test "${debug}" = "true" ; then
     echo "NCWMS: Using NCWMS_BASE: ${NCWMS_BASE}"  >&2
     echo "NCWMS: Setting ncWMS access URLs in viewers.xml (if needed)."  >&2
     ls -l "${VIEWERS_XML}" >&2
@@ -164,16 +164,14 @@ if test -f "${VIEWERS_XML}"; then
     sed -i "s+@NCWMS_BASE@+${NCWMS_BASE}+g" "${VIEWERS_XML}";
 fi
 
-if [ $debug = true ];then
+if test "${debug}" = "true" ; then
     echo "${VIEWERS_XML} - "  >&2
     cat "${VIEWERS_XML}" >&2
 fi
 
-# while true; do sleep 1; done
-
 LOGBACK_XML="${DEFAULT_CONF_DIR}/logback.xml"
 NGAP_LOGBACK_XML="${DEFAULT_CONF_DIR}/logback-ngap.xml"
-if [ $debug = true ];then
+if test "${debug}" = "true" ; then
     cp "${NGAP_LOGBACK_XML}" "${LOGBACK_XML}"
     echo "Enabled Logback (slf4j) debug logging for NGAP."  >&2
     cat "${LOGBACK_XML}"  >&2
@@ -181,74 +179,104 @@ fi
 
 # modify bes.conf based on environment variables before startup.
 #
-if [ "${SERVER_HELP_EMAIL}" != "not_set" ]; then
-    echo "Setting Admin Contact To: ${SERVER_HELP_EMAIL}" >&2
-    sed -i "s/admin.email.address@your.domain.name/${SERVER_HELP_EMAIL}/" /etc/bes/bes.conf
+if test "${SERVER_HELP_EMAIL}" != "not_set" ; then
+    echo "Setting Admin Contact To: $SERVER_HELP_EMAIL"
+    sed -i "s/admin.email.address@your.domain.name/$SERVER_HELP_EMAIL/" /etc/bes/bes.conf
 fi
-
-if [ "${FOLLOW_SYMLINKS}" != "not_set" ]; then
+if test "${FOLLOW_SYMLINKS}" != "not_set" ; then
     echo "Setting BES FollowSymLinks to YES." >&2
     sed -i "s/^BES.Catalog.catalog.FollowSymLinks=No/BES.Catalog.catalog.FollowSymLinks=Yes/" /etc/bes/bes.conf
 fi
 
+echo "JAVA VERSION: "
+java -version
+
 aws configure list >&2
 status=$?
-if [ $status -ne 0 ]; then
-    echo "Problem with AWS CLI!" >&2
+if test $status -ne 0 ; then
+    echo "WARNING: Problem with AWS CLI! (status: ${status})" >&2
 fi
 
-
+#-------------------------------------------------------------------------------
 # Start the BES daemon process
 # /usr/bin/besdaemon -i /usr -c /etc/bes/bes.conf -r /var/run/bes.pid
 /usr/bin/besctl start -d "/dev/null,timing" >&2
 status=$?
-if [ $status -ne 0 ]; then
+if test $status -ne 0 ; then
     echo "ERROR: Failed to start BES: $status" >&2
     exit $status
 fi
-besd_pid=`ps aux | grep /usr/bin/besdaemon | grep -v grep | awk '{print $2;}' - `;
+besd_pid=`ps aux | grep /usr/bin/besdaemon | grep -v grep | awk '{print $2;}' - `
 echo "The BES is UP! pid: $besd_pid" >&2
 
-
+#-------------------------------------------------------------------------------
 # Start Tomcat process
-/usr/libexec/tomcat/server start > /var/log/tomcat/console.log 2>&1 &
+#
+export OLFS_CONF="${CATALINA_HOME}/webapps/opendap/WEB-INF/conf"
+# mv ${OLFS_CONF}/logback.xml ${OLFS_CONF}/logback.xml.OFF
+echo "Starting Tomcat..." >&2
+#systemctl start tomcat
+${CATALINA_HOME}/bin/startup.sh 2>&1 > /var/log/tomcat/console.log &
 status=$?
 tomcat_pid=$!
-if [ $status -ne 0 ]; then
+if test $status -ne 0 ; then
     echo "ERROR: Failed to start Tomcat: $status" >&2
     exit $status
 fi
-echo "Tomcat is UP! pid: $tomcat_pid" >&2
+# When we launch tomcat the initial pid gets "retired" because it spawns a
+# secondary processes.
+initial_pid="${tomcat_pid}"
+echo "Tomcat started, initial pid: ${initial_pid}" >&2
+while test $initial_pid -eq $tomcat_pid
+do
+    sleep 1
+    tomcat_ps=$(ps aux | grep tomcat | grep -v grep)
+    echo "tomcat_ps: ${tomcat_ps}" >&2
+    tomcat_pid=$(echo ${tomcat_ps} | awk '{print $2}')
+    echo "tomcat_pid: ${tomcat_pid}" >&2
+done
+# New pid and we should be good to go.
+echo "Tomcat is UP! pid: ${tomcat_pid}" >&2
 
 # TEMPORARY
 /cleanup_files.sh >&2 &
 # TEMPORARY
 
 echo "Hyrax Has Arrived..." >&2
-
+echo "--------------------------------------------------------------------" >&2
+#-------------------------------------------------------------------------------
 while /bin/true; do
-    sleep 60
-    besd_ps=`ps -f $besd_pid`;
+    sleep ${SLEEP_INTERVAL}
+    echo "Checking Hyrax Operational State..." >&2
+    besd_ps=`ps -f $besd_pid`
     BESD_STATUS=$?
+    echo "BESD_STATUS: ${BESD_STATUS}" >&2
 
-    tomcat_ps=`ps -f $tomcat_pid`;
+    tomcat_ps=$(ps -f "${tomcat_pid}")
     TOMCAT_STATUS=$?
+    echo "TOMCAT_STATUS: ${TOMCAT_STATUS}" >&2
 
-    if [ $BESD_STATUS -ne 0 ]; then
-        echo "ERROR: BESD_STATUS: $BESD_STATUS bes_pid:$bes_pid" >&2
-        echo "ERROR: The BES daemon appears to have died! Exiting." >&2
-        exit 1;
+    if test $BESD_STATUS -ne 0 ; then
+        echo "BESD_STATUS: $BESD_STATUS bes_pid:$bes_pid" >&2
+        echo "The BES daemon appears to have died! Exiting." >&2
+        exit 1
     fi
-    if [ $TOMCAT_STATUS -ne 0 ]; then
+    if test $TOMCAT_STATUS -ne 0 ; then
         echo "TOMCAT_STATUS: $TOMCAT_STATUS tomcat_pid:$tomcat_pid" >&2
         echo "Tomcat appears to have died! Exiting." >&2
         echo "Tomcat Console Log [BEGIN]" >&2
-        cat /usr/share/tomcat/logs/console.log >&2
+        cat /var/log/tomcat/console.log >&2
         echo "Tomcat Console Log [END]" >&2
+        echo "catalina.out [BEGIN]" >&2
+        cat /usr/share/tomcat/logs/catalina.out >&2
+        echo "catalina.out [END]" >&2
+        echo "localhost.log [BEGIN]" >&2
+        cat /usr/share/tomcat/logs/localhost* >&2
+        echo "localhost.log [END]" >&2
         exit 2
     fi
 
-    if [ $debug = true ];then
+    if test $debug = true ; then
         echo "-------------------------------------------------------------------"  >&2
         date >&2
         echo "BESD_STATUS: $BESD_STATUS  besd_pid:$besd_pid" >&2
@@ -258,4 +286,6 @@ while /bin/true; do
     tail -f /var/log/bes/bes.log | awk -f beslog2json.awk
 
 done
+#-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 
