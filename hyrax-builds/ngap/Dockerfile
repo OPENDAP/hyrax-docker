@@ -205,8 +205,8 @@ RUN set -e \
     && cp olfs/resources/ngap/lib/elasticache-java-cluster-client-1.1.2.jar ${CATALINA_HOME}/lib \
     && echo "Copying memcached Session Manager" \
     && cp olfs/resources/ngap/lib/memcached-session-manager-2.3.2.jar ${CATALINA_HOME}/lib \
-    && echo "Copying memcached Session Manager TC7" \
-    && cp olfs/resources/ngap/lib/memcached-session-manager-tc7-2.3.2.jar ${CATALINA_HOME}/lib \
+    && echo "Copying memcached Session Manager TC9" \
+    && cp olfs/resources/ngap/lib/memcached-session-manager-tc9-2.3.2.jar ${CATALINA_HOME}/lib \
     && chown -R tomcat:tomcat  ${CATALINA_HOME}/lib \
     && rm -rfv olfs
 
