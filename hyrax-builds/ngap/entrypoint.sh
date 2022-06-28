@@ -20,14 +20,14 @@ echo "#" >&2
 echo "${HR2}" >&2
 echo "#      Checking AWS CLI: " >&2
 echo "#" >&2
-aws configure list 2>&1 | awk '{print "#    "$0;}' >&2
+aws configure list 2>&1 | awk '{print "##    "$0;}' >&2
 status=$?
 if test $status -ne 0 ; then
     echo "WARNING: Problem with AWS CLI! (status: ${status})" >&2
 fi
 echo "#" >&2
 echo "#          JAVA VERSION: " >&2
-java -version 2>&1 | awk '{print "#                       "$0;}' >&2
+java -version 2>&1 | awk '{print "##                       "$0;}' >&2
 echo "#" >&2
 export JAVA_HOME=${JAVA_HOME:-"/etc/alternatives/jre"}
 echo "#             JAVA_HOME: ${JAVA_HOME}" >&2
@@ -93,7 +93,7 @@ if test -n "${HOST}"  &&  test -n "${USERNAME}"  &&  test -n "${PASSWORD}" ; the
     chown bes:bes "${NETRC_FILE}"
     chmod 400 "${NETRC_FILE}"
     echo "#  "$(ls -l "${NETRC_FILE}")  >&2
-    cat "${NETRC_FILE}" | awk '{print "#    "$0;}' >&2
+    cat "${NETRC_FILE}" | awk '{print "##    "$0;}' >&2
     echo "#" >&2
 fi
 ################################################################################
@@ -111,7 +111,7 @@ if test -n "${USER_ACCESS_XML}"  ; then
     echo "# Updating OLFS user access controls: ${USER_ACCESS_XML_FILE}" >&2
     echo "${USER_ACCESS_XML}" > ${USER_ACCESS_XML_FILE}
     echo "# ${USER_ACCESS_XML_FILE}: " >&2
-    cat "${USER_ACCESS_XML_FILE}" | awk '{print "#    "$0;}' >&2
+    cat "${USER_ACCESS_XML_FILE}" | awk '{print "##    "$0;}' >&2
     echo "#" >&2
 fi
 ################################################################################
@@ -129,7 +129,7 @@ if test -n "${BES_SITE_CONF}" ; then
     # @TODO THis seems like a crappy hack, we should just change the source file in BitBucket to be correct
     echo "${BES_SITE_CONF}" | sed -e "s+BES.LogName=stdout+BES.LogName=${BES_LOG_FILE}+g" > ${BES_SITE_CONF_FILE}
     echo "# ${BES_SITE_CONF_FILE}: " >&2
-    cat "${BES_SITE_CONF_FILE}" | awk '{print "#    "$0;}' >&2
+    cat "${BES_SITE_CONF_FILE}" | awk '{print "##    "$0;}' >&2
     echo "#" >&2
 fi
 ################################################################################
@@ -145,7 +145,7 @@ if test -n "${TOMCAT_CONTEXT_XML}" ; then
     echo "# Tomcat context.xml file: ${TOMCAT_CONTEXT_FILE}" >&2
     echo "${TOMCAT_CONTEXT_XML}" > ${TOMCAT_CONTEXT_FILE}
     echo "# ${TOMCAT_CONTEXT_FILE}: " >&2
-    cat "${TOMCAT_CONTEXT_FILE}" | awk '{print "#    "$0;}' >&2
+    cat "${TOMCAT_CONTEXT_FILE}" | awk '{print "##    "$0;}' >&2
     echo "#" >&2
 fi
 ################################################################################
@@ -263,7 +263,7 @@ fi
 
 if test "${debug}" = "true" ; then
     echo "# ${VIEWERS_XML}: " >&2
-    cat  "${VIEWERS_XML}" | awk '{print "#    "$0;}' >&2
+    cat  "${VIEWERS_XML}" | awk '{print "##    "$0;}' >&2
     echo "#" >&2
 fi
 ################################################################################
@@ -278,7 +278,7 @@ if test "${debug}" = "true" ; then
     ngap_logback_xml="${OLFS_CONF_DIR}/logback-ngap.xml"
     cp "${ngap_logback_xml}" "${logback_xml}"
     echo "# Enabled Logback (slf4j) debug logging for NGAP."  >&2
-    cat  "${logback_xml}" | awk '{print "#    "$0;}' >&2
+    cat  "${logback_xml}" | awk '{print "##    "$0;}' >&2
     echo "#"  >&2
 fi
 ################################################################################
@@ -342,9 +342,9 @@ while test $initial_pid -eq $tomcat_pid
 do
     sleep 1
     tomcat_ps=$(ps aux | grep tomcat | grep -v grep)
-    echo "tomcat_ps: ${tomcat_ps}" >&2
+    echo "#  tomcat_ps: ${tomcat_ps}" >&2
     tomcat_pid=$(echo ${tomcat_ps} | awk '{print $2}')
-    echo "tomcat_pid: ${tomcat_pid}" >&2
+    echo "# tomcat_pid: ${tomcat_pid}" >&2
 done
 # New pid and we should be good to go.
 echo "# Tomcat is UP! pid: ${tomcat_pid}" >&2
@@ -355,12 +355,13 @@ echo "#" >&2
 # TEMPORARY
 
 echo "# Hyrax Has Arrived..." >&2
+echo "#" >&2
 echo "${HR1}" >&2
 #-------------------------------------------------------------------------------
 while /bin/true; do
     sleep ${SLEEP_INTERVAL}
     echo "Checking Hyrax Operational State..." >&2
-    besd_ps=`ps -f $besd_pid`
+    besd_ps=$(ps -f $besd_pid)
     BESD_STATUS=$?
     echo "BESD_STATUS: ${BESD_STATUS}" >&2
     if test $BESD_STATUS -ne 0 ; then

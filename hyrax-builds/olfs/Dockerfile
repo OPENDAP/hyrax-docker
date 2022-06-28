@@ -28,6 +28,8 @@ USER root
 
 # Update OS and install ps (and other filesystem utils)
 RUN set -e \
+    && sudo apt autoremove \
+    && sudo apt autoclean -y \
     && apt-get -y update
 
 #
