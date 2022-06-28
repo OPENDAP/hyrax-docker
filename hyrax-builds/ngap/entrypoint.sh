@@ -5,11 +5,11 @@
 # set -v # "set -o verbose" Prints shell input lines as they are read.
 # set -x # "set -o xtrace"  Print command traces before executing command.
 # set -e #  Exit on error.
-export HRH="########################## HYRAX #################################"
-export HRB="########################## besd ##################################"
-export HRT="####################### Tomcat/OLFS ###############################"
-export HR0="##################################################################"
-export HR0="#-----------------------------------------------------------------"
+export HRH="########################### HYRAX #################################"
+export HRB="########################### besd ##################################"
+export HRT="####################### Tomcat/OLFS ################################"
+export HR0="###################################################################"
+export HR1="#-----------------------------------------------------------------"
 export HR2="#-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --"
 #echo "entrypoint.sh  command line: \"$@\""
 echo "${HRH}" >&2
@@ -17,7 +17,9 @@ echo "# Greetings, I am "`whoami`"." >&2
 set -e
 #set -x
 echo "#" >&2
-echo "${HR2}" >&2
+
+################################################################################
+echo "${HR1}" >&2
 echo "#      Checking AWS CLI: " >&2
 echo "#" >&2
 aws configure list 2>&1 | awk '{print "##    "$0;}' >&2
@@ -26,25 +28,31 @@ if test $status -ne 0 ; then
     echo "WARNING: Problem with AWS CLI! (status: ${status})" >&2
 fi
 echo "#" >&2
+################################################################################
+echo "${HR2}" >&2
 echo "#          JAVA VERSION: " >&2
 java -version 2>&1 | awk '{print "##                       "$0;}' >&2
 echo "#" >&2
 export JAVA_HOME=${JAVA_HOME:-"/etc/alternatives/jre"}
 echo "#             JAVA_HOME: ${JAVA_HOME}" >&2
-echo "${HR2}" >&2
 
-export SLEEP_INTERVAL=${SLEEP_INTERVAL:-60}
-echo "#        SLEEP_INTERVAL: ${SLEEP_INTERVAL} seconds." >&2
+export CATALINA_HOME=${CATALINA_HOME:-"NOT_SET"}
+echo "#         CATALINA_HOME: ${CATALINA_HOME}" >&2
 
-export SERVER_HELP_EMAIL=${SERVER_HELP_EMAIL:-"not_set"}
-echo "#     SERVER_HELP_EMAIL: ${SERVER_HELP_EMAIL}" >&2
+export DEPLOYMENT_CONTEXT=${DEPLOYMENT_CONTEXT:-"ROOT"}
+echo "#    DEPLOYMENT_CONTEXT: ${DEPLOYMENT_CONTEXT}" >&2
 
-export FOLLOW_SYMLINKS=${FOLLOW_SYMLINKS:-"not_set"}
-echo "#       FOLLOW_SYMLINKS: ${FOLLOW_SYMLINKS}" >&2
+export OLFS_CONF_DIR="${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf"
+echo "#         OLFS_CONF_DIR: ${OLFS_CONF_DIR}" >&2
+
+export TOMCAT_CONTEXT_FILE="/usr/share/tomcat/conf/context.xml"
+echo "#   TOMCAT_CONTEXT_FILE: ${TOMCAT_CONTEXT_FILE}" >&2
 
 export NCWMS_BASE=${NCWMS_BASE:-"https://localhost:8080"}
 echo "#            NCWMS_BASE: ${NCWMS_BASE}" >&2
 
+################################################################################
+echo "${HR2}" >&2
 export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-"<not set>"}
 echo "# AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}" >&2
 
@@ -54,20 +62,8 @@ echo "#     AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}" >&2
 export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-"<not set>"}
 echo "#    AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}" >&2
 
-export CATALINA_HOME=${CATALINA_HOME:-"NOT_SET"}
-echo "#         CATALINA_HOME: ${CATALINA_HOME}" >&2
-
-export DEPLOYMENT_CONTEXT=${DEPLOYMENT_CONTEXT:-"ROOT"}
-echo "#    DEPLOYMENT_CONTEXT: ${DEPLOYMENT_CONTEXT}" >&2
-
-
-export OLFS_CONF_DIR="${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf"
-echo "#         OLFS_CONF_DIR: ${OLFS_CONF_DIR}" >&2
-
-
-export TOMCAT_CONTEXT_FILE="/usr/share/tomcat/conf/context.xml"
-echo "#   TOMCAT_CONTEXT_FILE: ${TOMCAT_CONTEXT_FILE}" >&2
-
+################################################################################
+echo "${HR2}" >&2
 export NETRC_FILE="/etc/bes/ngap_netrc"
 echo "#            NETRC_FILE: ${NETRC_FILE}" >&2
 
@@ -77,6 +73,16 @@ echo "#    BES_SITE_CONF_FILE: ${BES_SITE_CONF_FILE}" >&2
 export BES_LOG_FILE="/var/log/bes/bes.log"
 echo "#          BES_LOG_FILE: ${BES_LOG_FILE}" >&2
 
+export SLEEP_INTERVAL=${SLEEP_INTERVAL:-60}
+echo "#        SLEEP_INTERVAL: ${SLEEP_INTERVAL} seconds." >&2
+
+export SERVER_HELP_EMAIL=${SERVER_HELP_EMAIL:-"not_set"}
+echo "#     SERVER_HELP_EMAIL: ${SERVER_HELP_EMAIL}" >&2
+
+export FOLLOW_SYMLINKS=${FOLLOW_SYMLINKS:-"not_set"}
+echo "#       FOLLOW_SYMLINKS: ${FOLLOW_SYMLINKS}" >&2
+echo "#" >&2
+echo "${HR1}" >&2
 
 
 ################################################################################
@@ -110,7 +116,6 @@ if test -n "${USER_ACCESS_XML}"  ; then
     USER_ACCESS_XML_FILE="${OLFS_CONF_DIR}/user-access.xml"
     echo "# Updating OLFS user access controls: ${USER_ACCESS_XML_FILE}" >&2
     echo "${USER_ACCESS_XML}" > ${USER_ACCESS_XML_FILE}
-    echo "# ${USER_ACCESS_XML_FILE}: " >&2
     cat "${USER_ACCESS_XML_FILE}" | awk '{print "##    "$0;}' >&2
     echo "#" >&2
 fi
@@ -128,7 +133,6 @@ if test -n "${BES_SITE_CONF}" ; then
     # echo "${BES_SITE_CONF}" > ${BES_SITE_CONF_FILE}
     # @TODO THis seems like a crappy hack, we should just change the source file in BitBucket to be correct
     echo "${BES_SITE_CONF}" | sed -e "s+BES.LogName=stdout+BES.LogName=${BES_LOG_FILE}+g" > ${BES_SITE_CONF_FILE}
-    echo "# ${BES_SITE_CONF_FILE}: " >&2
     cat "${BES_SITE_CONF_FILE}" | awk '{print "##    "$0;}' >&2
     echo "#" >&2
 fi
@@ -144,7 +148,6 @@ if test -n "${TOMCAT_CONTEXT_XML}" ; then
     echo "${HR2}" >&2
     echo "# Tomcat context.xml file: ${TOMCAT_CONTEXT_FILE}" >&2
     echo "${TOMCAT_CONTEXT_XML}" > ${TOMCAT_CONTEXT_FILE}
-    echo "# ${TOMCAT_CONTEXT_FILE}: " >&2
     cat "${TOMCAT_CONTEXT_FILE}" | awk '{print "##    "$0;}' >&2
     echo "#" >&2
 fi
