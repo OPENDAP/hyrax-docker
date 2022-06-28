@@ -27,9 +27,9 @@ LABEL org.opendap.hyrax.version.is-production="false"
 USER root
 
 # Update OS and install ps (and other filesystem utils)
-# RUN set -e && rm -rf /var/lib/apt/lists/*
-# RUN printf "deb http://archive.debian.org/debian/ jessie main\ndeb-src http://archive.debian.org/debian/ jessie main\ndeb http://security.debian.org jessie/updates main\ndeb-src http://security.debian.org jessie/updates main" > /etc/apt/sources.list
-RUN set -e && apt-get -y unzip
+#RUN set -e && apt-get -y update
+RUN set -e && apt-get -y install unzip
+
 #
 # The --build-arg USE_NCWMS can be set to "true" in order to 
 # add the ncWMS application to the build.
