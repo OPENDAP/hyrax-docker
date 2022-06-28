@@ -5,27 +5,33 @@
 # set -v # "set -o verbose" Prints shell input lines as they are read.
 # set -x # "set -o xtrace"  Print command traces before executing command.
 # set -e #  Exit on error.
-
+export HRH="########################## HYRAX #################################"
+export HRB="########################## besd ##################################"
+export HRT="####################### Tomcat/OLFS ###############################"
+export HR0="##################################################################"
+export HR0="#-----------------------------------------------------------------"
+export HR2="#-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --"
 #echo "entrypoint.sh  command line: \"$@\""
-echo "############################## HYRAX ################################" >&2
+echo "${HRH}" >&2
 echo "# Greetings, I am "`whoami`"." >&2
 set -e
 #set -x
-echo "#"
-
-echo "#      Checking AWS CLI: "
+echo "#" >&2
+echo "${HR2}" >&2
+echo "#      Checking AWS CLI: " >&2
+echo "#" >&2
 aws configure list 2>&1 | awk '{print "#    "$0;}' >&2
 status=$?
 if test $status -ne 0 ; then
     echo "WARNING: Problem with AWS CLI! (status: ${status})" >&2
 fi
-
-echo  "#          JAVA VERSION: "
+echo "#" >&2
+echo "#          JAVA VERSION: " >&2
 java -version 2>&1 | awk '{print "#                       "$0;}' >&2
-
-echo "#--------------------------------------------------------------------" >&2
+echo "#" >&2
 export JAVA_HOME=${JAVA_HOME:-"/etc/alternatives/jre"}
 echo "#             JAVA_HOME: ${JAVA_HOME}" >&2
+echo "${HR2}" >&2
 
 export SLEEP_INTERVAL=${SLEEP_INTERVAL:-60}
 echo "#        SLEEP_INTERVAL: ${SLEEP_INTERVAL} seconds." >&2
@@ -78,16 +84,16 @@ echo "#          BES_LOG_FILE: ${BES_LOG_FILE}" >&2
 # Only modify the .netrc file if all three environment variables are defined
 #
 if test -n "${HOST}"  &&  test -n "${USERNAME}"  &&  test -n "${PASSWORD}" ; then
-    echo "# -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- " >&2
+    echo "${HR2}" >&2
     echo "# Updating netrc file: ${NETRC_FILE}" >&2
     # machine is a domain name or a ip address, not a URL.
-    echo "machine ${HOST}" | sed -e "s_https:__g"  -e "s_http:__g" -e "s+/++g" >> "${NETRC_FILE}"
-    echo "    login ${USERNAME}"    >> "${NETRC_FILE}"
-    echo "    password ${PASSWORD}" >> "${NETRC_FILE}"
+    echo "# machine ${HOST}" | sed -e "s_https:__g"  -e "s_http:__g" -e "s+/++g" >> "${NETRC_FILE}"
+    echo "#    login ${USERNAME}"    >> "${NETRC_FILE}"
+    echo "#    password ${PASSWORD}" >> "${NETRC_FILE}"
     chown bes:bes "${NETRC_FILE}"
     chmod 400 "${NETRC_FILE}"
-    ls -l "${NETRC_FILE}"  >&2
-    cat "${NETRC_FILE}" >&2
+    echo "#  "$(ls -l "${NETRC_FILE}")  >&2
+    cat "${NETRC_FILE}" | awk '{print "#    "$0;}' >&2
     echo "#" >&2
 fi
 ################################################################################
@@ -97,14 +103,15 @@ fi
 # Inject user-access.xml document to define the servers relationship to
 # EDL and the user access rules.
 #
-# Test if the user-access.xml env variable is set (by way of not unset) and not empty
+# Test if the user-access.xml env variable is set (by way of not unset) and
+# not empty
 if test -n "${USER_ACCESS_XML}"  ; then
-    echo "# -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- " >&2
+    echo "${HR2}" >&2
     USER_ACCESS_XML_FILE="${OLFS_CONF_DIR}/user-access.xml"
     echo "# Updating OLFS user access controls: ${USER_ACCESS_XML_FILE}" >&2
     echo "${USER_ACCESS_XML}" > ${USER_ACCESS_XML_FILE}
-    echo "${USER_ACCESS_XML_FILE} -" >&2
-    cat ${USER_ACCESS_XML_FILE} >&2
+    echo "# ${USER_ACCESS_XML_FILE}: " >&2
+    cat "${USER_ACCESS_XML_FILE}" | awk '{print "#    "$0;}' >&2
     echo "#" >&2
 fi
 ################################################################################
@@ -116,13 +123,13 @@ fi
 #
 # Test if the bes.conf env variable is set (by way of not unset) and not empty
 if test -n "${BES_SITE_CONF}" ; then
-    echo "# -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- " >&2
+    echo "${HR2}" >&2
     echo "# Updating BES site.conf: ${BES_SITE_CONF_FILE}" >&2
     # echo "${BES_SITE_CONF}" > ${BES_SITE_CONF_FILE}
     # @TODO THis seems like a crappy hack, we should just change the source file in BitBucket to be correct
     echo "${BES_SITE_CONF}" | sed -e "s+BES.LogName=stdout+BES.LogName=${BES_LOG_FILE}+g" > ${BES_SITE_CONF_FILE}
-    echo "${BES_SITE_CONF_FILE} - " >&2
-    cat ${BES_SITE_CONF_FILE} >&2
+    echo "# ${BES_SITE_CONF_FILE}: " >&2
+    cat "${BES_SITE_CONF_FILE}" | awk '{print "#    "$0;}' >&2
     echo "#" >&2
 fi
 ################################################################################
@@ -134,11 +141,11 @@ fi
 #
 # Test if the bes.conf env variable is set (by way of not unset) and not empty
 if test -n "${TOMCAT_CONTEXT_XML}" ; then
-    echo "# -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- " >&2
+    echo "${HR2}" >&2
     echo "# Tomcat context.xml file: ${TOMCAT_CONTEXT_FILE}" >&2
     echo "${TOMCAT_CONTEXT_XML}" > ${TOMCAT_CONTEXT_FILE}
-    echo "${TOMCAT_CONTEXT_FILE} - " >&2
-    cat ${TOMCAT_CONTEXT_FILE} >&2
+    echo "# ${TOMCAT_CONTEXT_FILE}: " >&2
+    cat "${TOMCAT_CONTEXT_FILE}" | awk '{print "#    "$0;}' >&2
     echo "#" >&2
 fi
 ################################################################################
@@ -228,10 +235,12 @@ done
 ################################################################################
 
 if test "${debug}" = "true" ; then
+    echo "${HR2}" >&2
     echo "# CATALINA_HOME: ${CATALINA_HOME}"  >&2
-    ls -l "${CATALINA_HOME}" >&2
+    echo "#    " $(ls -l "${CATALINA_HOME}")  >&2
     echo "# CATALINA_HOME/bin: ${CATALINA_HOME}/bin"  >&2
-    ls -l "${CATALINA_HOME}/bin"  >&2
+    echo "#    " $(ls -l "${CATALINA_HOME}/bin")  >&2
+    echo "#" >&2
 fi
 
 
@@ -241,10 +250,11 @@ fi
 #
 VIEWERS_XML="${OLFS_CONF_DIR}/viewers.xml"
 if test "${debug}" = "true" ; then
-    echo "# -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- " >&2
-    echo "NCWMS: Using NCWMS_BASE: ${NCWMS_BASE}"  >&2
-    echo "NCWMS: Setting ncWMS access URLs in viewers.xml (if needed)."  >&2
-    ls -l "${VIEWERS_XML}" >&2
+    echo "${HR2}" >&2
+    echo "# NCWMS: Using NCWMS_BASE: ${NCWMS_BASE}"  >&2
+    echo "# NCWMS: Setting ncWMS access URLs in viewers.xml (if needed)."  >&2
+    echo "# " $(ls -l "${VIEWERS_XML}") >&2
+    echo "#" >&2
 fi
 
 if test -f "${VIEWERS_XML}"; then
@@ -252,8 +262,9 @@ if test -f "${VIEWERS_XML}"; then
 fi
 
 if test "${debug}" = "true" ; then
-    echo "${VIEWERS_XML} - "  >&2
-    cat "${VIEWERS_XML}" >&2
+    echo "# ${VIEWERS_XML}: " >&2
+    cat  "${VIEWERS_XML}" | awk '{print "#    "$0;}' >&2
+    echo "#" >&2
 fi
 ################################################################################
 
@@ -261,13 +272,13 @@ fi
 #
 # Configure OLFS debug logging if debug is enabled.
 if test "${debug}" = "true" ; then
-    echo "# -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- " >&2
-    echo "# Configuring OLFS to debug logging..."
+    echo "${HR2}" >&2
+    echo "# Configuring OLFS to debug logging..." >&2
     logback_xml="${OLFS_CONF_DIR}/logback.xml"
     ngap_logback_xml="${OLFS_CONF_DIR}/logback-ngap.xml"
     cp "${ngap_logback_xml}" "${logback_xml}"
     echo "# Enabled Logback (slf4j) debug logging for NGAP."  >&2
-    cat "${logback_xml}"  >&2
+    cat  "${logback_xml}" | awk '{print "#    "$0;}' >&2
     echo "#"  >&2
 fi
 ################################################################################
@@ -277,13 +288,13 @@ fi
 # modify bes.conf based on environment variables before startup.
 #
 if test "${SERVER_HELP_EMAIL}" != "not_set" ; then
-    echo "# -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- " >&2
-    echo "Setting Admin Contact To: $SERVER_HELP_EMAIL"
+    echo "${HR2}" >&2
+    echo "# Setting Admin Contact To: $SERVER_HELP_EMAIL" >&2
     sed -i "s/admin.email.address@your.domain.name/$SERVER_HELP_EMAIL/" /etc/bes/bes.conf
     echo "#"  >&2
 fi
 if test "${FOLLOW_SYMLINKS}" != "not_set" ; then
-    echo "# -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- " >&2
+    echo "${HR2}" >&2
     echo "Setting BES FollowSymLinks to YES." >&2
     sed -i "s/^BES.Catalog.catalog.FollowSymLinks=No/BES.Catalog.catalog.FollowSymLinks=Yes/" /etc/bes/bes.conf
     echo "#" >&2
@@ -295,7 +306,7 @@ fi
 #-------------------------------------------------------------------------------
 # Start the BES daemon process
 # /usr/bin/besdaemon -i /usr -c /etc/bes/bes.conf -r /var/run/bes.pid
-echo "############################## besd #################################" >&2
+echo "${HRB}" >&2
 echo "#    Starting besd..."
 /usr/bin/besctl start -d "/dev/null,timing" >&2
 status=$?
@@ -310,7 +321,7 @@ echo "#" >&2
 #-------------------------------------------------------------------------------
 # Start Tomcat process
 #
-echo "########################### tomcat/olfs #############################" >&2
+echo "${HRT}" >&2
 echo "#    Starting tomcat/olfs..." >&2
 
 # mv ${OLFS_CONF_DIR}/logback.xml ${OLFS_CONF_DIR}/logback.xml.OFF
@@ -344,7 +355,7 @@ echo "#" >&2
 # TEMPORARY
 
 echo "# Hyrax Has Arrived..." >&2
-echo "#--------------------------------------------------------------------" >&2
+echo "${HR1}" >&2
 #-------------------------------------------------------------------------------
 while /bin/true; do
     sleep ${SLEEP_INTERVAL}
@@ -352,16 +363,15 @@ while /bin/true; do
     besd_ps=`ps -f $besd_pid`
     BESD_STATUS=$?
     echo "BESD_STATUS: ${BESD_STATUS}" >&2
+    if test $BESD_STATUS -ne 0 ; then
+        echo "BESD_STATUS: $BESD_STATUS bes_pid:$bes_pid" >&2
+        echo "The BES daemon appears to have died! Exiting." >&2
+        exit $BESD_STATUS
+    fi
 
     tomcat_ps=$(ps -f "${tomcat_pid}")
     TOMCAT_STATUS=$?
     echo "TOMCAT_STATUS: ${TOMCAT_STATUS}" >&2
-
-    if test $BESD_STATUS -ne 0 ; then
-        echo "BESD_STATUS: $BESD_STATUS bes_pid:$bes_pid" >&2
-        echo "The BES daemon appears to have died! Exiting." >&2
-        exit 1
-    fi
     if test $TOMCAT_STATUS -ne 0 ; then
         echo "TOMCAT_STATUS: $TOMCAT_STATUS tomcat_pid:$tomcat_pid" >&2
         echo "Tomcat appears to have died! Exiting." >&2
@@ -374,11 +384,11 @@ while /bin/true; do
         echo "localhost.log [BEGIN]" >&2
         cat /usr/share/tomcat/logs/localhost* >&2
         echo "localhost.log [END]" >&2
-        exit 2
+        exit $TOMCAT_STATUS
     fi
 
     if test $debug = true ; then
-        echo "#-----------------------------------------------------------"  >&2
+        echo "${HR1}"  >&2
         date >&2
         echo "# BESD_STATUS: $BESD_STATUS  besd_pid:$besd_pid" >&2
         echo "# TOMCAT_STATUS: $TOMCAT_STATUS tomcat_pid:$tomcat_pid" >&2
