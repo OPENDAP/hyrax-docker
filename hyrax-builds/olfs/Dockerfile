@@ -56,7 +56,6 @@ ENV PATH $CATALINA_HOME/bin:$PATH
 RUN echo "CATALINA_HOME: $CATALINA_HOME"
 
 # SNAPSHOT URLs
-ENV OLFS_PACKAGE="s3://opendap.travis.build/olfs-${OLFS_VERSION}-webapp.tgz"
 RUN echo "OLFS_VERSION: ${OLFS_VERSION}"
 
 ###############################################################
@@ -72,11 +71,17 @@ RUN echo "Installing the latest olfs snapshot (${OLFS_VERSION}.tgz)."
 RUN set -e \
     && tar -C ${ROOT} -xzvf /${OLFS_DISTRO}.tgz \
     && ls -l ${ROOT} \
-    && echo "Unpacking warfile..." \
-    && mkdir -p ${CATALINA_HOME}/webapps/opendap/ \
-    && (cd ${CATALINA_HOME}/webapps/opendap/ && jar -xf ${ROOT}/${OLFS_DISTRO}/opendap.war) \
-    && echo "Cleaning up." \
+    && echo "Unpacking warfile..."  >&2 \
+    && mkdir -p $(readlink -f ${CATALINA_HOME})/webapps/opendap/ \
+    && unzip -o ${ROOT}/${OLFS_DISTRO}/opendap.war -d ${CATALINA_HOME}/webapps/opendap/ \
+    && echo "Cleaning up."  >&2 \
     && rm -rf ${ROOT}/${OLFS_DISTRO} /${OLFS_DISTRO}.tgz
+
+#    && echo "Unpacking warfile ${ROOT}/${OLFS_DISTRO}/opendap.war" \
+#    && mkdir -p ${CATALINA_HOME}/webapps/opendap/ \
+#    && (cd ${CATALINA_HOME}/webapps/opendap/ && jar -xf ${ROOT}/${OLFS_DISTRO}/opendap.war) \
+#    && echo "Cleaning up." \
+#    && rm -rf ${ROOT}/${OLFS_DISTRO} /${OLFS_DISTRO}.tgz
 
 
 # set host for bes that olfs will contact - this is expected to be over docker's internal network
