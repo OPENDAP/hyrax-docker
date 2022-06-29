@@ -83,8 +83,18 @@ RUN set -e \
     && mkdir -p ${CATALINA_HOME}/webapps/opendap/
 
 RUN set -e \
+    && echo "/proc/sys/kernel/threads-max" \
+    && cat /proc/sys/kernel/threads-max
+
+RUN set -e \
+    && echo "/etc/security/limits.conf" \
+    && cat /etc/security/limits.conf
+
+RUN set -e \
     && cd ${CATALINA_HOME}/webapps/opendap/ \
     && jar -xf ${DIST_WAR_FILE}
+
+
 
 RUN set -e \
     && echo "Cleaning up." \
