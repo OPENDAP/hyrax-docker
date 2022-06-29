@@ -15,7 +15,7 @@ ENV OLFS_VERSION=${OLFS_VERSION:-"unknown"}
 RUN echo "OLFS_VERSION: ${OLFS_VERSION}"
 
 ARG OLFS_DISTRO
-ENV OLFS_DISTRO=${OLFS_DISTRO:-"./olfs-${OLFS_VERSION}-webapp"}
+ENV OLFS_DISTRO=${OLFS_DISTRO:-"olfs-${OLFS_VERSION}-webapp"}
 RUN echo "OLFS_DISTRO: ${OLFS_DISTRO}"
 COPY ${OLFS_DISTRO}.tgz /${OLFS_DISTRO}.tgz
 
@@ -28,7 +28,6 @@ USER root
 
 # Update OS and install ps (and other filesystem utils)
 #RUN set -e && apt-get -y update
-
 
 RUN set -e && sed -i 's/# \(.*multiverse$\)/\1/g' /etc/apt/sources.list
 RUN set -e && apt-get update

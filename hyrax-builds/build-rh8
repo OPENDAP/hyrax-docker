@@ -169,7 +169,7 @@ function s3_pull(){
     local object_name="${2}"
     local target_dir="${3}"
     echo "# S3 - Retrieving ${object_name} from ${bucket_name}" >&2
-    aws s3 cp --quiet "s3://${bucket_name}/${object_name}" "${target_dir}/${object_name}" >&2
+    python3 -m awscli s3 cp --quiet "s3://${bucket_name}/${object_name}" "${target_dir}/${object_name}" >&2
     echo "#" >&2
 }
 
@@ -276,15 +276,15 @@ function get_olfs_distro() {
 
 ################################################################################
 #
-# get_ngap_distro() - Get the rpm and war files need for a Hyrax installation
-#    from the identified S3 bucket.
+# get_ngap_olfs_distro() - Get the rpm and war files need for a Hyrax NGAP OLFS
+#    installation from the identified S3 bucket.
 #    $1 - The AWS S3 bucket from which to pull the Hyrax components
 #    $2 - The directory into which to place the Hyrax components.
 #    $3 - The olfs version number ##.##.##-##
 #
-function get_ngap_distro() {
+function get_ngap_olfs_distro() {
     echo "${HR}" >&2
-    echo "# TASK: get_ngap_distro()" >&2
+    echo "# TASK: get_ngap_olfs_distro()" >&2
     local s3_bucket="${1}"
     echo "#          s3_bucket: ${s3_bucket}" >&2
     local target_dir="${2}"
@@ -328,9 +328,9 @@ function build_ngap() {
 
 
 
-function build_hyrax() {
+function build_hyrax_docker() {
     echo "${HR}" >&2
-    echo "# TASK: build_hyrax()" >&2
+    echo "# TASK: build_hyrax_docker()" >&2
 #        --no-cache \
         docker build ${NO_CACHE} \
         --platform linux/amd64 \
@@ -437,12 +437,12 @@ function build_hyrax() {
         "${DOCKER_NAME}" \
         "${OLFS_VERSION}" 2>&1 | tee -a "${log_file}" >&2
 
-    get_ngap_distro \
+    get_ngap_olfs_distro \
         "${S3_BUILD_BUCKET}" \
         "${DOCKER_NAME}" \
         "${OLFS_VERSION}" 2>&1 | tee -a "${log_file}" >&2
 
-    build_hyrax 2>&1 | tee -a "${log_file}" >&2
+    build_hyrax_docker 2>&1 | tee -a "${log_file}" >&2
     cleanup_build_files "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}" >&2
 }
 
@@ -467,13 +467,64 @@ function build_ngap() {
         "${LIBDAP_VERSION}" \
         "${BES_VERSION}" 2>&1 | tee -a "${log_file}" >&2
 
-    get_ngap_distro \
+    get_ngap_olfs_distro \
         "${S3_BUILD_BUCKET}" \
         "${DOCKER_NAME}" \
         "${OLFS_VERSION}" 2>&1 | tee -a "${log_file}" >&2
 
-    build_ngap 2>&1 | tee -a "${log_file}" >&2
+    build_hyrax_docker 2>&1 | tee -a "${log_file}" >&2
     cleanup_build_files "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}" >&2
+}
+
+
+
+
+
+
+function build_olfs_docker() {
+    echo "${HR}" >&2
+    echo "# TASK: build_olfs_docker()" >&2
+#        --no-cache \
+        docker build ${NO_CACHE} \
+        --platform linux/amd64 \
+        --build-arg TOMCAT_VERSION \
+        --build-arg RELEASE_DATE \
+        --build-arg HYRAX_VERSION \
+        --build-arg OLFS_VERSION \
+        --tag "${IMAGE_TAG}" \
+        --tag "${SNAPSHOT_TAG}" \
+        ${DOCKER_NAME}
+    echo "#" >&2
+    echo "#" >&2
+}
+
+function build_olfs() {
+    local log_file="build_olfs.log"
+
+    export DOCKER_NAME="olfs"
+    show_version 2>&1 | tee "${log_file}" >&2
+
+#    local tomcat_version="unset"
+##    tomcat_version=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
+#    get_tomcat_distro \
+#        "${DOCKER_NAME}" \
+#        "${tomcat_version}" 2>&1 | tee -a "${log_file}" >&2
+#
+#    get_besd_distro \
+#        "${S3_BUILD_BUCKET}" \
+#        "${DOCKER_NAME}" \
+#        "el8" \
+#        "${LIBDAP_VERSION}" \
+#        "${BES_VERSION}" 2>&1 | tee -a "${log_file}" >&2
+
+
+    get_olfs_distro \
+        "${S3_BUILD_BUCKET}" \
+        "${DOCKER_NAME}" \
+        "${OLFS_VERSION}" 2>&1 | tee -a "${log_file}" >&2
+
+    build_olfs_docker 2>&1 | tee -a "${log_file}" >&2
+#    cleanup_build_files "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}" >&2
 }
 
 
