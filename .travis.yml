@@ -82,12 +82,14 @@ install:
   - ls -l ./hyrax-builds
 
 stages:
-  - name: FIRST
+  - name: OLFS
     if:  branch = master
   - name: RH8_BUILD_AND_TEST
     if:  branch = master
   - name: RH8_BUILD
     if:  branch = master
+  - name: OLFS
+    if: branch = master
   - name: C7_BUILD_AND_TEST
     if:  branch = disabled
   - name: C7_BUILD
@@ -234,7 +236,7 @@ jobs:
         - docker push ${SNAPSHOT_IMAGE_TAG}
         - docker push ${BUILD_VERSION_TAG}
 
-    - stage: FIRST
+    - stage: OLFS
       name: "Build opendap/olfs:snapshot"
       script:
         - export SNAPSHOT_IMAGE_TAG=opendap/olfs:snapshot
