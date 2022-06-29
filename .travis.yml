@@ -82,8 +82,6 @@ install:
   - ls -l ./hyrax-builds
 
 stages:
-  - name: OLFS
-    if:  branch = master
   - name: RH8_BUILD_AND_TEST
     if:  branch = master
   - name: RH8_BUILD
