@@ -26,6 +26,9 @@ LABEL org.opendap.hyrax.version.is-production="false"
 
 USER root
 
+# Hack to fix broken apt-get update
+RUN set -e && apt-get remove libappstream3
+
 # Update OS and install ps (and other filesystem utils)
 RUN set -e && apt-get -y update
 
