@@ -30,11 +30,10 @@ USER root
 #RUN set -e && apt-get -y update
 
 
-RUN set -e \
-    && sed -i 's/# \(.*multiverse$\)/\1/g' /etc/apt/sources.list \
-    && apt-get update \
-    && apt-get -y upgrade \
-    && apt -y install unzip
+RUN set -e && sed -i 's/# \(.*multiverse$\)/\1/g' /etc/apt/sources.list
+RUN set -e && apt-get update
+RUN set -e && apt-get -y upgrade
+RUN set -e && apt -y install unzip
 
 #
 # The --build-arg USE_NCWMS can be set to "true" in order to 
