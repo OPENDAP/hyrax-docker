@@ -30,8 +30,10 @@ USER root
 #RUN set -e && apt-get -y update
 
 RUN set -e && sed -i 's/# \(.*multiverse$\)/\1/g' /etc/apt/sources.list
+RUN set -e && rm -fr /var/lib/apt/lists
+RUN set -e && mkdir -pv /var/lib/apt/lists/partial
 RUN set -e && apt-get -oDebug::pkgAcquire::Worker=1 update
-RUN set -e && apt-get -y -oDebug::pkgAcquire::Worker=1 upgrade
+RUN set -e && apt-get -y upgrade
 RUN set -e && apt-get -y install unzip
 
 #
