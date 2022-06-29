@@ -27,7 +27,7 @@ LABEL org.opendap.hyrax.version.is-production="false"
 USER root
 
 # Hack to fix broken apt-get update
-RUN set -e && apt-get -V
+RUN set -e && apt list --installed
 
 # Update OS and install ps (and other filesystem utils)
 RUN set -e && apt-get -y update
