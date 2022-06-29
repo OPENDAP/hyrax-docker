@@ -28,7 +28,7 @@ USER root
 
 # Update OS and install ps (and other filesystem utils)
 #RUN set -e && apt-get -y update
-RUN set -e && apt-get -y install zip
+RUN set -e && apt -y install unzip
 
 #
 # The --build-arg USE_NCWMS can be set to "true" in order to 
