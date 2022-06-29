@@ -3,7 +3,7 @@
 ###
 
 #
-FROM tomcat:9-jre11
+FROM tomcat:9
 MAINTAINER support@opendap.org
 
 ARG RELEASE_DATE

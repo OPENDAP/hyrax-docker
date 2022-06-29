@@ -216,7 +216,7 @@ jobs:
           "el8"
           "${LIBDAP_VERSION}"
           "${BES_VERSION}" true 2>&1
-        - get_ngap_distro
+        - get_ngap_olfs_distro
           "${S3_BUILD_BUCKET}"
           "${DOCKER_NAME}"
           "${OLFS_VERSION}" 2>&1
