@@ -29,12 +29,12 @@ USER root
 # Update OS and install ps (and other filesystem utils)
 #RUN set -e && apt-get -y update
 
-RUN set -e && sed -i 's/# \(.*multiverse$\)/\1/g' /etc/apt/sources.list
-RUN set -e && rm -fr /var/lib/apt/lists
-RUN set -e && mkdir -pv /var/lib/apt/lists/partial
-RUN set -e && apt-get -oDebug::pkgAcquire::Worker=1 update
-RUN set -e && apt-get -y upgrade
-RUN set -e && apt-get -y install unzip
+#RUN set -e && sed -i 's/# \(.*multiverse$\)/\1/g' /etc/apt/sources.list
+#RUN set -e && rm -fr /var/lib/apt/lists
+#RUN set -e && mkdir -pv /var/lib/apt/lists/partial
+#RUN set -e && apt-get -oDebug::pkgAcquire::Worker=1 update
+#RUN set -e && apt-get -y upgrade
+#RUN set -e && apt-get -y install unzip
 
 #
 # The --build-arg USE_NCWMS can be set to "true" in order to 
@@ -77,17 +77,24 @@ RUN echo "Installing the latest olfs snapshot (${OLFS_VERSION}.tgz)."
 RUN set -e \
     && tar -C ${ROOT} -xzvf /${OLFS_DISTRO}.tgz \
     && ls -l ${ROOT} \
-    && echo "Unpacking warfile..."  >&2 \
-    && mkdir -p $(readlink -f ${CATALINA_HOME})/webapps/opendap/ \
-    && unzip -o ${ROOT}/${OLFS_DISTRO}/opendap.war -d ${CATALINA_HOME}/webapps/opendap/ \
-    && echo "Cleaning up."  >&2 \
+    && export DIST_WAR_FILE="${ROOT}/${OLFS_DISTRO}/opendap.war"
+    && echo "Unpacking warfile ${DIST_WAR_FILE}" \
+    && mkdir -p ${CATALINA_HOME}/webapps/opendap/ \
+    && cd ${CATALINA_HOME}/webapps/opendap/ \
+    && jar -xf ${DIST_WAR_FILE} \
+    && echo "Cleaning up." \
     && rm -rf ${ROOT}/${OLFS_DISTRO} /${OLFS_DISTRO}.tgz
-
-#    && echo "Unpacking warfile ${ROOT}/${OLFS_DISTRO}/opendap.war" \
-#    && mkdir -p ${CATALINA_HOME}/webapps/opendap/ \
-#    && (cd ${CATALINA_HOME}/webapps/opendap/ && jar -xf ${ROOT}/${OLFS_DISTRO}/opendap.war) \
-#    && echo "Cleaning up." \
+    
+#    && echo "Installing warfile ${DIST_WAR_FILE}"  >&2 \
+#    && cp "${WAR_FILE}" ${CATALINA_HOME}/webapps
 #    && rm -rf ${ROOT}/${OLFS_DISTRO} /${OLFS_DISTRO}.tgz
+
+#    && echo "Unpacking warfile..."  >&2 \
+#    && mkdir -p $(readlink -f ${CATALINA_HOME})/webapps/opendap/ \
+#    && unzip -o ${ROOT}/${OLFS_DISTRO}/opendap.war -d ${CATALINA_HOME}/webapps/opendap/ \
+#    && echo "Cleaning up."  >&2 \
+#    && rm -rf ${ROOT}/${OLFS_DISTRO} /${OLFS_DISTRO}.tgz
+
 
 
 # set host for bes that olfs will contact - this is expected to be over docker's internal network
