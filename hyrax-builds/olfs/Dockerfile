@@ -77,14 +77,14 @@ RUN echo "Installing the latest olfs snapshot (${OLFS_VERSION}.tgz)."
 RUN set -e \
     && tar -C ${ROOT} -xzvf /${OLFS_DISTRO}.tgz \
     && ls -l ${ROOT} \
-    && export DIST_WAR_FILE="${ROOT}/${OLFS_DISTRO}/opendap.war"
+    && export DIST_WAR_FILE="${ROOT}/${OLFS_DISTRO}/opendap.war" \
     && echo "Unpacking warfile ${DIST_WAR_FILE}" \
     && mkdir -p ${CATALINA_HOME}/webapps/opendap/ \
     && cd ${CATALINA_HOME}/webapps/opendap/ \
     && jar -xf ${DIST_WAR_FILE} \
     && echo "Cleaning up." \
     && rm -rf ${ROOT}/${OLFS_DISTRO} /${OLFS_DISTRO}.tgz
-    
+
 #    && echo "Installing warfile ${DIST_WAR_FILE}"  >&2 \
 #    && cp "${WAR_FILE}" ${CATALINA_HOME}/webapps
 #    && rm -rf ${ROOT}/${OLFS_DISTRO} /${OLFS_DISTRO}.tgz
