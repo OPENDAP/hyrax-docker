@@ -3,7 +3,7 @@
 ###
 
 #
-FROM tomcat:9
+FROM tomcat:9-jre11
 MAINTAINER support@opendap.org
 
 ARG RELEASE_DATE
@@ -27,14 +27,14 @@ LABEL org.opendap.hyrax.version.is-production="false"
 USER root
 
 # Update OS and install ps (and other filesystem utils)
-#RUN set -e && apt-get -y update
+RUN set -e && apt-get -y update
 
 #RUN set -e && sed -i 's/# \(.*multiverse$\)/\1/g' /etc/apt/sources.list
 #RUN set -e && rm -fr /var/lib/apt/lists
 #RUN set -e && mkdir -pv /var/lib/apt/lists/partial
 #RUN set -e && apt-get -oDebug::pkgAcquire::Worker=1 update
 #RUN set -e && apt-get -y upgrade
-#RUN set -e && apt-get -y install unzip
+RUN set -e && apt-get -y install unzip
 
 #
 # The --build-arg USE_NCWMS can be set to "true" in order to 
@@ -78,36 +78,19 @@ RUN echo "Installing the latest olfs snapshot (${OLFS_VERSION}.tgz)."
 RUN set -e \
     && tar -C ${ROOT} -xzvf /${OLFS_DISTRO}.tgz \
     && ls -l ${ROOT} \
-    && export DIST_WAR_FILE="${ROOT}/${OLFS_DISTRO}/opendap.war" \
+    && mkdir -p $(readlink -f ${CATALINA_HOME})/webapps/opendap/
+
+RUN set -e \
     && echo "Unpacking warfile ${DIST_WAR_FILE}" \
-    && mkdir -p ${CATALINA_HOME}/webapps/opendap/
+    && unzip -o ${DIST_WAR_FILE} -d ${CATALINA_HOME}/webapps/opendap/
 
 RUN set -e \
-    && echo "/proc/sys/kernel/threads-max" \
-    && cat /proc/sys/kernel/threads-max
-
-RUN set -e \
-    && echo "/etc/security/limits.conf" \
-    && cat /etc/security/limits.conf
-
-RUN set -e \
-    && cd ${CATALINA_HOME}/webapps/opendap/ \
-    && jar -xf ${DIST_WAR_FILE}
-
-
-
-RUN set -e \
-    && echo "Cleaning up." \
+    && echo "Cleaning up."  >&2 \
     && rm -rf ${ROOT}/${OLFS_DISTRO} /${OLFS_DISTRO}.tgz
 
-#    && echo "Installing warfile ${DIST_WAR_FILE}"  >&2 \
-#    && cp "${WAR_FILE}" ${CATALINA_HOME}/webapps
-#    && rm -rf ${ROOT}/${OLFS_DISTRO} /${OLFS_DISTRO}.tgz
 
-#    && echo "Unpacking warfile..."  >&2 \
-#    && mkdir -p $(readlink -f ${CATALINA_HOME})/webapps/opendap/ \
-#    && unzip -o ${ROOT}/${OLFS_DISTRO}/opendap.war -d ${CATALINA_HOME}/webapps/opendap/ \
-#    && echo "Cleaning up."  >&2 \
+#    && echo "Installing warfile ${DIST_WAR_FILE}"  >&2 \
+#    && cp "${WAR_FILE}" ${CATALINA_HOME}/webapps \
 #    && rm -rf ${ROOT}/${OLFS_DISTRO} /${OLFS_DISTRO}.tgz
 
 
