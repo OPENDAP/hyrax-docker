@@ -6,7 +6,7 @@
 dist: xenial
 
 vm:
-  sixe: large
+  size: large
 
 language: python
 
