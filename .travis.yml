@@ -5,9 +5,6 @@
 
 dist: xenial
 
-vm:
-  size: large
-
 language: python
 
 services:
