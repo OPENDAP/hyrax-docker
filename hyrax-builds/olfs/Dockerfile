@@ -42,7 +42,7 @@ LABEL org.opendap.olfs.version=${OLFS_VERSION}
 LABEL org.opendap.olfs.release-date=RELEASE_DATE
 LABEL org.opendap.hyrax.version.is-production="false"
 
-#
+
 # The --build-arg USE_NCWMS can be set to "true" in order to 
 # add the ncWMS application to the build.
 ARG USE_NCWMS
