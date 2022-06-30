@@ -21,7 +21,7 @@ export BES_VERSION=${BES_VERSION:-$(cat ../snapshot.time | grep bes | sed "s/bes
 export LIBDAP_VERSION=${LIBDAP_VERSION:-$(cat ../snapshot.time | grep libdap4 | sed "s/libdap4-//g"| awk '{print $1;}')}
 
 export SNAPSHOT_IMAGE_TAG=${SNAPSHOT_IMAGE_TAG:-"opendap/${DOCKER_NAME}:snapshot"}
-export BUILD_VERSION_TAG=${BUILD_VERSION_TAG:"opendap/${DOCKER_NAME}:${HYRAX_VERSION_NUMBER}"}
+export BUILD_VERSION_TAG=${BUILD_VERSION_TAG:-"opendap/${DOCKER_NAME}:${HYRAX_VERSION_NUMBER}"}
 
 
 function show_version(){
@@ -516,6 +516,40 @@ function build_olfs() {
         "${OLFS_VERSION}" 2>&1 | tee -a "${log_file}" >&2
 
     build_olfs_docker 2>&1 | tee -a "${log_file}" >&2
+#    cleanup_build_files "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}" >&2
+}
+
+
+function build_besd_docker() {
+    echo "${HR}" >&2
+    echo "# TASK: build_besd_docker()" >&2
+#        --no-cache \
+        docker build ${NO_CACHE} \
+        --platform linux/amd64 \
+        --build-arg RELEASE_DATE \
+        --build-arg LIBDAP_VERSION \
+        --build-arg BES_VERSION \
+        --tag "${BUILD_VERSION_TAG}" \
+        --tag "${SNAPSHOT_IMAGE_TAG}" \
+        ${DOCKER_NAME}
+    echo "#" >&2
+    echo "#" >&2
+}
+
+function build_besd() {
+    local log_file="build_besd.log"
+
+    export DOCKER_NAME="besd"
+    show_version 2>&1 | tee "${log_file}" >&2
+
+    get_besd_distro \
+        "${S3_BUILD_BUCKET}" \
+        "${DOCKER_NAME}" \
+        "el8" \
+        "${LIBDAP_VERSION}" \
+        "${BES_VERSION}" 2>&1 | tee -a "${log_file}" >&2
+
+    build_besd_docker 2>&1 | tee -a "${log_file}" >&2
 #    cleanup_build_files "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}" >&2
 }
 
