@@ -363,7 +363,6 @@ function start_hyrax(){
     platform=$(get_platform)
     echo "#                platform: ${platform}" >&2
 
-    # docker run -d -h hyrax -p 8080:8080 --name=hyrax "${IMAGE_TAG}"
     docker run \
         -d\
         ${platform} \
@@ -504,19 +503,11 @@ function build_olfs() {
     export DOCKER_NAME="olfs"
     show_version 2>&1 | tee "${log_file}" >&2
 
-#    local tomcat_version="unset"
-##    tomcat_version=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
-#    get_tomcat_distro \
-#        "${DOCKER_NAME}" \
-#        "${tomcat_version}" 2>&1 | tee -a "${log_file}" >&2
-#
-#    get_besd_distro \
-#        "${S3_BUILD_BUCKET}" \
-#        "${DOCKER_NAME}" \
-#        "el8" \
-#        "${LIBDAP_VERSION}" \
-#        "${BES_VERSION}" 2>&1 | tee -a "${log_file}" >&2
-
+    local tomcat_version="unset"
+    tomcat_version=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
+    get_tomcat_distro \
+        "${DOCKER_NAME}" \
+        "${tomcat_version}" 2>&1 | tee -a "${log_file}" >&2
 
     get_olfs_distro \
         "${S3_BUILD_BUCKET}" \

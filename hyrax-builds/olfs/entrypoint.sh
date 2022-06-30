@@ -13,12 +13,11 @@ echo "Greetings, I am "`whoami`".";   >&2
 set -e
 #set -x
 
-if [ $NCWMS_BASE ] && [ -n $NCWMS_BASE ] ; then    
-    echo "Found exisiting NCWMS_BASE: $NCWMS_BASE"  
-else 
-    NCWMS_BASE="https://localhost:8080"
-     echo "Assigning default NCWMS_BASE: $NCWMS_BASE"  
-fi
+export SLEEP_INTERVAL=${SLEEP_INTERVAL:-60}
+echo "SLEEP_INTERVAL: ${SLEEP_INTERVAL} seconds." >&2
+
+export NCWMS_BASE=${NCWMS_BASE:-"https://localhost:8080"}
+echo "NCWMS_BASE: ${NCWMS_BASE}" >&2
 
 debug=false;
 
@@ -44,7 +43,7 @@ while getopts "n:d" opt; do
   esac
 done
 
-if [ $debug = true ];then
+if test "${debug}" = true ; then
     echo "CATALINA_HOME: ${CATALINA_HOME}" >&2
     ls -l "$CATALINA_HOME" "$CATALINA_HOME/bin"  >&2
     echo "NCWMS_BASE: ${NCWMS_BASE}" >&2
@@ -52,42 +51,47 @@ if [ $debug = true ];then
 fi
 
 sed -i "s+@NCWMS_BASE@+$NCWMS_BASE+g" ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml;
-if [ $debug = true ];then
+if test "${debug}" = true ; then
     echo "${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml" >&2
     cat ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml >&2
 fi
 
-# $CATALINA_HOME/bin/start-tomcat.sh
-$CATALINA_HOME/bin/startup.sh
+export OLFS_CONF="${CATALINA_HOME}/webapps/opendap/WEB-INF/conf"
+# mv ${OLFS_CONF}/logback.xml ${OLFS_CONF}/logback.xml.OFF
+echo "Starting Tomcat..." >&2
+#systemctl start tomcat
+${CATALINA_HOME}/bin/startup.sh 2>&1 > /var/log/tomcat/console.log &
 status=$?
-if [ $status != "0" ];then 
-    echo "Failed to launch the Tomcat process. status: ${status} EXITING!" >&2
-    exit 2
+tomcat_pid=$!
+if test $status -ne 0 ; then
+    echo "ERROR: Failed to start Tomcat: $status" >&2
+    exit $status
 fi
-
-echo "Launched Tomcat." >&2
-
-tomcat_key="/usr/local/tomcat/bin/tomcat-juli.jar"
-
-tomcat_info=`ps -f | grep ${tomcat_key} - `
-status=$?
-echo "tomcat_info: $tomcat_info status: $status" >&2
-
-if [ $status != "0" ];then 
-    echo "Unable to detect Tomcat process. status: ${status} EXITING!" >&2
-    exit 2
-fi
-
-tomcat_pid=`echo $tomcat_info | awk '{print $2}' -`
-
-echo "Tomcat Has Arrived. (pid: $tomcat_pid)" >&2
+# When we launch tomcat the initial pid gets "retired" because it spawns a
+# secondary processes.
+initial_pid="${tomcat_pid}"
+echo "Tomcat started, initial pid: ${initial_pid}" >&2
+while test $initial_pid -eq $tomcat_pid
+do
+    sleep 1
+    tomcat_ps=$(ps aux | grep tomcat | grep -v grep)
+    echo "tomcat_ps: ${tomcat_ps}" >&2
+    tomcat_pid=$(echo ${tomcat_ps} | awk '{print $2}')
+    echo "tomcat_pid: ${tomcat_pid}" >&2
+done
+# New pid and we should be good to go.
+echo "Tomcat is UP! pid: ${tomcat_pid}" >&2
 
 
 while /bin/true; do
-    sleep 60
-    tomcat_ps=`ps -f $tomcat_pid`;
+    sleep ${SLEEP_INTERVAL}
+    echo "Checking Hyrax Operational State..." >&2
+    tomcat_ps=$(ps -f "${tomcat_pid}")
     TOMCAT_STATUS=$?
-    if [ $TOMCAT_STATUS -ne 0 ]; then
+    echo "TOMCAT_STATUS: ${TOMCAT_STATUS}" >&2
+
+    TOMCAT_STATUS=$?
+    if test $TOMCAT_STATUS -ne 0 ; then
         echo "TOMCAT_STATUS: $TOMCAT_STATUS tomcat_pid:$tomcat_pid" >&2
         echo "Tomcat appears to have died! Exiting." >&2
         echo "Tomcat Console Log [BEGIN]" >&2
@@ -95,7 +99,7 @@ while /bin/true; do
         echo "Tomcat Console Log [END]" >&2
         exit -2
     fi
-    if [ $debug = true ];then 
+    if test "${debug}" = true ; then
         echo "-------------------------------------------------------------------"
         date
         echo "TOMCAT_STATUS: $TOMCAT_STATUS  tomcat_pid:$tomcat_pid"
