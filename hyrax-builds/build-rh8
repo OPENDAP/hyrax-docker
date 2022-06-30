@@ -13,15 +13,15 @@ export BES_VERSION=""
 export LIBDAP_VERSION=""
 export HYRAX_VERSION_NUMBER=""
 
-RELEASE_DATE=$(cat ../snapshot.time | grep hyrax | awk '{print $2;}')
-HYRAX_VERSION=$(cat ../snapshot.time | grep hyrax | awk '{print $1;}')
-HYRAX_VERSION_NUMBER=$(echo "${HYRAX_VERSION}" | sed "s/hyrax-//g" )
-OLFS_VERSION=$(cat ../snapshot.time | grep olfs | sed "s/olfs-//g" | awk '{print $1;}')
-BES_VERSION=$(cat ../snapshot.time | grep bes | sed "s/bes-//g" | awk '{print $1;}')
-LIBDAP_VERSION=$(cat ../snapshot.time | grep libdap4 | sed "s/libdap4-//g"| awk '{print $1;}')
+export RELEASE_DATE=${RELEASE_DATE:-$(cat ../snapshot.time | grep hyrax | awk '{print $2;}')}
+export HYRAX_VERSION=${HYRAX_VERSION:-$(cat ../snapshot.time | grep hyrax | awk '{print $1;}')}
+export HYRAX_VERSION_NUMBER=${HYRAX_VERSION_NUMBER:-$(echo "${HYRAX_VERSION}" | sed "s/hyrax-//g" )}
+export OLFS_VERSION=${OLFS_VERSION:-$(cat ../snapshot.time | grep olfs | sed "s/olfs-//g" | awk '{print $1;}')}
+export BES_VERSION=${BES_VERSION:-$(cat ../snapshot.time | grep bes | sed "s/bes-//g" | awk '{print $1;}')}
+export LIBDAP_VERSION=${LIBDAP_VERSION:-$(cat ../snapshot.time | grep libdap4 | sed "s/libdap4-//g"| awk '{print $1;}')}
 
-export SNAPSHOT_TAG="opendap/${DOCKER_NAME}:snapshot"
-export IMAGE_TAG="opendap/${DOCKER_NAME}:${HYRAX_VERSION_NUMBER}"
+export SNAPSHOT_IMAGE_TAG=${SNAPSHOT_IMAGE_TAG:-"opendap/${DOCKER_NAME}:snapshot"}
+export BUILD_VERSION_TAG=${BUILD_VERSION_TAG:"opendap/${DOCKER_NAME}:${HYRAX_VERSION_NUMBER}"}
 
 
 function show_version(){
@@ -32,13 +32,14 @@ function show_version(){
     echo "#          BES_VERSION: ${BES_VERSION}" >&2
     echo "#       LIBDAP_VERSION: ${LIBDAP_VERSION}" >&2
     echo "#          DOCKER_NAME: ${DOCKER_NAME}" >&2
-    echo "#            IMAGE_TAG: ${IMAGE_TAG}" >&2
-    echo "#         SNAPSHOT_TAG: ${SNAPSHOT_TAG}" >&2
+    echo "#    BUILD_VERSION_TAG: ${BUILD_VERSION_TAG}" >&2
+    echo "#   SNAPSHOT_IMAGE_TAG: ${SNAPSHOT_IMAGE_TAG}" >&2
     echo "#       SLEEP_INTERVAL: ${SLEEP_INTERVAL}" >&2
     echo "#" >&2
     echo "# TOMCAT_MAJOR_VERSION: ${TOMCAT_MAJOR_VERSION}" >&2
     echo "#" >&2
     echo "#             NO_CACHE: ${NO_CACHE}" >&2
+    echo "#" >&2
     echo "#" >&2
 }
 
@@ -319,8 +320,8 @@ function build_ngap() {
         --build-arg LIBDAP_VERSION \
         --build-arg BES_VERSION \
         --build-arg OLFS_VERSION \
-        --tag "${IMAGE_TAG}" \
-        --tag "${SNAPSHOT_TAG}" \
+        --tag "${BUILD_VERSION_TAG}" \
+        --tag "${SNAPSHOT_IMAGE_TAG}" \
         ${DOCKER_NAME}
     echo "#" >&2
     echo "#" >&2
@@ -340,8 +341,8 @@ function build_hyrax_docker() {
         --build-arg LIBDAP_VERSION \
         --build-arg BES_VERSION \
         --build-arg OLFS_VERSION \
-        --tag "${IMAGE_TAG}" \
-        --tag "${SNAPSHOT_TAG}" \
+        --tag "${BUILD_VERSION_TAG}" \
+        --tag "${SNAPSHOT_IMAGE_TAG}" \
         ${DOCKER_NAME}
     echo "#" >&2
     echo "#" >&2
@@ -370,7 +371,7 @@ function start_hyrax(){
         -p 8080:8080 \
         --name=hyrax \
         --env SLEEP_INTERVAL \
-        "${IMAGE_TAG}"
+        "${image_tag}"
 
     echo "#" >&2
 }
@@ -490,8 +491,8 @@ function build_olfs_docker() {
         --build-arg RELEASE_DATE \
         --build-arg HYRAX_VERSION \
         --build-arg OLFS_VERSION \
-        --tag "${IMAGE_TAG}" \
-        --tag "${SNAPSHOT_TAG}" \
+        --tag "${BUILD_VERSION_TAG}" \
+        --tag "${SNAPSHOT_IMAGE_TAG}" \
         ${DOCKER_NAME}
     echo "#" >&2
     echo "#" >&2
