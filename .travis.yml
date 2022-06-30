@@ -106,8 +106,8 @@ jobs:
       name: "Build opendap/olfs:snapshot"
       script:
         - export DOCKER_NAME="olfs"
-        - export SNAPSHOT_IMAGE_TAG="opendap/olfs:rh8-snapshot"
-        - export BUILD_VERSION_TAG="opendap/olfs:rh8-${OLFS_VERSION}"
+        - export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}:rh8-snapshot"
+        - export BUILD_VERSION_TAG="opendap/${DOCKER_NAME}:rh8-${OLFS_VERSION}"
         - cd hyrax-builds
         - source ./build-rh8
         - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
@@ -124,6 +124,8 @@ jobs:
           --tag "${SNAPSHOT_IMAGE_TAG}"
           --tag "${BUILD_VERSION_TAG}" olfs
         - docker image ls -a
+        - docker push ${SNAPSHOT_IMAGE_TAG}
+        - docker push ${BUILD_VERSION_TAG}
 
 
     ############################################################################
@@ -134,8 +136,8 @@ jobs:
       name: "Build and Test opendap/hyrax:snapshot (RH8)"
       script:
         - export DOCKER_NAME="hyrax"
-        - export SNAPSHOT_IMAGE_TAG="opendap/hyrax:rh8-snapshot"
-        - export BUILD_VERSION_TAG="opendap/hyrax:rh8-${HYRAX_VERSION}"
+        - export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}:rh8-snapshot"
+        - export BUILD_VERSION_TAG="opendap/${DOCKER_NAME}:rh8-${HYRAX_VERSION}"
         - cd hyrax-builds
         - source ./build-rh8
         - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
@@ -172,8 +174,8 @@ jobs:
       name: "Build opendap/besd:snapshot (RH8)"
       script:
         - export DOCKER_NAME="besd"
-        - export SNAPSHOT_IMAGE_TAG="opendap/besd:rh8-snapshot"
-        - export BUILD_VERSION_TAG="opendap/besd:rh8-${HYRAX_VERSION}"
+        - export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}:rh8-snapshot"
+        - export BUILD_VERSION_TAG="opendap/${DOCKER_NAME}:rh8-${HYRAX_VERSION}"
         - cd hyrax-builds
         - source ./build-rh8
         - show_version
@@ -197,8 +199,8 @@ jobs:
       name: "Build opendap/hyrax_ncwms:snapshot (RH8)"
       script:
         - export DOCKER_NAME="hyrax"
-        - export SNAPSHOT_IMAGE_TAG="opendap/hyrax_ncwms:rh8-snapshot"
-        - export BUILD_VERSION_TAG="opendap/hyrax_ncwms:rh8-${HYRAX_VERSION}"
+        - export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}_ncwms:rh8-snapshot"
+        - export BUILD_VERSION_TAG="opendap/${DOCKER_NAME}_ncwms:rh8-${HYRAX_VERSION}"
         - cd hyrax-builds
         - source ./build-rh8
         - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
@@ -230,8 +232,8 @@ jobs:
       name: "Build opendap/hyrax:ngap-snapshot (RH8)"
       script:
         - export DOCKER_NAME="ngap"
-        - export SNAPSHOT_IMAGE_TAG="opendap/hyrax:rh8-ngap-snapshot"
-        - export BUILD_VERSION_TAG=opendap/hyrax:rh8-ngap-${HYRAX_VERSION}
+        - export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}:rh8-ngap-snapshot"
+        - export BUILD_VERSION_TAG=opendap/${DOCKER_NAME}:rh8-ngap-${HYRAX_VERSION}
         - cd hyrax-builds
         - source ./build-rh8
         - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
