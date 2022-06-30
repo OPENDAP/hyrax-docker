@@ -30,14 +30,14 @@ USER root
 RUN set -e && apt list --installed
 
 # Update OS and install ps (and other filesystem utils)
-RUN set -e && apt-get -y update
+#RUN set -e && apt-get -y update
 
 #RUN set -e && sed -i 's/# \(.*multiverse$\)/\1/g' /etc/apt/sources.list
 #RUN set -e && rm -fr /var/lib/apt/lists
 #RUN set -e && mkdir -pv /var/lib/apt/lists/partial
 #RUN set -e && apt-get -oDebug::pkgAcquire::Worker=1 update
 #RUN set -e && apt-get -y upgrade
-RUN set -e && apt-get -y install unzip
+#RUN set -e && apt-get -y install unzip
 
 #
 # The --build-arg USE_NCWMS can be set to "true" in order to 
@@ -84,8 +84,13 @@ RUN set -e \
     && mkdir -p $(readlink -f ${CATALINA_HOME})/webapps/opendap/
 
 RUN set -e \
-    && echo "Unpacking warfile ${DIST_WAR_FILE}" \
-    && unzip -o ${DIST_WAR_FILE} -d ${CATALINA_HOME}/webapps/opendap/
+    && echo "Unpacking warfile..." \
+    && cd ${CATALINA_HOME}/webapps/opendap/ \
+    && jar -xf ${ROOT}/${OLFS_DISTRO}/opendap.war
+
+#RUN set -e \
+#    && echo "Unpacking warfile ${DIST_WAR_FILE}" \
+#    && unzip -o ${DIST_WAR_FILE} -d ${CATALINA_HOME}/webapps/opendap/
 
 RUN set -e \
     && echo "Cleaning up."  >&2 \

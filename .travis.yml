@@ -246,7 +246,8 @@ jobs:
           "${S3_BUILD_BUCKET}"
           "olfs"
           "${OLFS_VERSION}" 2>&1
-        - docker build --build-arg RELEASE_DATE
+        - docker build -m 4g
+          --build-arg RELEASE_DATE
           --build-arg HYRAX_VERSION
           --build-arg OLFS_VERSION
           --tag "${SNAPSHOT_IMAGE_TAG}"
