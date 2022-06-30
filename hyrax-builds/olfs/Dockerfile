@@ -27,8 +27,8 @@ LABEL org.opendap.hyrax.version.is-production="false"
 USER root
 
 # Update OS and install ps (and other filesystem utils)
-RUN set -e \
-    && apt-get -y update
+#RUN set -e \
+#    && apt-get -y update
 
 #
 # The --build-arg USE_NCWMS can be set to "true" in order to 
