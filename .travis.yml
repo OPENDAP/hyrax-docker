@@ -229,8 +229,8 @@ jobs:
       name: "Build opendap/hyrax:ngap-snapshot (RH8)"
       script:
         - export DOCKER_NAME="ngap"
-        - export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}:rh8-ngap-snapshot"
-        - export BUILD_VERSION_TAG=opendap/${DOCKER_NAME}:rh8-ngap-${HYRAX_VERSION}
+        - export SNAPSHOT_IMAGE_TAG="opendap/hyrax:rh8-${DOCKER_NAME}-snapshot"
+        - export BUILD_VERSION_TAG=opendap/hyrax:rh8-${DOCKER_NAME}-${HYRAX_VERSION}
         - cd hyrax-builds
         - source ./build-rh8
         - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
