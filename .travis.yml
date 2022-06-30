@@ -5,6 +5,9 @@
 
 dist: xenial
 
+vm:
+  sixe: large
+
 language: python
 
 services:
