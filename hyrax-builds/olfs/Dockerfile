@@ -64,14 +64,12 @@ RUN set -e && \
 ################################################################
 # Update and install the needful.
 #
-# Installing autoconf automake git bc for the tests install. The tests
-# are installed in the container but not run until a later stage of the
-# Travis build (or at a later time). They need to be part of the container,
-# however, to be run, so install them as part of this Dockerfile.
+# Installing utils for debugging convenience.
+#
 RUN set -e \
     && dnf update  -y \
     && dnf install -y curl unzip which emacs vim \
-    && dnf install -y python3 git bc \
+    && dnf install -y python3 bc \
     && dnf install -y java-11-openjdk-devel \
     && dnf clean all
 #
