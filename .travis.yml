@@ -140,7 +140,7 @@ jobs:
         - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
         - show_version
         - get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_VERSION}"
-        - get_besd_distro
+        - s3_get_besd_distro
           "${S3_BUILD_BUCKET}"
           "${DOCKER_NAME}"
           "el8"
@@ -176,7 +176,7 @@ jobs:
         - cd hyrax-builds
         - source ./build-rh8
         - show_version
-        - get_besd_distro
+        - s3_get_besd_distro
           "${S3_BUILD_BUCKET}"
           "${DOCKER_NAME}"
           "el8"
@@ -203,7 +203,7 @@ jobs:
         - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
         - show_version
         - get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_VERSION}"
-        - get_besd_distro
+        - s3_get_besd_distro
           "${S3_BUILD_BUCKET}"
           "${DOCKER_NAME}"
           "el8"
@@ -236,7 +236,7 @@ jobs:
         - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
         - show_version
         - get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_VERSION}"
-        - get_besd_distro
+        - s3_get_besd_distro
           "${S3_BUILD_BUCKET}"
           "${DOCKER_NAME}"
           "el8"

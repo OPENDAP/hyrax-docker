@@ -1,11 +1,5 @@
 #!/bin/bash
 HR="###########################################################################"
-export DOCKER_NAME=${DOCKER_NAME:-"hyrax"}
-export TOMCAT_MAJOR_VERSION=${TOMCAT_MAJOR_VERSION:-"9"}
-export SLEEP_INTERVAL=${SLEEP_INTERVAL:-60}
-export NO_CACHE=${NO_CACHE:-""}
-
-export S3_BUILD_BUCKET="opendap.travis.build"
 export RELEASE_DATE=""
 export HYRAX_VERSION=""
 export OLFS_VERSION=""
@@ -13,6 +7,11 @@ export BES_VERSION=""
 export LIBDAP_VERSION=""
 export HYRAX_VERSION_NUMBER=""
 
+export S3_BUILD_BUCKET=${S3_BUILD_BUCKET:-"opendap.travis.build"}
+export DOCKER_NAME=${DOCKER_NAME:-"hyrax"}
+export TOMCAT_MAJOR_VERSION=${TOMCAT_MAJOR_VERSION:-"9"}
+export SLEEP_INTERVAL=${SLEEP_INTERVAL:-60}
+export NO_CACHE=${NO_CACHE:-""}
 export RELEASE_DATE=${RELEASE_DATE:-$(cat ../snapshot.time | grep hyrax | awk '{print $2;}')}
 export HYRAX_VERSION=${HYRAX_VERSION:-$(cat ../snapshot.time | grep hyrax | awk '{print $1;}')}
 export HYRAX_VERSION_NUMBER=${HYRAX_VERSION_NUMBER:-$(echo "${HYRAX_VERSION}" | sed "s/hyrax-//g" )}
@@ -176,7 +175,7 @@ function s3_pull(){
 
 ################################################################################
 #
-# get_hyrax_distro() - Get the rpm and war files need for a Hyrax installation
+# s3_get_besd_distro() - Get the rpm and war files need for a Hyrax installation
 #    from the identified S3 bucket.
 #    $1 - The AWS S3 bucket from which to pull the Hyrax components
 #    $2 - The directory into which to place the Hyrax components.
@@ -186,9 +185,9 @@ function s3_pull(){
 #    $6 - A debug flag, if present (i.e. not empty string) then the devel and
 #         debuginfo rpm files for libdap and bes will be retrieved as well.
 #
-function get_besd_distro() {
+function s3_get_besd_distro() {
     echo "${HR}" >&2
-    echo "# TASK: get_besd_distro()" >&2
+    echo "# TASK: s3_get_besd_distro()" >&2
     local s3_bucket="${1}"
     echo "#          s3_bucket: ${s3_bucket}" >&2
     local target_dir="${2}"
@@ -211,7 +210,8 @@ function get_besd_distro() {
     s3_pull "${s3_bucket}" \
             "libdap-${libdap_version}.${larch}.x86_64.rpm" \
             "${target_dir}"
-    if test -n "${debug}"; then
+
+    if test -n "${debug}"; then # Only get the debug libs when invoked in debug mode
         s3_pull "${s3_bucket}" \
                 "libdap-devel-${libdap_version}.${larch}.x86_64.rpm" \
                 "${target_dir}"
@@ -224,13 +224,104 @@ function get_besd_distro() {
             "bes-${bes_version}.static.${larch}.x86_64.rpm" \
             "${target_dir}"
 
-    if test -n "${debug}"; then
+    if test -n "${debug}"; then # Only get the debug libs when invoked in debug mode
         s3_pull "${s3_bucket}" \
                 "bes-devel-${bes_version}.static.${larch}.x86_64.rpm" \
                 "${target_dir}"
         s3_pull "${s3_bucket}" \
                 "bes-debuginfo-${bes_version}.static.${larch}.x86_64.rpm" \
                 "${target_dir}"
+    fi
+
+    set +e
+    echo "#" >&2
+    return 0
+}
+
+
+
+function curl_pull(){
+    local release_url="${1}"
+    local target_file="${2}"
+    local target_dir="${3}"
+
+    local target_url="${release_url}/${target_file}"
+    echo "#" >&2
+    echo "# curl_pull(), retrieving:" >&2
+    echo "#   target_file: ${target_file}" >&2
+    echo "#   release_url: ${release_url}" >&2
+    echo "#    target_url: ${target_url}" >&2
+    curl -s -o "${target_dir}/${target_file}" "${target_url}"
+    echo "#" >&2
+}
+
+################################################################################
+#
+# woo_get_besd_distro() - Get the rpm and war files need for a Hyrax release
+# from https://www.opendap.org/pub/binaries
+#    $1 - The directory into which to place the Hyrax components.
+#    $2 - The linux architecture (aka el7, el8, etc.)
+#    $3 - The libap version number ##.##.##-##
+#    $4 - The bes version number ##.##.##-##
+#    $5 - A debug flag, if present (i.e. not empty string) then the devel and
+#         debuginfo rpm files for libdap and bes will be retrieved as well.
+#
+function woo_get_besd_distro() {
+    echo "${HR}" >&2
+    echo "# TASK: woo_get_besd_distro()" >&2
+    local target_dir="${1}"
+    echo "#         target_dir: ${target_dir}" >&2
+    local larch="${2}"
+    echo "# linux_architecture: ${larch}" >&2
+    local libdap_version="${3}"
+    echo "#     libdap_version: ${libdap_version}" >&2
+    local bes_version="${4}"
+    echo "#        bes_version: ${bes_version}" >&2
+    local hyrax_version="${5}"
+    echo "#      hyrax_version: ${hyrax_version}" >&2
+    local debug="${6}"
+    echo "#              debug: ${debug}" >&2
+
+    set -e
+
+    echo "${HR}"
+    echo "# woo_get_besd_distro()"
+    echo "#"
+    echo "# Cleaning up..." >&2
+    rm -fv "${target_dir}/*.rpm"
+    echo "#"
+
+    release_host="https://www.opendap.org/pub/binary/"
+
+    release_dir=$(echo "${hyrax_version}" | awk '{split($0,a,"."); print a[1]"."a[2];}')
+    if test "${larch}" = "el7"; then
+        release_dir="${release_dir}/centos-7.x"
+    elif test "${larch}" = "el8"; then
+        release_dir="${release_dir}/rhel-8"
+    fi
+    echo "release_dir: ${release_dir}"
+
+    release_url="${release_host}/${release_dir}"
+    echo "release_url: ${release_dir}"
+
+
+    target_file="libdap-${libdap_version}.${larch}.x86_64.rpm"
+    curl_pull "${release_url}" "${target_file}" "${target_dir}"
+    if test -n "${debug}"; then # Only get the debug libs when invoked in debug mode
+        target_file="libdap-devel-${libdap_version}.${larch}.x86_64.rpm"
+        curl_pull "${release_url}" "${target_file}" "${target_dir}"
+        target_file="libdap-debuginfo-${libdap_version}.${larch}.x86_64.rpm"
+        curl_pull "${release_url}" "${target_file}" "${target_dir}"
+    fi
+
+
+    target_file="bes-${bes_version}.static.${larch}.x86_64.rpm"
+    curl_pull "${release_url}" "${target_file}" "${target_dir}"
+    if test -n "${debug}"; then # Only get the debug libs when invoked in debug mode
+        target_file="bes-devel-${bes_version}.static.${larch}.x86_64.rpm"
+        curl_pull "${release_url}" "${target_file}" "${target_dir}"
+        target_file="bes-debuginfo-${bes_version}.static.${larch}.x86_64.rpm"
+        curl_pull "${release_url}" "${target_file}" "${target_dir}"
     fi
 
     set +e
@@ -425,7 +516,7 @@ function build_hyrax() {
         "${DOCKER_NAME}" \
         "${tomcat_version}" 2>&1 | tee -a "${log_file}" >&2
 
-    get_besd_distro \
+    s3_get_besd_distro \
         "${S3_BUILD_BUCKET}" \
         "${DOCKER_NAME}" \
         "el8" \
@@ -460,7 +551,7 @@ function build_ngap() {
         "${DOCKER_NAME}" \
         "${tomcat_version}" 2>&1 | tee -a "${log_file}" >&2
 
-    get_besd_distro \
+    s3_get_besd_distro \
         "${S3_BUILD_BUCKET}" \
         "${DOCKER_NAME}" \
         "el8" \
@@ -542,7 +633,7 @@ function build_besd() {
     export DOCKER_NAME="besd"
     show_version 2>&1 | tee "${log_file}" >&2
 
-    get_besd_distro \
+    s3_get_besd_distro \
         "${S3_BUILD_BUCKET}" \
         "${DOCKER_NAME}" \
         "el8" \
