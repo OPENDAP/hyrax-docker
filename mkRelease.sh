@@ -68,15 +68,15 @@ do
     echo "#     BUILD_VERSION_TAG: ${BUILD_VERSION_TAG}" >&2
 
 
-    get_tomcat_distro "${docker_name}" "${TOMCAT_VERSION}"
+#    get_tomcat_distro "${docker_name}" "${TOMCAT_VERSION}"
 
     woo_get_besd_distro \
-        "${docker_name}" \
+        `pwd` \
         "el8" \
         "${LIBDAP_VERSION}" \
         "${BES_VERSION}" true 2>&1
 
-    get_olfs_distro \
+    woo_get_olfs_distro \
         "${S3_BUILD_BUCKET}" \
         "${docker_name}" \
         "${OLFS_VERSION}" 2>&1

@@ -110,7 +110,7 @@ jobs:
         - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
         - show_version
         - get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_VERSION}"
-        - get_olfs_distro
+        - s3_get_olfs_distro
           "${S3_BUILD_BUCKET}"
           "olfs"
           "${OLFS_VERSION}" 2>&1
@@ -146,7 +146,7 @@ jobs:
           "el8"
           "${LIBDAP_VERSION}"
           "${BES_VERSION}" true 2>&1
-        - get_olfs_distro
+        - s3_get_olfs_distro
           "${S3_BUILD_BUCKET}"
           "${DOCKER_NAME}"
           "${OLFS_VERSION}" 2>&1
@@ -209,7 +209,7 @@ jobs:
           "el8"
           "${LIBDAP_VERSION}"
           "${BES_VERSION}" true 2>&1
-        - get_olfs_distro
+        - s3_get_olfs_distro
           "${S3_BUILD_BUCKET}"
           "${DOCKER_NAME}"
           "${OLFS_VERSION}" 2>&1
