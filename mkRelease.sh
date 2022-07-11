@@ -56,6 +56,64 @@ function get_rpms(){
 
 
 
+function get_release_from_woo(){
+    local download_server="https://www.opendap.org"
+    local libdap_version="3.20.10-0"
+    local bes_version="3.20.12-0"
+    local olfs_version="1.18.12-0"
+
+    # RHEL-8
+    local dir_name="pub/binary/hyrax-1.16/rhel-8"
+    local larch="el8"
+
+    local libdap_rpm="libdap-${libdap_version}.static.${larch}.x86_64.rpm"
+    curl_pull  "${download_server}/${dir_name}" "${libdap_rpm}" "."
+    local libdap_devel_rpm="libdap-devel-${libdap_version}.static.${larch}.x86_64.rpm"
+    curl_pull  "${download_server}/${dir_name}" "${libdap_devel_rpm}" "."
+    local libdap_debug_rpm="libdap-debuginfo-${libdap_version}.static.${larch}.x86_64.rpm"
+    curl_pull  "${download_server}/${dir_name}" "${libdap_debug_rpm}" "."
+
+    local bes_rpm="bes-${bes_version}.static.${larch}.x86_64.rpm"
+    curl_pull  "${download_server}/${dir_name}" "${bes_rpm}" "."
+    local bes_devel_rpm="bes-devel-${bes_version}.static.${larch}.x86_64.rpm"
+    curl_pull  "${download_server}/${dir_name}" "${bes_devel_rpm}" "."
+    local bes_debug_rpm="bes-debuginfo-${bes_version}.static.${larch}.x86_64.rpm"
+    curl_pull  "${download_server}/${dir_name}" "${bes_debug_rpm}" "."
+
+    # RHEL-7 (aka CentOS-7)
+    dir_name="pub/binary/hyrax-1.16/centos-7.x"
+    larch="el7"
+
+    libdap_rpm="libdap-${libdap_version}.static.${larch}.x86_64.rpm"
+    curl_pull  "${download_server}/${dir_name}" "${libdap_rpm}" "."
+    libdap_devel_rpm="libdap-devel-${libdap_version}.static.${larch}.x86_64.rpm"
+    curl_pull  "${download_server}/${dir_name}" "${libdap_devel_rpm}" "."
+    libdap_debug_rpm="libdap-debuginfo-${libdap_version}.static.${larch}.x86_64.rpm"
+    curl_pull  "${download_server}/${dir_name}" "${libdap_debug_rpm}" "."
+
+    bes_rpm="bes-${bes_version}.static.${larch}.x86_64.rpm"
+    curl_pull  "${download_server}/${dir_name}" "${bes_rpm}" "."
+    bes_devel_rpm="bes-devel-${bes_version}.static.${larch}.x86_64.rpm"
+    curl_pull  "${download_server}/${dir_name}" "${bes_devel_rpm}" "."
+    bes_debug_rpm="bes-debuginfo-${bes_version}.static.${larch}.x86_64.rpm"
+    curl_pull  "${download_server}/${dir_name}" "${bes_debug_rpm}" "."
+
+    dir_name="pub/olfs"
+    olfs_dist="olfs-${olfs_version}-webapp.tgz"
+    curl_pull  "${download_server}/${dir_name}" "${olfs_dist}" "."
+    robots_olfs_dist="robots-olfs-${olfs_version}-webapp.tgz"
+    curl_pull  "${download_server}/${dir_name}" "${olfs_dist}" "."
+
+}
+function hyrax_1_16_7(){
+    bucket_url="https://s3.amazonaws.com/opendap.travis.build/"
+    bes_version="3.20.12-0"
+    libdap_version="3.20.10-0"
+    olfs_version="1.18.12-0"
+    larch="el8"
+
+    get_release_from_s3
+}
 
 
 
@@ -104,3 +162,4 @@ do
     rm -v "${docker_name}/robots-olfs-${OLFS_VERSION}*"
     rm -rv "${docker_name}/apache-tomcat-${TOMCAT_VERSION}*"
 done
+}
