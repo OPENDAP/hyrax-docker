@@ -99,30 +99,6 @@ stages:
 
 jobs:
   include:
-    - stage: OLFS
-      name: "Build opendap/olfs:snapshot"
-      script:
-        - cd hyrax-builds
-        - export DOCKER_NAME="olfs"
-        - source ./build-rh8
-        - export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}:rh8-snapshot"
-        - export BUILD_VERSION_TAG="opendap/${DOCKER_NAME}:rh8-${OLFS_VERSION}"
-        - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
-        - show_version
-        - get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_VERSION}"
-        - s3_get_olfs_distro
-          "${S3_BUILD_BUCKET}"
-          "olfs"
-          "${OLFS_VERSION}" 2>&1
-        - docker build
-          --build-arg RELEASE_DATE
-          --build-arg HYRAX_VERSION
-          --build-arg OLFS_VERSION
-          --tag "${SNAPSHOT_IMAGE_TAG}"
-          --tag "${BUILD_VERSION_TAG}" olfs
-        - docker image ls -a
-        - docker push ${SNAPSHOT_IMAGE_TAG}
-        - docker push ${BUILD_VERSION_TAG}
 
 
     ############################################################################
@@ -260,11 +236,35 @@ jobs:
         - docker push ${SNAPSHOT_IMAGE_TAG}
         - docker push ${BUILD_VERSION_TAG}
 
+    - stage: RH8_BUILD
+      name: "Build opendap/olfs:snapshot"
+      script:
+        - cd hyrax-builds
+        - export DOCKER_NAME="olfs"
+        - source ./build-rh8
+        - export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}:rh8-snapshot"
+        - export BUILD_VERSION_TAG="opendap/${DOCKER_NAME}:rh8-${OLFS_VERSION}"
+        - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
+        - show_version
+        - get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_VERSION}"
+        - s3_get_olfs_distro
+          "${S3_BUILD_BUCKET}"
+          "olfs"
+          "${OLFS_VERSION}" 2>&1
+        - docker build
+          --build-arg RELEASE_DATE
+          --build-arg HYRAX_VERSION
+          --build-arg OLFS_VERSION
+          --tag "${SNAPSHOT_IMAGE_TAG}"
+          --tag "${BUILD_VERSION_TAG}" olfs
+        - docker image ls -a
+        - docker push ${SNAPSHOT_IMAGE_TAG}
+        - docker push ${BUILD_VERSION_TAG}
 
     - stage: test_deployed_image
       name: "Test Deployed Image (RH8)"
       script:
-        - export TEST_IMAGE=opendap/hyrax:${HYRAX_VERSION}
+        - export TEST_IMAGE=opendap/hyrax:rh8-${HYRAX_VERSION}
         - echo "Running Hyrax Regression Test Script on ${TEST_IMAGE}"
         - ./regression_test_script -i "${TEST_IMAGE}"
 
