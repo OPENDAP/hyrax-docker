@@ -96,15 +96,14 @@ RUN set -e && \
 # are installed in the container but not run until a later stage of the
 # Travis build (or at a later time). They need to be part of the container,
 # however, to be run, so install them as part of this Dockerfile.
-RUN set -e \
-    && dnf update  -y \
-    && dnf install -y make curl unzip which autoconf automake emacs vim diffutils \
-    && dnf install -y python3 git bc valgrind gdb \
-    && dnf install -y java-11-openjdk-devel \
-    && dnf clean all
+RUN set -e && dnf update  -y
+RUN set -e && dnf install -y make curl unzip which autoconf automake emacs vim
+RUN set -e && dnf install -y diffutils
+RUN set -e && dnf install -y python3 git bc valgrind gdb
+RUN set -e && dnf install -y java-11-openjdk-devel
+RUN set -e && dnf clean all
 #
-RUN set -e \
-    && python3 -m pip install awscli
+RUN set -e && python3 -m pip install awscli
 
 ################################################################
 # Install the latest libdap snapshot
