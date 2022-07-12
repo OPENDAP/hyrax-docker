@@ -110,7 +110,7 @@ RUN if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else ec
 # however, to be run, so install them as part of this Dockerfile.
 RUN set -e \
     && dnf update  -y \
-    && dnf install -y make curl unzip which autoconf automake emacs vim \
+    && dnf install -y make curl unzip which autoconf automake emacs vim diffutils \
     && dnf install -y python3 git bc valgrind gdb \
     && dnf install -y java-11-openjdk-devel \
     && dnf clean all

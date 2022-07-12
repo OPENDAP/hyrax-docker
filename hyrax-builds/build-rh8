@@ -35,9 +35,11 @@ function show_version(){
     echo "#          DOCKER_NAME: ${DOCKER_NAME}" >&2
     echo "#    BUILD_VERSION_TAG: ${BUILD_VERSION_TAG}" >&2
     echo "#   SNAPSHOT_IMAGE_TAG: ${SNAPSHOT_IMAGE_TAG}" >&2
+    echo "#      S3_BUILD_BUCKET: ${S3_BUILD_BUCKET}" >&2
     echo "#       SLEEP_INTERVAL: ${SLEEP_INTERVAL}" >&2
     echo "#" >&2
     echo "# TOMCAT_MAJOR_VERSION: ${TOMCAT_MAJOR_VERSION}" >&2
+    echo "#       TOMCAT_VERSION: ${TOMCAT_VERSION}" >&2
     echo "#" >&2
     echo "#             NO_CACHE: ${NO_CACHE}" >&2
     echo "#" >&2
