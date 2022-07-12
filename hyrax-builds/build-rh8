@@ -5,7 +5,6 @@ export HYRAX_VERSION=""
 export OLFS_VERSION=""
 export BES_VERSION=""
 export LIBDAP_VERSION=""
-export HYRAX_VERSION_NUMBER=""
 
 export S3_BUILD_BUCKET=${S3_BUILD_BUCKET:-"opendap.travis.build"}
 export DOCKER_NAME=${DOCKER_NAME:-"hyrax"}
@@ -13,15 +12,13 @@ export TOMCAT_MAJOR_VERSION=${TOMCAT_MAJOR_VERSION:-"9"}
 export SLEEP_INTERVAL=${SLEEP_INTERVAL:-60}
 export NO_CACHE=${NO_CACHE:-""}
 export RELEASE_DATE=${RELEASE_DATE:-$(cat ../snapshot.time | grep hyrax | awk '{print $2;}')}
-#export HYRAX_VERSION=${HYRAX_VERSION:-$(cat ../snapshot.time | grep hyrax | awk '{print $1;}')}
-#export HYRAX_VERSION_NUMBER=${HYRAX_VERSION_NUMBER:-$(echo "${HYRAX_VERSION}" | sed "s/hyrax-//g" )}
 export HYRAX_VERSION=${HYRAX_VERSION:-$(cat ../snapshot.time | grep hyrax | awk '{print $1;}' | sed "s/hyrax-//g" )}
 export OLFS_VERSION=${OLFS_VERSION:-$(cat ../snapshot.time | grep olfs | sed "s/olfs-//g" | awk '{print $1;}')}
 export BES_VERSION=${BES_VERSION:-$(cat ../snapshot.time | grep bes | sed "s/bes-//g" | awk '{print $1;}')}
 export LIBDAP_VERSION=${LIBDAP_VERSION:-$(cat ../snapshot.time | grep libdap4 | sed "s/libdap4-//g"| awk '{print $1;}')}
 
 export SNAPSHOT_IMAGE_TAG=${SNAPSHOT_IMAGE_TAG:-"opendap/${DOCKER_NAME}:snapshot"}
-export BUILD_VERSION_TAG=${BUILD_VERSION_TAG:-"opendap/${DOCKER_NAME}:${HYRAX_VERSION_NUMBER}"}
+export BUILD_VERSION_TAG=${BUILD_VERSION_TAG:-"opendap/${DOCKER_NAME}:${HYRAX_VERSION}"}
 
 export RELEASE_HOST=${RELEASE_HOST:-"https://www.opendap.org/pub/"}
 
@@ -297,8 +294,8 @@ function woo_get_besd_distro() {
     rm -fv "${target_dir}/*.rpm"
     echo "#" >&2
 
-    local release_dir="pub/binary/"
-    release_dir="${release_dir}"$(echo "${hyrax_version}" | awk '{split($0,a,"."); print a[1]"."a[2];}')
+    local release_dir="pub/binary"
+    release_dir="${release_dir}/hyrax-"$(echo "${hyrax_version}" | awk '{split($0,a,"."); print a[1]"."a[2];}')
     if test "${larch}" = "el7"; then
         release_dir="${release_dir}/centos-7.x"
     elif test "${larch}" = "el8"; then
