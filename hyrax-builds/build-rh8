@@ -1,5 +1,6 @@
 #!/bin/bash
 HR="###########################################################################"
+export BUILD_RECIPE=${1:-"../snapshot.time"}
 export RELEASE_DATE=""
 export HYRAX_VERSION=""
 export OLFS_VERSION=""
@@ -11,11 +12,11 @@ export DOCKER_NAME=${DOCKER_NAME:-"hyrax"}
 export TOMCAT_MAJOR_VERSION=${TOMCAT_MAJOR_VERSION:-"9"}
 export SLEEP_INTERVAL=${SLEEP_INTERVAL:-60}
 export NO_CACHE=${NO_CACHE:-""}
-export RELEASE_DATE=${RELEASE_DATE:-$(cat ../snapshot.time | grep hyrax | awk '{print $2;}')}
-export HYRAX_VERSION=${HYRAX_VERSION:-$(cat ../snapshot.time | grep hyrax | awk '{print $1;}' | sed "s/hyrax-//g" )}
-export OLFS_VERSION=${OLFS_VERSION:-$(cat ../snapshot.time | grep olfs | sed "s/olfs-//g" | awk '{print $1;}')}
-export BES_VERSION=${BES_VERSION:-$(cat ../snapshot.time | grep bes | sed "s/bes-//g" | awk '{print $1;}')}
-export LIBDAP_VERSION=${LIBDAP_VERSION:-$(cat ../snapshot.time | grep libdap4 | sed "s/libdap4-//g"| awk '{print $1;}')}
+export RELEASE_DATE=${RELEASE_DATE:-$(cat "${BUILD_RECIPE}" | grep hyrax | awk '{print $2;}')}
+export HYRAX_VERSION=${HYRAX_VERSION:-$(cat "${BUILD_RECIPE}" | grep hyrax | awk '{print $1;}' | sed "s/hyrax-//g" )}
+export OLFS_VERSION=${OLFS_VERSION:-$(cat "${BUILD_RECIPE}" | grep olfs | sed "s/olfs-//g" | awk '{print $1;}')}
+export BES_VERSION=${BES_VERSION:-$(cat "${BUILD_RECIPE}" | grep bes | sed "s/bes-//g" | awk '{print $1;}')}
+export LIBDAP_VERSION=${LIBDAP_VERSION:-$(cat "${BUILD_RECIPE}" | grep libdap4 | sed "s/libdap4-//g"| awk '{print $1;}')}
 
 export SNAPSHOT_IMAGE_TAG=${SNAPSHOT_IMAGE_TAG:-"opendap/${DOCKER_NAME}:snapshot"}
 export BUILD_VERSION_TAG=${BUILD_VERSION_TAG:-"opendap/${DOCKER_NAME}:${HYRAX_VERSION}"}
