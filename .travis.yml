@@ -258,8 +258,6 @@ jobs:
           --tag "${SNAPSHOT_IMAGE_TAG}"
           --tag "${BUILD_VERSION_TAG}" olfs
         - docker image ls -a
-        - docker push ${SNAPSHOT_IMAGE_TAG}
-        - docker push ${BUILD_VERSION_TAG}
 
     - stage: test_deployed_image
       name: "Test Deployed Image (RH8)"
