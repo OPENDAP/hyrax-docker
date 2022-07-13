@@ -93,9 +93,9 @@ if test -n "${HOST}"  &&  test -n "${USERNAME}"  &&  test -n "${PASSWORD}" ; the
     echo "${HR2}" >&2
     echo "# Updating netrc file: ${NETRC_FILE}" >&2
     # machine is a domain name or a ip address, not a URL.
-    echo "# machine ${HOST}" | sed -e "s_https:__g"  -e "s_http:__g" -e "s+/++g" >> "${NETRC_FILE}"
-    echo "#    login ${USERNAME}"    >> "${NETRC_FILE}"
-    echo "#    password ${PASSWORD}" >> "${NETRC_FILE}"
+    echo "machine ${HOST}" | sed -e "s_https:__g"  -e "s_http:__g" -e "s+/++g" >> "${NETRC_FILE}"
+    echo "    login ${USERNAME}"    >> "${NETRC_FILE}"
+    echo "    password ${PASSWORD}" >> "${NETRC_FILE}"
     chown bes:bes "${NETRC_FILE}"
     chmod 400 "${NETRC_FILE}"
     echo "#  "$(ls -l "${NETRC_FILE}")  >&2
