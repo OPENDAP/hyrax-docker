@@ -66,12 +66,12 @@ function get_latest_tomcat_version_number(){
 
         local tomcat_version=""
         if test -n "${ignore_list}" ; then
-            echo "# Using ignore_list: '${ignore_list}'"
+            echo "# Using ignore_list: '${ignore_list}'" >&2
             tomcat_version=$(echo "${tomcat_major_version_list}" | \
             grep -v ${ignore_list} | \
             tail -n 1 )
         else
-            echo "# The ignore_list is empty."
+            echo "# The ignore_list is empty." >&2
             tomcat_version=$(echo "${tomcat_major_version_list}" | \
             tail -n 1 )
         fi
