@@ -45,6 +45,16 @@ function show_version(){
     echo "#" >&2
 }
 
+################################################################################
+#
+# get_latest_tomcat_version_number()
+#
+# Using the passed tomcat_major_version this function uses the Tomcat GitHub
+# repo to find the most recent release for that major version, and then checks
+# to make sure that the release is available from the Tomcat download server.
+# If the version is not available on the download server, the release is
+# discarded and the next most recent release is chosen.
+#
 function get_latest_tomcat_version_number(){
     local tomcat_major_version="${1}"
 
