@@ -48,16 +48,49 @@ function show_version(){
 function get_latest_tomcat_version_number(){
     local tomcat_major_version="${1}"
 
-    local tomcat_gh_repo="https://api.github.com/repos/apache/tomcat/tags"
-    local per_page_count=100
-    local tomcat_version=""
-    tomcat_version=$(curl -s "${tomcat_gh_repo}?per_page=${per_page_count}" | \
-        jq -r '.[] | .name' | \
-        sort -V | \
-        grep "^${tomcat_major_version}" | \
-        tail -n 1 )
+    local release_endpoint_base="https://dlcdn.apache.org/tomcat/tomcat"
+    local tomcat_gh_repo="https://api.github.com/repos/apache/tomcat/tags?per_page=100"
 
-    echo "#   Using tomcat_version: ${tomcat_version}" >&2
+    local retry=true
+    local ignore_list=
+
+    tomcat_versions_list=$(curl -s "${tomcat_gh_repo}")
+    while $retry ; do
+        tomcat_major_version_list=$(echo "${tomcat_versions_list}" | \
+            jq -r '.[] | .name' | \
+            sort -V | \
+            grep "^${tomcat_major_version}" )
+
+        echo "# tomcat_major_version_list: " >&2
+        echo "${tomcat_major_version_list}" | awk '{print "##   "$0;}' >&2
+
+        local tomcat_version=""
+        if test -n "${ignore_list}" ; then
+            echo "# Using ignore_list: '${ignore_list}'"
+            tomcat_version=$(echo "${tomcat_major_version_list}" | \
+            grep -v ${ignore_list} | \
+            tail -n 1 )
+        else
+            echo "# The ignore_list is empty."
+            tomcat_version=$(echo "${tomcat_major_version_list}" | \
+            tail -n 1 )
+        fi
+        echo "# Candidate tomcat_version: ${tomcat_version}" >&2
+
+        local release_endpoint_url="${release_endpoint_base}-${tomcat_major_version}/v${tomcat_version}"
+        echo "# release_endpoint_url=${release_endpoint_url}" >&2
+
+        status=$(curl -s -o /dev/null -w "%{response_code}" "${release_endpoint_url}")
+        if test $status -eq 404 ; then
+            echo "# Candidate tomcat_version: ${tomcat_version} not found on download site: ${release_endpoint_url} " >&2
+            ignore_list+="${ignore_list}  -e ${tomcat_version} "
+            retry=true
+        else
+            retry=false
+            ignore_list=
+        fi
+    done
+    echo "#   Using tomcat_version: ${tomcat_version} " >&2
     echo "${tomcat_version}"
 }
 
