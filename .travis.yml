@@ -200,6 +200,8 @@ jobs:
           --tag "${BUILD_VERSION_TAG}"
           "${DOCKER_NAME}"
         - docker image ls -a
+        - docker push ${SNAPSHOT_IMAGE_TAG}
+        - docker push ${BUILD_VERSION_TAG}
 
     - stage: RH8_BUILD
       name: "Build opendap/hyrax:ngap-snapshot (RH8)"
