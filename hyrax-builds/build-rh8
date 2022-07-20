@@ -503,6 +503,7 @@ function build_ngap() {
 
 
 function build_hyrax_docker() {
+    local docker_name="${1}"
     echo "${HR}" >&2
     echo "# TASK: build_hyrax_docker()" >&2
 #        --no-cache \
@@ -516,7 +517,7 @@ function build_hyrax_docker() {
         --build-arg OLFS_VERSION \
         --tag "${BUILD_VERSION_TAG}" \
         --tag "${SNAPSHOT_IMAGE_TAG}" \
-        ${DOCKER_NAME}
+        ${docker_name}
     echo "#" >&2
     echo "#" >&2
 }
@@ -615,9 +616,10 @@ function build_hyrax() {
         "${DOCKER_NAME}" \
         "${OLFS_VERSION}" 2>&1 | tee -a "${log_file}" >&2
 
-    build_hyrax_docker 2>&1 | tee -a "${log_file}" >&2
+    build_hyrax_docker "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}" >&2
     cleanup_build_files "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}" >&2
 }
+
 
 
 function build_ngap() {
@@ -645,7 +647,7 @@ function build_ngap() {
         "${DOCKER_NAME}" \
         "${OLFS_VERSION}" 2>&1 | tee -a "${log_file}" >&2
 
-    build_hyrax_docker 2>&1 | tee -a "${log_file}" >&2
+    build_hyrax_docker "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}" >&2
     cleanup_build_files "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}" >&2
 }
 
