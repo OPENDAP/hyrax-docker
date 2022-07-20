@@ -100,7 +100,7 @@ RUN set -e \
     && yum -v -y install tomcat unzip which autoconf automake python3 git bc emacs vim
 
 RUN set -e \
-    && yum -y update
+    && yum -y update \
     && yum clean all
 
 RUN set -e \
