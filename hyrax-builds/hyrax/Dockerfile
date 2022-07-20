@@ -15,7 +15,6 @@
 # Set one or more individual labels
 FROM rockylinux:8
 
-
 RUN export NOW=`date +%s`
 ARG RELEASE_DATE
 ENV RELEASE_DATE ${RELEASE_DATE:-"${NOW}"}
@@ -154,6 +153,7 @@ RUN set -e && useradd -m -U -d /home/tomcat -s /bin/false tomcat
 RUN set -e \
     && tar -xvf "/${TOMCAT_DISTRO}.tar.gz" -C /home/tomcat >&2 \
     && ln -s /home/tomcat/${TOMCAT_DISTRO} /usr/share/tomcat >&2 \
+    && ln -s /home/tomcat/${TOMCAT_DISTRO} /tomcat >&2 \
     && rm -rvf /usr/share/tomcat/webapps/* >&2 \
     && mkdir -p /var/log/tomcat \
     && chown -R tomcat:tomcat /var/log/tomcat /home/tomcat
@@ -220,8 +220,11 @@ RUN rm -vf /libdap*.rpm /bes*.rpm /olfs*.tgz /robots*.tgz /apache*
 # retrieve and install the ncWMS web application
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 
-# This is ncWMS-2.4.2
-ENV NCWMS_WAR_URL=https://github.com/Reading-eScience-Centre/ncwms/releases/download/ncwms-2.4.2/ncWMS2.war
+ARG NCWMS_VERSION
+ENV NCWMS_VERSION ${NCWMS_VERSION:-"2.5.2"}
+RUN echo "NCWMS_VERSION: ${NCWMS_VERSION}"
+ENV NCWMS_WAR_URL="https://github.com/Reading-eScience-Centre/ncwms/releases/download/ncwms-${NCWMS_VERSION}/ncWMS2.war"
+RUN echo "NCWMS_WAR_URL: ${NCWMS_WAR_URL}"
 
 RUN if [ $USE_NCWMS = "true" ]; then \
         echo "Installing ncWMS..."; \
