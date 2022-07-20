@@ -97,7 +97,9 @@ RUN set -e \
     && yum install java-11-openjdk-devel \
     && yum -y install tomcat unzip which autoconf automake python3 git bc emacs vim \
     && yum -y update \
-    && yum clean all \
+    && yum clean all
+
+RUN set -e \
     && python3 -m pip install awscli
 
 RUN java -version
