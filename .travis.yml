@@ -200,7 +200,7 @@ jobs:
 #        - docker push ${SNAPSHOT_IMAGE_TAG}
 #        - docker push ${BUILD_VERSION_TAG}
 
-    - stage: RH8_BUILD
+    - stage: BUILD
       name: "Build opendap/hyrax:ngap-snapshot (RH8)"
       script:
         - cd hyrax-builds
@@ -235,7 +235,7 @@ jobs:
 #        - docker push ${SNAPSHOT_IMAGE_TAG}
 #        - docker push ${BUILD_VERSION_TAG}
 
-    - stage: RH8_BUILD
+    - stage: BUILD
       name: "Build opendap/olfs:snapshot"
       script:
         - cd hyrax-builds
@@ -292,8 +292,8 @@ jobs:
         - cd ..
         - echo "Running Test Script"
         - ./regression_test_script -i ${SNAPSHOT_IMAGE_TAG}
-        - docker push ${SNAPSHOT_IMAGE_TAG}
-        - docker push ${BUILD_VERSION_TAG}
+#        - docker push ${SNAPSHOT_IMAGE_TAG}
+#        - docker push ${BUILD_VERSION_TAG}
 
     - stage: BUILD
       name: "Build opendap/besd:c7-snapshot (CentOS-7)"
