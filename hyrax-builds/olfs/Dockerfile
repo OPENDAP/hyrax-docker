@@ -73,8 +73,8 @@ RUN set -e \
     && dnf install -y java-11-openjdk-devel \
     && dnf clean all
 #
-RUN set -e \
-    && python3 -m pip install awscli
+RUN set -e && python3 -m pip install --upgrade pip
+RUN set -e && python3 -m pip install awscli
 
 
 ################################################################

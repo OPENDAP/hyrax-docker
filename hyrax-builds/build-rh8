@@ -521,6 +521,51 @@ function build_hyrax_docker() {
     echo "#" >&2
     echo "#" >&2
 }
+
+function build_hyrax_ncwms_docker() {
+    local docker_name="${1}"
+    echo "#" >&2
+    export DOCKER_NAME="hyrax"
+    source ./build-rh8
+    export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}_ncwms:rh8-snapshot"
+    export BUILD_VERSION_TAG="opendap/${DOCKER_NAME}_ncwms:rh8-${HYRAX_VERSION}"
+    export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
+    show_version  >&2
+    get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_VERSION}"
+    s3_get_besd_distro \
+        "${S3_BUILD_BUCKET}" \
+        "${DOCKER_NAME}" \
+        "el8" \
+        "${LIBDAP_VERSION}" \
+        "${BES_VERSION}" true 2>&1
+    s3_get_olfs_distro \
+        "${S3_BUILD_BUCKET}" \
+        "${DOCKER_NAME}" \
+        "${OLFS_VERSION}" 2>&1
+
+    docker build \
+        --build-arg RELEASE_DATE \
+        --build-arg HYRAX_VERSION \
+        --build-arg LIBDAP_VERSION \
+        --build-arg BES_VERSION \
+        --build-arg OLFS_VERSION \
+        --build-arg USE_NCWMS=true \
+        --tag "${SNAPSHOT_IMAGE_TAG}" \
+        --tag "${BUILD_VERSION_TAG}" \
+        "${DOCKER_NAME}"
+
+    docker image ls -a
+    #docker push ${SNAPSHOT_IMAGE_TAG}
+    #docker push ${BUILD_VERSION_TAG}
+
+    
+    
+    
+    
+}
+
+
+
 function get_platform(){
     local platform=""
     if test `uname -m` = "arm64" ; then platform="--platform linux/amd64"; fi

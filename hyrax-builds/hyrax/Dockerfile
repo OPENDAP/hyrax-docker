@@ -115,7 +115,9 @@ RUN set -e && dnf install -y java-11-openjdk-devel
 RUN set -e && dnf clean all
 RUN set -e && which diff
 #
-RUN set -e && python3 -m pip install awscli
+RUN set -e && python3 -m pip install --upgrade pip
+RUN set -e && python3 -m pip install --no-cache-dir awscli
+
 
 
 ################################################################
