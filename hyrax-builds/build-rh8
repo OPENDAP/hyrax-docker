@@ -523,7 +523,8 @@ function build_hyrax_docker() {
 }
 
 function build_hyrax_ncwms_docker() {
-    local docker_name="${1}"
+    echo "#################################################################" >&2
+    echo "# build_hyrax_ncwms_docker()" >&2
     echo "#" >&2
     export DOCKER_NAME="hyrax"
     source ./build-rh8
@@ -557,11 +558,6 @@ function build_hyrax_ncwms_docker() {
     docker image ls -a
     #docker push ${SNAPSHOT_IMAGE_TAG}
     #docker push ${BUILD_VERSION_TAG}
-
-    
-    
-    
-    
 }
 
 

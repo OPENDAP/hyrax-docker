@@ -190,6 +190,7 @@ jobs:
           "${DOCKER_NAME}"
           "${OLFS_VERSION}" 2>&1
         - docker build
+          --build-arg TOMCAT_VERSION
           --build-arg RELEASE_DATE
           --build-arg HYRAX_VERSION
           --build-arg LIBDAP_VERSION
@@ -254,6 +255,7 @@ jobs:
           "olfs"
           "${OLFS_VERSION}" 2>&1
         - docker build
+          --build-arg TOMCAT_VERSION
           --build-arg RELEASE_DATE
           --build-arg HYRAX_VERSION
           --build-arg OLFS_VERSION
