@@ -286,8 +286,8 @@ jobs:
           --build-arg LIBDAP_VERSION
           --build-arg BES_VERSION
           --build-arg OLFS_VERSION
-          --tag "${SNAPSHOT_IMAGE_TAG}" hyrax-c7
-        - docker tag ${SNAPSHOT_IMAGE_TAG} ${BUILD_VERSION_TAG}
+          --tag "${SNAPSHOT_IMAGE_TAG}"
+          --tag "${BUILD_VERSION_TAG}"  hyrax-c7
         - docker image ls -a
         - cd ..
         - echo "Running Test Script"
@@ -305,8 +305,8 @@ jobs:
           --build-arg RELEASE_DATE
           --build-arg LIBDAP_VERSION
           --build-arg BES_VERSION
-          -t "${SNAPSHOT_IMAGE_TAG}" besd-c7
-        - docker tag ${SNAPSHOT_IMAGE_TAG} ${BUILD_VERSION_TAG}
+          --tag "${SNAPSHOT_IMAGE_TAG}"
+          --tag "${BUILD_VERSION_TAG}" besd-c7
         - docker image ls -a
 
     - stage: BUILD
@@ -326,8 +326,8 @@ jobs:
           --build-arg BES_VERSION
           --build-arg OLFS_VERSION
           --build-arg USE_NCWMS=true
-          --tag "${SNAPSHOT_IMAGE_TAG}" hyrax-c7
-        - docker tag ${SNAPSHOT_IMAGE_TAG} ${BUILD_VERSION_TAG}
+          --tag "${SNAPSHOT_IMAGE_TAG}"
+          --tag "${BUILD_VERSION_TAG}" hyrax-c7
         - docker image ls -a
 #        - docker push ${SNAPSHOT_IMAGE_TAG}
 #        - docker push ${BUILD_VERSION_TAG}
@@ -349,8 +349,8 @@ jobs:
           --build-arg BES_VERSION
           --build-arg OLFS_VERSION
           --build-arg USE_NCWMS=true
-          --tag "${SNAPSHOT_IMAGE_TAG}" ngap-c7
-        - docker tag ${SNAPSHOT_IMAGE_TAG} ${BUILD_VERSION_TAG}
+          --tag "${SNAPSHOT_IMAGE_TAG}"
+          --tag "${BUILD_VERSION_TAG}" ngap-c7
         - docker image ls -a
 
     - stage: TEST_DEPLOYED_IMAGE
