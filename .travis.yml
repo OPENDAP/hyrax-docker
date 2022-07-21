@@ -331,6 +331,8 @@ jobs:
           --tag "${SNAPSHOT_IMAGE_TAG}" hyrax-c7
         - docker tag ${SNAPSHOT_IMAGE_TAG} ${BUILD_VERSION_TAG}
         - docker image ls -a
+        - docker push ${SNAPSHOT_IMAGE_TAG}
+        - docker push ${BUILD_VERSION_TAG}
 
     - stage: C7_BUILD
       name: "opendap/hyrax:c7-ngap-snapshot (CentOS-7)"
