@@ -2,17 +2,13 @@
 
 ## Current Version: <font style="font-size: 300%;">**Hyrax-1.16.7**</font>
 
-**Hyrax-1.16.7** is composed of:
+**Hyrax-1.16.8** is composed of:
 
 |||
 | :---: | :---:|
-| **[OLFS version 1.18.12](https://github.com/OPENDAP/olfs/releases/tag/1.18.12)** | [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.6803527.svg)](https://doi.org/10.5281/zenodo.6803527)
-| **[BES version 3.20.12](https://github.com/OPENDAP/bes/releases/tag/3.20.12)** | [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.6803473.svg)](https://doi.org/10.5281/zenodo.6803473)
-| **[libdap4 version 3.20.10](https://github.com/OPENDAP/libdap4/releases/tag/3.20.10)** |[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.6789103.svg)](https://doi.org/10.5281/zenodo.6789103) |
-
-
-
-
+| **[OLFS version 1.18.13](https://github.com/OPENDAP/olfs/releases/tag/1.18.13)** |[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.6885327.svg)](https://doi.org/10.5281/zenodo.6885327)
+| **[BES version 3.20.13](https://github.com/OPENDAP/bes/releases/tag/3.20.13)** | [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.6884800.svg)](https://doi.org/10.5281/zenodo.6884800)
+| **[libdap4 version 3.20.11](https://github.com/OPENDAP/libdap4/releases/tag/3.20.11)** | [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.6878992.svg)](https://doi.org/10.5281/zenodo.6878992)|
 
 
 
