@@ -13,7 +13,7 @@
 # it for debugging stuff.
 #
 # Set one or more individual labels
-FROM rockylinux:8
+FROM centos:7
 
 ARG RELEASE_DATE
 ENV RELEASE_DATE ${RELEASE_DATE:-"unknown"}
@@ -24,7 +24,7 @@ ENV LIBDAP_VERSION=${LIBDAP_VERSION:-"snapshot"}
 RUN echo "LIBDAP_VERSION: ${LIBDAP_VERSION}"
 
 ARG LIBDAP_RPM
-ENV LIBDAP_RPM=${LIBDAP_RPM:-"libdap-${LIBDAP_VERSION}.el8.x86_64.rpm"}
+ENV LIBDAP_RPM=${LIBDAP_RPM:-"./libdap-${LIBDAP_VERSION}.el7.x86_64.rpm"}
 RUN echo "LIBDAP_RPM: ${LIBDAP_RPM}"
 COPY ${LIBDAP_RPM} /${LIBDAP_RPM}
 
@@ -33,7 +33,7 @@ ENV BES_VERSION=${BES_VERSION:-"snapshot"}
 RUN echo "BES_VERSION: ${BES_VERSION}"
 
 ARG BES_RPM
-ENV BES_RPM=${BES_RPM:-"bes-${BES_VERSION}.static.el8.x86_64.rpm"}
+ENV BES_RPM=${BES_RPM:-"./bes-${BES_VERSION}.static.el7.x86_64.rpm"}
 RUN echo "BES_RPM: ${BES_RPM}"
 COPY ${BES_RPM} /${BES_RPM}
 
@@ -49,9 +49,9 @@ USER root
 
 # Update and install the needful.
 RUN set -e \
-    && dnf -y install which bc python3 emacs vim\
-    && dnf -y update \
-    && dnf clean all \
+    && yum -y install which bc python3 emacs vim\
+    && yum -y update \
+    && yum clean all \
     && python3 -m pip install awscli
 
 ###############################################################
@@ -59,7 +59,7 @@ RUN set -e \
 RUN set -e \
     && echo "Installing libdap snapshot rpm. ${LIBDAP_RPM}" \
     && ls -l ./libdap* \
-    && dnf -y install ./${LIBDAP_RPM} \
+    && yum -y install ./${LIBDAP_RPM} \
     && rm -f ./${LIBDAP_RPM}
 
 ###############################################################
@@ -67,7 +67,7 @@ RUN set -e \
 RUN set -e \
     && echo "Install the besd rpm ${BES_RPM} " \
     && ls -l ./bes* \
-    && dnf -y install ./${BES_RPM} \
+    && yum -y install ./${BES_RPM} \
     && rm -f ./${BES_RPM}
 
 

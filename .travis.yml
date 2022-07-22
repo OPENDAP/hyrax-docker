@@ -19,6 +19,12 @@ notifications:
     - ndp@opendap.org
     - jgallagher@opendap.org
 
+addons:
+  apt:
+    packages:
+      - gnupg
+      - jq
+
 env:
   global:
     # AWS_ACCESS_KEY_ID for the user 'travis-hyrax-docker'
@@ -41,10 +47,16 @@ env:
     - NGAP_DISTRO_URL="s3://opendap.travis.build/${NGAP_DISTRO}"
     - ROBOTS_DISTRO="robots-olfs-${OLFS_VERSION}-webapp.tgz"
     - ROBOTS_DISTRO_URL="s3://opendap.travis.build/${ROBOTS_DISTRO}"
-    - LIBDAP_RPM="libdap-${LIBDAP_VERSION}.el7.x86_64.rpm"
-    - LIBDAP_RPM_URL="s3://opendap.travis.build/${LIBDAP_RPM}"
-    - BES_RPM="bes-${BES_VERSION}.static.el7.x86_64.rpm"
-    - BES_RPM_URL="s3://opendap.travis.build/${BES_RPM}"
+    - LIBDAP_C7_RPM="libdap-${LIBDAP_VERSION}.el7.x86_64.rpm"
+    - LIBDAP_C7_RPM_URL="s3://opendap.travis.build/${LIBDAP_C7_RPM}"
+    - LIBDAP_RH8_RPM="libdap-${LIBDAP_VERSION}.el8.x86_64.rpm"
+    - LIBDAP_RH8_RPM_URL="s3://opendap.travis.build/${LIBDAP_RH8_RPM}"
+    - BES_C7_RPM="bes-${BES_VERSION}.static.el7.x86_64.rpm"
+    - BES_C7_RPM_URL="s3://opendap.travis.build/${BES_C7_RPM}"
+    - BES_RH8_RPM="bes-${BES_VERSION}.static.el8.x86_64.rpm"
+    - BES_RH8_RPM_URL="s3://opendap.travis.build/${BES_RH8_RPM}"
+    - TOMCAT_MAJOR_VERSION=9
+    - S3_BUILD_BUCKET="opendap.travis.build"
 
 before_install:
   - pip3 install awscli
@@ -53,10 +65,14 @@ install:
   - echo "print env:"
   - printenv
   - echo $DOCKER_HUB_PSWD | docker login -u $DOCKER_HUB_UID --password-stdin
-  - echo "Retrieving libdap RPM ${LIBDAP_RPM}"
-  - aws --region=us-east-1 s3 cp ${LIBDAP_RPM_URL} ./hyrax-builds/${LIBDAP_RPM}
-  - echo "Retrieving BES RPM ${BES_RPM}"
-  - aws --region=us-east-1 s3 cp ${BES_RPM_URL} ./hyrax-builds/${BES_RPM}
+  - echo "Retrieving libdap C7 RPM ${LIBDAP_C7_RPM}"
+  - aws --region=us-east-1 s3 cp ${LIBDAP_C7_RPM_URL} ./hyrax-builds/${LIBDAP_C7_RPM}
+  - echo "Retrieving libdap RH8 RPM ${LIBDAP_RH8_RPM}"
+  - aws --region=us-east-1 s3 cp ${LIBDAP_RH8_RPM_URL} ./hyrax-builds/${LIBDAP_RH8_RPM}
+  - echo "Retrieving BES C7 RPM ${BES_C7_RPM}"
+  - aws --region=us-east-1 s3 cp ${BES_C7_RPM_URL} ./hyrax-builds/${BES_C7_RPM}
+  - echo "Retrieving BES RH8 RPM ${BES_RH8_RPM}"
+  - aws --region=us-east-1 s3 cp ${BES_RH8_RPM_URL} ./hyrax-builds/${BES_RH8_RPM}
   - echo "Retrieving OLFS Distribution file ${OLFS_DISTRO}"
   - aws --region=us-east-1 s3 cp ${OLFS_DISTRO_URL} ./hyrax-builds/${OLFS_DISTRO}
   - echo "Retrieving ROBOTS Distribution file ${ROBOTS_DISTRO}"
@@ -65,82 +81,246 @@ install:
   - aws --region=us-east-1 s3 cp ${NGAP_DISTRO_URL} ./hyrax-builds/${NGAP_DISTRO}
   - ls -l ./hyrax-builds
 
-
 stages:
-  - name: build_and_test_hyrax_service
+  - name: OLFS
+    if: branch = master
+  - name: BUILD_AND_TEST
     if:  branch = master
-  - name: build
+  - name: BUILD
     if:  branch = master
-  - name: test_deployed_image
+  - name: TEST_DEPLOYED_IMAGE
     if: branch = master
   - name: disabled
     if: branch = disabled
 
 jobs:
   include:
-    - stage: build_and_test_hyrax_service
-      name: "Build opendap/hyrax:snapshot and run regression tests"
+
+
+    ############################################################################
+    #
+    # RH8 Builds
+    #
+    - stage: BUILD_AND_TEST
+      name: "Build and Test opendap/hyrax:snapshot (RH8)"
       script:
-        - export SNAPSHOT_IMAGE_TAG=opendap/hyrax:snapshot
-        - export BUILD_VERSION_TAG=opendap/hyrax:${HYRAX_VERSION}
         - cd hyrax-builds
-        - cp ./${LIBDAP_RPM} ./hyrax
-        - cp ./${BES_RPM} ./hyrax
-        - cp ./${OLFS_DISTRO} ./hyrax
-        - cp ./${ROBOTS_DISTRO} ./hyrax
+        - export DOCKER_NAME="hyrax"
+        - source ./build-rh8
+        - export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}:snapshot"
+        - export BUILD_VERSION_TAG="opendap/${DOCKER_NAME}:${HYRAX_VERSION}"
+        - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
+        - show_version
+        - get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_VERSION}"
+        - s3_get_besd_distro
+          "${S3_BUILD_BUCKET}"
+          "${DOCKER_NAME}"
+          "el8"
+          "${LIBDAP_VERSION}"
+          "${BES_VERSION}" true 2>&1
+        - s3_get_olfs_distro
+          "${S3_BUILD_BUCKET}"
+          "${DOCKER_NAME}"
+          "${OLFS_VERSION}" 2>&1
         - docker build
+          --build-arg TOMCAT_VERSION
           --build-arg RELEASE_DATE
           --build-arg HYRAX_VERSION
           --build-arg LIBDAP_VERSION
           --build-arg BES_VERSION
           --build-arg OLFS_VERSION
-          --tag "${SNAPSHOT_IMAGE_TAG}" hyrax
-        - docker tag ${SNAPSHOT_IMAGE_TAG} ${BUILD_VERSION_TAG}
+          --tag "${SNAPSHOT_IMAGE_TAG}"
+          --tag "${BUILD_VERSION_TAG}"
+          "${DOCKER_NAME}"
         - docker image ls -a
         - cd ..
         - echo "Running Test Script"
         - ./regression_test_script -i ${SNAPSHOT_IMAGE_TAG}
+#        - docker push ${SNAPSHOT_IMAGE_TAG}
+#        - docker push ${BUILD_VERSION_TAG}
 
-    - stage: build
-      name: "opendap/besd:snapshot"
+    - stage: BUILD
+      name: "Build opendap/besd:snapshot (RH8)"
       script:
-        - export SNAPSHOT_IMAGE_TAG=opendap/besd:snapshot
-        - export BUILD_VERSION_TAG=opendap/besd:${BES_VERSION}
         - cd hyrax-builds
-        - cp ./${LIBDAP_RPM} ./besd
-        - cp ./${BES_RPM} ./besd
+        - export DOCKER_NAME="besd"
+        - source ./build-rh8
+        - export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}:snapshot"
+        - export BUILD_VERSION_TAG="opendap/${DOCKER_NAME}:${HYRAX_VERSION}"
+        - show_version
+        - s3_get_besd_distro
+          "${S3_BUILD_BUCKET}"
+          "${DOCKER_NAME}"
+          "el8"
+          "${LIBDAP_VERSION}"
+          "${BES_VERSION}" true 2>&1
+        - docker build
+          --build-arg RELEASE_DATE
+          --build-arg HYRAX_VERSION
+          --build-arg LIBDAP_VERSION
+          --build-arg BES_VERSION
+          --tag "${SNAPSHOT_IMAGE_TAG}"
+          --tag "${BUILD_VERSION_TAG}"
+          "${DOCKER_NAME}"
+        - docker image ls -a
+
+    - stage: BUILD
+      name: "Build opendap/hyrax_ncwms:snapshot (RH8)"
+      script:
+        - cd hyrax-builds
+        - export DOCKER_NAME="hyrax"
+        - source ./build-rh8
+        - export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}_ncwms:snapshot"
+        - export BUILD_VERSION_TAG="opendap/${DOCKER_NAME}_ncwms:${HYRAX_VERSION}"
+        - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
+        - show_version
+        - get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_VERSION}"
+        - s3_get_besd_distro
+          "${S3_BUILD_BUCKET}"
+          "${DOCKER_NAME}"
+          "el8"
+          "${LIBDAP_VERSION}"
+          "${BES_VERSION}" true 2>&1
+        - s3_get_olfs_distro
+          "${S3_BUILD_BUCKET}"
+          "${DOCKER_NAME}"
+          "${OLFS_VERSION}" 2>&1
+        - docker build
+          --build-arg TOMCAT_VERSION
+          --build-arg RELEASE_DATE
+          --build-arg HYRAX_VERSION
+          --build-arg LIBDAP_VERSION
+          --build-arg BES_VERSION
+          --build-arg OLFS_VERSION
+          --build-arg USE_NCWMS=true
+          --tag "${SNAPSHOT_IMAGE_TAG}"
+          --tag "${BUILD_VERSION_TAG}"
+          "${DOCKER_NAME}"
+        - docker image ls -a
+#        - docker push ${SNAPSHOT_IMAGE_TAG}
+#        - docker push ${BUILD_VERSION_TAG}
+
+    - stage: BUILD
+      name: "Build opendap/hyrax:ngap-snapshot (RH8)"
+      script:
+        - cd hyrax-builds
+        - export DOCKER_NAME="ngap"
+        - source ./build-rh8
+        - export SNAPSHOT_IMAGE_TAG="opendap/hyrax:${DOCKER_NAME}-snapshot"
+        - export BUILD_VERSION_TAG=opendap/hyrax:${DOCKER_NAME}-${HYRAX_VERSION}
+        - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
+        - show_version
+        - get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_VERSION}"
+        - s3_get_besd_distro
+          "${S3_BUILD_BUCKET}"
+          "${DOCKER_NAME}"
+          "el8"
+          "${LIBDAP_VERSION}"
+          "${BES_VERSION}" true 2>&1
+        - get_ngap_olfs_distro
+          "${S3_BUILD_BUCKET}"
+          "${DOCKER_NAME}"
+          "${OLFS_VERSION}" 2>&1
+        - docker build
+          --build-arg TOMCAT_VERSION
+          --build-arg RELEASE_DATE
+          --build-arg HYRAX_VERSION
+          --build-arg LIBDAP_VERSION
+          --build-arg BES_VERSION
+          --build-arg OLFS_VERSION
+          --tag "${SNAPSHOT_IMAGE_TAG}"
+          --tag "${BUILD_VERSION_TAG}"
+          "${DOCKER_NAME}"
+        - docker image ls -a
+#        - docker push ${SNAPSHOT_IMAGE_TAG}
+#        - docker push ${BUILD_VERSION_TAG}
+
+    - stage: BUILD
+      name: "Build opendap/olfs:snapshot"
+      script:
+        - cd hyrax-builds
+        - export DOCKER_NAME="olfs"
+        - source ./build-rh8
+        - export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}:snapshot"
+        - export BUILD_VERSION_TAG="opendap/${DOCKER_NAME}:${OLFS_VERSION}"
+        - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
+        - show_version
+        - get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_VERSION}"
+        - s3_get_olfs_distro
+          "${S3_BUILD_BUCKET}"
+          "olfs"
+          "${OLFS_VERSION}" 2>&1
+        - docker build
+          --build-arg TOMCAT_VERSION
+          --build-arg RELEASE_DATE
+          --build-arg HYRAX_VERSION
+          --build-arg OLFS_VERSION
+          --tag "${SNAPSHOT_IMAGE_TAG}"
+          --tag "${BUILD_VERSION_TAG}" olfs
+        - docker image ls -a
+
+    - stage: TEST_DEPLOYED_IMAGE
+      name: "Test Deployed Image (RH8)"
+      script:
+        - export TEST_IMAGE=opendap/hyrax:${HYRAX_VERSION}
+        - echo "Running Hyrax Regression Test Script on ${TEST_IMAGE}"
+        - ./regression_test_script -i "${TEST_IMAGE}"
+
+    ############################################################################
+    #
+    # CentOS-7 Builds
+    #
+    - stage: BUILD_AND_TEST
+      name: "Build and Test opendap/hyrax:c7-snapshot (CentOS-7)"
+      script:
+        - export SNAPSHOT_IMAGE_TAG=opendap/hyrax:c7-snapshot
+        - export BUILD_VERSION_TAG=opendap/hyrax:c7-${HYRAX_VERSION}
+        - cd hyrax-builds
+        - cp ./${LIBDAP_C7_RPM} ./hyrax-c7
+        - cp ./${BES_C7_RPM} ./hyrax-c7
+        - cp ./${OLFS_DISTRO} ./hyrax-c7
+        - cp ./${ROBOTS_DISTRO} ./hyrax-c7
+        - docker build
+          --build-arg RELEASE_DATE
+          --build-arg HYRAX_VERSION
+          --build-arg LIBDAP_VERSION
+          --build-arg BES_VERSION
+          --build-arg OLFS_VERSION
+          --tag "${SNAPSHOT_IMAGE_TAG}"
+          --tag "${BUILD_VERSION_TAG}"  hyrax-c7
+        - docker image ls -a
+        - cd ..
+        - echo "Running Test Script"
+        - ./regression_test_script -i ${SNAPSHOT_IMAGE_TAG}
+#        - docker push ${SNAPSHOT_IMAGE_TAG}
+#        - docker push ${BUILD_VERSION_TAG}
+
+    - stage: BUILD
+      name: "Build opendap/besd:c7-snapshot (CentOS-7)"
+      script:
+        - export SNAPSHOT_IMAGE_TAG=opendap/besd:c7-snapshot
+        - export BUILD_VERSION_TAG=opendap/besd:c7-${BES_VERSION}
+        - cd hyrax-builds
+        - cp ./${LIBDAP_C7_RPM} ./besd-c7
+        - cp ./${BES_C7_RPM} ./besd-c7
         - docker build
           --build-arg RELEASE_DATE
           --build-arg LIBDAP_VERSION
           --build-arg BES_VERSION
-          -t "${SNAPSHOT_IMAGE_TAG}" besd
-        - docker tag ${SNAPSHOT_IMAGE_TAG} ${BUILD_VERSION_TAG}
+          --tag "${SNAPSHOT_IMAGE_TAG}"
+          --tag "${BUILD_VERSION_TAG}" besd-c7
         - docker image ls -a
 
-    - stage: build
-      name: "opendap/olfs:snapshot"
+    - stage: BUILD
+      name: "Build opendap/hyrax_ncwms:c7-snapshot (CentOS-7)"
       script:
-        - export SNAPSHOT_IMAGE_TAG=opendap/olfs:snapshot
-        - export BUILD_VERSION_TAG=opendap/olfs:${OLFS_VERSION}
+        - export SNAPSHOT_IMAGE_TAG=opendap/hyrax_ncwms:c7-snapshot
+        - export BUILD_VERSION_TAG=opendap/hyrax_ncwms:c7-${HYRAX_VERSION}
         - cd hyrax-builds
-        - cp ./${OLFS_DISTRO} ./olfs
-        - docker build --build-arg RELEASE_DATE
-          --build-arg HYRAX_VERSION
-          --build-arg OLFS_VERSION
-          -t "${SNAPSHOT_IMAGE_TAG}" olfs
-        - docker tag ${SNAPSHOT_IMAGE_TAG} ${BUILD_VERSION_TAG}
-        - docker image ls -a
-
-    - stage: build
-      name: "opendap/hyrax_ncwms:snapshot"
-      script:
-        - export SNAPSHOT_IMAGE_TAG=opendap/hyrax_ncwms:snapshot
-        - export BUILD_VERSION_TAG=opendap/hyrax_ncwms:${HYRAX_VERSION}
-        - cd hyrax-builds
-        - cp ./${LIBDAP_RPM} ./hyrax
-        - cp ./${BES_RPM} ./hyrax
-        - cp ./${OLFS_DISTRO} ./hyrax
-        - cp ./${ROBOTS_DISTRO} ./hyrax
+        - cp ./${LIBDAP_C7_RPM} ./hyrax-c7
+        - cp ./${BES_C7_RPM} ./hyrax-c7
+        - cp ./${OLFS_DISTRO} ./hyrax-c7
+        - cp ./${ROBOTS_DISTRO} ./hyrax-c7
         - docker build
           --build-arg RELEASE_DATE
           --build-arg HYRAX_VERSION
@@ -148,20 +328,22 @@ jobs:
           --build-arg BES_VERSION
           --build-arg OLFS_VERSION
           --build-arg USE_NCWMS=true
-          --tag "${SNAPSHOT_IMAGE_TAG}" hyrax
-        - docker tag ${SNAPSHOT_IMAGE_TAG} ${BUILD_VERSION_TAG}
+          --tag "${SNAPSHOT_IMAGE_TAG}"
+          --tag "${BUILD_VERSION_TAG}" hyrax-c7
         - docker image ls -a
+#        - docker push ${SNAPSHOT_IMAGE_TAG}
+#        - docker push ${BUILD_VERSION_TAG}
 
-    - stage: build
-      name: "opendap/hyrax:ngap-snapshot"
+    - stage: BUILD
+      name: "opendap/hyrax:c7-ngap-snapshot (CentOS-7)"
       script:
-        - export SNAPSHOT_IMAGE_TAG=opendap/hyrax:ngap-snapshot
-        - export BUILD_VERSION_TAG=opendap/hyrax:ngap-${HYRAX_VERSION}
+        - export SNAPSHOT_IMAGE_TAG=opendap/hyrax:c7-ngap-snapshot
+        - export BUILD_VERSION_TAG=opendap/hyrax:c7-ngap-${HYRAX_VERSION}
         - cd hyrax-builds
         - ls -l
-        - cp ./${LIBDAP_RPM} ./ngap
-        - cp ./${BES_RPM} ./ngap
-        - cp ./${NGAP_DISTRO} ./ngap
+        - cp ./${LIBDAP_C7_RPM} ./ngap-c7
+        - cp ./${BES_C7_RPM} ./ngap-c7
+        - cp ./${NGAP_DISTRO} ./ngap-c7
         - docker build --build-arg RELEASE_DATE
           --build-arg RELEASE_DATE
           --build-arg HYRAX_VERSION
@@ -169,15 +351,17 @@ jobs:
           --build-arg BES_VERSION
           --build-arg OLFS_VERSION
           --build-arg USE_NCWMS=true
-          --tag "${SNAPSHOT_IMAGE_TAG}" ngap
-        - docker tag ${SNAPSHOT_IMAGE_TAG} ${BUILD_VERSION_TAG}
+          --tag "${SNAPSHOT_IMAGE_TAG}"
+          --tag "${BUILD_VERSION_TAG}" ngap-c7
         - docker image ls -a
 
-    - stage: test_deployed_image
-      name: "Test Deployed Image"
+    - stage: TEST_DEPLOYED_IMAGE
+      name: "Test Deployed Image (CentOS-7)"
       script:
-        - echo "Running Test Script"
-        - ./regression_test_script
+        - export TEST_IMAGE=opendap/hyrax:c7-${HYRAX_VERSION}
+        - echo "Running Hyrax Regression Test Script on ${TEST_IMAGE}"
+        - ./regression_test_script -i "${TEST_IMAGE}"
+
 
 before_deploy:
   - export DOCKER_LOGIN=`aws ecr get-login --region us-east-1 | sed "s/-e none //g"`;

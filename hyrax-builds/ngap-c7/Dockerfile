@@ -13,7 +13,7 @@
 # it for debugging stuff.
 #
 # Set one or more individual labels
-FROM rockylinux:8
+FROM centos:7
 
 # ENV DEPLOYMENT_CONTEXT="ROOT"
 ENV DEFAULT_NGAP_DEPLOYMENT_CONTEXT="ngap"
@@ -31,13 +31,6 @@ ARG RELEASE_DATE
 ENV RELEASE_DATE ${RELEASE_DATE:-"${NOW}"}
 RUN echo "RELEASE_DATE: ${RELEASE_DATE}"
 
-ARG TOMCAT_VERSION
-ENV TOMCAT_VERSION ${TOMCAT_VERSION:-"9.0.64"}
-RUN echo "TOMCAT_VERSION: ${TOMCAT_VERSION}"
-ENV TOMCAT_DISTRO="apache-tomcat-${TOMCAT_VERSION}"
-COPY "${TOMCAT_DISTRO}.tar.gz" /
-RUN ls -l /apache-tomcat-*  >&2
-
 ARG HYRAX_VERSION
 ENV HYRAX_VERSION=${HYRAX_VERSION:-"snapshot"}
 RUN echo "HYRAX_VERSION: ${HYRAX_VERSION}"
@@ -47,20 +40,18 @@ ENV LIBDAP_VERSION=${LIBDAP_VERSION:-"snapshot"}
 RUN echo "LIBDAP_VERSION: ${LIBDAP_VERSION}"
 
 ARG LIBDAP_RPM
-ENV LIBDAP_RPM=${LIBDAP_RPM:-"libdap-${LIBDAP_VERSION}.el8.x86_64.rpm"}
+ENV LIBDAP_RPM=${LIBDAP_RPM:-"libdap-${LIBDAP_VERSION}.el7.x86_64.rpm"}
 RUN echo "LIBDAP_RPM: ${LIBDAP_RPM}"
-COPY ${LIBDAP_RPM} libdap-devel-* libdap-debuginfo-* /
-RUN ls -l /libdap-*  >&2
+COPY ${LIBDAP_RPM} /${LIBDAP_RPM}
 
 ARG BES_VERSION
 ENV BES_VERSION=${BES_VERSION:-"snapshot"}
 RUN echo "BES_VERSION: ${BES_VERSION}"
 
 ARG BES_RPM
-ENV BES_RPM=${BES_RPM:-"bes-${BES_VERSION}.static.el8.x86_64.rpm"}
+ENV BES_RPM=${BES_RPM:-"bes-${BES_VERSION}.static.el7.x86_64.rpm"}
 RUN echo "BES_RPM: ${BES_RPM}"
-COPY ${BES_RPM} bes-devel-* bes-debuginfo-* /
-RUN ls -l /bes-* >&2
+COPY ${BES_RPM} /${BES_RPM}
 
 ARG OLFS_VERSION
 ENV OLFS_VERSION=${OLFS_VERSION:-"unknown"}
@@ -77,8 +68,8 @@ ENV TOMCAT_CONNECTION_TIMEOUT_MS=${TOMCAT_CONNECTION_TIMEOUT_MS:-"1000000"}
 RUN echo "TOMCAT_CONNECTION_TIMEOUT_MS: ${TOMCAT_CONNECTION_TIMEOUT_MS}"
 
 LABEL vendor="OPeNDAP"
-LABEL org.opendap.hyrax.version=${HYRAX_VERSION}
-LABEL org.opendap.hyrax.release-date=${RELEASE_DATE}
+LABEL org.opendap.hyrax.version=snapshot
+LABEL org.opendap.hyrax.release-date=RELEASE_DATE
 LABEL org.opendap.hyrax.version.is-production="false"
 
 MAINTAINER support@opendap.org
@@ -95,72 +86,38 @@ RUN set -e && \
 # Installing autoconf automake git bc for the tests install. The tests
 # are installed in the container but not run until a later stage of the
 # Travis build (or at a later time). They need to be part of the container,
-# however, to be run, so install them as part of this Dockerfile.
-RUN set -e && dnf update  -y
-RUN set -e && dnf install -y make curl unzip which autoconf automake emacs vim
-RUN set -e && dnf install -y diffutils
-RUN set -e && dnf install -y python3 git bc valgrind gdb
-RUN set -e && dnf install -y java-11-openjdk-devel
-RUN set -e && dnf clean all
-#
-RUN set -e && python3 -m pip install awscli
+# howerver, to be run, so install them as part of this Dockerfile.
+RUN set -e \
+    && yum -y install tomcat unzip which python3 autoconf automake git bc emacs vim \
+    && yum -y update \
+    && python3 -m pip install awscli
 
 ################################################################
-# Install the latest libdap snapshot
+# Tomcat environment (Tomcat installed above by via yum)
+#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
+ENV CATALINA_HOME /usr/share/tomcat
+ENV PATH $CATALINA_HOME/bin:$PATH
+RUN echo "CATALINA_HOME: $CATALINA_HOME"
+
+################################################################
+# Retrieve and install the latest libdap snapshot
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 RUN set -e \
-    && echo "Installing the libdap rpm: ${LIBDAP_RPM}" >&2 \
+    && echo "Installing the latest libdap snapshot. rpm: ${LIBDAP_RPM}" \
     && ls -l ./libdap* \
-    && dnf -y install ./libdap-*.rpm \
+    && yum -y install ./${LIBDAP_RPM} \
     && rm -f ./${LIBDAP_RPM}
 
-RUN echo "libdap4 is installed."
-
 ################################################################
-# Install the latest BES snapshot
+# Retrieve and install the latest BES snapshot
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 RUN set -e \
-    && echo "Installing the latest BES rpm: ${BES_RPM}" >&2 \
+    && echo "Retrieving, and installing the latest besd snapshot. rpm: $BES_RPM" \
     && ls -l ./bes* \
-    && dnf -y install ./bes-*.rpm \
+    && yum -y install ./${BES_RPM} \
     && rm -f ./${BES_RPM}
 
 RUN echo "besdaemon is here: "`which besdaemon`
-
-################################################################
-# Install and Setup Tomcat
-#
-# Make tomcat user and group
-#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
-RUN set -e && useradd -m -U -d /home/tomcat -s /bin/false tomcat
-#
-# Install the Tomcat package that should have been copied into
-# the root directory prior to this layer.
-#
-RUN set -e \
-    && tar -xvf "/${TOMCAT_DISTRO}.tar.gz" -C /home/tomcat >&2 \
-    && ln -s /home/tomcat/${TOMCAT_DISTRO} /usr/share/tomcat >&2 \
-    && rm -rvf /usr/share/tomcat/webapps/* >&2 \
-    && mkdir -p /var/log/tomcat \
-    && chown -R tomcat:tomcat /var/log/tomcat /home/tomcat
-COPY tomcat.service /etc/systemd/system/tomcat.service
-RUN set -e && systemctl enable tomcat >&2
-#RUN firewall-cmd --add-port 8080/tcp --permanent
-#RUN firewall-cmd --reload
-
-ENV CATALINA_HOME /usr/share/tomcat
-ENV PATH $CATALINA_HOME/bin:$PATH
-RUN set -e && echo "CATALINA_HOME: ${CATALINA_HOME}" >&2
-
-# Install our modified server.xml so that the server compresses responses.
-COPY tomcat9-server.xml /
-RUN set -e \
-    && mv /tomcat9-server.xml ${CATALINA_HOME}/conf/server.xml \
-    && chown -R tomcat:tomcat ${CATALINA_HOME}/conf/server.xml
-
-RUN set -e \
-    && echo "Cleaning up Tomcat distribution files..." >&2 \
-    && rm -fv "/${TOMCAT_DISTRO}.tar.gz"  >&2
 
 ################################################################
 # Retrieve, verify, and install the NGAP/OLFS web application
@@ -169,14 +126,14 @@ ENV ROOT=/dev/shm
 
 # NGAP package uses the OLFS_VERSION number. jhrg 4/2/21
 RUN set -e \
-    && echo "Installing the latest NGAP distribution (${NGAP_DISTRO})." >&2 \
-    && echo "working dir: "$(pwd)"    ROOT: ${ROOT}"  >&2 \
-    && tar -C "${ROOT}" -xzvf /${NGAP_DISTRO}.tgz >&2 \
-    && ls -l "${ROOT}" >&2 \
-    && echo "Unpacking warfile..." >&2 \
+    && echo "Installing the latest NGAP distribution (${NGAP_DISTRO})." \
+    && echo "working dir: "$(pwd)"    ROOT: ${ROOT}" \
+    && tar -C "${ROOT}" -xzvf /${NGAP_DISTRO}.tgz \
+    && ls -l "${ROOT}" \
+    && echo "Unpacking warfile..." \
     && unzip -o ${ROOT}/${NGAP_DISTRO}/${DEFAULT_NGAP_DEPLOYMENT_CONTEXT}.war -d ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/ \
-    && echo "Cleaning up." >&2 \
-    && rm -rf ${ROOT}/${NGAP_DISTRO} /${NGAP_DISTRO}.tgz
+    && echo "Cleaning up." \
+    && rm -rf ${ROOT}/${NGAP_DISTRO} ./${NGAP_DISTRO}.tgz
 
 # Fix ownership and access permissions
 RUN set -e \
@@ -185,18 +142,23 @@ RUN set -e \
     && chmod 700 ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/logs
 ################################################################
 
+
+
+# Install our modified server.xml so that the server compresses responses and
+# sets the connectionTimeout to 1000 seconds
+COPY tomcat7-server.xml /
+RUN set -e \
+    && mv /tomcat7-server.xml ${CATALINA_HOME}/conf/server.xml \
+    && chown -R tomcat:tomcat ${CATALINA_HOME}/conf/server.xml
 ################################################################
-# Install our modified tomcat.conf so that the server use the memory
-# cached session state and not require sticky sessions to operate
-# behind a load balancer.
-#
+
+# Install our modified tomcat.conf so that the server use the memory.
 COPY tomcat.conf /
 RUN set -e \
-    && mkdir -p /etc/tomcat \
     && mv /tomcat.conf /etc/tomcat/tomcat.conf \
-    && chown -R tomcat:tomcat /etc/tomcat
-#
-# Install Memcached Session Manager jars into the Tomcat: ${CATALINA_HOME}/lib
+    && chown -R tomcat:tomcat /etc/tomcat/tomcat.conf
+
+# Install Session Manager jars into the Tomcat: ${CATALINA_HOME}/lib
 RUN set -e \
     && echo "Installing Session Manager jar files. Cloning OLFS..." \
     && git clone --depth 1 https://github.com/OPENDAP/olfs \
@@ -204,10 +166,12 @@ RUN set -e \
     && cp olfs/resources/ngap/lib/elasticache-java-cluster-client-1.1.2.jar ${CATALINA_HOME}/lib \
     && echo "Copying memcached Session Manager" \
     && cp olfs/resources/ngap/lib/memcached-session-manager-2.3.2.jar ${CATALINA_HOME}/lib \
-    && echo "Copying memcached Session Manager TC9" \
-    && cp olfs/resources/ngap/lib/memcached-session-manager-tc9-2.3.2.jar ${CATALINA_HOME}/lib \
+    && echo "Copying memcached Session Manager TC7" \
+    && cp olfs/resources/ngap/lib/memcached-session-manager-tc7-2.3.2.jar ${CATALINA_HOME}/lib \
     && chown -R tomcat:tomcat  ${CATALINA_HOME}/lib \
     && rm -rfv olfs
+
+RUN yum clean all
 
 ################################################################
 #

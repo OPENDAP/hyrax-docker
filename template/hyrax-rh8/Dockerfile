@@ -15,17 +15,12 @@
 # Set one or more individual labels
 FROM rockylinux:8
 
+ENV TOMCAT_VERSION="9.0.64"
+
 RUN export NOW=`date +%s`
 ARG RELEASE_DATE
 ENV RELEASE_DATE ${RELEASE_DATE:-"${NOW}"}
 RUN echo "RELEASE_DATE: ${RELEASE_DATE}"
-
-ARG TOMCAT_VERSION
-ENV TOMCAT_VERSION ${TOMCAT_VERSION:-"9.0.64"}
-RUN echo "TOMCAT_VERSION: ${TOMCAT_VERSION}"
-ENV TOMCAT_DISTRO="apache-tomcat-${TOMCAT_VERSION}"
-COPY "${TOMCAT_DISTRO}.tar.gz" /
-RUN ls -l /apache-tomcat-*  >&2
 
 ARG HYRAX_VERSION
 ENV HYRAX_VERSION=${HYRAX_VERSION:-"snapshot"}
@@ -67,7 +62,7 @@ COPY ${ROBOTS_DISTRO}.tgz /${ROBOTS_DISTRO}.tgz
 
 LABEL vendor="OPeNDAP"
 LABEL org.opendap.hyrax.version=${HYRAX_VERSION}
-LABEL org.opendap.hyrax.release-date=${RELEASE_DATE}
+LABEL org.opendap.hyrax.release-date=RELEASE_DATE
 LABEL org.opendap.hyrax.version.is-production="false"
 
 MAINTAINER support@opendap.org
@@ -100,24 +95,45 @@ RUN if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else ec
 #RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
 #RUN sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
 
-################################################################
 # Update and install the needful.
-#
+RUN dnf update  -y
+RUN dnf install -y make wget unzip which autoconf automake emacs vim python3 git bc valgrind gdb
+RUN dnf install -y java-11-openjdk-devel
 # Installing autoconf automake git bc for the tests install. The tests
 # are installed in the container but not run until a later stage of the
 # Travis build (or at a later time). They need to be part of the container,
-# however, to be run, so install them as part of this Dockerfile.
-RUN set -e && dnf update  -y
-RUN set -e && dnf install -y make curl unzip which autoconf automake emacs vim
-RUN set -e && dnf install -y diffutils
-RUN set -e && dnf install -y python3 git bc valgrind gdb
-RUN set -e && dnf install -y java-11-openjdk-devel
-RUN set -e && dnf clean all
-RUN set -e && which diff
-#
-RUN set -e && python3 -m pip install --upgrade pip
-RUN set -e && python3 -m pip install --no-cache-dir awscli
+# howerver, to be run, so install them as part of this Dockerfile.
+RUN dnf clean all
 
+# We need AWS CLI so we get it from python3 pip
+RUN python3 -m pip install awscli
+
+
+
+################################################################
+# Setup Tomcat
+#
+# Make tomcat user and group
+#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
+RUN groupadd tomcat
+# RUN useradd -r -g tomcat tomcat
+RUN useradd -m -U -d /usr/share/tomcat -s /bin/false tomcat
+#
+# Get and install the Tomcat package directly from Apache
+RUN curl -o tomcat.tgz https://archive.apache.org/dist/tomcat/tomcat-9/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz
+RUN tar xvf tomcat.tgz -C /usr/share/tomcat
+RUN ln -s /usr/share/apache-tomcat-${TOMCAT_VERSION} /usr/share/tomcat/latest
+RUN rm -rvf /usr/share/tomcat/latest/webapps/*
+run mkdir -p /var/log/tomcat
+RUN chown -R tomcat:tomcat /var/log/tomcat /usr/share/tomcat
+COPY tomcat.service /etc/systemd/system/tomcat.service
+RUN systemctl enable tomcat
+RUN firewall-cmd --add-port 8080/tcp --permanent
+RUN firewall-cmd --reload
+
+ENV CATALINA_HOME /usr/share/tomcat/latest
+ENV PATH $CATALINA_HOME/bin:$PATH
+RUN echo "CATALINA_HOME: ${CATALINA_HOME}"
 
 
 ################################################################
@@ -126,8 +142,8 @@ RUN set -e && python3 -m pip install --no-cache-dir awscli
 RUN set -e \
     && echo "Installing the libdap rpm: ${LIBDAP_RPM}" \
     && ls -l ./libdap* \
-    && dnf -y install ./libdap-*.rpm \
-    && rm -f ./${LIBDAP_RPM}
+    && dnf -y install ./libdap-*.rpm
+#    && rm -f ./${LIBDAP_RPM}
 
 RUN echo "libdap4 is installed."
 
@@ -137,72 +153,37 @@ RUN echo "libdap4 is installed."
 RUN set -e \
     && echo "Installing the latest BES rpm: ${BES_RPM}" \
     && ls -l ./bes* \
-    && dnf -y install ./bes-*.rpm \
-    && rm -f ./${BES_RPM}
+    && dnf -y install ./bes-*.rpm
+#    && rm -f ./${BES_RPM}
 
 RUN echo "besdaemon is here: "`which besdaemon`
-
-################################################################
-# Install and Setup Tomcat
-#
-# Make tomcat user and group
-#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
-RUN set -e && useradd -m -U -d /home/tomcat -s /bin/false tomcat
-#
-# Install the Tomcat package that should have been copied into
-# the root directory prior to this layer.
-#
-RUN set -e \
-    && tar -xvf "/${TOMCAT_DISTRO}.tar.gz" -C /home/tomcat >&2 \
-    && ln -s /home/tomcat/${TOMCAT_DISTRO} /usr/share/tomcat >&2 \
-    && ln -s /home/tomcat/${TOMCAT_DISTRO} /tomcat >&2 \
-    && rm -rvf /usr/share/tomcat/webapps/* >&2 \
-    && mkdir -p /var/log/tomcat \
-    && chown -R tomcat:tomcat /var/log/tomcat /home/tomcat
-COPY tomcat.service /etc/systemd/system/tomcat.service
-RUN set -e && systemctl enable tomcat
-#RUN firewall-cmd --add-port 8080/tcp --permanent
-#RUN firewall-cmd --reload
-
-ENV CATALINA_HOME /usr/share/tomcat
-ENV PATH $CATALINA_HOME/bin:$PATH
-RUN set -e && echo "CATALINA_HOME: ${CATALINA_HOME}" >&2
-
-# Install our modified server.xml so that the server compresses responses.
-COPY tomcat9-server.xml /
-RUN set -e \
-    && mv /tomcat9-server.xml ${CATALINA_HOME}/conf/server.xml \
-    && chown -R tomcat:tomcat ${CATALINA_HOME}/conf/server.xml
-
-RUN set -e \
-    && echo "Cleaning up Tomcat distribution files..." >&2 \
-    && rm -fv "/${TOMCAT_DISTRO}.tar.gz"
 
 ################################################################
 # Install the OLFS web application
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 ENV ROOT=/dev/shm
 
-RUN echo "Installing the latest olfs distribution (${OLFS_VERSION})." >&2
+RUN echo "Installing the latest olfs distribution (${OLFS_VERSION})."
 RUN set -e \
-    && echo "working_dir: "`pwd`  >&2 \
+    && echo "working_dir: "`pwd` \
     && ls -l . \
     && tar -C ${ROOT} -xzvf ./${OLFS_DISTRO}.tgz \
     && ls -l ${ROOT} \
-    && echo "Unpacking warfile..."  >&2 \
-    && mkdir -p $(readlink -f ${CATALINA_HOME})/webapps/opendap/ \
+    && echo "Unpacking warfile..." \
+    && mkdir -p ${CATALINA_HOME}/webapps/opendap/ \
+    # && (cd ${CATALINA_HOME}/webapps/opendap/ && jar -xf ${ROOT}/olfs-${OLFS_VERSION}-webapp/opendap.war) \
     && unzip -o ${ROOT}/${OLFS_DISTRO}/opendap.war -d ${CATALINA_HOME}/webapps/opendap/ \
-    && echo "Cleaning up."  >&2 \
+    && echo "Cleaning up." \
     && rm -rf ${ROOT}/${OLFS_DISTRO} ./${OLFS_DISTRO}.tgz
 
 RUN set -e \
-    && echo "Installing the latest dynamic robots.txt distribution (${OLFS_VERSION})."  >&2 \
+    && echo "Installing the latest dynamic robots.txt distribution (${OLFS_VERSION})." \
     && ls -l ./robots* \
     && tar -C ${ROOT} -xzf ./${ROBOTS_DISTRO}.tgz \
     && ls -l ${ROOT}/${ROBOTS_DISTRO} \
-    && echo "Unpacking dynamic robots.txt warfile..."  >&2 \
+    && echo "Unpacking dynamic robots.txt warfile..." \
     && unzip -o ${ROOT}/${ROBOTS_DISTRO}/ROOT.war -d ${CATALINA_HOME}/webapps/ROOT/ \
-    && echo "Cleaning up dynamic robots.txt snapshot..."  >&2 \
+    && echo "Cleaning up dynamic robots.txt snapshot..." \
     && rm -rf ${ROOT}/${ROBOTS_DISTRO} ${ROBOTS_DISTRO}.tgz
 
 # Fix ownership and access permissions
@@ -211,22 +192,13 @@ RUN set -e \
     && chown -R tomcat:tomcat ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs \
     && chmod 700 ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs 
 
-################################################################
-# Clean up the Hyrax distribution binaries.
-#
-RUN rm -vf /libdap*.rpm /bes*.rpm /olfs*.tgz /robots*.tgz /apache*
-#
-################################################################
 
 ################################################################
 # retrieve and install the ncWMS web application
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 
-ARG NCWMS_VERSION
-ENV NCWMS_VERSION ${NCWMS_VERSION:-"2.5.2"}
-RUN echo "NCWMS_VERSION: ${NCWMS_VERSION}"
-ENV NCWMS_WAR_URL="https://github.com/Reading-eScience-Centre/ncwms/releases/download/ncwms-${NCWMS_VERSION}/ncWMS2.war"
-RUN echo "NCWMS_WAR_URL: ${NCWMS_WAR_URL}"
+# This is ncWMS-2.4.2
+ENV NCWMS_WAR_URL=https://github.com/Reading-eScience-Centre/ncwms/releases/download/ncwms-2.4.2/ncWMS2.war
 
 RUN if [ $USE_NCWMS = "true" ]; then \
         echo "Installing ncWMS..."; \
@@ -262,6 +234,12 @@ RUN if [ $USE_NCWMS = "true" ]; then \
     else \
         echo "Skipping OLFS/ncWMS confguration installation."; \
     fi
+
+# Install our modified server.xml so that the server compresses responses.
+COPY tomcat7-server.xml /
+#RUN set -e \
+ #   && mv /tomcat7-server.xml ${CATALINA_HOME}/conf/server.xml \
+  #  && chown -R tomcat:tomcat ${CATALINA_HOME}/conf/server.xml
 
 ################################################################
 #
