@@ -57,6 +57,7 @@ env:
     - BES_RH8_RPM_URL="s3://opendap.travis.build/${BES_RH8_RPM}"
     - TOMCAT_MAJOR_VERSION=9
     - S3_BUILD_BUCKET="opendap.travis.build"
+    - ADD_DEBUG_RPMS=""
 
 before_install:
   - pip3 install awscli
@@ -117,7 +118,7 @@ jobs:
           "${DOCKER_NAME}"
           "el8"
           "${LIBDAP_VERSION}"
-          "${BES_VERSION}" false 2>&1
+          "${BES_VERSION}" $ADD_DEBUG 2>&1
         - s3_get_olfs_distro
           "${S3_BUILD_BUCKET}"
           "${DOCKER_NAME}"
@@ -153,7 +154,7 @@ jobs:
           "${DOCKER_NAME}"
           "el8"
           "${LIBDAP_VERSION}"
-          "${BES_VERSION}" false 2>&1
+          "${BES_VERSION}" $ADD_DEBUG_RPMS 2>&1
         - docker build
           --build-arg RELEASE_DATE
           --build-arg HYRAX_VERSION
@@ -180,7 +181,7 @@ jobs:
           "${DOCKER_NAME}"
           "el8"
           "${LIBDAP_VERSION}"
-          "${BES_VERSION}" false 2>&1
+          "${BES_VERSION}" $ADD_DEBUG_RPMS 2>&1
         - s3_get_olfs_distro
           "${S3_BUILD_BUCKET}"
           "${DOCKER_NAME}"
@@ -216,7 +217,7 @@ jobs:
           "${DOCKER_NAME}"
           "el8"
           "${LIBDAP_VERSION}"
-          "${BES_VERSION}" false 2>&1
+          "${BES_VERSION}" $ADD_DEBUG_RPMS 2>&1
         - get_ngap_olfs_distro
           "${S3_BUILD_BUCKET}"
           "${DOCKER_NAME}"
