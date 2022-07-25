@@ -1,22 +1,32 @@
 #!/bin/bash
-HR="###########################################################################"
-export BUILD_RECIPE=${1:-"../snapshot.time"}
-export RELEASE_DATE=""
-export HYRAX_VERSION=""
-export OLFS_VERSION=""
-export BES_VERSION=""
-export LIBDAP_VERSION=""
-
+ HR="############################################################################"
+HR2="# == == == == == == == == == == == == == == == == == == == == == == == == =="
+export BUILD_RECIPE_FILE=${1:-"../snapshot.time"}
 export S3_BUILD_BUCKET=${S3_BUILD_BUCKET:-"opendap.travis.build"}
 export DOCKER_NAME=${DOCKER_NAME:-"hyrax"}
 export TOMCAT_MAJOR_VERSION=${TOMCAT_MAJOR_VERSION:-"9"}
 export SLEEP_INTERVAL=${SLEEP_INTERVAL:-60}
 export NO_CACHE=${NO_CACHE:-""}
-export RELEASE_DATE=${RELEASE_DATE:-$(cat "${BUILD_RECIPE}" | grep hyrax | awk '{print $2;}')}
-export HYRAX_VERSION=${HYRAX_VERSION:-$(cat "${BUILD_RECIPE}" | grep hyrax | awk '{print $1;}' | sed "s/hyrax-//g" )}
-export OLFS_VERSION=${OLFS_VERSION:-$(cat "${BUILD_RECIPE}" | grep olfs | sed "s/olfs-//g" | awk '{print $1;}')}
-export BES_VERSION=${BES_VERSION:-$(cat "${BUILD_RECIPE}" | grep bes | sed "s/bes-//g" | awk '{print $1;}')}
-export LIBDAP_VERSION=${LIBDAP_VERSION:-$(cat "${BUILD_RECIPE}" | grep libdap4 | sed "s/libdap4-//g"| awk '{print $1;}')}
+
+
+function read_build_recipe() {
+    local build_recipe_file="${1}"
+    local build_recipe=""
+    build_recipe=$(cat "${build_recipe_file}")
+
+    export RELEASE_DATE=""
+    export HYRAX_VERSION=""
+    export OLFS_VERSION=""
+    export BES_VERSION=""
+    export LIBDAP_VERSION=""
+    RELEASE_DATE=${RELEASE_DATE:-$(echo "${build_recipe}" | grep hyrax | awk '{print $2;}')}
+    HYRAX_VERSION=${HYRAX_VERSION:-$(echo "${build_recipe}" | grep hyrax | awk '{print $1;}' | sed "s/hyrax-//g" )}
+    OLFS_VERSION=${OLFS_VERSION:-$(echo "${build_recipe}" | grep olfs | sed "s/olfs-//g" | awk '{print $1;}')}
+    BES_VERSION=${BES_VERSION:-$(echo "${build_recipe}" | grep bes | sed "s/bes-//g" | awk '{print $1;}')}
+    LIBDAP_VERSION=${LIBDAP_VERSION:-$(echo "${build_recipe}" | grep libdap4 | sed "s/libdap4-//g"| awk '{print $1;}')}
+}
+read_build_recipe "${BUILD_RECIPE_FILE}"
+
 
 export SNAPSHOT_IMAGE_TAG=${SNAPSHOT_IMAGE_TAG:-"opendap/${DOCKER_NAME}:snapshot"}
 export BUILD_VERSION_TAG=${BUILD_VERSION_TAG:-"opendap/${DOCKER_NAME}:${HYRAX_VERSION}"}
@@ -232,7 +242,7 @@ function s3_pull(){
 #         debuginfo rpm files for libdap and bes will be retrieved as well.
 #
 function s3_get_besd_distro() {
-    echo "${HR}" >&2
+    echo "${HR2}" >&2
     echo "# TASK: s3_get_besd_distro()" >&2
     local s3_bucket="${1}"
     echo "#          s3_bucket: ${s3_bucket}" >&2
@@ -770,8 +780,117 @@ function build_besd() {
 }
 
 
+function pull_tag_and_push_image(){
+    set -e
+    echo "${HR2}"
+    echo "# "
+    echo "# pull_tag_push_image()"
+    echo "# "
+    local target_image_tag="${1}"
+    echo "#    target_image_tag: ${target_image_tag}"
+    local new_tag="${2}"
+    echo "#             new_tag: ${new_tag}"
 
+    echo "# "
+    echo "# PULLING: ${target_image_tag}"
+    echo "# "
+    docker pull ${target_image_tag}
+    echo "# "
+    echo "# TAGGING AS: ${new_tag}"
+    echo "# "
+    set -x
+    docker tag  ${target_image_tag} ${new_tag}
+    set +x
+    echo "# "
+    echo "# PUSHING: ${new_tag}"
+    echo "# "
+    set -x
+    docker push ${new_tag}
+    set +x
+    set +e
+}
 
+################################################################################
+#
+# mk_easy_docker_release()
+#
+# $1 - You must pass a build recipe (aka snapshot.time) file name containing the
+# versions and build times.
+#
+# Reads a snapshot.time file (aka a build recipe) which contains a list of the
+# Hyrax Docker files that made up the build. The idea is that is the release
+# process is followed then recipe file will look something like:
+#
+#     libdap4-3.20.11-0 2022-07-21T23:48:51+0000
+#     bes-3.20.13-0 2022-07-22T14:41:58+0000
+#     olfs-1.18.13-0 2022-07-22T16:36:38+0000
+#     hyrax-1.16.8-0 2022-07-22T16:36:38+0000
+#
+# Note that the build numbers at the end of the version numbers are all 0.
+#
+# The Docker images for:
+#    opendap/hyrax:HYRAX_BUILD_VERSION
+#    opendap/hyrax_ncwms:HYRAX_BUILD_VERSION
+#    opendap/besd:BES_BUILD_VERSION
+#    opendap/olfs:OLFS_BUILD_VERSION
+#
+# Are pulled from Docker Hub, then they are tagged with the release number. For
+# our release that means the the trailing build number (should be "-0") is
+# removed from the build version. The image is also tagged with the "latest"
+# tag (meaning the most recent release) and then the reults are pushed to Docker
+# Hub.
+#
+# Depends on the functions:
+#   - read_build_recipe()
+#   - pull_tag_and_push_image()
+#   - The HR variable
+#
+function mk_easy_docker_release(){
+    local build_recipe_file="${1}"
+    echo "${HR}"
+    echo "# "
+    echo "# mk_easy_docker_release() - BEGIN"
+    echo "# "
+    read_build_recipe "${build_recipe_file}"
+
+    echo "#           RELEASE_DATE: ${RELEASE_DATE}"
+    echo "#          HYRAX_VERSION: ${HYRAX_VERSION}"
+    local hyrax_major_version=
+    hyrax_major_version=$(echo "${HYRAX_VERSION}" | awk '{split($0,a,"."); print a[1]"."a[2];}')
+    echo "#    hyrax_major_version: ${hyrax_major_version}"
+    local hyrax_release_version=
+    hyrax_release_version=$(echo "${HYRAX_VERSION}" | awk '{split($0,a,"-"); print a[1];}')
+    echo "#  hyrax_release_version: ${hyrax_release_version}"
+
+    echo "#           OLFS_VERSION: ${OLFS_VERSION}"
+    local olfs_release_version=
+    olfs_release_version=$(echo "${OLFS_VERSION}" | awk '{split($0,a,"-"); print a[1];}')
+    echo "#   olfs_release_version: ${olfs_release_version}"
+
+    local bes_version="${4}"
+    echo "#            BES_VERSION: ${BES_VERSION}"
+    local bes_release_version=
+    bes_release_version=$(echo "${BES_VERSION}" | awk '{split($0,a,"-"); print a[1];}')
+    echo "#    bes_release_version: ${bes_release_version}"
+
+    pull_tag_and_push_image "opendap/hyrax:${HYRAX_VERSION}" "opendap/hyrax:${hyrax_release_version}"
+    pull_tag_and_push_image "opendap/hyrax:${HYRAX_VERSION}" "opendap/hyrax:latest"
+
+    pull_tag_and_push_image "opendap/hyrax_ncwms:${HYRAX_VERSION}" "opendap/hyrax_ncwms:${hyrax_release_version}"
+    pull_tag_and_push_image "opendap/hyrax_ncwms:${HYRAX_VERSION}" "opendap/hyrax_ncwms:latest"
+
+    pull_tag_and_push_image "opendap/besd:${BES_VERSION}" "opendap/besd:${bes_release_version}"
+    pull_tag_and_push_image "opendap/besd:${BES_VERSION}" "opendap/besd:latest"
+
+    pull_tag_and_push_image "opendap/olfs:${OLFS_VERSION}" "opendap/olfs:${olfs_release_version}"
+    pull_tag_and_push_image "opendap/olfs:${OLFS_VERSION}" "opendap/olfs:latest"
+
+    echo "#"
+    echo "# mk_easy_docker_release() - END"
+    echo "${HR}"
+}
+
+# make_hyrax_release "${RELEASE_DATE}" "${HYRAX_VERSION}" "${OLFS_VERSION}" "${BES_VERSION}" "${LIBDAP_VERSION}"
 
 
 
