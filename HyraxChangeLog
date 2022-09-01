@@ -1,0 +1,506 @@
+
+## -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+## Hyrax Version 1.16.8-21 (date: 2022-09-01T04:42:21+0000)
+##
+##     olfs-1.18.13-21
+##     bes-3.20.13-50
+##     libdap-3.20.11-31
+##
+## -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+##  libdap4-3.20.11-31
+##  hyrax-1.16.8-21
+##
+
+2022-09-01  ndp-opendap  <ndp@opendap.org>
+	
+	Refining commit message format
+	
+	Reformatted automated commit message forBES build trigger.
+	
+2022-08-31  James Gallagher  <jgallagher@opendap.org>
+	
+	Undo the change to Str::print_val() (#200)
+	Undo the change to Str::print_val()
+	
+	Added test-deploy to libdap4 (#202)
+	
+2022-08-30  James Gallagher  <jgallagher@opendap.org>
+	
+	Fixed how Str variables are printed. (#199)
+	Fixed how Str variables are printed.
+	String variables were printed using the Attribute escaping 
+	code. This lead to odd
+	behavior when that code was updated to correct years-long 
+	issues that we had been
+	papering over. I added new code to Str.cc to escape the Str and 
+	Url class' values.
+	Note that this is really only used by things like getdap & 
+	getdap4 and in test code.
+	
+2022-08-25  kyang2014  <kyang2014@users.noreply.github.com>
+	
+	Merge pull request #198 from OPENDAP/hyrax-708-esc-das
+	Hyrax 708 esc das
+	
+2022-08-25  myang6  <myang6@hdfgroup.org>
+	
+	reduce several sonar cloud smells
+	
+	HYRAX-708, 1) Unescape the special characters when parsing DAS 
+	from a file. 2) Update tests. 3) Make DmrRoundTrip and DmrToDap2 tests 
+	temporarily no-op. Will re-visit them later.
+	
+2022-08-23  myang6  <myang6@hdfgroup.org>
+	
+	HYRAX-708, update the das baseline files to reflect the 
+	escaping of the special characters for string attributes.
+	
+2022-08-22  James Gallagher  <jgallagher@opendap.org>
+	
+	Addedd comment about D4Group dims()
+	[skip ci]
+	
+2022-08-22  myang6  <myang6@hdfgroup.org>
+	
+	Merge branch 'master' into hyrax-708-esc-das
+	
+	HYRAX-708, update the escaping functions for DAP4 XML, DAP2 XML 
+	AND DAS. Temporarily turn off two DAS tests that contain the special 
+	characters.
+	
+2022-08-17  ndp-opendap  <ndp@opendap.org>
+	
+	Updating trtavis-ci-opendap github credentials
+	
+2022-08-12  myang6  <myang6@hdfgroup.org>
+	
+	Merge branch 'master' into hyrax-708-esc-das
+	
+2022-08-08  James Gallagher  <jgallagher@opendap.org>
+	
+	Modify D4Group::find_var() so it can find D4Groups (#194)
+	Modify D4Group::find_var() so it can find D4Groups
+	When a path in a CE specifies a Group, we should be returning 
+	all the
+	variables in that Group. Right now libdap just throws an 
+	exception. Once
+	find_var() returns the BaseType* to the Group, we should be set 
+	to mark
+	all of the Group's variables as part of the projection.
+	Added print_val and print_decl methods to D4Group.
+	This will make it easy(ier) to add tests for the new 'all vars
+	in a group' feature/fix.
+	Added tests for the 'Group projection' feature/fix
+	Now projection works for Groups and nested groups both and 
+	without
+	member variables. That is, for normal groups (ones with child
+	variables) naming the group in a CE results in all the 
+	variables in
+	that group and its child groups being included in the response. 
+	For
+	Groups that only contain attributes, naming the group in the CE 
+	will
+	cause that group to be included in the dap (i.e., data) 
+	response. This
+	dubious behavior is ... well, dubious. But modulo the 
+	correctness of
+	attributes in the face of a constraint, it does work.
+	See DMRTest 243 - 249 plus some of the D4GroupTest unit tests.
+	
+2022-07-21  ndp-opendap  <ndp@opendap.org>
+	
+	Updating build offset for TravisCI
+	
+	Preparing release 3.20.11, Hyrax-1.16.8
+ 
+## -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+##  bes-3.20.13-50
+##  hyrax-1.16.8-21
+##
+
+2022-09-01  ndp-opendap  <ndp@opendap.org>
+	
+	Merge branch 'master' of https://github.com/OPENDAP/bes
+	
+2022-09-01  The-Robot-Travis  <npotter@opendap.org>
+	
+	libdap4: Triggering BES build for snapshot production. Build 
+	Version Matrix:   libdap4-3.20.11-32 2022-09-01T15:58:46+0000
+	
+2022-09-01  ndp-opendap  <ndp@opendap.org>
+	
+	Refining commit message format
+	
+	Reformatted automated commit message for OLFS build trigger.
+	
+2022-08-31  The-Robot-Travis  <npotter@opendap.org>
+	
+	libdap4-3.20.11-31 2022-09-01T03:46:39+0000 Triggering BES 
+	build for snapshots.
+	
+	libdap4-3.20.11-30 2022-09-01T02:13:50+0000 Triggering BES 
+	build for snapshots.
+	
+	libdap4-3.20.11-28 2022-09-01T02:09:08+0000 Triggering BES 
+	build for snapshots.
+	
+	libdap4-3.20.11-26 2022-09-01T01:39:02+0000 Triggering BES 
+	build for snapshots.
+	
+2022-08-30  The-Robot-Travis  <npotter@opendap.org>
+	
+	libdap4-3.20.11-22 2022-08-30T16:05:52+0000 Triggering BES 
+	build for snapshots.
+	
+2022-08-25  kyang2014  <kyang2014@users.noreply.github.com>
+	
+	Merge pull request #671 from OPENDAP/fix_gm_test
+	HYRAX-708, the dmr and ddx input and baseline files  (at global 
+	metadata store unit-test) wrongly add &quot…
+	
+2022-08-25  myang6  <myang6@hdfgroup.org>
+	
+	HYRAX-708, the dmr and ddx input and baseline files wrongly add 
+	&quot; for string. Remove the &quot;.
+	
+2022-08-25  kyang2014  <kyang2014@users.noreply.github.com>
+	
+	Merge pull request #670 from OPENDAP/hyrax-708-no-esc
+	Hyrax 708 no esc
+	
+2022-08-25  The-Robot-Travis  <npotter@opendap.org>
+	
+	libdap4-3.20.11-19 2022-08-25T17:58:29+0000 Triggering BES 
+	build for snapshots.
+	
+2022-08-25  myang6  <myang6@hdfgroup.org>
+	
+	HYRAX-708, updating the HDF4 handler to correctly handle the 
+	special characters.
+	
+	HYRAX-708, add comments to some handlers about the change of 
+	escaping special characters.
+	
+2022-08-23  myang6  <myang6@hdfgroup.org>
+	
+	HYRAX-708, add fileout netCDF tests for the special character 
+	handling.
+	
+2022-08-23  Kent Yang  <myang6@hdfgroup.org>
+	
+	HYRAX-708, add one test to the HDF5 handler to reflect the 
+	handling of the special characters.
+	
+	 update fits handler to escape the string attribute in the 
+	libdap
+	
+2022-08-23  myang6  <myang6@hdfgroup.org>
+	
+	HYRAX-708, update ncml tests due to the update of the special 
+	character handling.
+	
+2022-08-22  myang6  <myang6@hdfgroup.org>
+	
+	HYRAX-708, update the baseline files to reflect the correct 
+	handling of escaping special characters for attributes.
+	
+2022-08-22  The-Robot-Travis  <npotter@opendap.org>
+	
+	libdap4-3.20.11-15 2022-08-22T22:14:50+0000 Triggering BES 
+	build for snapshots.
+	
+2022-08-22  myang6  <myang6@hdfgroup.org>
+	
+	Merge branch 'master' into hyrax-708-no-esc
+	
+	HYRAX-708, GDAL handler also escapes the special characters. 
+	Need to turn it off since we are doing this in the libdap4.
+	
+2022-08-19  James Gallagher  <jgallagher@opendap.org>
+	
+	Length refactor (#667)
+	Change every call from string::length to string::size
+	This makes it easier to see where libdap's BaseType::length
+	is used.
+	
+2022-08-17  The-Robot-Travis  <npotter@opendap.org>
+	
+	libdap4-3.20.11-11 2022-08-18T00:02:59+0000 Triggering BES 
+	build for snapshots.
+	
+2022-08-17  ndp-opendap  <ndp@opendap.org>
+	
+	Updating travis-ci-opendap github creds
+	
+2022-08-15  myang6  <myang6@hdfgroup.org>
+	
+	HYRAX-708, check in an dmr bescmd file to handle the special 
+	characters.
+	
+2022-08-15  Sam Lloyd  <slloyd@opendap.org>
+	
+	added curl_global_init call (#666)
+	
+2022-08-12  myang6  <myang6@hdfgroup.org>
+	
+	Merge branch 'master' into hyrax-708-no-esc
+	
+2022-08-12  kyang2014  <kyang2014@users.noreply.github.com>
+	
+	Merge pull request #665 from OPENDAP/hyrax-788
+	Hyrax 788
+	
+2022-08-12  myang6  <myang6@hdfgroup.org>
+	
+	HYRAX-788, add tests for scalar variable in compact storage. 1) 
+	integer type. 2)fixed-size string 3)variable-length string 4) With 
+	fillvalue.
+	
+	HYRAX-788, support scalar variable for compact storage
+	
+2022-08-09  kyang2014  <kyang2014@users.noreply.github.com>
+	
+	Merge pull request #664 from OPENDAP/hyrax-795
+	Hyrax 795
+	
+2022-08-09  myang6  <myang6@hdfgroup.org>
+	
+	Merge branch 'master' into hyrax-795
+	
+2022-08-09  kyang2014  <kyang2014@users.noreply.github.com>
+	
+	Merge pull request #663 from OPENDAP/hyrax-771
+	Hyrax 771 - the travis error seems bogus.
+	
+2022-08-09  myang6  <myang6@hdfgroup.org>
+	
+	HYRAX-771, clean two code smells according to sonar cloud
+	
+	HYRAX-771, trigger travis build.
+	
+2022-08-08  myang6  <myang6@hdfgroup.org>
+	
+	HYRAX-795, add three dmr++ tests to the fileout netCDF module. 
+1. simple dmr++ test. 2. shuffle+deflate with normal data. 3. 
+	shuffle+deflate+deflate with data that contains fillvalues.
+	
+2022-08-08  The-Robot-Travis  <npotter@opendap.org>
+	
+	libdap4-3.20.11-5 2022-08-08T20:09:21+0000 Triggering BES build 
+	for snapshots.
+	
+2022-08-08  myang6  <myang6@hdfgroup.org>
+	
+	HYRAX-771, improve the description of a value-result parameter 
+	according to Jame's suggestion.
+	
+2022-08-07  myang6  <myang6@hdfgroup.org>
+	
+	HYRAX-771, remove unused tests in the git.
+	
+	HYRAX-771, clean up code.
+	
+	HYRAX-771, add more tests and clean up code a bit.
+	
+2022-08-05  myang6  <myang6@hdfgroup.org>
+	
+	HYRAX-771, finally fix the corner case in the GHRSST file.
+	
+	HYRAX-771, fix bugs in the new code but sst still cannot be 
+	decompressed
+	
+	HYRAX-771, add more debugging
+	
+	HYRAX-771, not ready checking some testing files for debugging 
+	only.
+	
+2022-08-03  Kent Yang  <myang6@hdfgroup.org>
+	
+	HYRAX-771, add the deflate twice special case to the test. The 
+	input buffer of the second deflate is bigger than the chunk size.
+	
+	Merge branch 'master' into hyrax-771
+	
+2022-08-03  myang6  <myang6@hdfgroup.org>
+	
+	HYRAX-771, make the buffer in the inflate() extended for the 
+	case when the buffer to decompress the data needs to be bigger than the 
+	buffer of the chunk size.
+	
+2022-08-03  James Gallagher  <jgallagher@opendap.org>
+	
+	Modified BESDapTransmit so that it uses the libdap::Error 
+	file/line info (#662)
+	Modified BESDapTransmit so that it uses the libdap::Error file 
+	and line info
+	This is an improvement over using __FILE__ and __LINE__ for the 
+	location
+	where the libdap::Error object was rethrown. This makes 
+	tracking down
+	errors and setting debugger breakpoints faster.
+	
+2022-08-01  James Gallagher  <jgallagher@opendap.org>
+	
+	Merge branch 'master' of https://github.com/OPENDAP/bes
+	The merged changes have been through CI/CD and the others
+	are just formatting.
+	[skip ci]
+	
+	Formating changes only to DMZ.cc and gse.yy
+	[skip ci]
+	
+2022-08-01  kyang2014  <kyang2014@users.noreply.github.com>
+	
+	Merge pull request #661 from OPENDAP/hyrax-792
+	HYRAX-792, add bes version in the dmrpp files to ensure all the 
+	filte…
+	
+2022-08-01  myang6  <myang6@hdfgroup.org>
+	
+	HYRAX-792, add bes version in the dmrpp files to ensure all the 
+	filters are included.
+	
+2022-07-29  kyang2014  <kyang2014@users.noreply.github.com>
+	
+	Merge pull request #660 from OPENDAP/hyrax-793
+	HYRAX-793, 1. Fixes the bug that the dmrpp cannot retrieve the 
+	data w…
+	
+2022-07-29  myang6  <myang6@hdfgroup.org>
+	
+	HYRAX-793, 1. Fixes the bug that the dmrpp cannot retrieve the 
+	data when a variable contains one chunk and that chunk data are filled 
+	values and the chunk is compressed. 2. Adds three tests to ensure all 
+	related cases are covered.
+	
+2022-07-25  kyang2014  <kyang2014@users.noreply.github.com>
+	
+	Merge pull request #657 from OPENDAP/hyrax-745
+	Hyrax 745
+	
+2022-07-22  ndp-opendap  <ndp@opendap.org>
+	
+	Added DOI to README
+	
+	Changes for release 3.20.13, Hyrax-1.16.8
+	
+	Moved the ingest of all_modules.txt into 
+	version_update_modules.sh, thus simplifying its invocation.
+	
+	Fixings modules list for gdal changes.
+	
+ 
+## -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+##  olfs-1.18.13-21
+##  hyrax-1.16.8-21
+##
+
+2022-09-01  ndp-opendap  <ndp@opendap.org>
+	
+	Merge branch 'master' of https://github.com/opendap/olfs
+	
+	Added convenient script for pushing to our ngap s3 documents 
+	bucket
+	
+2022-09-01  The-Robot-Travis  <npotter@opendap.org>
+	
+	bes-3.20.13-51 2022-09-01T16:32:23+0000 - Triggering OLFS build 
+	for snapshots.
+	
+2022-09-01  ndp-opendap  <ndp@opendap.org>
+	
+	Updated CloudFront 504 page with Jame's input
+	
+	Refining commit message format
+	
+	Reformatted automated commit message for hyrax-docker build 
+	trigger.
+	
+2022-08-31  The-Robot-Travis  <npotter@opendap.org>
+	
+	bes-3.20.13-50 2022-09-01T04:27:04+0000 - Triggering OLFS build 
+	for snapshots.
+	
+	bes-3.20.13-49 2022-09-01T03:34:00+0000 - Triggering OLFS build 
+	for snapshots.
+	
+	bes-3.20.13-48 2022-09-01T03:15:52+0000 - Triggering OLFS build 
+	for snapshots.
+	
+2022-08-31  ndp-opendap  <ndp@opendap.org>
+	
+	Formatting of commit message continues.
+	
+	Updated git commit message for trigger to include build 
+	inventory
+	
+	this is a test
+	
+	This is a test commit.
+	
+	added 504 page (cloudfront) and associated template to the ngap 
+	resources
+	
+2022-08-25  The-Robot-Travis  <npotter@opendap.org>
+	
+	bes-3.20.13-44 2022-08-25T21:54:43+0000 - Triggering OLFS build 
+	for snapshots.
+	
+2022-08-22  The-Robot-Travis  <npotter@opendap.org>
+	
+	bes-3.20.13-33 2022-08-22T23:42:36+0000 - Triggering OLFS build 
+	for snapshots.
+	
+2022-08-19  The-Robot-Travis  <npotter@opendap.org>
+	
+	bes-3.20.13-30 2022-08-19T13:54:26+0000 - Triggering OLFS build 
+	for snapshots.
+	
+2022-08-18  ndp-opendap  <ndp@opendap.org>
+	
+	Merge branch 'master' of https://github.com/opendap/olfs
+	
+	Updating github credentials for travis-ci-opendap
+	
+2022-08-17  The-Robot-Travis  <npotter@opendap.org>
+	
+	bes-3.20.13-28 2022-08-18T00:48:16+0000 - Triggering OLFS build 
+	for snapshots.
+	
+	bes-3.20.13-27 2022-08-18T00:30:06+0000 - Triggering OLFS build 
+	for snapshots.
+	
+2022-08-15  The-Robot-Travis  <npotter@opendap.org>
+	
+	bes-3.20.13-22 2022-08-15T17:10:20+0000 - Triggering OLFS build 
+	for snapshots.
+	
+2022-08-12  The-Robot-Travis  <npotter@opendap.org>
+	
+	bes-3.20.13-19 2022-08-12T19:02:00+0000 - Triggering OLFS build 
+	for snapshots.
+	
+2022-08-09  The-Robot-Travis  <npotter@opendap.org>
+	
+	bes-3.20.13-16 2022-08-09T19:53:00+0000 - Triggering OLFS build 
+	for snapshots.
+	
+	bes-3.20.13-14 2022-08-09T18:22:49+0000 - Triggering OLFS build 
+	for snapshots.
+	
+2022-08-03  The-Robot-Travis  <npotter@opendap.org>
+	
+	bes-3.20.13-10 2022-08-03T16:14:10+0000 - Triggering OLFS build 
+	for snapshots.
+	
+2022-08-01  The-Robot-Travis  <npotter@opendap.org>
+	
+	bes-3.20.13-7 2022-08-01T18:32:55+0000 - Triggering OLFS build 
+	for snapshots.
+	
+2022-07-29  The-Robot-Travis  <npotter@opendap.org>
+	
+	bes-3.20.13-4 2022-07-29T19:05:43+0000 - Triggering OLFS build 
+	for snapshots.
+	
+ 
