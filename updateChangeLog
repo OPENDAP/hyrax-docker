@@ -181,37 +181,35 @@ function mk_hyrax_changelog_entry(){
 }
 
 function undo_updates() {
-    for proj in ${COMPONENT_PROJECTS}
-    do
-        cd "../${proj}" || exit;
-        git checkout -- ChangeLog;
-    done
-    cd "${START_DIR}" || exit
-    git checkout -- "${HYRAX_CHANGE_LOG}"
-}
+    use_git_reset="${1}"
 
-function commit_updates() {
     for proj in ${COMPONENT_PROJECTS}
     do
         cd "../${proj}" || exit;
+        if test -n "${use_git_reset}"; then
+            git reset HEAD~
+        fi
         git checkout -- ChangeLog;
     done
     cd "${START_DIR}" || exit
-    git commit -m "Updated Hyrax combined ChangeLog for hyrax-${HYRAX_VERSION}"
+    if test -n "${use_git_reset}"; then
+        git reset HEAD~
+    fi
+    git checkout -- "${HYRAX_CHANGE_LOG}"
 }
 
 function update_project_change_log(){
     local proj_name="${1}"
     local proj_version="${2}"
-    local commit="${3}"
+    local commit_changes="${3}"
 
     cd "../${proj_name}" || exit 1;
     local change_log_text=
     change_log_text=$(get_new_change_log_text "${proj_name}" "${proj_version}")
     prepend_to_file "${change_log_text}" ./ChangeLog
-    if test -n "${commit}"; then
+    if test -n "${commit_changes}"; then
         echo "# ${proj_name}: Committing changes to git" >&2
-        git commit -m "Updating ChangeLog for ${proj_name}-${proj_version} (hyrax-${HYRAX_VERSION})" ./ChangeLog >&2
+        git commit -m "Updating ChangeLog for ${proj_name}-${proj_version} (hyrax-${HYRAX_VERSION}) [skip-ci]" ./ChangeLog >&2
     fi
     cd "${START_DIR}" || exit 1;
     echo "${change_log_text}"
@@ -219,15 +217,22 @@ function update_project_change_log(){
 
 function update_hyrax_combined_change_log(){
     local change_log_text="${1}"
-    local commit="${2}"
+    local commit_changes="${2}"
 
     cd "${START_DIR}" || exit
 
     prepend_to_file "${change_log_text}" "${HYRAX_CHANGE_LOG}"
 
-    if test -n "${COMMIT_UPDATES}"; then
-        echo "# ${proj_name}: Committing changes to git" >&2
-        git commit -m "Updating ChangeLog for ${proj_name}-${proj_version} (hyrax-${HYRAX_VERSION})" ./ChangeLog >&2
+    if test -n "${commit_changes}"; then
+
+        echo "# hyrax-docker: Committing changes to git" >&2
+        git commit -m "Updating Hyrax combined ChangeLog (hyrax-${HYRAX_VERSION})
+Build Version Matrix:
+    libdap4-${LIBDAP_VERSION}
+    bes-${BES_VERSION}
+    olfs-${OLFS_VERSION}
+    hyrax-${HYRAX_VERSION}
+" "${HYRAX_CHANGE_LOG}" >&2
     fi
 
 }
