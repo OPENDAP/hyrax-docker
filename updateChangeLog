@@ -1,14 +1,17 @@
 #!/bin/bash
 HYRAX_CHANGE_LOG=${1:-"HyraxChangeLog"}
+COMMIT_UPDATES=${2:-""} # Anything not empty will trigger commits
+
 debug=${debug:-""}
+
 BUILD_RECIPE_FILE="./snapshot.time"
+
 START_DIR=$PWD
 
 COMPONENT_PROJECTS="libdap4 bes olfs"
-COMMIT_UPDATES=${2:-""}
 
 
-export HR1="# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - "
+export HR1="# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
 export HR0="## -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --"
 
 function read_build_recipe() {
@@ -229,7 +232,7 @@ function update_hyrax_combined_change_log(){
 
 }
 
-function main() {
+function updateHyraxChangeLogs() {
     if test -n "${debug}"; then
         echo "${HR0}";
         echo "# "$(basename $0)
@@ -250,4 +253,4 @@ function main() {
     update_hyrax_combined_change_log "${hyrax_clog_entry}" "${COMMIT_UPDATES}"
 }
 
-main
+updateHyraxChangeLogs
