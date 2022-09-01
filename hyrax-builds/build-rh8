@@ -103,7 +103,13 @@ function get_latest_tomcat_version_number(){
         status=$(curl -s -o /dev/null -w "%{response_code}" "${release_endpoint_url}")
         if test $status -eq 404 ; then
             echo "# Candidate tomcat_version: ${tomcat_version} not found on download site: ${release_endpoint_url} " >&2
-            ignore_list+="${ignore_list}  -e ${tomcat_version} "
+            if test -n "${tomcat_version}"; then
+                ignore_list+="${ignore_list}  -e ${tomcat_version} "
+            else
+                echo "# ERROR: The tomcat_version is inexplicably empty. Exiting." >&2
+                echo "FAILED_TO_LOCATE_TOMCAT_VERSION"
+                return 1;
+            fi
             retry=true
         else
             retry=false

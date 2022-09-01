@@ -1,0 +1,253 @@
+#!/bin/bash
+HYRAX_CHANGE_LOG=${1:-"HyraxChangeLog"}
+debug=${debug:-""}
+BUILD_RECIPE_FILE="./snapshot.time"
+START_DIR=$PWD
+
+COMPONENT_PROJECTS="libdap4 bes olfs"
+COMMIT_UPDATES=${2:-""}
+
+
+export HR1="# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - "
+export HR0="## -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --"
+
+function read_build_recipe() {
+    local build_recipe_file="${1}"
+    local build_recipe=""
+    if test -n "${debug}"; then
+        echo "${HR1}" >&2
+        echo "# Reading build recipe file: ${build_recipe_file}" >&2
+        echo "#" >&2
+    fi
+
+    local build_recipe=""
+    build_recipe=$(cat "${build_recipe_file}")
+    #if test -n "${debug}"; then
+    #    echo "${build_recipe}" | awk '{print "##    "$0;}' >&2
+    #fi
+
+    export RELEASE_DATE=""
+    RELEASE_DATE=${RELEASE_DATE:-$(echo "${build_recipe}" | grep hyrax | awk '{print $2;}')}
+    if test -n "${debug}"; then echo "#   RELEASE_DATE: ${RELEASE_DATE}" >&2; fi
+
+    export HYRAX_VERSION=""
+    HYRAX_VERSION=${HYRAX_VERSION:-$(echo "${build_recipe}" | grep hyrax | awk '{print $1;}' | sed "s/hyrax-//g" )}
+    if test -n "${debug}"; then echo "#  HYRAX_VERSION: ${HYRAX_VERSION}" >&2; fi
+
+    export OLFS_VERSION=""
+    OLFS_VERSION=${OLFS_VERSION:-$(echo "${build_recipe}" | grep olfs | sed "s/olfs-//g" | awk '{print $1;}')}
+    if test -n "${debug}"; then echo "#   OLFS_VERSION: ${OLFS_VERSION}" >&2; fi
+
+    export BES_VERSION=""
+    BES_VERSION=${BES_VERSION:-$(echo "${build_recipe}" | grep bes | sed "s/bes-//g" | awk '{print $1;}')}
+    if test -n "${debug}"; then echo "#    BES_VERSION: ${BES_VERSION}" >&2; fi
+
+    export LIBDAP_VERSION=""
+    LIBDAP_VERSION=${LIBDAP_VERSION:-$(echo "${build_recipe}" | grep libdap4 | sed "s/libdap4-//g"| awk '{print $1;}')}
+    if test -n "${debug}"; then echo "# LIBDAP_VERSION: ${LIBDAP_VERSION}" >&2; fi
+
+    if test -n "${debug}"; then echo "#" >&2; fi
+
+}
+
+function get_new_change_log_text(){
+    local proj_name="${1}"
+    local proj_version="${2}"
+
+    if test -n "${debug}"; then
+        echo "${HR1}" >&2
+        echo "# get_change_log_text()" >&2
+        echo "#     proj_name: ${proj_name}" >&2
+        echo "#     proj_version: ${proj_version}" >&2
+        echo "#" >&2
+    fi
+
+    local most_recent_entry=""
+    most_recent_entry=$(grep -e "[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]" ChangeLog | head -1 | awk '{print $1;}')
+    if test -n "${debug}"; then echo "# most_recent_entry: ${most_recent_entry}" >&2; fi
+
+    local orig_update_text=""
+    orig_update_text=$(gitlog-to-changelog --since="${most_recent_entry}")
+    if test -n "${debug}"; then
+        echo "#" >&2
+        echo "# orig_update_text:" >&2
+        echo "#" >&2
+        echo "${orig_update_text}" | awk '{print "##    "$0;}' >&2
+        echo "#" >&2
+    fi
+
+    # Now that we have the raw change log entries, we use the canonical text
+    # processing system that is UNIX to make sure the lines are not too long and
+    # the indentation is correct.
+    local update_text=""
+    update_text=$(echo "${orig_update_text}" | \
+                fold -s -w 72 | \
+                awk '{
+                    if(!match($0,"^[0-9]|^[\\t]")){
+                        printf("\t%s\n",$0);
+                    }
+                    else{
+                        print $0;
+                    }
+                }')
+
+    # We know that the most_recent_entry date string is the most recent
+    # entry in the ChangeLog, but that entry already exists. And
+    # because of the lazy way we invoked gitlog-to-changelog using
+    # the most_recent_entry value, we got back that entry as well. Rather
+    # than doing the painful date time arithemetic we just use the fact
+    # that the most_recent_entry entry is in both the existing ChangeLog and
+    # is the last entry in the update_text, we just prune it from the
+    # update test and we are off to the races.
+
+    # Find the beginning of the last entry in the update text.
+    local location_of_most_recent_entry=""
+    location_of_most_recent_entry=$( echo "${update_text}" | \
+                grep -n "${most_recent_entry}" | \
+                head -1 | \
+                awk '{split($1,a,":");print a[1]-1;}')
+
+   # echo "${update_text}" | grep -n "${most_recent_entry}" # | head -1 | awk '{split($1,a,":");print a[1]-1;}')
+
+    if test -n "${debug}"; then
+        echo "# location_of_most_recent_entry: ${location_of_most_recent_entry}" >&2
+        echo "#" >&2
+    fi
+
+    if test -n "${location_of_most_recent_entry}" && \
+       test ${location_of_most_recent_entry} -gt 0
+    then
+        # Prune the most recent entry to avoid duplication
+        update_text=$(echo "${update_text}" | head -n "${location_of_most_recent_entry}")
+    else
+        echo "Warning: Did not find most_recent entry in new changes. Skipping..." >&2
+    fi
+
+    # Add a banner for this update
+    update_text=$( \
+        echo "${HR0}"; \
+        echo "##  ${proj_name}-${proj_version}"; \
+        echo "##  hyrax-${HYRAX_VERSION}"; \
+        echo "##"; \
+        echo ""; \
+        echo "${update_text}"; \
+        echo " ";  )
+
+    if test -n "${debug}"; then
+        # Show the result for debuggin
+        echo "# update_text:" >&2
+        echo "#" >&2
+        echo "${update_text}" | awk '{print "###    "$0;}' >&2
+        echo "#" >&2
+
+        echo "${HR1}" >&2
+        echo "" >&2
+    fi
+    # The return value from this function.
+    echo "${update_text}"
+}
+
+function prepend_to_file(){
+    prepend_text="${1}"
+    target_file="${2}"
+    #set -v
+    echo "${prepend_text}" > foo
+    cat "${target_file}" >> foo
+    mv foo "${target_file}"
+    #set +v
+}
+
+function mk_hyrax_changelog_entry(){
+    local libdap4_txt="${1}"
+    local bes_txt="${2}"
+    local olfs_txt="${3}"
+
+    # Print just the right stuff to stdout.
+    echo ""
+    echo "${HR0}"
+    echo "## Hyrax Version ${HYRAX_VERSION} (date: ${RELEASE_DATE})"
+    echo "##"
+    echo "##     olfs-${OLFS_VERSION}"
+    echo "##     bes-${BES_VERSION}"
+    echo "##     libdap-${LIBDAP_VERSION}"
+    echo "##"
+    echo "${libdap4_txt}"
+    echo "${bes_txt}"
+    echo "${olfs_txt}"
+
+}
+
+function undo_updates() {
+    for proj in ${COMPONENT_PROJECTS}
+    do
+        cd "../${proj}" || exit;
+        git checkout -- ChangeLog;
+    done
+    cd "${START_DIR}" || exit
+    git checkout -- "${HYRAX_CHANGE_LOG}"
+}
+
+function commit_updates() {
+    for proj in ${COMPONENT_PROJECTS}
+    do
+        cd "../${proj}" || exit;
+        git checkout -- ChangeLog;
+    done
+    cd "${START_DIR}" || exit
+    git commit -m "Updated Hyrax combined ChangeLog for hyrax-${HYRAX_VERSION}"
+}
+
+function update_project_change_log(){
+    local proj_name="${1}"
+    local proj_version="${2}"
+    local commit="${3}"
+
+    cd "../${proj_name}" || exit 1;
+    local change_log_text=
+    change_log_text=$(get_new_change_log_text "${proj_name}" "${proj_version}")
+    prepend_to_file "${change_log_text}" ./ChangeLog
+    if test -n "${commit}"; then
+        echo "# ${proj_name}: Committing changes to git" >&2
+        git commit -m "Updating ChangeLog for ${proj_name}-${proj_version} (hyrax-${HYRAX_VERSION})" ./ChangeLog >&2
+    fi
+    cd "${START_DIR}" || exit 1;
+    echo "${change_log_text}"
+}
+
+function update_hyrax_combined_change_log(){
+    local change_log_text="${1}"
+    local commit="${2}"
+
+    cd "${START_DIR}" || exit
+
+    prepend_to_file "${change_log_text}" "${HYRAX_CHANGE_LOG}"
+
+    if test -n "${COMMIT_UPDATES}"; then
+        echo "# ${proj_name}: Committing changes to git" >&2
+        git commit -m "Updating ChangeLog for ${proj_name}-${proj_version} (hyrax-${HYRAX_VERSION})" ./ChangeLog >&2
+    fi
+
+}
+
+function main() {
+    if test -n "${debug}"; then
+        echo "${HR0}";
+        echo "# "$(basename $0)
+        echo "#"
+    fi
+
+    read_build_recipe "${BUILD_RECIPE_FILE}"
+
+    libdap4_change_log_text=$(update_project_change_log libdap4 "${LIBDAP_VERSION}" "${COMMIT_UPDATES}")
+    bes_change_log_text=$(update_project_change_log bes "${BES_VERSION}" "${COMMIT_UPDATES}")
+    olfs_change_log_text=$(update_project_change_log olfs "${OLFS_VERSION}" "${COMMIT_UPDATES}")
+
+    hyrax_clog_entry=$(mk_hyrax_changelog_entry \
+                                "${libdap4_change_log_text}" \
+                                "${bes_change_log_text}" \
+                                "${olfs_change_log_text}")
+
+    update_hyrax_combined_change_log "${hyrax_clog_entry}" "${COMMIT_UPDATES}"
+}
+
+main
