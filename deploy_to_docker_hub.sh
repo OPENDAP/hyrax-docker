@@ -2,6 +2,7 @@
 #
 # Called from the travis.yml. This depends on env vars set by the 
 # travis yaml. jhrg 3/31/21
+set -e
 
 OPENDAP_AWS_ACCOUNT=747931985039
 
