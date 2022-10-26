@@ -147,7 +147,7 @@ jobs:
         - export DOCKER_NAME="besd"
         - source ./build-rh8
         - export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}:snapshot"
-        - export BES_VERSION_TAG="opendap/${DOCKER_NAME}:${BES_VERSION}"
+        - export BUILD_VERSION_TAG="opendap/${DOCKER_NAME}:${BES_VERSION}"
         - show_version
         - s3_get_besd_distro
           "${S3_BUILD_BUCKET}"
@@ -161,7 +161,7 @@ jobs:
           --build-arg LIBDAP_VERSION
           --build-arg BES_VERSION
           --tag "${SNAPSHOT_IMAGE_TAG}"
-          --tag "${BES_VERSION_TAG}"
+          --tag "${BUILD_VERSION_TAG}"
           "${DOCKER_NAME}"
         - docker image ls -a
 
