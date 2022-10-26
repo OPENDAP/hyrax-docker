@@ -61,6 +61,7 @@ env:
 
 before_install:
   - pip3 install awscli
+  - if test "${TRAVIS_PULL_REQUEST}" = "false"; then export DEPLOY_ME="true"; else export DEPLOY_ME="false"; fi
 
 install:
   - echo "print env:"
@@ -266,6 +267,7 @@ jobs:
         - export TEST_IMAGE=opendap/hyrax:${HYRAX_VERSION}
         - echo "Running Hyrax Regression Test Script on ${TEST_IMAGE}"
         - ./regression_test_script -i "${TEST_IMAGE}"
+        - export DEPLOY_ME="false"
 
     ############################################################################
     #
@@ -293,8 +295,6 @@ jobs:
         - cd ..
         - echo "Running Test Script"
         - ./regression_test_script -i ${SNAPSHOT_IMAGE_TAG}
-#        - docker push ${SNAPSHOT_IMAGE_TAG}
-#        - docker push ${BUILD_VERSION_TAG}
 
     - stage: BUILD
       name: "Build opendap/besd:c7-snapshot (CentOS-7)"
@@ -332,8 +332,6 @@ jobs:
           --tag "${SNAPSHOT_IMAGE_TAG}"
           --tag "${BUILD_VERSION_TAG}" hyrax-c7
         - docker image ls -a
-#        - docker push ${SNAPSHOT_IMAGE_TAG}
-#        - docker push ${BUILD_VERSION_TAG}
 
     - stage: BUILD
       name: "opendap/hyrax:c7-ngap-snapshot (CentOS-7)"
@@ -362,6 +360,7 @@ jobs:
         - export TEST_IMAGE=opendap/hyrax:c7-${HYRAX_VERSION}
         - echo "Running Hyrax Regression Test Script on ${TEST_IMAGE}"
         - ./regression_test_script -i "${TEST_IMAGE}"
+        - export DEPLOY_ME="false"
 
 
 before_deploy:
@@ -373,5 +372,5 @@ deploy:
     script: bash ${TRAVIS_BUILD_DIR}/deploy_to_docker_hub.sh
     on:
       branch: master
-      condition: ${TRAVIS_PULL_REQUEST} = "false"
+      condition: ${DEPLOY_ME} = "true"
 
