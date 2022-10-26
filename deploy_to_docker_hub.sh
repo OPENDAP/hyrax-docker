@@ -16,7 +16,7 @@ docker push ${BUILD_VERSION_TAG}
 
 echo "Docker Hub deployment complete."
 
-echo "AWS configuration:""
+echo "AWS configuration: "
 aws configure list
 
 echo "Deploying ${SNAPSHOT_IMAGE_TAG} to AWS ECR"
