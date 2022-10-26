@@ -138,8 +138,6 @@ jobs:
         - cd ..
         - echo "Running Test Script"
         - ./regression_test_script -i ${SNAPSHOT_IMAGE_TAG}
-#        - docker push ${SNAPSHOT_IMAGE_TAG}
-#        - docker push ${BUILD_VERSION_TAG}
 
     - stage: BUILD
       name: "Build opendap/besd:snapshot (RH8)"
@@ -199,8 +197,6 @@ jobs:
           --tag "${BUILD_VERSION_TAG}"
           "${DOCKER_NAME}"
         - docker image ls -a
-#        - docker push ${SNAPSHOT_IMAGE_TAG}
-#        - docker push ${BUILD_VERSION_TAG}
 
     - stage: BUILD
       name: "Build opendap/hyrax:ngap-snapshot (RH8)"
@@ -234,8 +230,6 @@ jobs:
           --tag "${BUILD_VERSION_TAG}"
           "${DOCKER_NAME}"
         - docker image ls -a
-#        - docker push ${SNAPSHOT_IMAGE_TAG}
-#        - docker push ${BUILD_VERSION_TAG}
 
     - stage: BUILD
       name: "Build opendap/olfs:snapshot"
@@ -366,6 +360,7 @@ jobs:
 before_deploy:
   - export DOCKER_LOGIN=`aws ecr get-login --region us-east-1 | sed "s/-e none //g"`;
   - $DOCKER_LOGIN;
+  - echo "DEPLOY_ME is ${DEPLOY_ME}"
 
 deploy:
   - provider: script
