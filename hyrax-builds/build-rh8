@@ -647,6 +647,8 @@ function cleanup_build_files(){
 }
 
 function build_hyrax() {
+    local debug="${1}"
+
     local log_file="build_hyrax.log"
     show_version 2>&1 | tee "${log_file}" >&2
 
@@ -661,7 +663,7 @@ function build_hyrax() {
         "${DOCKER_NAME}" \
         "el8" \
         "${LIBDAP_VERSION}" \
-        "${BES_VERSION}" 2>&1 | tee -a "${log_file}" >&2
+        "${BES_VERSION}" $debug 2>&1 | tee -a "${log_file}" >&2
 
     s3_get_olfs_distro \
         "${S3_BUILD_BUCKET}" \
