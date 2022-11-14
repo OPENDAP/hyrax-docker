@@ -520,6 +520,9 @@ function build_ngap() {
 
 function build_hyrax_docker() {
     local docker_name="${1}"
+
+    show_version >&2
+
     echo "${HR}" >&2
     echo "# TASK: build_hyrax_docker()" >&2
 #        --no-cache \
@@ -647,21 +650,24 @@ function cleanup_build_files(){
 }
 
 function build_hyrax() {
+    local debug="${1}"
+
     local log_file="build_hyrax.log"
     show_version 2>&1 | tee "${log_file}" >&2
 
-    local tomcat_version="unset"
-    tomcat_version=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
+    export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
+    show_version >&2
+
     get_tomcat_distro \
         "${DOCKER_NAME}" \
-        "${tomcat_version}" 2>&1 | tee -a "${log_file}" >&2
+        "${TOMCAT_VERSION}" 2>&1 | tee -a "${log_file}" >&2
 
     s3_get_besd_distro \
         "${S3_BUILD_BUCKET}" \
         "${DOCKER_NAME}" \
         "el8" \
         "${LIBDAP_VERSION}" \
-        "${BES_VERSION}" 2>&1 | tee -a "${log_file}" >&2
+        "${BES_VERSION}" $debug 2>&1 | tee -a "${log_file}" >&2
 
     s3_get_olfs_distro \
         "${S3_BUILD_BUCKET}" \

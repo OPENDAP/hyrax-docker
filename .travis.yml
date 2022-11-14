@@ -61,6 +61,7 @@ env:
 
 before_install:
   - pip3 install awscli
+  - if test "${TRAVIS_PULL_REQUEST}" = "false"; then export DEPLOY_ME="true"; else export DEPLOY_ME="false"; fi
 
 install:
   - echo "print env:"
@@ -137,8 +138,6 @@ jobs:
         - cd ..
         - echo "Running Test Script"
         - ./regression_test_script -i ${SNAPSHOT_IMAGE_TAG}
-#        - docker push ${SNAPSHOT_IMAGE_TAG}
-#        - docker push ${BUILD_VERSION_TAG}
 
     - stage: BUILD
       name: "Build opendap/besd:snapshot (RH8)"
@@ -147,7 +146,7 @@ jobs:
         - export DOCKER_NAME="besd"
         - source ./build-rh8
         - export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}:snapshot"
-        - export BES_VERSION_TAG="opendap/${DOCKER_NAME}:${BES_VERSION}"
+        - export BUILD_VERSION_TAG="opendap/${DOCKER_NAME}:${BES_VERSION}"
         - show_version
         - s3_get_besd_distro
           "${S3_BUILD_BUCKET}"
@@ -161,7 +160,7 @@ jobs:
           --build-arg LIBDAP_VERSION
           --build-arg BES_VERSION
           --tag "${SNAPSHOT_IMAGE_TAG}"
-          --tag "${BES_VERSION_TAG}"
+          --tag "${BUILD_VERSION_TAG}"
           "${DOCKER_NAME}"
         - docker image ls -a
 
@@ -198,8 +197,6 @@ jobs:
           --tag "${BUILD_VERSION_TAG}"
           "${DOCKER_NAME}"
         - docker image ls -a
-#        - docker push ${SNAPSHOT_IMAGE_TAG}
-#        - docker push ${BUILD_VERSION_TAG}
 
     - stage: BUILD
       name: "Build opendap/hyrax:ngap-snapshot (RH8)"
@@ -233,8 +230,6 @@ jobs:
           --tag "${BUILD_VERSION_TAG}"
           "${DOCKER_NAME}"
         - docker image ls -a
-#        - docker push ${SNAPSHOT_IMAGE_TAG}
-#        - docker push ${BUILD_VERSION_TAG}
 
     - stage: BUILD
       name: "Build opendap/olfs:snapshot"
@@ -266,6 +261,7 @@ jobs:
         - export TEST_IMAGE=opendap/hyrax:${HYRAX_VERSION}
         - echo "Running Hyrax Regression Test Script on ${TEST_IMAGE}"
         - ./regression_test_script -i "${TEST_IMAGE}"
+        - export DEPLOY_ME="false"
 
     ############################################################################
     #
@@ -293,8 +289,6 @@ jobs:
         - cd ..
         - echo "Running Test Script"
         - ./regression_test_script -i ${SNAPSHOT_IMAGE_TAG}
-#        - docker push ${SNAPSHOT_IMAGE_TAG}
-#        - docker push ${BUILD_VERSION_TAG}
 
     - stage: BUILD
       name: "Build opendap/besd:c7-snapshot (CentOS-7)"
@@ -332,8 +326,6 @@ jobs:
           --tag "${SNAPSHOT_IMAGE_TAG}"
           --tag "${BUILD_VERSION_TAG}" hyrax-c7
         - docker image ls -a
-#        - docker push ${SNAPSHOT_IMAGE_TAG}
-#        - docker push ${BUILD_VERSION_TAG}
 
     - stage: BUILD
       name: "opendap/hyrax:c7-ngap-snapshot (CentOS-7)"
@@ -362,16 +354,18 @@ jobs:
         - export TEST_IMAGE=opendap/hyrax:c7-${HYRAX_VERSION}
         - echo "Running Hyrax Regression Test Script on ${TEST_IMAGE}"
         - ./regression_test_script -i "${TEST_IMAGE}"
+        - export DEPLOY_ME="false"
 
 
 before_deploy:
   - export DOCKER_LOGIN=`aws ecr get-login --region us-east-1 | sed "s/-e none //g"`;
   - $DOCKER_LOGIN;
+  - echo "DEPLOY_ME is ${DEPLOY_ME}"
 
 deploy:
   - provider: script
     script: bash ${TRAVIS_BUILD_DIR}/deploy_to_docker_hub.sh
     on:
       branch: master
-      condition: ${TRAVIS_PULL_REQUEST} = "false"
+      condition: ${DEPLOY_ME} = "true"
 
