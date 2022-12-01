@@ -304,6 +304,7 @@ COPY entrypoint.sh /
 RUN chmod +x /entrypoint.sh
 ENTRYPOINT [ "/entrypoint.sh" ]
 
+EXPOSE 8009
 EXPOSE 8080
 EXPOSE 8443
 EXPOSE 10022
