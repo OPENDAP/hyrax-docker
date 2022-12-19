@@ -40,11 +40,11 @@ done
 shift $(($OPTIND - 1))
 tests="$@"
 
-echo "Using following configurations:"
-echo "Time out duration: ${time_out}"
-echo "Image name: ${test_image_name}"
-echo "End point: ${end_point}"
-echo "Tests: ${tests}"
+echo "Using following configurations:" >&2
+echo "Time out duration: ${time_out}" >&2
+echo "Image name: ${test_image_name}" >&2
+echo "End point: ${end_point}" >&2
+echo "Tests: ${tests}" >&2
 
 function waitForHyrax() {
     # Don't fail on errors, they're expected...
@@ -100,7 +100,7 @@ then
 fi
 
 #start Hyrax
-container_id=$(docker run -d -h hyrax -p 8080:8080 --name=hyrax ${test_image_name})
+container_id=$(docker run -h hyrax -p 8080:8080 --name=hyrax ${test_image_name})
 
 waitForHyrax
 
