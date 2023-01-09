@@ -320,7 +320,7 @@ if test $status -ne 0 ; then
     exit $status
 fi
 besd_pid=`ps aux | grep /usr/bin/besdaemon | grep -v grep | awk '{print $2;}' - `
-echo "# The besd is UP! []pid: ${besd_pid}]" >&2
+echo "# The besd is UP! [pid: ${besd_pid}]" >&2
 echo "#" >&2
 
 #-------------------------------------------------------------------------------
