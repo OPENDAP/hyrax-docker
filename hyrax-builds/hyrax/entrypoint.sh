@@ -131,6 +131,9 @@ fi
 #-------------------------------------------------------------------------------
 # Start the BES daemon process
 # /usr/bin/besdaemon -i /usr -c /etc/bes/bes.conf -r /var/run/bes.pid
+bes_uid=$(id -u bes)
+bes_gid=$(id -g bes)
+echo "Launching besd [uid: ${bes_uid} gid: ${bes_gid}]" >&2
 /usr/bin/besctl start
 status=$?
 if test $status -ne 0 ; then
@@ -138,7 +141,7 @@ if test $status -ne 0 ; then
     exit $status
 fi
 besd_pid=`ps aux | grep /usr/bin/besdaemon | grep -v grep | awk '{print $2;}' - `
-echo "The BES is UP! pid: $besd_pid" >&2
+echo "The besd is UP! [pid: ${besd_pid}]" >&2
 
 #-------------------------------------------------------------------------------
 # Start Tomcat process
