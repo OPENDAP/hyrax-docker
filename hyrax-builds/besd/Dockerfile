@@ -49,7 +49,7 @@ USER root
 
 # Update and install the needful.
 RUN set -e \
-    && dnf -y install which bc python3 emacs vim\
+    && dnf -y install which bc python3 emacs vim procps \
     && dnf -y update \
     && dnf clean all \
     && python3 -m pip install awscli

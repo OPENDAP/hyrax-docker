@@ -110,6 +110,7 @@ RUN if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else ec
 RUN set -e && dnf update  -y
 RUN set -e && dnf install -y make curl unzip which autoconf automake emacs vim
 RUN set -e && dnf install -y diffutils
+RUN set -e && dnf install -y procps
 RUN set -e && dnf install -y python3 git bc valgrind gdb
 RUN set -e && dnf install -y java-11-openjdk-devel
 RUN set -e && dnf clean all
