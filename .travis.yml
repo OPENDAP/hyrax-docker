@@ -101,7 +101,6 @@ stages:
 jobs:
   include:
 
-
     ############################################################################
     #
     # RH8 Builds
@@ -268,7 +267,7 @@ jobs:
 
     ############################################################################
     #
-    # CentOS-7 Builds
+    # CentOS-7 Builds, now disabled. jhrg 1/26/23
     #
     - stage: disabled # BUILD_AND_TEST
       name: "Build and Test opendap/hyrax:c7-snapshot (CentOS-7)"
@@ -358,7 +357,6 @@ jobs:
         - echo "Running Hyrax Regression Test Script on ${TEST_IMAGE}"
         - ./regression_test_script -i "${TEST_IMAGE}"
         - export DEPLOY_ME="false"
-
 
 before_deploy:
   - export DOCKER_LOGIN=`aws ecr get-login --region us-east-1 | sed "s/-e none //g"`;
