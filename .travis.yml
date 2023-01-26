@@ -47,12 +47,15 @@ env:
     - NGAP_DISTRO_URL="s3://opendap.travis.build/${NGAP_DISTRO}"
     - ROBOTS_DISTRO="robots-olfs-${OLFS_VERSION}-webapp.tgz"
     - ROBOTS_DISTRO_URL="s3://opendap.travis.build/${ROBOTS_DISTRO}"
+
+    # C7 items
     - LIBDAP_C7_RPM="libdap-${LIBDAP_VERSION}.el7.x86_64.rpm"
     - LIBDAP_C7_RPM_URL="s3://opendap.travis.build/${LIBDAP_C7_RPM}"
-    - LIBDAP_RH8_RPM="libdap-${LIBDAP_VERSION}.el8.x86_64.rpm"
-    - LIBDAP_RH8_RPM_URL="s3://opendap.travis.build/${LIBDAP_RH8_RPM}"
     - BES_C7_RPM="bes-${BES_VERSION}.static.el7.x86_64.rpm"
     - BES_C7_RPM_URL="s3://opendap.travis.build/${BES_C7_RPM}"
+
+    - LIBDAP_RH8_RPM="libdap-${LIBDAP_VERSION}.el8.x86_64.rpm"
+    - LIBDAP_RH8_RPM_URL="s3://opendap.travis.build/${LIBDAP_RH8_RPM}"
     - BES_RH8_RPM="bes-${BES_VERSION}.static.el8.x86_64.rpm"
     - BES_RH8_RPM_URL="s3://opendap.travis.build/${BES_RH8_RPM}"
     - TOMCAT_MAJOR_VERSION=9
@@ -67,12 +70,12 @@ install:
   - echo "print env:"
   - printenv
   - echo $DOCKER_HUB_PSWD | docker login -u $DOCKER_HUB_UID --password-stdin
-  - echo "Retrieving libdap C7 RPM ${LIBDAP_C7_RPM}"
-  - aws --region=us-east-1 s3 cp ${LIBDAP_C7_RPM_URL} ./hyrax-builds/${LIBDAP_C7_RPM}
+  # - echo "Retrieving libdap C7 RPM ${LIBDAP_C7_RPM}"
+  # - aws --region=us-east-1 s3 cp ${LIBDAP_C7_RPM_URL} ./hyrax-builds/${LIBDAP_C7_RPM}
+  # - echo "Retrieving BES C7 RPM ${BES_C7_RPM}"
+  # - aws --region=us-east-1 s3 cp ${BES_C7_RPM_URL} ./hyrax-builds/${BES_C7_RPM}
   - echo "Retrieving libdap RH8 RPM ${LIBDAP_RH8_RPM}"
   - aws --region=us-east-1 s3 cp ${LIBDAP_RH8_RPM_URL} ./hyrax-builds/${LIBDAP_RH8_RPM}
-  - echo "Retrieving BES C7 RPM ${BES_C7_RPM}"
-  - aws --region=us-east-1 s3 cp ${BES_C7_RPM_URL} ./hyrax-builds/${BES_C7_RPM}
   - echo "Retrieving BES RH8 RPM ${BES_RH8_RPM}"
   - aws --region=us-east-1 s3 cp ${BES_RH8_RPM_URL} ./hyrax-builds/${BES_RH8_RPM}
   - echo "Retrieving OLFS Distribution file ${OLFS_DISTRO}"
@@ -267,7 +270,7 @@ jobs:
     #
     # CentOS-7 Builds
     #
-    - stage: BUILD_AND_TEST
+    - stage: disabled # BUILD_AND_TEST
       name: "Build and Test opendap/hyrax:c7-snapshot (CentOS-7)"
       script:
         - export SNAPSHOT_IMAGE_TAG=opendap/hyrax:c7-snapshot
@@ -290,7 +293,7 @@ jobs:
         - echo "Running Test Script"
         - ./regression_test_script -i ${SNAPSHOT_IMAGE_TAG}
 
-    - stage: BUILD
+    - stage: disabled # BUILD
       name: "Build opendap/besd:c7-snapshot (CentOS-7)"
       script:
         - export SNAPSHOT_IMAGE_TAG=opendap/besd:c7-snapshot
@@ -306,7 +309,7 @@ jobs:
           --tag "${BUILD_VERSION_TAG}" besd-c7
         - docker image ls -a
 
-    - stage: BUILD
+    - stage: disabled # BUILD
       name: "Build opendap/hyrax_ncwms:c7-snapshot (CentOS-7)"
       script:
         - export SNAPSHOT_IMAGE_TAG=opendap/hyrax_ncwms:c7-snapshot
@@ -327,7 +330,7 @@ jobs:
           --tag "${BUILD_VERSION_TAG}" hyrax-c7
         - docker image ls -a
 
-    - stage: BUILD
+    - stage: disabled # BUILD
       name: "opendap/hyrax:c7-ngap-snapshot (CentOS-7)"
       script:
         - export SNAPSHOT_IMAGE_TAG=opendap/hyrax:c7-ngap-snapshot
@@ -348,7 +351,7 @@ jobs:
           --tag "${BUILD_VERSION_TAG}" ngap-c7
         - docker image ls -a
 
-    - stage: TEST_DEPLOYED_IMAGE
+    - stage: disabled # TEST_DEPLOYED_IMAGE
       name: "Test Deployed Image (CentOS-7)"
       script:
         - export TEST_IMAGE=opendap/hyrax:c7-${HYRAX_VERSION}
@@ -368,4 +371,3 @@ deploy:
     on:
       branch: master
       condition: ${DEPLOY_ME} = "true"
-
