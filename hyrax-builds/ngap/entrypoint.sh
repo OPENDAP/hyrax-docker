@@ -106,11 +106,29 @@ fi
 
 
 ################################################################################
+# Inject olfs.xml configuration document.
+#
+# Test if the olfs.xml env variable is set (by way of not unset) and
+# not empty and use it's value if present and non-empty.olfs
+#
+if test -n "${OLFS_XML}"  ; then
+    echo "${HR2}" >&2
+    OLFS_XML_FILE="${OLFS_CONF_DIR}/olfs.xml"
+    echo "# Updating OLFS configuration file: ${OLFS_XML_FILE}" >&2
+    echo "${OLFS_XML}" > ${OLFS_XML_FILE}
+    cat "${OLFS_XML_FILE}" | awk '{print "##    "$0;}' >&2
+    echo "#" >&2
+fi
+################################################################################
+
+
+################################################################################
 # Inject user-access.xml document to define the servers relationship to
 # EDL and the user access rules.
 #
 # Test if the user-access.xml env variable is set (by way of not unset) and
 # not empty
+#
 if test -n "${USER_ACCESS_XML}"  ; then
     echo "${HR2}" >&2
     USER_ACCESS_XML_FILE="${OLFS_CONF_DIR}/user-access.xml"
@@ -120,6 +138,7 @@ if test -n "${USER_ACCESS_XML}"  ; then
     echo "#" >&2
 fi
 ################################################################################
+
 
 
 ################################################################################
