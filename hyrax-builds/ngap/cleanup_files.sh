@@ -10,7 +10,8 @@
 verbose=
 default_dir="/tmp/hyrax_fonc"
 default_interval="60" # minutes
-default_log="/var/log/bes/nc_cleanup.log"
+default_log="/var/log/bes/cleanup.log"
+BES_TMP_FILES_DIR="/tmp/bes_rr_tmp"
 
 if test -n "${verbose}"; then echo "##########################################################" >&2 ; fi
 if test -n "${verbose}"; then echo "# $0" >&2; echo "#" >&2; fi
@@ -28,27 +29,37 @@ SLEEP_TIME=$(echo "${INTERVAL}*60/2" | bc)
 if test -n "${verbose}"; then echo "#   SLEEP_TIME: ${SLEEP_TIME}s" >&2; fi
 if test -n "${verbose}"; then echo "#" >&2; fi
 
+TARGET_DIRS="${TARGET_DIR} ${BES_TMP_FILES_DIR}"
 
+let pass=0
 while true 
 do
-    if test -d ${TARGET_DIR};
-    then
-        orphaned_files=$(find ${TARGET_DIR} -type f -mmin +${INTERVAL})
-        if test -n "${verbose}"; then echo "orphaned_files: "${orphaned_files} >&2; fi
-
-        if test -n "${orphaned_files}";
+    let pass+=1
+    echo "########################################################################################" >> "${CLEANUP_LOG}"
+    echo "# Begin Pass: ${pass} ("$(date)")" >> "${CLEANUP_LOG}"
+    for target_dir in ${TARGET_DIRS}
+    do
+        if test -d ${target_dir};
         then
-            echo "########################################################################################" >> "${CLEANUP_LOG}"
-            echo "# "$(date)" BEGIN File Cleanup of ${TARGET_DIR} " >> "${CLEANUP_LOG}"
-            for file in ${orphaned_files}
-            do
-                target=$(ls -l "${file}")
-                rm -f "${file}"
-                echo $(date)" removed: ${target}" 2>&1 >> "${CLEANUP_LOG}"
-            done
-            echo "#" >> "${CLEANUP_LOG}"
+            orphaned_files=$(find ${target_dir} -type f -mmin +${INTERVAL})
+            if test -n "${verbose}"; then echo "orphaned_files: "${orphaned_files} >&2; fi
+
+            if test -n "${orphaned_files}";
+            then
+                echo "# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" >> "${CLEANUP_LOG}"
+                echo "# Begin cleanup of ${target_dir} ("$(date)")" >> "${CLEANUP_LOG}"
+                echo "#" >> "${CLEANUP_LOG}"
+                for file in ${orphaned_files}
+                do
+                    target=$(ls -l "${file}")
+                    rm -f "${file}"
+                    echo $(date)" removed: ${target}" 2>&1 >> "${CLEANUP_LOG}"
+                done
+                echo "#" >> "${CLEANUP_LOG}"
+                echo "# End cleanup of ${target_dir} ("$(date)")" >> "${CLEANUP_LOG}"
+            fi
         fi
-    fi
+    done
     sleep "${SLEEP_TIME}"
 
 done
