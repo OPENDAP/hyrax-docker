@@ -100,7 +100,7 @@ then
 fi
 
 #start Hyrax
-container_id=$(docker run -d -h hyrax -p 8080:8080 --name=hyrax ${test_image_name})
+container_id=$(docker run -h hyrax -p 8080:8080 --name=hyrax ${test_image_name})
 
 waitForHyrax
 
