@@ -65,6 +65,10 @@ ENV ROBOTS_DISTRO=${ROBOTS_DISTRO:-"robots-olfs-${OLFS_VERSION}-webapp"}
 RUN echo "ROBOTS_DISTRO: ${ROBOTS_DISTRO}"
 COPY ${ROBOTS_DISTRO}.tgz /${ROBOTS_DISTRO}.tgz
 
+ARG DEPLOYMENT_CONTEXT
+ENV DEPLOYMENT_CONTEXT=${DEPLOYMENT_CONTEXT:-"opendap"}
+RUN echo "DEPLOYMENT_CONTEXT: ${DEPLOYMENT_CONTEXT}"
+
 LABEL vendor="OPeNDAP"
 LABEL org.opendap.hyrax.version=${HYRAX_VERSION}
 LABEL org.opendap.hyrax.release-date=${RELEASE_DATE}
@@ -191,8 +195,8 @@ RUN set -e \
     && tar -C ${ROOT} -xzvf ./${OLFS_DISTRO}.tgz \
     && ls -l ${ROOT} \
     && echo "Unpacking warfile..."  >&2 \
-    && mkdir -p $(readlink -f ${CATALINA_HOME})/webapps/opendap/ \
-    && unzip -o ${ROOT}/${OLFS_DISTRO}/opendap.war -d ${CATALINA_HOME}/webapps/opendap/ \
+    && mkdir -p $(readlink -f ${CATALINA_HOME})/webapps/${DEPLOYMENT_CONTEXT}/ \
+    && unzip -o ${ROOT}/${OLFS_DISTRO}/opendap.war -d ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/ \
     && echo "Cleaning up."  >&2 \
     && rm -rf ${ROOT}/${OLFS_DISTRO} ./${OLFS_DISTRO}.tgz
 
@@ -208,9 +212,9 @@ RUN set -e \
 
 # Fix ownership and access permissions
 RUN set -e \
-    && mkdir -p ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs \
-    && chown -R tomcat:tomcat ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs \
-    && chmod 700 ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs 
+    && mkdir -p ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/logs \
+    && chown -R tomcat:tomcat ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/logs \
+    && chmod 700 ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/logs
 
 ################################################################
 # Clean up the Hyrax distribution binaries.
@@ -259,7 +263,7 @@ RUN if [ $USE_NCWMS = "true" ]; then \
         # to the server a viewers.xml which has
         # been templated so that the ncWMS host can be installed 
         # at startup.        
-        mv /tmp/olfs_viewers.xml ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml; \
+        mv /tmp/olfs_viewers.xml ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/viewers.xml; \
     else \
         echo "Skipping OLFS/ncWMS confguration installation."; \
     fi
