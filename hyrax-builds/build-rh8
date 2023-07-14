@@ -576,9 +576,23 @@ function build_hyrax_docker() {
     echo "#" >&2
 }
 
+
+
+
+#- docker build
+#  --build-arg TOMCAT_VERSION
+#  --build-arg RELEASE_DATE
+#  --build-arg HYRAX_VERSION
+#  --build-arg LIBDAP_VERSION
+#  --build-arg BES_VERSION
+#  --build-arg BUILD_DMRPP_VERSION
+#  --tag "${SNAPSHOT_IMAGE_TAG}"
+#  --tag "${BUILD_VERSION_TAG}"
+#  "${DOCKER_NAME}"
+
 function build_dmrpp_service_docker() {
     local docker_name="${1}"
-
+    export DEPLOYMENT_CONTEXT="${2:-"build_dmrpp"}"
     show_version >&2
 
     echo "${HR}" >&2
@@ -591,6 +605,7 @@ function build_dmrpp_service_docker() {
         --build-arg LIBDAP_VERSION \
         --build-arg BES_VERSION \
         --build-arg BUILD_DMRPP_VERSION \
+        --build-arg DEPLOYMENT_CONTEXT \
         --tag "${BUILD_VERSION_TAG}" \
         --tag "${SNAPSHOT_IMAGE_TAG}" \
         ${docker_name}
