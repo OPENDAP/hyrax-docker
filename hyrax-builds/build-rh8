@@ -561,6 +561,7 @@ function build_hyrax_docker() {
 
     echo "${HR}" >&2
     echo "# TASK: build_hyrax_docker()" >&2
+#        --no-cache \
         docker build ${NO_CACHE} \
         --platform linux/amd64 \
         --build-arg TOMCAT_VERSION \

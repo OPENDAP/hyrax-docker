@@ -156,17 +156,6 @@ jobs:
           "${DOCKER_NAME}"
           "${BUILD_DMRPP_VERSION}" 2>&1
         - build_dmrpp_service_docker "${DOCKER_NAME}" ROOT
-        #- docker build
-        #  --build-arg TOMCAT_VERSION
-        #  --build-arg RELEASE_DATE
-        #  --build-arg HYRAX_VERSION
-        #  --build-arg LIBDAP_VERSION
-        #  --build-arg BES_VERSION
-        #  --build-arg BUILD_DMRPP_VERSION
-        #  --build-arg "DEPLOYMENT_CONTEXT=ROOT"
-        #  --tag "${SNAPSHOT_IMAGE_TAG}"
-        #  --tag "${BUILD_VERSION_TAG}"
-        #  "${DOCKER_NAME}"
         - docker image ls -a
 #        - cd ..
 #        - echo "Running Test Script"
