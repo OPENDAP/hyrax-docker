@@ -37,7 +37,8 @@ echo "AWS_ACCESS_KEY_ID is ${AWS_ACCESS_KEY_ID}" >&2
 export AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION:-<not set>}"
 echo "AWS_DEFAULT_REGION is ${AWS_DEFAULT_REGION}" >&2
 
-export DEBUG="${DEBUG:-false}"
+
+debug=false
 
 while getopts "de:sn:i:k:r:" opt; do
   echo "Processing command line opt: ${opt}" >&2
@@ -55,7 +56,7 @@ while getopts "de:sn:i:k:r:" opt; do
       echo "Set ncWMS public facing service base to : ${NCWMS_BASE}" >&2
       ;;
     d)
-      DEBUG=true
+      export debug=true
       echo "Debug is enabled" >&2
       ;;
     k)
@@ -88,12 +89,12 @@ while getopts "de:sn:i:k:r:" opt; do
   esac
 done
 
-if test "${DEBUG}" = "true" ; then
+if test "${debug}" = "true" ; then
     echo "CATALINA_HOME: ${CATALINA_HOME}"  >&2
     ls -l "$CATALINA_HOME" "$CATALINA_HOME/bin"  >&2
 fi
 
-if test "${DEBUG}" = "true" ; then
+if test "${debug}" = "true" ; then
     echo "NCWMS: Using NCWMS_BASE: ${NCWMS_BASE}"  >&2
     echo "NCWMS: Setting ncWMS access URLs in viewers.xml (if needed)."  >&2
     ls -l "${VIEWERS_XML}" >&2
@@ -101,7 +102,7 @@ fi
 
 
 sed -i "s+@NCWMS_BASE@+$NCWMS_BASE+g" ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml
-if test "${DEBUG}" = "true" ; then
+if test "${debug}" = "true" ; then
     echo "${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml"  >&2
     cat ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml >&2
 fi
@@ -209,7 +210,7 @@ while /bin/true; do
         exit 2
     fi
     
-    if test "${DEBUG}" = "true" ; then
+    if test $debug = true ; then
         echo "-------------------------------------------------------------------"  >&2
         date >&2
         echo "BESD_STATUS: $BESD_STATUS  besd_pid:$besd_pid" >&2

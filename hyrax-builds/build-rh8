@@ -18,11 +18,13 @@ function read_build_recipe() {
     export HYRAX_VERSION=""
     export OLFS_VERSION=""
     export BES_VERSION=""
+    export BUILD_DMRPP_VERSION=""
     export LIBDAP_VERSION=""
     RELEASE_DATE=${RELEASE_DATE:-$(echo "${build_recipe}" | grep hyrax | awk '{print $2;}')}
     HYRAX_VERSION=${HYRAX_VERSION:-$(echo "${build_recipe}" | grep hyrax | awk '{print $1;}' | sed "s/hyrax-//g" )}
     OLFS_VERSION=${OLFS_VERSION:-$(echo "${build_recipe}" | grep olfs | sed "s/olfs-//g" | awk '{print $1;}')}
     BES_VERSION=${BES_VERSION:-$(echo "${build_recipe}" | grep bes | sed "s/bes-//g" | awk '{print $1;}')}
+    BUILD_DMRPP_VERSION=${BUILD_DMRPP_VERSION:-$(echo "${build_recipe}" | grep "build_dmrpp-" | sed "s/build_dmrpp-//g" | awk '{print $1;}')}
     LIBDAP_VERSION=${LIBDAP_VERSION:-$(echo "${build_recipe}" | grep libdap4 | sed "s/libdap4-//g"| awk '{print $1;}')}
 }
 read_build_recipe "${BUILD_RECIPE_FILE}"
@@ -40,6 +42,7 @@ function show_version(){
     echo "#        HYRAX_VERSION: ${HYRAX_VERSION}" >&2
     echo "#         OLFS_VERSION: ${OLFS_VERSION}" >&2
     echo "#          BES_VERSION: ${BES_VERSION}" >&2
+    echo "#  BUILD_DMRPP_VERSION: ${BUILD_DMRPP_VERSION}" >&2
     echo "#       LIBDAP_VERSION: ${LIBDAP_VERSION}" >&2
     echo "#          DOCKER_NAME: ${DOCKER_NAME}" >&2
     echo "#    BUILD_VERSION_TAG: ${BUILD_VERSION_TAG}" >&2
@@ -199,7 +202,7 @@ function get_tomcat_distro(){
     echo "# Importing Tomcat public keys:" >&2
     echo "#        Local keys file: ${tomcat_keys_file}" >&2
     echo "#                 Source: ${tomcat_keys_url}" >&2
-    gpg --import "${tomcat_keys_file}" >&2
+    gpg --import "${tomcat_keys_file}" 2>&1 | awk '{print "#    ", $0;}' >&2
     if test $? -ne 0 ; then
         echo "ERROR! Failed to import Tomcat public keys!" >&2
         return 2
@@ -210,8 +213,9 @@ function get_tomcat_distro(){
     echo "#     Tomcat public keys: ${tomcat_keys_file}" >&2
     echo "#      distribution file: ${tomcat_distro_file}" >&2
     echo "#              signature: ${tomcat_sig_file}" >&2
+    echo "#" >&2
 
-    gpg --verify "${tomcat_sig_file}" "${tomcat_distro_file}" >&2
+    gpg --verify "${tomcat_sig_file}" "${tomcat_distro_file}" 2>&1 | awk '{print "#    ", $0;}' >&2
     if test $? -ne 0 ; then
         echo "ERROR! Failed to verify Tomcat distribution!" >&2
         return 2
@@ -220,7 +224,61 @@ function get_tomcat_distro(){
     return 0
 }
 
+################################################################################
+#
+# check_aws() - Get a thing from an S3 bucket
+#
+# [-bash: ~] aws configure list
+#       Name                    Value             Type    Location
+#       ----                    -----             ----    --------
+#    profile                <not set>             None    None
+# access_key                <not set>             None    None
+# secret_key                <not set>             None    None
+#     region                us-west-2      config-file    ~/.aws/config
+#
+# export AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
+# export AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+# export AWS_DEFAULT_REGION=us-west-2
+#
+#
+function check_aws(){
+    echo "${HR}" >&2
+    echo "#" >&2
+    echo "# check_aws()" >&2
+    echo "#" >&2
 
+    local aws_config_list=
+    aws_config_list=$(aws configure list | sed -e "s/not set/not_set/g")
+    local access_key
+    access_key=$(echo "${aws_config_list}" | grep -i access_key | awk '{print $2;}')
+    local secret_key
+    secret_key=$(echo "${aws_config_list}" | grep -i secret_key | awk '{print $2;}')
+    local region
+    region=$(echo "${aws_config_list}" | grep -i region | awk '{print $2;}')
+    local partial=
+    partial=$(echo "${aws_config_list}" | grep -i "Partial credentials found in env")
+
+    ns="<not_set>"
+    status=0;
+    if test "${access_key}" = "${ns}"; then
+      status=1
+      echo "# The AWS_ACCESS_KEY_ID has not been set." >&2
+    fi
+    if test "${secret_key}" = "${ns}"; then
+      status=1
+      echo "# The AWS_SECRET_ACCESS_KEY has not been set." >&2
+    fi
+    if test "${region}" = "${ns}"; then
+      status=1
+      echo "# The AWS_DEFAULT_REGION has not been set." >&2
+    fi
+
+    if test -n "${partial}"; then
+        status=1
+        echo "# ${partial}" >&2
+    fi
+    return $status
+}
 
 ################################################################################
 #
@@ -427,6 +485,38 @@ function s3_get_olfs_distro() {
     return 0
 }
 
+################################################################################
+#
+# s3_get_build_dmrpp_distro() - Get the rpm and war files need for a Hyrax
+# installation from the identified S3 bucket.
+#    $1 - The AWS S3 bucket from which to pull the Hyrax components
+#    $2 - The directory into which to place the Hyrax components.
+#    $3 - The olfs version number ##.##.##-##
+#
+function s3_get_build_dmrpp_distro() {
+    echo "${HR}" >&2
+    echo "# TASK: s3_get_build_dmrpp_distro()" >&2
+    local s3_bucket="${1}"
+    echo "#           s3_bucket: ${s3_bucket}" >&2
+    local target_dir="${2}"
+    echo "#          target_dir: ${target_dir}" >&2
+    local build_dmrpp_version="${3}"
+    echo "# build_dmrpp_version: ${build_dmrpp_version}" >&2
+
+    set -e
+    echo "# Cleaning up..." >&2
+    rm -fv "${target_dir}/build_dmrpp*.tgz"
+
+    echo "#" >&2
+    s3_pull "${s3_bucket}" \
+            "build_dmrpp-${build_dmrpp_version}-webapp.tgz" \
+            "${target_dir}"
+
+    set +e
+    echo "#" >&2
+    return 0
+}
+
 
 ################################################################################
 #
@@ -541,6 +631,45 @@ function build_hyrax_docker() {
     echo "#" >&2
 }
 
+
+
+
+#- docker build
+#  --build-arg TOMCAT_VERSION
+#  --build-arg RELEASE_DATE
+#  --build-arg HYRAX_VERSION
+#  --build-arg LIBDAP_VERSION
+#  --build-arg BES_VERSION
+#  --build-arg BUILD_DMRPP_VERSION
+#  --tag "${SNAPSHOT_IMAGE_TAG}"
+#  --tag "${BUILD_VERSION_TAG}"
+#  "${DOCKER_NAME}"
+
+function build_dmrpp_service_docker() {
+    local docker_name="${1}"
+    export DEPLOYMENT_CONTEXT="${2:-"build_dmrpp"}"
+    show_version >&2
+
+    echo "${HR}" >&2
+    echo "# TASK: build_dmrpp_service_docker()" >&2
+        docker build ${NO_CACHE} \
+        --platform linux/amd64 \
+        --build-arg TOMCAT_VERSION \
+        --build-arg RELEASE_DATE \
+        --build-arg HYRAX_VERSION \
+        --build-arg LIBDAP_VERSION \
+        --build-arg BES_VERSION \
+        --build-arg BUILD_DMRPP_VERSION \
+        --build-arg DEPLOYMENT_CONTEXT \
+        --tag "${BUILD_VERSION_TAG}" \
+        --tag "${SNAPSHOT_IMAGE_TAG}" \
+        ${docker_name}
+    echo "#" >&2
+    echo "#" >&2
+}
+
+
+
 function build_hyrax_ncwms_docker() {
     echo "#################################################################" >&2
     echo "# build_hyrax_ncwms_docker()" >&2
@@ -599,7 +728,7 @@ function start_hyrax(){
     echo "#                platform: ${platform}" >&2
 
     docker run \
-        -d\
+        -d \
         ${platform} \
         -h hyrax \
         -p 8080:8080 \
@@ -682,6 +811,36 @@ function build_hyrax() {
     build_hyrax_docker "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}" >&2
     cleanup_build_files "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}" >&2
 }
+
+function build_dmrpp_service() {
+    local debug="${1}"
+
+    local log_file="build_dmrpp_service.log"
+    show_version 2>&1 | tee "${log_file}" >&2
+
+    export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
+    show_version >&2
+
+    get_tomcat_distro \
+        "${DOCKER_NAME}" \
+        "${TOMCAT_VERSION}" 2>&1 | tee -a "${log_file}" >&2
+
+    s3_get_besd_distro \
+        "${S3_BUILD_BUCKET}" \
+        "${DOCKER_NAME}" \
+        "el8" \
+        "${LIBDAP_VERSION}" \
+        "${BES_VERSION}" $debug 2>&1 | tee -a "${log_file}" >&2
+
+    s3_get_build_dmrpp_distro \
+        "${S3_BUILD_BUCKET}" \
+        "${DOCKER_NAME}" \
+        "${BUILD_DMRPP_VERSION}" 2>&1 | tee -a "${log_file}" >&2
+
+    build_dmrpp_service_docker "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}" >&2
+    cleanup_build_files "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}" >&2
+}
+
 
 
 
@@ -905,4 +1064,39 @@ function mk_easy_docker_release(){
 # make_hyrax_release "${RELEASE_DATE}" "${HYRAX_VERSION}" "${OLFS_VERSION}" "${BES_VERSION}" "${LIBDAP_VERSION}"
 
 
+function travis_hyrax() {
+    check_aws
+    if test $? -ne 0; then
+        echo "# There is a problem with the AWS configuration. Fix it and try again"
+        return $status
+    fi
 
+    export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}:snapshot"
+    export BUILD_VERSION_TAG="opendap/${DOCKER_NAME}:${HYRAX_VERSION}"
+    export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
+    show_version
+    get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_VERSION}"
+    s3_get_besd_distro \
+        "${S3_BUILD_BUCKET}" \
+        "${DOCKER_NAME}" \
+        "el8" \
+        "${LIBDAP_VERSION}" \
+        "${BES_VERSION}" $ADD_DEBUG 2>&1
+    s3_get_olfs_distro \
+        "${S3_BUILD_BUCKET}" \
+        "${DOCKER_NAME}" \
+        "${OLFS_VERSION}" 2>&1
+    docker build \
+        --build-arg TOMCAT_VERSION \
+        --build-arg RELEASE_DATE \
+        --build-arg HYRAX_VERSION \
+        --build-arg LIBDAP_VERSION \
+        --build-arg BES_VERSION \
+        --build-arg OLFS_VERSION \
+        --tag "${SNAPSHOT_IMAGE_TAG}" \
+        --tag "${BUILD_VERSION_TAG}" \
+        "${DOCKER_NAME}"
+
+    docker image ls -a
+
+}

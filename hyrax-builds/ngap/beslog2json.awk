@@ -17,11 +17,11 @@ BEGIN {
         indent="    ";
     }
 
-# 1601642669|&|2122|&|timing|&|more stuff...
-#1601642669|&|2122|&|verbose|&|Message Stuff
-#1601642679|&|2122|&|info|&|Message stuff
-#1601642679|&|2122|&|error|&|Error stuff
-#1601642679|&|2122|&|request|&|Error stuff
+# 1601642669|&|2122|&|timing|&|TimingFields
+# 1601642669|&|2122|&|verbose|&|MessageField
+# 1601642679|&|2122|&|info|&|MessageField
+# 1601642679|&|2122|&|error|&|MessageField
+# 1601642679|&|2122|&|request|&|RequestFields
 
 
 

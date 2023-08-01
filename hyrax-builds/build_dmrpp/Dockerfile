@@ -51,23 +51,19 @@ RUN echo "BES_RPM: ${BES_RPM}"
 COPY ${BES_RPM} bes-devel-* bes-debuginfo-* /
 RUN ls -l /bes-* >&2
 
-ARG OLFS_VERSION
-ENV OLFS_VERSION=${OLFS_VERSION:-"snapshot"}
-RUN echo "OLFS_VERSION: ${OLFS_VERSION}"
+ARG BUILD_DMRPP_VERSION
+ENV BUILD_DMRPP_VERSION=${BUILD_DMRPP_VERSION:-"snapshot"}
+RUN echo "BUILD_DMRPP_VERSION: ${BUILD_DMRPP_VERSION}"
 
-ARG OLFS_DISTRO
-ENV OLFS_DISTRO=${OLFS_DISTRO:-"olfs-${OLFS_VERSION}-webapp"}
-RUN echo "OLFS_DISTRO: ${OLFS_DISTRO}"
-COPY ${OLFS_DISTRO}.tgz /${OLFS_DISTRO}.tgz
-
-ARG ROBOTS_DISTRO
-ENV ROBOTS_DISTRO=${ROBOTS_DISTRO:-"robots-olfs-${OLFS_VERSION}-webapp"}
-RUN echo "ROBOTS_DISTRO: ${ROBOTS_DISTRO}"
-COPY ${ROBOTS_DISTRO}.tgz /${ROBOTS_DISTRO}.tgz
+ARG BUILD_DMRPP_DISTRO
+ENV BUILD_DMRPP_DISTRO=${BUILD_DMRPP_DISTRO:-"build_dmrpp-${BUILD_DMRPP_VERSION}-webapp"}
+RUN echo "BUILD_DMRPP_DISTRO: ${BUILD_DMRPP_DISTRO}"
+COPY ${BUILD_DMRPP_DISTRO}.tgz /${BUILD_DMRPP_DISTRO}.tgz
 
 ARG DEPLOYMENT_CONTEXT
-ENV DEPLOYMENT_CONTEXT=${DEPLOYMENT_CONTEXT:-"opendap"}
+ENV DEPLOYMENT_CONTEXT=${DEPLOYMENT_CONTEXT:-"build_dmrpp"}
 RUN echo "DEPLOYMENT_CONTEXT: ${DEPLOYMENT_CONTEXT}"
+
 
 LABEL vendor="OPeNDAP"
 LABEL org.opendap.hyrax.version=${HYRAX_VERSION}
@@ -187,31 +183,22 @@ RUN set -e \
     && rm -fv "/${TOMCAT_DISTRO}.tar.gz"
 
 ################################################################
-# Install the OLFS web application
+# Install the build dmr++ web application
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 ENV ROOT=/dev/shm
 
-RUN echo "Installing the latest olfs distribution (${OLFS_VERSION})." >&2
+RUN echo "Installing the latest build_dmrpp distribution (${BUILD_DMRPP_VERSION})." >&2
 RUN set -e \
     && echo "working_dir: "`pwd`  >&2 \
     && ls -l . \
-    && tar -C ${ROOT} -xzvf ./${OLFS_DISTRO}.tgz \
+    && tar -C ${ROOT} -xzvf ./${BUILD_DMRPP_DISTRO}.tgz \
     && ls -l ${ROOT} \
     && echo "Unpacking warfile..."  >&2 \
     && mkdir -p $(readlink -f ${CATALINA_HOME})/webapps/${DEPLOYMENT_CONTEXT}/ \
-    && unzip -o ${ROOT}/${OLFS_DISTRO}/opendap.war -d ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/ \
+    && unzip -o ${ROOT}/${BUILD_DMRPP_DISTRO}/build_dmrpp.war -d ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/ \
     && echo "Cleaning up."  >&2 \
-    && rm -rf ${ROOT}/${OLFS_DISTRO} ./${OLFS_DISTRO}.tgz
+    && rm -rf ${ROOT}/${BUILD_DMRPP_DISTRO} ./${BUILD_DMRPP_DISTRO}.tgz
 
-RUN set -e \
-    && echo "Installing the latest dynamic robots.txt distribution (${OLFS_VERSION})."  >&2 \
-    && ls -l ./robots* \
-    && tar -C ${ROOT} -xzf ./${ROBOTS_DISTRO}.tgz \
-    && ls -l ${ROOT}/${ROBOTS_DISTRO} \
-    && echo "Unpacking dynamic robots.txt warfile..."  >&2 \
-    && unzip -o ${ROOT}/${ROBOTS_DISTRO}/ROOT.war -d ${CATALINA_HOME}/webapps/ROOT/ \
-    && echo "Cleaning up dynamic robots.txt snapshot..."  >&2 \
-    && rm -rf ${ROOT}/${ROBOTS_DISTRO} ${ROBOTS_DISTRO}.tgz
 
 # Fix ownership and access permissions
 RUN set -e \
@@ -222,54 +209,9 @@ RUN set -e \
 ################################################################
 # Clean up the Hyrax distribution binaries.
 #
-RUN rm -vf /libdap*.rpm /bes*.rpm /olfs*.tgz /robots*.tgz /apache*
+RUN rm -vf /libdap*.rpm /bes*.rpm /build_dmrpp*.tgz /robots*.tgz /apache*
 #
 ################################################################
-
-################################################################
-# retrieve and install the ncWMS web application
-#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
-
-ARG NCWMS_VERSION
-ENV NCWMS_VERSION ${NCWMS_VERSION:-"2.5.2"}
-RUN echo "NCWMS_VERSION: ${NCWMS_VERSION}"
-ENV NCWMS_WAR_URL="https://github.com/Reading-eScience-Centre/ncwms/releases/download/ncwms-${NCWMS_VERSION}/ncWMS2.war"
-RUN echo "NCWMS_WAR_URL: ${NCWMS_WAR_URL}"
-
-RUN if [ $USE_NCWMS = "true" ]; then \
-        echo "Installing ncWMS..."; \
-        curl -sfSL ${NCWMS_WAR_URL} -o /dev/shm/ncWMS.war; \
-        unzip -o /dev/shm/ncWMS.war -d ${CATALINA_HOME}/webapps/ncWMS2/; \
-        rm -rf /dev/shm/*; \
-    else \
-        echo "ncWMS will NOT be installed."; \
-    fi
-
-# set a default ncWMS admin if DEVELOPER_MODE is enabled.
-RUN if [ ${DEVELOPER_MODE} = "true" ] && [ $USE_NCWMS = "true" ]; then \
-        echo "DEVELOPER MODE: Adding ncWMS admin credentials"; \
-        sed -i 'sX</tomcat-users>X<role rolename="ncWMS-admin"/> <user username="admin" password="admin" roles="ncWMS-admin"/> </tomcat-users>X' ${CATALINA_HOME}/conf/tomcat-users.xml; \
-    else \
-        echo "No ncWMS admin credentials installed."; \
-    fi
-    
-#
-# make ncWMS work without further configuration 
-# We will need to adjust this target if we
-# decide to run as a different (not root) user.
-COPY ncWMS_config.xml /root/.ncWMS2/config.xml
-RUN  chmod +r /root/.ncWMS2/config.xml
-
-COPY olfs_viewers.xml /tmp/olfs_viewers.xml
-RUN if [ $USE_NCWMS = "true" ]; then \
-        # If we're installing ncWMS then we copy 
-        # to the server a viewers.xml which has
-        # been templated so that the ncWMS host can be installed 
-        # at startup.        
-        mv /tmp/olfs_viewers.xml ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/viewers.xml; \
-    else \
-        echo "Skipping OLFS/ncWMS confguration installation."; \
-    fi
 
 ################################################################
 #
@@ -277,35 +219,12 @@ RUN if [ $USE_NCWMS = "true" ]; then \
 # project
 #
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
-ENV TEST_INSTALL_DIR="/hyrax_regression_tests"
-RUN set -e \
-    && echo "Retrieving, and building hyrax regression tests." \
-    && echo "h_r_t will be in: ${TEST_INSTALL_DIR}" \
-    && mkdir -p ${TEST_INSTALL_DIR} \
-    && git clone -v https://github.com/opendap/hyrax_regression_tests ${TEST_INSTALL_DIR} \
-    && cd ${TEST_INSTALL_DIR} \
-    && autoreconf -vif \
-    && ./configure
 
-# In order to get the executable "testsuite" to build we have to run
-# "make check" But that will fail at build time so the "make check" call
-# ends up pretty tortured to avoid a build error.
-RUN set -e \
-    && cd ${TEST_INSTALL_DIR} \
-    && make testsuite > mk.log 2>&1 \
-    && echo "SUCCESS: hyrax_regression_tests ready!"
+# @TODO Write regression tests for build_dmrpp
+
 ################################################################
 
 RUN ls -l /usr/libexec/
-
-################################################################
-# TEMPORARY
-# Grab the cleanup files script for managing orphaned files
-# from fileout_netcdf
-COPY cleanup_files.sh /
-RUN chmod +x /cleanup_files.sh
-# TEMPORARY
-################################################################
 
 
 COPY entrypoint.sh /
