@@ -224,7 +224,61 @@ function get_tomcat_distro(){
     return 0
 }
 
+################################################################################
+#
+# check_aws() - Get a thing from an S3 bucket
+#
+# [-bash: ~] aws configure list
+#       Name                    Value             Type    Location
+#       ----                    -----             ----    --------
+#    profile                <not set>             None    None
+# access_key                <not set>             None    None
+# secret_key                <not set>             None    None
+#     region                us-west-2      config-file    ~/.aws/config
+#
+# export AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
+# export AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+# export AWS_DEFAULT_REGION=us-west-2
+#
+#
+function check_aws(){
+    echo "${HR}" >&2
+    echo "#" >&2
+    echo "# check_aws()" >&2
+    echo "#" >&2
 
+    local aws_config_list=
+    aws_config_list=$(aws configure list | sed -e "s/not set/not_set/g")
+    local access_key
+    access_key=$(echo "${aws_config_list}" | grep -i access_key | awk '{print $2;}')
+    local secret_key
+    secret_key=$(echo "${aws_config_list}" | grep -i secret_key | awk '{print $2;}')
+    local region
+    region=$(echo "${aws_config_list}" | grep -i region | awk '{print $2;}')
+    local partial=
+    partial=$(echo "${aws_config_list}" | grep -i "Partial credentials found in env")
+
+    ns="<not_set>"
+    status=0;
+    if test "${access_key}" = "${ns}"; then
+      status=1
+      echo "# The AWS_ACCESS_KEY_ID has not been set." >&2
+    fi
+    if test "${secret_key}" = "${ns}"; then
+      status=1
+      echo "# The AWS_SECRET_ACCESS_KEY has not been set." >&2
+    fi
+    if test "${region}" = "${ns}"; then
+      status=1
+      echo "# The AWS_DEFAULT_REGION has not been set." >&2
+    fi
+
+    if test -n "${partial}"; then
+        status=1
+        echo "# ${partial}" >&2
+    fi
+    return $status
+}
 
 ################################################################################
 #
@@ -674,7 +728,7 @@ function start_hyrax(){
     echo "#                platform: ${platform}" >&2
 
     docker run \
-        -d\
+        -d \
         ${platform} \
         -h hyrax \
         -p 8080:8080 \
@@ -1010,4 +1064,39 @@ function mk_easy_docker_release(){
 # make_hyrax_release "${RELEASE_DATE}" "${HYRAX_VERSION}" "${OLFS_VERSION}" "${BES_VERSION}" "${LIBDAP_VERSION}"
 
 
+function travis_hyrax() {
+    check_aws
+    if test $? -ne 0; then
+        echo "# There is a problem with the AWS configuration. Fix it and try again"
+        return $status
+    fi
 
+    export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}:snapshot"
+    export BUILD_VERSION_TAG="opendap/${DOCKER_NAME}:${HYRAX_VERSION}"
+    export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
+    show_version
+    get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_VERSION}"
+    s3_get_besd_distro \
+        "${S3_BUILD_BUCKET}" \
+        "${DOCKER_NAME}" \
+        "el8" \
+        "${LIBDAP_VERSION}" \
+        "${BES_VERSION}" $ADD_DEBUG 2>&1
+    s3_get_olfs_distro \
+        "${S3_BUILD_BUCKET}" \
+        "${DOCKER_NAME}" \
+        "${OLFS_VERSION}" 2>&1
+    docker build \
+        --build-arg TOMCAT_VERSION \
+        --build-arg RELEASE_DATE \
+        --build-arg HYRAX_VERSION \
+        --build-arg LIBDAP_VERSION \
+        --build-arg BES_VERSION \
+        --build-arg OLFS_VERSION \
+        --tag "${SNAPSHOT_IMAGE_TAG}" \
+        --tag "${BUILD_VERSION_TAG}" \
+        "${DOCKER_NAME}"
+
+    docker image ls -a
+
+}
