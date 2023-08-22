@@ -374,9 +374,14 @@ done
 echo "# Tomcat is UP! pid: ${tomcat_pid}" >&2
 echo "#" >&2
 
-# TEMPORARY
+# TEMPORARY ###################################################################
 /cleanup_files.sh >&2 &
-# TEMPORARY
+
+# This 'tail -f' may not work in the background in which case we need to find
+# an alternate way
+tail -f "${BES_LOG_FILE}" | awk -f beslog2json.awk &
+
+# TEMPORARY ###################################################################
 
 echo "# Hyrax Has Arrived..." >&2
 echo "#" >&2
@@ -415,11 +420,12 @@ while /bin/true; do
     if test $debug = true ; then
         echo "${HR1}"  >&2
         date >&2
-        echo "# BESD_STATUS: $BESD_STATUS  besd_pid:$besd_pid" >&2
+        echo "#   BESD_STATUS: $BESD_STATUS     besd_pid:$besd_pid" >&2
         echo "# TOMCAT_STATUS: $TOMCAT_STATUS tomcat_pid:$tomcat_pid" >&2
     fi
 
-    tail -f "${BES_LOG_FILE}" | awk -f beslog2json.awk
+    # Moved to outside this loop and background.
+    # tail -f "${BES_LOG_FILE}" | awk -f beslog2json.awk
 
 done
 #-------------------------------------------------------------------------------
