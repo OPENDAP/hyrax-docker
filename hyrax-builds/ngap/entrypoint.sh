@@ -389,10 +389,10 @@ echo "${HR1}" >&2
 #-------------------------------------------------------------------------------
 while /bin/true; do
     sleep ${SLEEP_INTERVAL}
-    echo "Checking Hyrax Operational State..." >&2
+    if test $debug = true ; then echo "Checking Hyrax Operational State..." >&2; fi
     besd_ps=$(ps -f $besd_pid)
     BESD_STATUS=$?
-    echo "BESD_STATUS: ${BESD_STATUS}" >&2
+    if test $debug = true ; then echo "BESD_STATUS: ${BESD_STATUS}" >&2; fi
     if test $BESD_STATUS -ne 0 ; then
         echo "BESD_STATUS: $BESD_STATUS bes_pid:$bes_pid" >&2
         echo "The BES daemon appears to have died! Exiting." >&2
@@ -401,7 +401,7 @@ while /bin/true; do
 
     tomcat_ps=$(ps -f "${tomcat_pid}")
     TOMCAT_STATUS=$?
-    echo "TOMCAT_STATUS: ${TOMCAT_STATUS}" >&2
+    if test $debug = true ; then echo "TOMCAT_STATUS: ${TOMCAT_STATUS}" >&2; fi
     if test $TOMCAT_STATUS -ne 0 ; then
         echo "TOMCAT_STATUS: $TOMCAT_STATUS tomcat_pid:$tomcat_pid" >&2
         echo "Tomcat appears to have died! Exiting." >&2
@@ -420,8 +420,8 @@ while /bin/true; do
     if test $debug = true ; then
         echo "${HR1}"  >&2
         date >&2
-        echo "#   BESD_STATUS: $BESD_STATUS     besd_pid:$besd_pid" >&2
-        echo "# TOMCAT_STATUS: $TOMCAT_STATUS tomcat_pid:$tomcat_pid" >&2
+        echo "#   BESD_STATUS: $BESD_STATUS     besd_pid: $besd_pid" >&2
+        echo "# TOMCAT_STATUS: $TOMCAT_STATUS tomcat_pid: $tomcat_pid" >&2
     fi
 
     # Moved to outside this loop and background.
