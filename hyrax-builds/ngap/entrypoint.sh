@@ -332,7 +332,7 @@ bes_uid=$(id -u bes)
 bes_gid=$(id -g bes)
 echo "${HRB}" >&2
 echo "Launching besd [uid: ${bes_uid} gid: ${bes_gid}]" >&2
-/usr/bin/besctl start -d "/dev/null,timing" >&2
+/usr/bin/besctl start >&2 # dropped debug control -d "/dev/null,timing"  - ndp 10/12/2023
 status=$?
 if test $status -ne 0 ; then
     echo "ERROR: Failed to start BES: $status" >&2
