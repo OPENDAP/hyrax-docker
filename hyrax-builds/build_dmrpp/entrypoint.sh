@@ -37,6 +37,41 @@ echo "AWS_ACCESS_KEY_ID is ${AWS_ACCESS_KEY_ID}" >&2
 export AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION:-<not set>}"
 echo "AWS_DEFAULT_REGION is ${AWS_DEFAULT_REGION}" >&2
 
+export NETRC_FILE="/etc/bes/ngap_netrc"
+echo "#            NETRC_FILE: ${NETRC_FILE}" >&2
+
+################################################################################
+# Inject one set of credentials into .netrc
+# Only modify the .netrc file if all three environment variables are defined
+#
+if test -n "${HOST}"  &&  test -n "${USERNAME}"  &&  test -n "${PASSWORD}" ; then
+    echo "# Updating netrc file: ${NETRC_FILE}" >&2
+    # machine is a domain name or a ip address, not a URL.
+    echo "machine ${HOST}" | sed -e "s_https:__g"  -e "s_http:__g" -e "s+/++g" >> "${NETRC_FILE}"
+    echo "    login ${USERNAME}"    >> "${NETRC_FILE}"
+    echo "    password ${PASSWORD}" >> "${NETRC_FILE}"
+    chown bes:bes "${NETRC_FILE}"
+    chmod 400 "${NETRC_FILE}"
+    echo "#  "$(ls -l "${NETRC_FILE}")  >&2
+    cat "${NETRC_FILE}" | awk '{print "##    "$0;}' >&2
+    echo "#" >&2
+fi
+################################################################################
+
+################################################################################
+# Inject build_dmrpp.xml configuration document.
+#
+# Test if the olfs.xml env variable is set (by way of not unset) and
+# not empty and use it's value if present and non-empty.olfs
+#
+if test -n "${OLFS_XML}"  ; then
+    OLFS_XML_FILE="${OLFS_CONF_DIR}/build_dmrpp.xml"
+    echo "# Updating OLFS configuration file: ${OLFS_XML_FILE}" >&2
+    echo "${OLFS_XML}" > ${OLFS_XML_FILE}
+    cat "${OLFS_XML_FILE}" | awk '{print "##    "$0;}' >&2
+    echo "#" >&2
+fi
+################################################################################
 
 debug=false
 
