@@ -221,7 +221,30 @@ RUN rm -vf /libdap*.rpm /bes*.rpm /build_dmrpp*.tgz /robots*.tgz /apache*
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 
 # @TODO Write regression tests for build_dmrpp
+################################################################
+#
+# Retrieve, verify, and install the hyrax_regression_tests
+# project
+#
+#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
+ENV TEST_INSTALL_DIR="/hyrax_regression_tests"
+RUN set -e \
+    && echo "Retrieving, and building hyrax regression tests." \
+    && echo "h_r_t will be in: ${TEST_INSTALL_DIR}" \
+    && mkdir -p ${TEST_INSTALL_DIR} \
+    && git clone -v https://github.com/opendap/hyrax_regression_tests ${TEST_INSTALL_DIR} \
+    && cd ${TEST_INSTALL_DIR} \
+    && autoreconf -vif \
+    && ./configure
 
+# In order to get the executable "testsuite" to build we have to run
+# "make check" But that will fail at build time so the "make check" call
+# ends up pretty tortured to avoid a build error.
+RUN set -e \
+    && cd ${TEST_INSTALL_DIR} \
+    && make testsuite > mk.log 2>&1 \
+    && echo "SUCCESS: hyrax_regression_tests ready!"
+################################################################
 ################################################################
 
 RUN ls -l /usr/libexec/
