@@ -211,7 +211,7 @@ echo "Tomcat is UP! pid: ${tomcat_pid}" >&2
 /cleanup_files.sh >&2 &
 # TEMPORARY
 
-echo "Hyrax Has Arrived..." >&2
+echo "BuildDmrpp Has Arrived..." >&2
 echo "--------------------------------------------------------------------" >&2
 #-------------------------------------------------------------------------------
 while /bin/true; do
