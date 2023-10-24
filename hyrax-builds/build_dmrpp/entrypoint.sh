@@ -40,6 +40,19 @@ echo "AWS_DEFAULT_REGION is ${AWS_DEFAULT_REGION}" >&2
 export NETRC_FILE="/etc/bes/ngap_netrc"
 echo "#            NETRC_FILE: ${NETRC_FILE}" >&2
 
+export CATALINA_HOME=${CATALINA_HOME:-"NOT_SET"}
+echo "#         CATALINA_HOME: ${CATALINA_HOME}" >&2
+
+export DEPLOYMENT_CONTEXT=${DEPLOYMENT_CONTEXT:-"ROOT"}
+echo "#    DEPLOYMENT_CONTEXT: ${DEPLOYMENT_CONTEXT}" >&2
+
+export OLFS_CONF_DIR="${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf"
+echo "#         OLFS_CONF_DIR: ${OLFS_CONF_DIR}" >&2
+
+export TOMCAT_CONTEXT_FILE="/usr/share/tomcat/conf/context.xml"
+echo "#   TOMCAT_CONTEXT_FILE: ${TOMCAT_CONTEXT_FILE}" >&2
+
+
 ################################################################################
 # Inject one set of credentials into .netrc
 # Only modify the .netrc file if all three environment variables are defined
