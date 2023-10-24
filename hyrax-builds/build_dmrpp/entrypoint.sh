@@ -73,6 +73,45 @@ if test -n "${OLFS_XML}"  ; then
 fi
 ################################################################################
 
+################################################################################
+# Inject user-access.xml document to define the servers relationship to
+# EDL and the user access rules.
+#
+# Test if the user-access.xml env variable is set (by way of not unset) and
+# not empty
+#
+if test -n "${USER_ACCESS_XML}"  ; then
+    echo "${HR2}" >&2
+    USER_ACCESS_XML_FILE="${OLFS_CONF_DIR}/user-access.xml"
+    echo "# Updating OLFS user access controls: ${USER_ACCESS_XML_FILE}" >&2
+    echo "${USER_ACCESS_XML}" > ${USER_ACCESS_XML_FILE}
+    cat "${USER_ACCESS_XML_FILE}" | awk '{print "##    "$0;}' >&2
+    echo "#" >&2
+fi
+################################################################################
+
+################################################################################
+# Inject BES configuration site.conf document to configure the BES to operate
+# in the NGAP environment.
+#
+# Test if the bes.conf env variable is set (by way of not unset) and not empty
+if test -n "${BES_SITE_CONF}" ; then
+    echo "${HR2}" >&2
+    echo "# Updating BES site.conf: ${BES_SITE_CONF_FILE}" >&2
+    # echo "${BES_SITE_CONF}" > ${BES_SITE_CONF_FILE}
+    # @TODO THis seems like a crappy hack, we should just change the source file in BitBucket to be correct
+    echo "${BES_SITE_CONF}" | sed -e "s+BES.LogName=stdout+BES.LogName=${BES_LOG_FILE}+g" > ${BES_SITE_CONF_FILE}
+    cat "${BES_SITE_CONF_FILE}" | awk '{print "##    "$0;}' >&2
+    echo "#" >&2
+fi
+################################################################################
+
+
+################################################################################
+#
+# Process commandline arguments
+#
+#
 debug=false
 
 while getopts "de:sn:i:k:r:" opt; do
