@@ -25,9 +25,6 @@ echo "SERVER_HELP_EMAIL: ${SERVER_HELP_EMAIL}" >&2
 export FOLLOW_SYMLINKS="${FOLLOW_SYMLINKS:-not_set}"
 echo "FOLLOW_SYMLINKS: ${FOLLOW_SYMLINKS}" >&2
 
-export NCWMS_BASE="${NCWMS_BASE:-https://localhost:8080}"
-echo "NCWMS_BASE: ${NCWMS_BASE}" >&2
-
 export AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:-<not set>}"
 echo "AWS_SECRET_ACCESS_KEY is ${AWS_SECRET_ACCESS_KEY}" >&2
 
@@ -79,7 +76,7 @@ fi
 #
 if test -n "${OLFS_XML}"  ; then
     OLFS_XML_FILE="${OLFS_CONF_DIR}/build_dmrpp.xml"
-    echo "# Updating OLFS configuration file: ${OLFS_XML_FILE}" >&2
+    echo "# Updating build_pmrpp configuration file: ${OLFS_XML_FILE}" >&2
     echo "${OLFS_XML}" > ${OLFS_XML_FILE}
     cat "${OLFS_XML_FILE}" | awk '{print "##    "$0;}' >&2
     echo "#" >&2
@@ -127,7 +124,7 @@ fi
 #
 debug=false
 
-while getopts "de:sn:i:k:r:" opt; do
+while getopts "de:si:k:r:" opt; do
   echo "Processing command line opt: ${opt}" >&2
   case $opt in
     e)
@@ -137,10 +134,6 @@ while getopts "de:sn:i:k:r:" opt; do
     s)
       export FOLLOW_SYMLINKS="Yes"
       echo "Set FollowSymLinks to: ${FOLLOW_SYMLINKS}" >&2
-      ;;
-    n)
-      export NCWMS_BASE=$OPTARG
-      echo "Set ncWMS public facing service base to : ${NCWMS_BASE}" >&2
       ;;
     d)
       export debug=true
@@ -181,18 +174,8 @@ if test "${debug}" = "true" ; then
     ls -l "$CATALINA_HOME" "$CATALINA_HOME/bin"  >&2
 fi
 
-if test "${debug}" = "true" ; then
-    echo "NCWMS: Using NCWMS_BASE: ${NCWMS_BASE}"  >&2
-    echo "NCWMS: Setting ncWMS access URLs in viewers.xml (if needed)."  >&2
-    ls -l "${VIEWERS_XML}" >&2
-fi
 
 
-sed -i "s+@NCWMS_BASE@+$NCWMS_BASE+g" ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml
-if test "${debug}" = "true" ; then
-    echo "${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml"  >&2
-    cat ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml >&2
-fi
 
 #-------------------------------------------------------------------------------
 # modify bes.conf based on environment variables before startup.
