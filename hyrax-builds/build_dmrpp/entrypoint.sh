@@ -260,7 +260,7 @@ done
 echo "Tomcat is UP! pid: ${tomcat_pid}" >&2
 
 # TEMPORARY
-/cleanup_files.sh >&2 &
+#/cleanup_files.sh >&2 &
 # TEMPORARY
 
 echo "BuildDmrpp Has Arrived..." >&2
