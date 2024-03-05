@@ -227,6 +227,7 @@ jobs:
       script:
         - cd hyrax-builds
         - export DOCKER_NAME="ngap"
+        - export DEPLOY_ME=true
         - source ./build-rh8
         - export SNAPSHOT_IMAGE_TAG="opendap/hyrax:${DOCKER_NAME}-snapshot"
         - export BUILD_VERSION_TAG=opendap/hyrax:${DOCKER_NAME}-${HYRAX_VERSION}
