@@ -227,7 +227,6 @@ jobs:
       script:
         - cd hyrax-builds
         - export DOCKER_NAME="ngap"
-        - export DEPLOY_ME=true
         - source ./build-rh8
         - export SNAPSHOT_IMAGE_TAG="opendap/hyrax:${DOCKER_NAME}-snapshot"
         - export BUILD_VERSION_TAG=opendap/hyrax:${DOCKER_NAME}-${HYRAX_VERSION}
@@ -286,7 +285,7 @@ jobs:
         - export TEST_IMAGE=opendap/hyrax:${HYRAX_VERSION}
         - echo "Running Hyrax Regression Test Script on ${TEST_IMAGE}"
         - ./regression_test_script -i "${TEST_IMAGE}"
-        - export DEPLOY_ME="false"
+        - export DEPLOY_ME="true"
 
 before_deploy:
   - export DOCKER_LOGIN=`aws ecr get-login --region us-east-1 | sed "s/-e none //g"`;
