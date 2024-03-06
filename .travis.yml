@@ -286,7 +286,7 @@ jobs:
         - export TEST_IMAGE=opendap/hyrax:${HYRAX_VERSION}
         - echo "Running Hyrax Regression Test Script on ${TEST_IMAGE}"
         - ./regression_test_script -i "${TEST_IMAGE}"
-        - export DEPLOY_ME="true"
+        - export DEPLOY_ME="false"
 
 before_deploy:
   - export DOCKER_LOGIN=`aws ecr get-login --region us-east-1 | sed "s/-e none //g"`;
