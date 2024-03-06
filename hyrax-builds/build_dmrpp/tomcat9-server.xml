@@ -113,7 +113,7 @@
          Either JSSE or OpenSSL style configuration may be used. OpenSSL style
          configuration is used below.
     -->
-    <!-- -->
+
     <Connector port="8443" protocol="org.apache.coyote.http11.Http11AprProtocol"
                maxThreads="150" SSLEnabled="true" >
       <UpgradeProtocol className="org.apache.coyote.http2.Http2Protocol" />
