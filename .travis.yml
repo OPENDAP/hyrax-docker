@@ -12,8 +12,9 @@ services:
 
 branches:
   only:
-    - master
-    - main
+  - master
+  - main
+  - /^(.*-test-deploy)$/
 
 notifications:
   email:
