@@ -13,6 +13,8 @@ services:
 branches:
   only:
     - master
+    - main
+    - /^(.*-test-deploy)$/
 
 notifications:
   email:
