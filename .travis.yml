@@ -297,5 +297,5 @@ deploy:
   - provider: script
     script: bash ${TRAVIS_BUILD_DIR}/deploy_to_docker_hub.sh
     on:
-      branch: master OR branch =~ ^(.*-test-deploy)$
+      all_branches: true
       condition: ${DEPLOY_ME} = "true"
