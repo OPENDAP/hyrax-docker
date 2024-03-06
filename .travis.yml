@@ -12,9 +12,9 @@ services:
 
 branches:
   only:
-  - master
-  - main
-  - ngap-dit-test-deploy
+    - master
+    - main
+    - ngap-dit-test-deploy
 
 notifications:
   email:
