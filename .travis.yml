@@ -59,8 +59,8 @@ env:
 
 before_install:
   - pip3 install awscli
-  - if test "$TRAVIS_PULL_REQUEST" = "false" || [[ "${branch}" =~ ^(.*-test-deploy)$ ]]; then export DEPLOY_ME="true"; else export DEPLOY_ME="false"; fi
-  - echo "TRAVIS_PULL_REQUEST is $TRAVIS_PULL_REQUEST, DEPLOY_ME is ${DEPLOY_ME}, TRAVIS_PULL_REQUEST_BRANCH is $TRAVIS_PULL_REQUEST_BRANCH, BRANCH is $branch"
+  - if test "$TRAVIS_PULL_REQUEST" = "false" || [[ "$TRAVIS_PULL_REQUEST_BRANCH" =~ ^(.*-test-deploy)$ ]]; then export DEPLOY_ME="true"; else export DEPLOY_ME="false"; fi
+  - echo "TRAVIS_PULL_REQUEST is $TRAVIS_PULL_REQUEST, DEPLOY_ME is ${DEPLOY_ME}, TRAVIS_PULL_REQUEST_BRANCH is $TRAVIS_PULL_REQUEST_BRANCH"
 
 install:
   - echo "print env:"
