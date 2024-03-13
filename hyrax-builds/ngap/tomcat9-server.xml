@@ -118,9 +118,9 @@
                maxThreads="150" SSLEnabled="true" >
         <UpgradeProtocol className="org.apache.coyote.http2.Http2Protocol" />
         <SSLHostConfig>
-            <Certificate certificateKeyFile="conf/NGAP-CA-certificate.key"
-                         certificateFile="conf/NGAP-CA-certificate.crt"
-                         certificateChainFile="conf/NGAP-CA-certificate-chain.crt"
+            <Certificate certificateKeyFile="/usr/share/tomcat/conf/NGAP-CA-certificate.key"
+                         certificateFile="/usr/share/tomcat/conf/NGAP-CA-certificate.crt"
+                         certificateChainFile="/usr/share/tomcat/conf/NGAP-CA-certificate-chain.crt"
                          type="RSA" />
         </SSLHostConfig>
     </Connector>
