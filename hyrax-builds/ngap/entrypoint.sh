@@ -71,7 +71,7 @@ export NGAP_CERTIFICATE_CHAIN_FILE="/usr/share/tomcat/conf/NGAP-CA-certificate-c
 echo "#   NGAP_CERTIFICATE_CHAIN_FILE: ${NGAP_CERTIFICATE_CHAIN_FILE}" >&2
 
 export NGAP_CERTIFICATE_KEY="/usr/share/tomcat/conf/NGAP-CA-certificate.key"
-echo "#   NGAP_CERTIFICATE_KEY: ${NGAP_CERTIFICATE_KEY}" >&2
+echo "#   NGAP_CERTIFICATE_KEY: ${NGAP_CERTIFICATE_KEY_FILE}" >&2
 
 ################################################################################
 echo "${HR2}" >&2
