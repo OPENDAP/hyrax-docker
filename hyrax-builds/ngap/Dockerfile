@@ -171,6 +171,20 @@ RUN set -e \
     && echo "Cleaning up Tomcat distribution files..." >&2 \
     && rm -fv "/${TOMCAT_DISTRO}.tar.gz"  >&2
 
+# Install the Tomcat Native-APR library.
+#
+RUN set -e \
+    && export JAVA_HOME="$(dirname $(dirname $(readlink -f $(which javac))))" >&2 \
+    && echo $JAVA_HOME >&2 \
+    && tar -xvf "/${CATALINA_HOME}/bin/tomcat-native.tar.gz" -C ${CATALINA_HOME}/bin >&2 \
+    && cd ${CATALINA_HOME}/bin/tomcat-native-1.3.0-src/native >&2 \
+    && ./configure >&2 \
+    && make >&2 \
+    && make install >&2 \
+    && echo "SUCCESS: Tomcat Native-APR Library installed"
+
+ENV CATALINA_OPTS "-Djava.library.path=/usr/local/apr/lib"
+
 ################################################################
 # Retrieve, verify, and install the NGAP/OLFS web application
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
