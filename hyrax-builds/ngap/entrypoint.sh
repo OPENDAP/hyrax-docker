@@ -396,6 +396,22 @@ echo "# The besd is UP! [pid: ${besd_pid}]" >&2
 echo "#" >&2
 
 #-------------------------------------------------------------------------------
+# Build Tomcat native-apr library
+#
+echo "${HRT}" >&2
+echo "#    Building tomcat/native APR library..." >&2
+
+export JAVA_HOME="$(dirname $(dirname $(readlink -f $(which javac))))"
+
+cd ${CATALINA_HOME}/bin
+tar xvfz tomcat-native-1.3.0.tar.gz
+cd tomcat-native-1.3.0-src/native
+./configure
+make
+make install
+
+
+#-------------------------------------------------------------------------------
 # Start Tomcat process
 #
 echo "${HRT}" >&2

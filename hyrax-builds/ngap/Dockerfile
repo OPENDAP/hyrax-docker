@@ -104,6 +104,11 @@ RUN set -e && dnf install -y python3 git bc valgrind gdb
 RUN set -e && dnf install -y java-11-openjdk-devel
 # Temporary Hack to fix broken OpenJDK-11.0.20.0.8-2
 RUN set -e && dnf install -y tzdata-java
+# Temporary Hack to add missing Apache Portable Runtime library for Tomcat
+RUN set -e && dnf install -y ant
+RUN set -e && dnf install -y redhat-rpm-config
+RUN set -e && dnf install -y apr-devel
+RUN set -e && dnf install -y openssl-devel
 #
 RUN set -e && dnf clean all
 #
