@@ -101,6 +101,9 @@ RUN set -e && dnf install -y make curl unzip which autoconf automake emacs vim
 RUN set -e && dnf install -y diffutils
 RUN set -e && dnf install -y procps
 RUN set -e && dnf install -y python3 git bc valgrind gdb
+# Temporary Hack to add Ant before we install Java-11 since it will install Java-8
+#RUN set -e && dnf install -y ant
+RUN set -e && dnf install -y java-11-openjdk
 RUN set -e && dnf install -y java-11-openjdk-devel
 # Temporary Hack to fix broken OpenJDK-11.0.20.0.8-2
 RUN set -e && dnf install -y tzdata-java
@@ -184,6 +187,10 @@ RUN set -e \
     && echo "SUCCESS: Tomcat Native-APR Library installed"
 
 ENV CATALINA_OPTS "-Djava.library.path=/usr/local/apr/lib"
+
+# Uninstall Java-1.8.0 installed by Ant
+RUN set -e && yum remove -y java-1.8.0-openjdk >&2
+RUN set -e && which java && java -version
 
 ################################################################
 # Retrieve, verify, and install the NGAP/OLFS web application
