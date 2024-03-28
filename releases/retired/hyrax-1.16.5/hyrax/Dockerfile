@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 ###############################################################################################
 # 
 # Dockerfile for single container Hyrax
@@ -24,32 +23,11 @@ ENV BES_VERSION=3.20.10-0
 ENV OLFS_VERSION=1.18.10
 ENV RELEASE_DATE=2022-01-04
 
-# ENV DEPLOYMENT_CONTEXT="ROOT"
-ENV DEFAULT_NGAP_DEPLOYMENT_CONTEXT="ngap"
-
-ARG DEPLOYMENT_CONTEXT
-ENV DEPLOYMENT_CONTEXT ${DEPLOYMENT_CONTEXT:-"ROOT"}
-RUN echo "DEPLOYMENT_CONTEXT: ${DEPLOYMENT_CONTEXT}"
-
-
-RUN export NOW=`date +%s`
-# HYRAX VERSION INFO
-ARG RELEASE_DATE
-ENV RELEASE_DATE ${RELEASE_DATE:-"unknown"}
-RUN echo "RELEASE_DATE: ${RELEASE_DATE}"
-
-ARG AWS_ACCESS_KEY_ID
-ENV AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-"unknown"}
-RUN echo "AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}"
-
-ARG AWS_SECRET_ACCESS_KEY
-ENV AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-"unknown"}
-RUN echo "AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}"
 
 LABEL vendor="OPeNDAP Incorporated"
-LABEL org.opendap.hyrax.version=snapshot
-LABEL org.opendap.hyrax.release-date=RELEASE_DATE
-LABEL org.opendap.hyrax.version.is-production="false"
+LABEL org.opendap.hyrax.version=1.16.5
+LABEL org.opendap.hyrax.release-date=2022-01-04
+LABEL org.opendap.hyrax.version.is-production="true"
 
 MAINTAINER support@opendap.org
 
@@ -79,27 +57,17 @@ ENV DEVELOPER_MODE ${DEVELOPER_MODE:-"false"}
 RUN set -e && \
     if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else echo "DEVELOPER_MODE: DISABLED"; fi
 
-
 # Update and install the needful.
 RUN set -e \
-    && yum -y install \
-        tomcat \
-        unzip  \
-        which \
-        awscli \
-        autoconf \
-        automake \
-        git \
-        bc \
+    && yum -y install tomcat unzip which autoconf automake python3 git bc \
     && yum -y update \
-    && yum clean all 
+    && yum clean all \
+    && python3 -m pip install awscli
 
 # Tomcat environment (Tomcat installed above by via yum)
-#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 ENV CATALINA_HOME /usr/share/tomcat
 ENV PATH $CATALINA_HOME/bin:$PATH
 RUN echo "CATALINA_HOME: $CATALINA_HOME"
-
 
 ################################################################
 # Install the OPeNDAP security public key.
@@ -119,7 +87,8 @@ RUN set -e \
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 ENV LIBDAP_RPM="https://www.opendap.org/pub/binary/hyrax-${HYRAX_VERSION}/centos-7.x/libdap-${LIBDAP_VERSION}.el7.x86_64.rpm"
 ENV BES_RPM="https://www.opendap.org/pub/binary/hyrax-${HYRAX_VERSION}/centos-7.x/bes-${BES_VERSION}.static.el7.x86_64.rpm"
-ENV NGAP_PACKAGE="https://www.opendap.org/pub/olfs/ngap-${HYRAX_VERSION_LABEL}-webapp.tgz"
+ENV OLFS_WAR_URL="https://www.opendap.org/pub/olfs/olfs-${OLFS_VERSION}-webapp.tgz"
+ENV ROBOTS_WAR_URL="https://www.opendap.org/pub/olfs/robots-olfs-${OLFS_VERSION}-webapp.tgz"
 ###############################################################
 
 
@@ -135,7 +104,7 @@ RUN set -e \
     && yum -y install ./libdap.rpm \
     && rm -f libdap.*
 
-# gpg --keyserver certserver.pgp.com --recv-keys
+# gpg --keyserver certserver.pgp.com --recv-keys 
 ###############################################################
 
 
@@ -155,42 +124,47 @@ RUN echo "besdaemon is here: "`which besdaemon`
 ###############################################################
 
 
-
 ################################################################
-# Retrieve, verify, and install the NGAP web application
+# Retrieve, verify, and install the OLFS web application
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 RUN set -e \
-    && echo "Retrieving, verifying, and installing NGAP package: ${NGAP_PACKAGE}" \
-    && curl -sfSL ${NGAP_PACKAGE} > ngap-${HYRAX_VERSION_LABEL}.tgz \
-    && curl -sfSL ${NGAP_PACKAGE}.sig > ngap-${HYRAX_VERSION_LABEL}.tgz.sig \
-    && echo "Verifying tarball..." \
-    && gpg --verify ngap-${HYRAX_VERSION_LABEL}.tgz.sig ngap-${HYRAX_VERSION_LABEL}.tgz \
-    && echo "Unpacking tarball..." \
-    && tar -C /dev/shm -xzf ngap-${HYRAX_VERSION_LABEL}.tgz \
-    && echo "Unpacking warfile..." \
-    && unzip -o /dev/shm/ngap-${HYRAX_VERSION_LABEL}-webapp/${DEFAULT_NGAP_DEPLOYMENT_CONTEXT}.war -d ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/ \
-    && echo "Cleaning up." \
-    && rm -rf /dev/shm/* ngap-${HYRAX_VERSION_LABEL}.tgz*
-#
-#
+    && echo "Retrieving And Installing OLFS-${OLFS_VERSION}" \
+    && curl -sfSL ${OLFS_WAR_URL} > olfs-${OLFS_VERSION}.tgz \
+    && curl -sfSL ${OLFS_WAR_URL}.sig > olfs-${OLFS_VERSION}.tgz.sig \
+    && echo "Verifying OLFS-${OLFS_VERSION} tarball..." \
+    && gpg --verify olfs-${OLFS_VERSION}.tgz.sig olfs-${OLFS_VERSION}.tgz \
+    && echo "Unpacking OLFS-${OLFS_VERSION} tarball..." \
+    && tar -C /dev/shm -xzf olfs-${OLFS_VERSION}.tgz \
+    && echo "Unpacking OLFS-${OLFS_VERSION} warfile..." \
+    && unzip -o /dev/shm/olfs-${OLFS_VERSION}-webapp/opendap.war -d ${CATALINA_HOME}/webapps/opendap/ \
+    && echo "Cleaning up OLFS-${OLFS_VERSION} downloads." \
+    && rm -rf /dev/shm/* olfs-${OLFS_VERSION}.tgz*
+
+# Retrieve, verify, and install the dynamic robots.txt ROOT web application
+RUN set -e \
+    && echo "Retrieving And Installing Dynamic Robots.txt webapp version ${OLFS_VERSION}" \
+    && curl -sfSL ${ROBOTS_WAR_URL} > robots-olfs-${OLFS_VERSION}.tgz \
+    && curl -sfSL ${ROBOTS_WAR_URL}.sig > robots-olfs-${OLFS_VERSION}.tgz.sig \
+    && echo "Verifying Dynamic Robots.txt tarball..." \
+    && gpg --verify robots-olfs-${OLFS_VERSION}.tgz.sig robots-olfs-${OLFS_VERSION}.tgz \
+    && echo "Unpacking Dynamic Robots.txt tarball..." \
+    && tar -C /dev/shm -xzf robots-olfs-${OLFS_VERSION}.tgz \
+    && echo "Unpacking Dynamic Robots.txt warfile..." \
+    && unzip -o /dev/shm/robots-olfs-${OLFS_VERSION}-webapp/ROOT.war -d ${CATALINA_HOME}/webapps/ROOT/ \
+    && echo "Cleaning up Dynamic Robots.txt downloads." \
+    && rm -rf /dev/shm/* robots-olfs-${OLFS_VERSION}.tgz*
+
 # Fix ownership and access permissions
 RUN set -e \
-    && mkdir -p ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/logs \
-    && chown -R tomcat:tomcat ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/logs \
-    && chmod 700 ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/logs
-#
-# Clear these values so they do not persist in the container!
-ENV AWS_ACCESS_KEY_ID=
-ENV AWS_SECRET_ACCESS_KEY=
-RUN echo "unset AWS_ACCESS_KEY_ID"     >> ~/.bash_profile
-RUN echo "unset AWS_SECRET_ACCESS_KEY" >> ~/.bash_profile
-RUN echo "unset AWS_ACCESS_KEY_ID"     >> ~/.bashrc
-RUN echo "unset AWS_SECRET_ACCESS_KEY" >> ~/.bashrc
-################################################################
+    && mkdir -p ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs \
+    && chown -R tomcat:tomcat ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs \
+    && chmod 700 ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs 
+###############################################################
 
 
-################################################################
+###############################################################
 # retrieve and install the ncWMS web application
+#
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 
 # This is ncWMS-2.4.2
@@ -229,7 +203,7 @@ RUN set -e \
         # to the server a viewers.xml which has
         # been templated so that the ncWMS host can be installed 
         # at startup.        
-        mv /tmp/olfs_viewers.xml ${CATALINA_HOME}/webapps/ROOT/WEB-INF/conf/viewers.xml; \
+        mv /tmp/olfs_viewers.xml ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml; \
     else \
         echo "Skipping OLFS/ncWMS confguration installation."; \
     fi
@@ -241,7 +215,7 @@ RUN set -e \
     && mv /tomcat7-server.xml ${CATALINA_HOME}/conf/server.xml \
     && chown -R tomcat:tomcat ${CATALINA_HOME}/conf/server.xml
 
-################################################################
+###############################################################
 
 
 ################################################################
@@ -258,10 +232,8 @@ RUN set -e \
     && git clone -v https://github.com/opendap/hyrax_regression_tests ${TEST_INSTALL_DIR} \
     && cd ${TEST_INSTALL_DIR} \
     && git checkout tags/hyrax-${HYRAX_VERSION_LABEL} \
-    && git status \
     && autoreconf -vif \
     && ./configure
-
 
 # In order to get the executable "testsuite" to build we have to run
 # "make check" But that will fail at build time so the "make check" call
@@ -270,6 +242,15 @@ RUN set -e \
     && cd ${TEST_INSTALL_DIR} \
     && make testsuite > mk.log 2>&1 \
     && echo "SUCCESS: hyrax_regression_tests ready!"
+################################################################
+
+################################################################
+# TEMPORARY
+# Grab the cleanup files script for managing orphaned files
+# from fileout_netcdf
+COPY cleanup_files.sh /
+RUN chmod +x /cleanup_files.sh
+# TEMPORARY
 ################################################################
 
 
