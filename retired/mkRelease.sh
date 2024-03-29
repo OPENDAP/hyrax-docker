@@ -39,7 +39,7 @@ echo "#" >&2
 #export BUILD_VERSION_TAG=${BUILD_VERSION_TAG:-"opendap/${DOCKER_NAME}:${HYRAX_VERSION_NUMBER}"}
 #echo "#     BUILD_VERSION_TAG: ${BUILD_VERSION_TAG}" >&2
 echo "#" >&2
-build_dir=$(pwd)"/hyrax-builds"
+build_dir=$(pwd)"/builds"
 echo "#             build_dir: ${build_dir}" >&2
 
 cd "${build_dir}" || exit

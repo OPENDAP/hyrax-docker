@@ -64,20 +64,20 @@ install:
   - printenv
   - echo $DOCKER_HUB_PSWD | docker login -u $DOCKER_HUB_UID --password-stdin
   # - echo "Retrieving libdap C7 RPM ${LIBDAP_C7_RPM}"
-  # - aws --region=us-east-1 s3 cp ${LIBDAP_C7_RPM_URL} ./hyrax-builds/${LIBDAP_C7_RPM}
+  # - aws --region=us-east-1 s3 cp ${LIBDAP_C7_RPM_URL} ./builds/${LIBDAP_C7_RPM}
   # - echo "Retrieving BES C7 RPM ${BES_C7_RPM}"
-  # - aws --region=us-east-1 s3 cp ${BES_C7_RPM_URL} ./hyrax-builds/${BES_C7_RPM}
+  # - aws --region=us-east-1 s3 cp ${BES_C7_RPM_URL} ./builds/${BES_C7_RPM}
   - echo "Retrieving libdap RH8 RPM ${LIBDAP_RH8_RPM}"
-  - aws --region=us-east-1 s3 cp ${LIBDAP_RH8_RPM_URL} ./hyrax-builds/${LIBDAP_RH8_RPM}
+  - aws --region=us-east-1 s3 cp ${LIBDAP_RH8_RPM_URL} ./builds/${LIBDAP_RH8_RPM}
   - echo "Retrieving BES RH8 RPM ${BES_RH8_RPM}"
-  - aws --region=us-east-1 s3 cp ${BES_RH8_RPM_URL} ./hyrax-builds/${BES_RH8_RPM}
+  - aws --region=us-east-1 s3 cp ${BES_RH8_RPM_URL} ./builds/${BES_RH8_RPM}
   - echo "Retrieving OLFS Distribution file ${OLFS_DISTRO}"
-  - aws --region=us-east-1 s3 cp ${OLFS_DISTRO_URL} ./hyrax-builds/${OLFS_DISTRO}
+  - aws --region=us-east-1 s3 cp ${OLFS_DISTRO_URL} ./builds/${OLFS_DISTRO}
   - echo "Retrieving ROBOTS Distribution file ${ROBOTS_DISTRO}"
-  - aws --region=us-east-1 s3 cp ${ROBOTS_DISTRO_URL} ./hyrax-builds/${ROBOTS_DISTRO}
+  - aws --region=us-east-1 s3 cp ${ROBOTS_DISTRO_URL} ./builds/${ROBOTS_DISTRO}
   - echo "Retrieving NGAP Distribution file ${NGAP_DISTRO}"
-  - aws --region=us-east-1 s3 cp ${NGAP_DISTRO_URL} ./hyrax-builds/${NGAP_DISTRO}
-  - ls -l ./hyrax-builds
+  - aws --region=us-east-1 s3 cp ${NGAP_DISTRO_URL} ./builds/${NGAP_DISTRO}
+  - ls -l ./builds
 
 stages:
   - name: OLFS
@@ -101,7 +101,7 @@ jobs:
     - stage: BUILD_AND_TEST
       name: "Build and Test opendap/hyrax:snapshot (RH8)"
       script:
-        - cd hyrax-builds
+        - cd builds
         - export DOCKER_NAME="hyrax"
         - source ./build-rh8
         - export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}:snapshot"
@@ -137,7 +137,7 @@ jobs:
     - stage: BUILD
       name: "Build the opendap/build_dmrpp:snapshot (RH8)"
       script:
-        - cd hyrax-builds
+        - cd builds
         - export DOCKER_NAME="build_dmrpp"
         - source ./build-rh8
         - export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}:snapshot"
@@ -165,7 +165,7 @@ jobs:
     - stage: BUILD
       name: "Build opendap/besd:snapshot (RH8)"
       script:
-        - cd hyrax-builds
+        - cd builds
         - export DOCKER_NAME="besd"
         - source ./build-rh8
         - export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}:snapshot"
@@ -190,7 +190,7 @@ jobs:
     - stage: BUILD
       name: "Build opendap/hyrax_ncwms:snapshot (RH8)"
       script:
-        - cd hyrax-builds
+        - cd builds
         - export DOCKER_NAME="hyrax"
         - source ./build-rh8
         - export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}_ncwms:snapshot"
@@ -224,7 +224,7 @@ jobs:
     - stage: BUILD
       name: "Build opendap/hyrax:ngap-snapshot (RH8)"
       script:
-        - cd hyrax-builds
+        - cd builds
         - export DOCKER_NAME="ngap"
         - source ./build-rh8
         - export SNAPSHOT_IMAGE_TAG="opendap/hyrax:${DOCKER_NAME}-snapshot"
@@ -257,7 +257,7 @@ jobs:
     - stage: BUILD
       name: "Build opendap/olfs:snapshot"
       script:
-        - cd hyrax-builds
+        - cd builds
         - export DOCKER_NAME="olfs"
         - source ./build-rh8
         - export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}:snapshot"
