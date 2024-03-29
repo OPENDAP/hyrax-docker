@@ -1,6 +1,7 @@
 #!/bin/bash
- HR="############################################################################"
-HR2="# == == == == == == == == == == == == == == == == == == == == == == == == =="
+ HR="##########################################################################"
+HR2="== == == == == == == == == == == == == == == == == == == == == == == == =="
+HR3="- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
 export BUILD_RECIPE_FILE=${1:-"../snapshot.time"}
 export S3_BUILD_BUCKET=${S3_BUILD_BUCKET:-"opendap.travis.build"}
 export DOCKER_NAME=${DOCKER_NAME:-"hyrax"}
@@ -8,6 +9,17 @@ export TOMCAT_MAJOR_VERSION=${TOMCAT_MAJOR_VERSION:-"9"}
 export SLEEP_INTERVAL=${SLEEP_INTERVAL:-60}
 export NO_CACHE=${NO_CACHE:-""}
 
+
+###########################################################################
+function loggy(){
+    if test -n "${log_file}"
+    then
+        echo  "$@"  | awk '{ print "# "$0;}' | tee -a "${log_file}" >&2
+    else
+        echo  "$@" | awk '{ print "# "$0;}'  >&2
+    fi
+}
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 function read_build_recipe() {
     local build_recipe_file="${1}"
@@ -33,29 +45,29 @@ read_build_recipe "${BUILD_RECIPE_FILE}"
 export SNAPSHOT_IMAGE_TAG=${SNAPSHOT_IMAGE_TAG:-"opendap/${DOCKER_NAME}:snapshot"}
 export BUILD_VERSION_TAG=${BUILD_VERSION_TAG:-"opendap/${DOCKER_NAME}:${HYRAX_VERSION}"}
 
-export RELEASE_HOST=${RELEASE_HOST:-"https://www.opendap.org/pub/"}
+export RELEASE_HOST=${RELEASE_HOST:-"https://www.opendap.org"}
 
 
 function show_version(){
-    echo "${HR}" >&2
-    echo "#         RELEASE_DATE: ${RELEASE_DATE}" >&2
-    echo "#        HYRAX_VERSION: ${HYRAX_VERSION}" >&2
-    echo "#         OLFS_VERSION: ${OLFS_VERSION}" >&2
-    echo "#          BES_VERSION: ${BES_VERSION}" >&2
-    echo "#  BUILD_DMRPP_VERSION: ${BUILD_DMRPP_VERSION}" >&2
-    echo "#       LIBDAP_VERSION: ${LIBDAP_VERSION}" >&2
-    echo "#          DOCKER_NAME: ${DOCKER_NAME}" >&2
-    echo "#    BUILD_VERSION_TAG: ${BUILD_VERSION_TAG}" >&2
-    echo "#   SNAPSHOT_IMAGE_TAG: ${SNAPSHOT_IMAGE_TAG}" >&2
-    echo "#      S3_BUILD_BUCKET: ${S3_BUILD_BUCKET}" >&2
-    echo "#       SLEEP_INTERVAL: ${SLEEP_INTERVAL}" >&2
-    echo "#" >&2
-    echo "# TOMCAT_MAJOR_VERSION: ${TOMCAT_MAJOR_VERSION}" >&2
-    echo "#       TOMCAT_VERSION: ${TOMCAT_VERSION}" >&2
-    echo "#" >&2
-    echo "#             NO_CACHE: ${NO_CACHE}" >&2
-    echo "#" >&2
-    echo "#" >&2
+    loggy "${HR}"
+    loggy "        RELEASE_DATE: ${RELEASE_DATE}"
+    loggy "       HYRAX_VERSION: ${HYRAX_VERSION}"
+    loggy "        OLFS_VERSION: ${OLFS_VERSION}"
+    loggy "         BES_VERSION: ${BES_VERSION}"
+    loggy " BUILD_DMRPP_VERSION: ${BUILD_DMRPP_VERSION}"
+    loggy "      LIBDAP_VERSION: ${LIBDAP_VERSION}"
+    loggy "         DOCKER_NAME: ${DOCKER_NAME}"
+    loggy "   BUILD_VERSION_TAG: ${BUILD_VERSION_TAG}"
+    loggy "  SNAPSHOT_IMAGE_TAG: ${SNAPSHOT_IMAGE_TAG}"
+    loggy "     S3_BUILD_BUCKET: ${S3_BUILD_BUCKET}"
+    loggy "      SLEEP_INTERVAL: ${SLEEP_INTERVAL}"
+    loggy ""
+    loggy "TOMCAT_MAJOR_VERSION: ${TOMCAT_MAJOR_VERSION}"
+    loggy "      TOMCAT_VERSION: ${TOMCAT_VERSION}"
+    loggy ""
+    loggy "            NO_CACHE: ${NO_CACHE}"
+    loggy ""
+    loggy ""
 }
 
 ################################################################################
@@ -84,33 +96,33 @@ function get_latest_tomcat_version_number(){
             sort -V | \
             grep "^${tomcat_major_version}" )
 
-        echo "# tomcat_major_version_list: " >&2
-        echo "${tomcat_major_version_list}" | awk '{print "##   "$0;}' >&2
+        loggy "tomcat_major_version_list: "
+        loggy "${tomcat_major_version_list}" | awk '{print "##   "$0;}'
 
         local tomcat_version=""
         if test -n "${ignore_list}" ; then
-            echo "# Using ignore_list: '${ignore_list}'" >&2
+            loggy "Using ignore_list: '${ignore_list}'"
             tomcat_version=$(echo "${tomcat_major_version_list}" | \
             grep -v ${ignore_list} | \
             tail -n 1 )
         else
-            echo "# The ignore_list is empty." >&2
+            loggy "The ignore_list is empty."
             tomcat_version=$(echo "${tomcat_major_version_list}" | \
             tail -n 1 )
         fi
-        echo "# Candidate tomcat_version: ${tomcat_version}" >&2
+        loggy "Candidate tomcat_version: ${tomcat_version}"
 
         local release_endpoint_url="${release_endpoint_base}-${tomcat_major_version}/v${tomcat_version}"
-        echo "# release_endpoint_url=${release_endpoint_url}" >&2
+        loggy "release_endpoint_url=${release_endpoint_url}"
 
         status=$(curl -s -o /dev/null -w "%{response_code}" "${release_endpoint_url}")
         if test $status -eq 404 ; then
-            echo "# Candidate tomcat_version: ${tomcat_version} not found on download site: ${release_endpoint_url} " >&2
+            loggy "Candidate tomcat_version: ${tomcat_version} not found on download site: ${release_endpoint_url} "
             if test -n "${tomcat_version}"; then
                 ignore_list+="${ignore_list}  -e ${tomcat_version} "
             else
-                echo "# ERROR: The tomcat_version is inexplicably empty. Exiting." >&2
-                echo "FAILED_TO_LOCATE_TOMCAT_VERSION"
+                loggy "ERROR: The tomcat_version is inexplicably empty. Exiting."
+                loggy "FAILED_TO_LOCATE_TOMCAT_VERSION"
                 return 1;
             fi
             retry=true
@@ -119,7 +131,7 @@ function get_latest_tomcat_version_number(){
             ignore_list=
         fi
     done
-    echo "#   Using tomcat_version: ${tomcat_version} " >&2
+    loggy "  Using tomcat_version: ${tomcat_version} "
     echo "${tomcat_version}"
 }
 
@@ -133,94 +145,94 @@ function get_latest_tomcat_version_number(){
 #          Example: 9.0.64
 #
 function get_tomcat_distro(){
-    echo "${HR}" >&2
-    echo "# TASK: get_tomcat_distro()" >&2
+    loggy "${HR}"
+    loggy "TASK: get_tomcat_distro()"
 
     # $1 - The directory into which the Tomcat distribution files
     #      will be placed
     local target_dir="${1}"
-    echo "#             target_dir: ${target_dir}" >&2
+    loggy "            target_dir: ${target_dir}"
 
     # $2 - The version number of the Tomcat distribution to retrieve.
     #       Example: 9.0.64
     local tomcat_version="${2}"
-    echo "#         tomcat_version: ${tomcat_version}" >&2
+    loggy "        tomcat_version: ${tomcat_version}"
 
     local tomcat_major_version=""
     tomcat_major_version=$(echo "${tomcat_version}" | awk 'BEGIN{FS="."}{print $1;}')
-    echo "#   tomcat_major_version: ${tomcat_major_version}" >&2
+    loggy "  tomcat_major_version: ${tomcat_major_version}"
 
 
     local silent="-s"
 
     local tomcat_distro="apache-tomcat-${tomcat_version}.tar.gz"
-    echo "#          tomcat_distro: ${tomcat_distro}" >&2
+    loggy "         tomcat_distro: ${tomcat_distro}"
 
     local tomcat_major_url="https://archive.apache.org/dist/tomcat/tomcat-${tomcat_major_version}"
-    echo "#       tomcat_major_url: ${tomcat_major_url}" >&2
+    loggy "      tomcat_major_url: ${tomcat_major_url}"
 
     local tomcat_distro_url="${tomcat_major_url}/v${tomcat_version}/bin/${tomcat_distro}"
-    echo "#      tomcat_distro_url: ${tomcat_distro_url}" >&2
+    loggy "     tomcat_distro_url: ${tomcat_distro_url}"
     local tomcat_distro_file="${target_dir}/${tomcat_distro}"
-    echo "#     tomcat_distro_file: ${tomcat_distro_file}" >&2
+    loggy "    tomcat_distro_file: ${tomcat_distro_file}"
 
     local tomcat_sig_url="${tomcat_distro_url}.asc"
-    echo "#         tomcat_sig_url: ${tomcat_sig_url}" >&2
+    loggy "        tomcat_sig_url: ${tomcat_sig_url}"
     local tomcat_sig_file="${tomcat_distro_file}.asc"
-    echo "#        tomcat_sig_file: ${tomcat_sig_file}" >&2
+    loggy "       tomcat_sig_file: ${tomcat_sig_file}"
 
     local tomcat_keys_url="${tomcat_major_url}/KEYS"
-    echo "#        tomcat_keys_url: ${tomcat_keys_url}" >&2
+    loggy "       tomcat_keys_url: ${tomcat_keys_url}"
     local tomcat_keys_file="${target_dir}/apache_tomcat_keys"
-    echo "#       tomcat_keys_file: ${tomcat_keys_file}" >&2
+    loggy "      tomcat_keys_file: ${tomcat_keys_file}"
 
-    echo "#" >&2
-    echo "#        cURL retrieving: ${tomcat_distro_url}" >&2
+    loggy ""
+    loggy "       cURL retrieving: ${tomcat_distro_url}"
     curl ${silent} -o "${tomcat_distro_file}" "${tomcat_distro_url}"
     if test $? -ne 0; then
         echo "ERROR! Failed to retrieve Tomcat distribution from ${tomcat_distro_url}" >&2
         return 2
     fi
 
-    echo "#" >&2
-    echo "#        cURL retrieving: ${tomcat_sig_url}" >&2
+    loggy ""
+    loggy "       cURL retrieving: ${tomcat_sig_url}"
     curl ${silent} -o "${tomcat_sig_file}" "${tomcat_sig_url}"
     if test $? -ne 0; then
         echo "ERROR! Failed to retrieve Tomcat distribution signature from ${tomcat_sig_url}" >&2
         return 2
     fi
 
-    echo "#" >&2
-    echo "#        cURL retrieving: ${tomcat_keys_url}" >&2
+    loggy ""
+    loggy "       cURL retrieving: ${tomcat_keys_url}"
     curl ${silent} -o "${tomcat_keys_file}" "${tomcat_keys_url}"
     if test $? -ne 0; then
         echo "ERROR! Failed to retrieve Tomcat public keys from ${tomcat_keys_url}" >&2
         return 2
     fi
 
-    echo "#" >&2
-    echo "# Importing Tomcat public keys:" >&2
-    echo "#        Local keys file: ${tomcat_keys_file}" >&2
-    echo "#                 Source: ${tomcat_keys_url}" >&2
-    gpg --import "${tomcat_keys_file}" 2>&1 | awk '{print "#    ", $0;}' >&2
+    loggy ""
+    loggy "Importing Tomcat public keys:"
+    loggy "       Local keys file: ${tomcat_keys_file}"
+    loggy "                Source: ${tomcat_keys_url}"
+    gpg --import "${tomcat_keys_file}" 2>&1 | awk '{print "#    ", $0;}'
     if test $? -ne 0 ; then
         echo "ERROR! Failed to import Tomcat public keys!" >&2
         return 2
     fi
 
-    echo "#" >&2
-    echo "# Verifying Tomcat distribution:" >&2
-    echo "#     Tomcat public keys: ${tomcat_keys_file}" >&2
-    echo "#      distribution file: ${tomcat_distro_file}" >&2
-    echo "#              signature: ${tomcat_sig_file}" >&2
-    echo "#" >&2
+    loggy ""
+    loggy "Verifying Tomcat distribution:"
+    loggy "    Tomcat public keys: ${tomcat_keys_file}"
+    loggy "     distribution file: ${tomcat_distro_file}"
+    loggy "             signature: ${tomcat_sig_file}"
+    loggy ""
 
-    gpg --verify "${tomcat_sig_file}" "${tomcat_distro_file}" 2>&1 | awk '{print "#    ", $0;}' >&2
+    gpg --verify "${tomcat_sig_file}" "${tomcat_distro_file}" 2>&1 | awk '{print "#    ", $0;}'
     if test $? -ne 0 ; then
         echo "ERROR! Failed to verify Tomcat distribution!" >&2
         return 2
     fi
-    echo "#" >&2
+    loggy ""
     return 0
 }
 
@@ -242,10 +254,10 @@ function get_tomcat_distro(){
 #
 #
 function check_aws(){
-    echo "${HR}" >&2
-    echo "#" >&2
-    echo "# check_aws()" >&2
-    echo "#" >&2
+    loggy "${HR}"
+    loggy ""
+    loggy "check_aws()"
+    loggy ""
 
     local aws_config_list=
     aws_config_list=$(aws configure list | sed -e "s/not set/not_set/g")
@@ -262,20 +274,20 @@ function check_aws(){
     status=0;
     if test "${access_key}" = "${ns}"; then
       status=1
-      echo "# The AWS_ACCESS_KEY_ID has not been set." >&2
+      loggy "The AWS_ACCESS_KEY_ID has not been set."
     fi
     if test "${secret_key}" = "${ns}"; then
       status=1
-      echo "# The AWS_SECRET_ACCESS_KEY has not been set." >&2
+      loggy "The AWS_SECRET_ACCESS_KEY has not been set."
     fi
     if test "${region}" = "${ns}"; then
       status=1
-      echo "# The AWS_DEFAULT_REGION has not been set." >&2
+      loggy "The AWS_DEFAULT_REGION has not been set."
     fi
 
     if test -n "${partial}"; then
         status=1
-        echo "# ${partial}" >&2
+        loggy "${partial}"
     fi
     return $status
 }
@@ -288,9 +300,9 @@ function s3_pull(){
     local bucket_name="${1}"
     local object_name="${2}"
     local target_dir="${3}"
-    echo "# S3 - Retrieving ${object_name} from ${bucket_name}" >&2
-    python3 -m awscli s3 cp --quiet "s3://${bucket_name}/${object_name}" "${target_dir}/${object_name}" >&2
-    echo "#" >&2
+    loggy "S3 - Retrieving ${object_name} from ${bucket_name}"
+    python3 -m awscli s3 cp --quiet "s3://${bucket_name}/${object_name}" "${target_dir}/${object_name}"
+    loggy ""
 }
 
 ################################################################################
@@ -306,27 +318,27 @@ function s3_pull(){
 #         debuginfo rpm files for libdap and bes will be retrieved as well.
 #
 function s3_get_besd_distro() {
-    echo "${HR2}" >&2
-    echo "# TASK: s3_get_besd_distro()" >&2
+    loggy "${HR2}"
+    loggy "TASK: s3_get_besd_distro()"
     local s3_bucket="${1}"
-    echo "#          s3_bucket: ${s3_bucket}" >&2
+    loggy "         s3_bucket: ${s3_bucket}"
     local target_dir="${2}"
-    echo "#         target_dir: ${target_dir}" >&2
+    loggy "        target_dir: ${target_dir}"
     local larch="${3}"
-    echo "# linux_architecture: ${larch}" >&2
+    loggy "linux_architecture: ${larch}"
     local libdap_version="${4}"
-    echo "#     libdap_version: ${libdap_version}" >&2
+    loggy "    libdap_version: ${libdap_version}"
     local bes_version="${5}"
-    echo "#        bes_version: ${bes_version}" >&2
+    loggy "       bes_version: ${bes_version}"
     local debug="${6}"
-    echo "#              debug: ${debug}" >&2
+    loggy "             debug: ${debug}"
 
     set -e
 
-    echo "# Cleaning up..." >&2
+    loggy "Cleaning up..."
     rm -fv "${target_dir}/*.rpm"
 
-    echo "#" >&2
+    loggy ""
     s3_pull "${s3_bucket}" \
             "libdap-${libdap_version}.${larch}.x86_64.rpm" \
             "${target_dir}"
@@ -354,7 +366,7 @@ function s3_get_besd_distro() {
     fi
 
     set +e
-    echo "#" >&2
+    loggy ""
     return 0
 }
 
@@ -366,14 +378,14 @@ function curl_pull(){
     local target_dir="${3}"
 
     local target_url="${release_url}/${target_file}"
-    echo "#" >&2
-    echo "# curl_pull(), retrieving:" >&2
-    echo "#   target_file: ${target_file}" >&2
-    echo "#   release_url: ${release_url}" >&2
-    echo "#    target_url: ${target_url}" >&2
-    curl -s -o "${target_dir}/${target_file}" "${target_url}"
-    echo "# "$(ls -l "${target_dir}/${target_file}") >&2
-    echo "#" >&2
+    loggy "$HR3"
+    loggy "curl_pull(), retrieving:"
+    loggy "  target_file: ${target_file}"
+    loggy "  release_url: ${release_url}"
+    loggy "   target_url: ${target_url}"
+    curl -s -L -o "${target_dir}/${target_file}" "${target_url}"
+    loggy ""$(ls -l "${target_dir}/${target_file}")
+    loggy ""
 }
 
 ################################################################################
@@ -388,42 +400,37 @@ function curl_pull(){
 #         debuginfo rpm files for libdap and bes will be retrieved as well.
 #
 function woo_get_besd_distro() {
-    echo "${HR}" >&2
-    echo "# TASK: woo_get_besd_distro()" >&2
+    loggy "${HR}"
+    loggy "TASK: woo_get_besd_distro()"
     local target_dir="${1}"
-    echo "#         target_dir: ${target_dir}" >&2
+    loggy "        target_dir: ${target_dir}"
     local larch="${2}"
-    echo "# linux_architecture: ${larch}" >&2
+    loggy "linux_architecture: ${larch}"
     local libdap_version="${3}"
-    echo "#     libdap_version: ${libdap_version}" >&2
+    loggy "    libdap_version: ${libdap_version}"
     local bes_version="${4}"
-    echo "#        bes_version: ${bes_version}" >&2
+    loggy "       bes_version: ${bes_version}"
     local hyrax_version="${5}"
-    echo "#      hyrax_version: ${hyrax_version}" >&2
+    loggy "     hyrax_version: ${hyrax_version}"
     local debug="${6}"
-    echo "#              debug: ${debug}" >&2
+    loggy "             debug: ${debug}"
 
     set -e
-
-    echo "${HR}"
-    echo "# woo_get_besd_distro()"
-    echo "#"
-    echo "# Cleaning up..." >&2
+    loggy ""
+    loggy "Cleaning up..."
     rm -fv "${target_dir}/*.rpm"
-    echo "#" >&2
+    loggy ""
 
     local release_dir="pub/binary"
     release_dir="${release_dir}/hyrax-"$(echo "${hyrax_version}" | awk '{split($0,a,"."); print a[1]"."a[2];}')
-    if test "${larch}" = "el7"; then
-        release_dir="${release_dir}/centos-7.x"
-    elif test "${larch}" = "el8"; then
-        release_dir="${release_dir}/rhel-8"
-    fi
-    echo "release_dir: ${release_dir}" >&2
+    ######### FIXME #########
+    # FIXME - rocky-8 or rhel8? wtf
+    release_dir="${release_dir}/rocky-8"
+    ######## FIXME #########
+    loggy "release_dir: ${release_dir}"
 
     release_url="${RELEASE_HOST}/${release_dir}"
-    echo "release_url: ${release_dir}" >&2
-
+    loggy "release_url: ${release_url}"
 
     target_file="libdap-${libdap_version}.${larch}.x86_64.rpm"
     curl_pull "${release_url}" "${target_file}" "${target_dir}"
@@ -445,7 +452,7 @@ function woo_get_besd_distro() {
     fi
 
     set +e
-    echo "#" >&2
+    loggy ""
     return 0
 }
 
@@ -459,20 +466,20 @@ function woo_get_besd_distro() {
 #    $3 - The olfs version number ##.##.##-##
 #
 function s3_get_olfs_distro() {
-    echo "${HR}" >&2
-    echo "# TASK: s3_get_olfs_distro()" >&2
+    loggy "${HR}"
+    loggy "TASK: s3_get_olfs_distro()"
     local s3_bucket="${1}"
-    echo "#          s3_bucket: ${s3_bucket}" >&2
+    loggy "         s3_bucket: ${s3_bucket}"
     local target_dir="${2}"
-    echo "#         target_dir: ${target_dir}" >&2
+    loggy "        target_dir: ${target_dir}"
     local olfs_version="${3}"
-    echo "#       olfs_version: ${olfs_version}" >&2
+    loggy "      olfs_version: ${olfs_version}"
 
     set -e
-    echo "# Cleaning up..." >&2
+    loggy "Cleaning up..."
     rm -fv "${target_dir}/olfs*.tgz"
 
-    echo "#" >&2
+    loggy ""
     s3_pull "${s3_bucket}" \
             "olfs-${olfs_version}-webapp.tgz" \
             "${target_dir}"
@@ -481,7 +488,7 @@ function s3_get_olfs_distro() {
             "robots-olfs-${olfs_version}-webapp.tgz" \
             "${target_dir}"
     set +e
-    echo "#" >&2
+    loggy ""
     return 0
 }
 
@@ -494,26 +501,26 @@ function s3_get_olfs_distro() {
 #    $3 - The olfs version number ##.##.##-##
 #
 function s3_get_build_dmrpp_distro() {
-    echo "${HR}" >&2
-    echo "# TASK: s3_get_build_dmrpp_distro()" >&2
+    loggy "${HR}"
+    loggy "TASK: s3_get_build_dmrpp_distro()"
     local s3_bucket="${1}"
-    echo "#           s3_bucket: ${s3_bucket}" >&2
+    loggy "          s3_bucket: ${s3_bucket}"
     local target_dir="${2}"
-    echo "#          target_dir: ${target_dir}" >&2
+    loggy "         target_dir: ${target_dir}"
     local build_dmrpp_version="${3}"
-    echo "# build_dmrpp_version: ${build_dmrpp_version}" >&2
+    loggy "build_dmrpp_version: ${build_dmrpp_version}"
 
     set -e
-    echo "# Cleaning up..." >&2
+    loggy "Cleaning up..."
     rm -fv "${target_dir}/build_dmrpp*.tgz"
 
-    echo "#" >&2
+    loggy ""
     s3_pull "${s3_bucket}" \
             "build_dmrpp-${build_dmrpp_version}-webapp.tgz" \
             "${target_dir}"
 
     set +e
-    echo "#" >&2
+    loggy ""
     return 0
 }
 
@@ -527,20 +534,20 @@ function s3_get_build_dmrpp_distro() {
 #    $3 - The olfs version number ##.##.##-##
 #
 function woo_get_olfs_distro() {
-    echo "${HR}" >&2
-    echo "# TASK: woo_get_olfs_distro()" >&2
-    local target_dir="${2}"
-    echo "#         target_dir: ${target_dir}" >&2
-    local olfs_version="${3}"
-    echo "#       olfs_version: ${olfs_version}" >&2
+    loggy "${HR}"
+    loggy "TASK: woo_get_olfs_distro()"
+    local target_dir="${1}"
+    loggy "        target_dir: ${target_dir}"
+    local olfs_version="${2}"
+    loggy "      olfs_version: ${olfs_version}"
 
     release_url="${RELEASE_HOST}/pub/olfs"
-    echo "release_url: ${release_dir}" >&2
+    loggy "release_url: ${release_dir}"
 
     set -e
-    echo "# Cleaning up..." >&2
-    rm -fv "${target_dir}/olfs*.tgz" >&2
-    rm -fv "${target_dir}/robots-olfs*.tgz" >&2
+    loggy "Cleaning up..."
+    rm -fv "${target_dir}/olfs*.tgz"
+    rm -fv "${target_dir}/robots-olfs*.tgz"
 
     target_file="olfs-${olfs_version}-webapp.tgz"
     curl_pull "${release_url}" "${target_file}" "${target_dir}"
@@ -549,7 +556,7 @@ function woo_get_olfs_distro() {
     curl_pull "${release_url}" "${target_file}" "${target_dir}"
 
     set +e
-    echo "#" >&2
+    loggy ""
     return 0
 }
 
@@ -563,33 +570,33 @@ function woo_get_olfs_distro() {
 #    $3 - The olfs version number ##.##.##-##
 #
 function get_ngap_olfs_distro() {
-    echo "${HR}" >&2
-    echo "# TASK: get_ngap_olfs_distro()" >&2
+    loggy "${HR}"
+    loggy "TASK: get_ngap_olfs_distro()"
     local s3_bucket="${1}"
-    echo "#          s3_bucket: ${s3_bucket}" >&2
+    loggy "         s3_bucket: ${s3_bucket}"
     local target_dir="${2}"
-    echo "#         target_dir: ${target_dir}" >&2
+    loggy "        target_dir: ${target_dir}"
     local olfs_version="${3}"
-    echo "#       olfs_version: ${olfs_version}" >&2
+    loggy "      olfs_version: ${olfs_version}"
 
     set -e
-    echo "# Cleaning up..." >&2
+    loggy "Cleaning up..."
     rm -fv "${target_dir}/ngap*.tgz"
 
-    echo "#" >&2
+    loggy ""
     s3_pull "${s3_bucket}" \
             "ngap-${olfs_version}-webapp.tgz" \
             "${target_dir}"
 
     set +e
-    echo "#" >&2
+    loggy ""
     return 0
 }
 
 
 function build_ngap() {
-    echo "${HR}" >&2
-    echo "# TASK: build_ngap_rh8()" >&2
+    loggy "${HR}"
+    loggy "TASK: build_ngap_rh8()"
 #        --no-cache \
         docker build ${NO_CACHE} \
         --platform linux/amd64 \
@@ -602,8 +609,8 @@ function build_ngap() {
         --tag "${BUILD_VERSION_TAG}" \
         --tag "${SNAPSHOT_IMAGE_TAG}" \
         ${DOCKER_NAME}
-    echo "#" >&2
-    echo "#" >&2
+    loggy ""
+    loggy ""
 }
 
 
@@ -611,10 +618,10 @@ function build_ngap() {
 function build_hyrax_docker() {
     local docker_name="${1}"
 
-    show_version >&2
+    show_version
 
-    echo "${HR}" >&2
-    echo "# TASK: build_hyrax_docker()" >&2
+    loggy "${HR}"
+    loggy "TASK: build_hyrax_docker()"
 #        --no-cache \
         docker build ${NO_CACHE} \
         --platform linux/amd64 \
@@ -627,8 +634,8 @@ function build_hyrax_docker() {
         --tag "${BUILD_VERSION_TAG}" \
         --tag "${SNAPSHOT_IMAGE_TAG}" \
         ${docker_name}
-    echo "#" >&2
-    echo "#" >&2
+    loggy ""
+    loggy ""
 }
 
 
@@ -648,10 +655,10 @@ function build_hyrax_docker() {
 function build_dmrpp_service_docker() {
     local docker_name="${1}"
     export DEPLOYMENT_CONTEXT="${2:-"build_dmrpp"}"
-    show_version >&2
+    show_version
 
-    echo "${HR}" >&2
-    echo "# TASK: build_dmrpp_service_docker()" >&2
+    loggy "${HR}"
+    loggy "TASK: build_dmrpp_service_docker()"
         docker build ${NO_CACHE} \
         --platform linux/amd64 \
         --build-arg TOMCAT_VERSION \
@@ -664,22 +671,22 @@ function build_dmrpp_service_docker() {
         --tag "${BUILD_VERSION_TAG}" \
         --tag "${SNAPSHOT_IMAGE_TAG}" \
         ${docker_name}
-    echo "#" >&2
-    echo "#" >&2
+    loggy ""
+    loggy ""
 }
 
 
 
 function build_hyrax_ncwms_docker() {
-    echo "#################################################################" >&2
-    echo "# build_hyrax_ncwms_docker()" >&2
-    echo "#" >&2
+    loggy "$HR"
+    loggy "build_hyrax_ncwms_docker()"
+    loggy ""
     export DOCKER_NAME="hyrax"
     source ./build-rh8
     export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}_ncwms:rh8-snapshot"
     export BUILD_VERSION_TAG="opendap/${DOCKER_NAME}_ncwms:rh8-${HYRAX_VERSION}"
     export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
-    show_version  >&2
+    show_version 
     get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_VERSION}"
     s3_get_besd_distro \
         "${S3_BUILD_BUCKET}" \
@@ -720,12 +727,12 @@ function get_platform(){
 function start_hyrax(){
     local image_tag="${1}"
 
-    echo "${HR}" >&2
-    echo "# TASK: start_hyrax()" >&2
-    echo "#   Starting docker image: ${image_tag}" >&2
+    loggy "${HR}"
+    loggy "TASK: start_hyrax()"
+    loggy "  Starting docker image: ${image_tag}"
     local platform=""
     platform=$(get_platform)
-    echo "#                platform: ${platform}" >&2
+    loggy "               platform: ${platform}"
 
     docker run \
         -d \
@@ -736,18 +743,18 @@ function start_hyrax(){
         --env SLEEP_INTERVAL \
         "${image_tag}"
 
-    echo "#" >&2
+    loggy ""
 }
 
 function debug_hyrax(){
     local image_tag="${1}"
 
-    echo "${HR}" >&2
-    echo "# TASK: debug_hyrax()" >&2
-    echo "#   Starting docker image: ${image_tag}" >&2
+    loggy "${HR}"
+    loggy "TASK: debug_hyrax()"
+    loggy "  Starting docker image: ${image_tag}"
     local platform=""
     platform=$(get_platform)
-    echo "#                platform: ${platform}" >&2
+    loggy "               platform: ${platform}"
 
     # docker run -d -h hyrax -p 8080:8080 --name=hyrax "${IMAGE_TAG}"
     docker run \
@@ -762,83 +769,83 @@ function debug_hyrax(){
 function cleanup_build_files(){
     local docker_name="${1}"
 
-    echo "${HR}" >&2
-    echo "# TASK: cleanup_build_files()" >&2
-    echo "#     Cleaning ${docker_name}" >&2
+    loggy "${HR}"
+    loggy "TASK: cleanup_build_files()"
+    loggy "    Cleaning ${docker_name}"
     local build_files=""
     build_files="${build_files} ${docker_name}/*.rpm"
     build_files="${build_files} ${docker_name}/olfs*.tgz"
     build_files="${build_files} ${docker_name}/ngap*.tgz"
     build_files="${build_files} ${docker_name}/robots*.tgz"
     build_files="${build_files} ${DOCKER_NAME}/apache*"
-    # ls -Gl ${build_files} >&2
-    rm -fv ${build_files} >&2
-    echo "#" >&2
-    echo "# DONE: cleanup_build_files()" >&2
-    echo "#" >&2
+    # ls -Gl ${build_files}
+    rm -fv ${build_files}
+    loggy ""
+    loggy "DONE: cleanup_build_files()"
+    loggy ""
 }
 
 function build_hyrax() {
     local debug="${1}"
 
     local log_file="build_hyrax.log"
-    show_version 2>&1 | tee "${log_file}" >&2
+    show_version 2>&1 | tee "${log_file}"
 
     export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
-    show_version >&2
+    show_version
 
     get_tomcat_distro \
         "${DOCKER_NAME}" \
-        "${TOMCAT_VERSION}" 2>&1 | tee -a "${log_file}" >&2
+        "${TOMCAT_VERSION}" 2>&1 | tee -a "${log_file}"
 
     s3_get_besd_distro \
         "${S3_BUILD_BUCKET}" \
         "${DOCKER_NAME}" \
         "el8" \
         "${LIBDAP_VERSION}" \
-        "${BES_VERSION}" $debug 2>&1 | tee -a "${log_file}" >&2
+        "${BES_VERSION}" $debug 2>&1 | tee -a "${log_file}"
 
     s3_get_olfs_distro \
         "${S3_BUILD_BUCKET}" \
         "${DOCKER_NAME}" \
-        "${OLFS_VERSION}" 2>&1 | tee -a "${log_file}" >&2
+        "${OLFS_VERSION}" 2>&1 | tee -a "${log_file}"
 
     get_ngap_olfs_distro \
         "${S3_BUILD_BUCKET}" \
         "${DOCKER_NAME}" \
-        "${OLFS_VERSION}" 2>&1 | tee -a "${log_file}" >&2
+        "${OLFS_VERSION}" 2>&1 | tee -a "${log_file}"
 
-    build_hyrax_docker "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}" >&2
-    cleanup_build_files "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}" >&2
+    build_hyrax_docker "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}"
+    cleanup_build_files "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}"
 }
 
 function build_dmrpp_service() {
     local debug="${1}"
 
     local log_file="build_dmrpp_service.log"
-    show_version 2>&1 | tee "${log_file}" >&2
+    show_version 2>&1 | tee "${log_file}"
 
     export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
-    show_version >&2
+    show_version
 
     get_tomcat_distro \
         "${DOCKER_NAME}" \
-        "${TOMCAT_VERSION}" 2>&1 | tee -a "${log_file}" >&2
+        "${TOMCAT_VERSION}" 2>&1 | tee -a "${log_file}"
 
     s3_get_besd_distro \
         "${S3_BUILD_BUCKET}" \
         "${DOCKER_NAME}" \
         "el8" \
         "${LIBDAP_VERSION}" \
-        "${BES_VERSION}" $debug 2>&1 | tee -a "${log_file}" >&2
+        "${BES_VERSION}" $debug 2>&1 | tee -a "${log_file}"
 
     s3_get_build_dmrpp_distro \
         "${S3_BUILD_BUCKET}" \
         "${DOCKER_NAME}" \
-        "${BUILD_DMRPP_VERSION}" 2>&1 | tee -a "${log_file}" >&2
+        "${BUILD_DMRPP_VERSION}" 2>&1 | tee -a "${log_file}"
 
-    build_dmrpp_service_docker "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}" >&2
-    cleanup_build_files "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}" >&2
+    build_dmrpp_service_docker "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}"
+    cleanup_build_files "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}"
 }
 
 
@@ -848,29 +855,29 @@ function build_ngap() {
     local log_file="build_ngap.log"
 
     export DOCKER_NAME="ngap"
-    show_version 2>&1 | tee "${log_file}" >&2
+    show_version 2>&1 | tee "${log_file}"
 
 
     local tomcat_version="unset"
     tomcat_version=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
     get_tomcat_distro \
         "${DOCKER_NAME}" \
-        "${tomcat_version}" 2>&1 | tee -a "${log_file}" >&2
+        "${tomcat_version}" 2>&1 | tee -a "${log_file}"
 
     s3_get_besd_distro \
         "${S3_BUILD_BUCKET}" \
         "${DOCKER_NAME}" \
         "el8" \
         "${LIBDAP_VERSION}" \
-        "${BES_VERSION}" 2>&1 | tee -a "${log_file}" >&2
+        "${BES_VERSION}" 2>&1 | tee -a "${log_file}"
 
     get_ngap_olfs_distro \
         "${S3_BUILD_BUCKET}" \
         "${DOCKER_NAME}" \
-        "${OLFS_VERSION}" 2>&1 | tee -a "${log_file}" >&2
+        "${OLFS_VERSION}" 2>&1 | tee -a "${log_file}"
 
-    build_hyrax_docker "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}" >&2
-    cleanup_build_files "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}" >&2
+    build_hyrax_docker "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}"
+    cleanup_build_files "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}"
 }
 
 
@@ -879,8 +886,8 @@ function build_ngap() {
 
 
 function build_olfs_docker() {
-    echo "${HR}" >&2
-    echo "# TASK: build_olfs_docker()" >&2
+    loggy "${HR}"
+    loggy "TASK: build_olfs_docker()"
 #        --no-cache \
         docker build ${NO_CACHE} \
         --platform linux/amd64 \
@@ -891,35 +898,35 @@ function build_olfs_docker() {
         --tag "${BUILD_VERSION_TAG}" \
         --tag "${SNAPSHOT_IMAGE_TAG}" \
         ${DOCKER_NAME}
-    echo "#" >&2
-    echo "#" >&2
+    loggy ""
+    loggy ""
 }
 
 function build_olfs() {
     local log_file="build_olfs.log"
 
     export DOCKER_NAME="olfs"
-    show_version 2>&1 | tee "${log_file}" >&2
+    show_version 2>&1 | tee "${log_file}"
 
     local tomcat_version="unset"
     tomcat_version=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
     get_tomcat_distro \
         "${DOCKER_NAME}" \
-        "${tomcat_version}" 2>&1 | tee -a "${log_file}" >&2
+        "${tomcat_version}" 2>&1 | tee -a "${log_file}"
 
     s3_get_olfs_distro \
         "${S3_BUILD_BUCKET}" \
         "${DOCKER_NAME}" \
-        "${OLFS_VERSION}" 2>&1 | tee -a "${log_file}" >&2
+        "${OLFS_VERSION}" 2>&1 | tee -a "${log_file}"
 
-    build_olfs_docker 2>&1 | tee -a "${log_file}" >&2
-#    cleanup_build_files "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}" >&2
+    build_olfs_docker 2>&1 | tee -a "${log_file}"
+#    cleanup_build_files "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}"
 }
 
 
 function build_besd_docker() {
-    echo "${HR}" >&2
-    echo "# TASK: build_besd_docker()" >&2
+    loggy "${HR}"
+    loggy "TASK: build_besd_docker()"
 #        --no-cache \
         docker build ${NO_CACHE} \
         --platform linux/amd64 \
@@ -929,52 +936,52 @@ function build_besd_docker() {
         --tag "${BUILD_VERSION_TAG}" \
         --tag "${SNAPSHOT_IMAGE_TAG}" \
         ${DOCKER_NAME}
-    echo "#" >&2
-    echo "#" >&2
+    loggy ""
+    loggy ""
 }
 
 function build_besd() {
     local log_file="build_besd.log"
 
     export DOCKER_NAME="besd"
-    show_version 2>&1 | tee "${log_file}" >&2
+    show_version 2>&1 | tee "${log_file}"
 
     s3_get_besd_distro \
         "${S3_BUILD_BUCKET}" \
         "${DOCKER_NAME}" \
         "el8" \
         "${LIBDAP_VERSION}" \
-        "${BES_VERSION}" 2>&1 | tee -a "${log_file}" >&2
+        "${BES_VERSION}" 2>&1 | tee -a "${log_file}"
 
-    build_besd_docker 2>&1 | tee -a "${log_file}" >&2
-#    cleanup_build_files "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}" >&2
+    build_besd_docker 2>&1 | tee -a "${log_file}"
+#    cleanup_build_files "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}"
 }
 
 
 function pull_tag_and_push_image(){
     set -e
-    echo "${HR2}"
-    echo "# "
-    echo "# pull_tag_push_image()"
-    echo "# "
+    loggy "${HR2}"
+    loggy ""
+    loggy "pull_tag_push_image()"
+    loggy ""
     local target_image_tag="${1}"
-    echo "#    target_image_tag: ${target_image_tag}"
+    loggy "   target_image_tag: ${target_image_tag}"
     local new_tag="${2}"
-    echo "#             new_tag: ${new_tag}"
+    loggy "            new_tag: ${new_tag}"
 
-    echo "# "
-    echo "# PULLING: ${target_image_tag}"
-    echo "# "
+    loggy ""
+    loggy "PULLING: ${target_image_tag}"
+    loggy ""
     docker pull ${target_image_tag}
-    echo "# "
-    echo "# TAGGING AS: ${new_tag}"
-    echo "# "
+    loggy ""
+    loggy "TAGGING AS: ${new_tag}"
+    loggy ""
     set -x
     docker tag  ${target_image_tag} ${new_tag}
     set +x
-    echo "# "
-    echo "# PUSHING: ${new_tag}"
-    echo "# "
+    loggy ""
+    loggy "PUSHING: ${new_tag}"
+    loggy ""
     set -x
     docker push ${new_tag}
     set +x
@@ -1018,31 +1025,31 @@ function pull_tag_and_push_image(){
 #
 function mk_easy_docker_release(){
     local build_recipe_file="${1}"
-    echo "${HR}"
-    echo "# "
-    echo "# mk_easy_docker_release() - BEGIN"
-    echo "# "
+    loggy "${HR}"
+    loggy ""
+    loggy "mk_easy_docker_release() - BEGIN"
+    loggy ""
     read_build_recipe "${build_recipe_file}"
 
-    echo "#           RELEASE_DATE: ${RELEASE_DATE}"
-    echo "#          HYRAX_VERSION: ${HYRAX_VERSION}"
+    loggy "          RELEASE_DATE: ${RELEASE_DATE}"
+    loggy "         HYRAX_VERSION: ${HYRAX_VERSION}"
     local hyrax_major_version=
     hyrax_major_version=$(echo "${HYRAX_VERSION}" | awk '{split($0,a,"."); print a[1]"."a[2];}')
-    echo "#    hyrax_major_version: ${hyrax_major_version}"
+    loggy "   hyrax_major_version: ${hyrax_major_version}"
     local hyrax_release_version=
     hyrax_release_version=$(echo "${HYRAX_VERSION}" | awk '{split($0,a,"-"); print a[1];}')
-    echo "#  hyrax_release_version: ${hyrax_release_version}"
+    loggy " hyrax_release_version: ${hyrax_release_version}"
 
-    echo "#           OLFS_VERSION: ${OLFS_VERSION}"
+    loggy "          OLFS_VERSION: ${OLFS_VERSION}"
     local olfs_release_version=
     olfs_release_version=$(echo "${OLFS_VERSION}" | awk '{split($0,a,"-"); print a[1];}')
-    echo "#   olfs_release_version: ${olfs_release_version}"
+    loggy "  olfs_release_version: ${olfs_release_version}"
 
     local bes_version="${4}"
-    echo "#            BES_VERSION: ${BES_VERSION}"
+    loggy "           BES_VERSION: ${BES_VERSION}"
     local bes_release_version=
     bes_release_version=$(echo "${BES_VERSION}" | awk '{split($0,a,"-"); print a[1];}')
-    echo "#    bes_release_version: ${bes_release_version}"
+    loggy "   bes_release_version: ${bes_release_version}"
 
     pull_tag_and_push_image "opendap/hyrax:${HYRAX_VERSION}" "opendap/hyrax:${hyrax_release_version}"
     pull_tag_and_push_image "opendap/hyrax:${HYRAX_VERSION}" "opendap/hyrax:latest"
@@ -1056,9 +1063,9 @@ function mk_easy_docker_release(){
     pull_tag_and_push_image "opendap/olfs:${OLFS_VERSION}" "opendap/olfs:${olfs_release_version}"
     pull_tag_and_push_image "opendap/olfs:${OLFS_VERSION}" "opendap/olfs:latest"
 
-    echo "#"
-    echo "# mk_easy_docker_release() - END"
-    echo "${HR}"
+    loggy ""
+    loggy "mk_easy_docker_release() - END"
+    loggy "${HR}"
 }
 
 # make_hyrax_release "${RELEASE_DATE}" "${HYRAX_VERSION}" "${OLFS_VERSION}" "${BES_VERSION}" "${LIBDAP_VERSION}"
@@ -1067,7 +1074,7 @@ function mk_easy_docker_release(){
 function travis_hyrax() {
     check_aws
     if test $? -ne 0; then
-        echo "# There is a problem with the AWS configuration. Fix it and try again"
+        loggy "There is a problem with the AWS configuration. Fix it and try again"
         return $status
     fi
 

@@ -26,15 +26,15 @@ function dhalt() {
 # - - - - - - - - - - - - - - - - - - - -
 # Remove all containers
 #
-function drmc(){
-    docker rm $(docker ps -aq);
+function drmac(){
+    docker rm -f $(docker ps -aq);
 }
 
 # - - - - - - - - - - - - - - - - - - - -
 # Remove all images
 #
-function drmi(){
-    docker rmi $(docker images -q);
+function drmai(){
+    docker rmi -f $(docker images -q);
 }
 
 # - - - - - - - - - - - - - - - - - - - -
