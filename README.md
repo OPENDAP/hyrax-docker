@@ -1,8 +1,8 @@
 # Hyrax docker
 
-## Current Version: <font style="font-size: 300%;">**Hyrax-1.16.8**</font>
+## Current Version: <font style="font-size: 300%;">**Hyrax-1.17.0-1**</font>
 
-**Hyrax-1.16.8** is composed of:
+**Hyrax-1.17.0-1** is composed of:
 
 |||
 | :---: | :---:|
