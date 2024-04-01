@@ -42,16 +42,26 @@ The hyrax-docker project can build the following Docker images:
 Apache Tomcat.
 * **ncwms** - The ncWMS application from our friends at the [Reading
     e-Science Centre](http://www.met.reading.ac.uk/resc/home/).
+* **ngap** - A specialization of the Hyrax server for deployment in
+the NASA cloud. This variant is dependent on the injection of 
+numerous configuration information at launch an is unlikely to be 
+of use to people whoa are not directly involved with the NGAP
+project.
 
-Each of these images can be run standalone; the last three can be
-combined via docker compose or ansible. **Note: We build and upload the 
-**_hyrax_** and **_hyrax_ncwms_** containers for our releases to Docker Hub. 
-We also produce and publish to Docker Hub **snapshot** containers for every CI 
-build of **hyrax**, **olfs**, **besd**. You'll need to build the
-other, more specialized, containers yourself.
 
-The Hyrax service starts up providing access to the default (test)
-data, but can easily be configured to serve data from the host machine
+Each of these images can be run standalone. The **besd**, **olfs**,
+and the **ncwms** images may be combined via docker compose or ansible. 
+
+>Note: We build and upload our official release containers 
+> to Docker Hub. We also produce and publish to Docker Hub 
+**snapshot** containers for every CI build of **hyrax**, **olfs**,
+**besd**, and **ngap** images. While these CI build images have
+> passed all of our various tests they are not official releases. 
+> _Caveat Emptor_.
+
+The default configuration has the Hyrax service start up providing
+access to the default (test) data, but can easily be configured to 
+serve data from the host machine
 (see **_Using Hyrax docker to serve your data_**).
 
 > NOTE: This code is based on work started by Gareth Williams at CSIRO
@@ -79,6 +89,20 @@ _Hyrax Docker Hub Pages_
 
 Build and run a dockerized Hyrax, serving your own data.
 
+Each build is based on a _build recipe_ that specifies the binary
+components to be used in the build. 
+
+For our CI builds those components reside exclusively in a private
+S3 bucket owned by OPeNDAP. In order to build using those recipes, 
+one needs to have credentials to access the S3 bucket. The 
+`build_from_ci_recipe.sh` shell script will perform this task.
+
+Our official release builds can be (re)built by using one
+of the recipes located in the _releases_ directory. The 
+`build_from_release_recipe.sh` shell script located in this 
+directory will build the latest release, or it can be told which
+build recipe file to utilize as it's only command line parameter.
+
 For detailed information about each of the four Docker container
 images, see the section **_Images_** below.
 
@@ -87,17 +111,20 @@ To build the single container hyrax, clone this project
 ```
 git clone https://github.com/opendap/hyrax-docker
 ```
-change directory to the desired hyrax release:
+change directory to the top of the project:
 ```
-cd hyrax-docker/hyrax-latest
+cd hyrax-docker
 ```
-and then use `docker build`
+and then use `build_from_release_recipe.sh`
 ```
-docker build -t hyrax_image hyrax
+build_from_release_recipe.sh
 ```
-to include ncWMS in the image, use a build argument like this:
+To build the docker image using the latest release binaries located
+at www.opendap.org/pub 
+
+To build the release from a previous version, for example `1.16.8`:
 ```
-docker build -t hyrax_image --build-arg USE_NCWMS=true hyrax
+build_from_release_recipe.sh releases/hyrax-1.16.8-build-recipe
 ```
 ### Running The Server
 
