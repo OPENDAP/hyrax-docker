@@ -74,8 +74,9 @@ You can easily build your own Docker image of Hyrax using the material in this p
 ### Get The Desired Image
 #### Download
 
-Probably the quickest way to get started is to _pull_ one of our images from Docker Hub and 
-run that. Each of the docker hub pages has simple launch instructions for the associated image(s).
+Probably the quickest way to get started is to _pull_ one of our images from 
+Docker Hub and run that. Each of the docker hub pages has simple launch 
+instructions for the associated image(s).
 More elaborate instructions may be found below in this document.
 
 _Hyrax Docker Hub Pages_
@@ -94,8 +95,11 @@ components to be used in the build.
 
 For our CI builds those components reside exclusively in a private
 S3 bucket owned by OPeNDAP. In order to build using those recipes, 
-one needs to have credentials to access the S3 bucket. The 
-`build_from_ci_recipe.sh` shell script will perform this task.
+one needs to have credentials to access the S3 bucket. Once you have configured
+your AWS credentials (either using the AS configuratrion or envirnment 
+variables) the`build_from_ci_recipe.sh` shell script will perform the retrieval
+and docker build using the recipe supplied, or the most recent recipe in the 
+`snapshot.time` file.
 
 Our official release builds can be (re)built by using one
 of the recipes located in the _releases_ directory. The 
@@ -117,14 +121,14 @@ cd hyrax-docker
 ```
 and then use `build_from_release_recipe.sh`
 ```
-build_from_release_recipe.sh
+./build_from_release_recipe.sh
 ```
 To build the docker image using the latest release binaries located
 at www.opendap.org/pub 
 
 To build the release from a previous version, for example `1.16.8`:
 ```
-build_from_release_recipe.sh releases/hyrax-1.16.8-build-recipe
+./build_from_release_recipe.sh releases/hyrax-1.16.8-build-recipe
 ```
 ### Running The Server
 
