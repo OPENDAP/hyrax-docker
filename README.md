@@ -69,7 +69,9 @@ and contributed to OPeNDAP. We are grateful for their support.
 
 ## <a name="quickstart"> Quick Start
 
-You can easily build your own Docker image of Hyrax using the material in this project. Alternatively, you can download offical images from our various DockerHub repositories. Both are discussed below.
+You can easily build your own Docker image of Hyrax using the material 
+in this project. Alternatively, you can download offical images from 
+our various DockerHub repositories. Both are discussed below.
 
 ### Get The Desired Image
 #### Download
@@ -105,7 +107,8 @@ Our official release builds can be (re)built by using one
 of the recipes located in the _releases_ directory. The 
 `build_from_release_recipe.sh` shell script located in this 
 directory will build the latest release, or it can be told which
-build recipe file to utilize as it's only command line parameter.
+build recipe file to utilize as the only command line parameter
+to the shell script.
 
 For detailed information about each of the four Docker container
 images, see the section **_Images_** below.
