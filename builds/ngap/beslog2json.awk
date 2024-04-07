@@ -188,17 +188,30 @@ BEGIN {
         }
     }
 }
+
+########################################################################
+#
+# Opens a json log element with kvp for time, pib and log entry type.
+#
 function print_opener(){
     printf("{ %s", n);
     printf("%s\"%stime\": %s", indent, prefix, $1);
-    printf(", %s%s\"%spid\": %s",  n, indent, prefix, $2);
-    printf(", %s%s\"%stype\": \"%s\"",  n, indent, prefix, $3);
+    write_kvp_num("pid",$2);
+    write_kvp_str("type", $3);
 }
-
+########################################################################
+#
+# Closes a json element.
+#
 function print_closer(){
     printf("%s}\n", n);
 }
 
+
+########################################################################
+#
+# Retuns the boolean state based on the passed value and the default.
+#
 function process_bool_value(var_val, dfault, ret_val){
     ret_val = dfault;
     if (length(var_val)>0) {
@@ -209,9 +222,18 @@ function process_bool_value(var_val, dfault, ret_val){
     return ret_val;
 }
 
+########################################################################
+#
+# Writes a key value pair in json. The value is handled as a number
+#
 function write_kvp_num(key,value){
     printf (", %s%s\"%s%s\": %s", n, indent, prefix, key, value);
 }
+
+########################################################################
+#
+# Writes a key value pair in json. The value handled as a string.
+#
 function write_kvp_str(key,value){
     printf (", %s%s\"%s%s\": \"%s\"", n, indent, prefix, key, value);
 }
