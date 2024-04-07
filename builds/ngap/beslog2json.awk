@@ -19,37 +19,44 @@
 BEGIN {
     FS="\\|&\\|";
 
+    # A namespace prefix for our variable names, if desired.
     prefix="hyrax_";
 
-    if(send_timing!="true"){
-        send_timing="false";
+    if(send_all=="true"){
+        # Send everything as json.
+        send_error="true";
+        send_timing="true";
+        send_info="true";
+        send_verbose="true";
+    }
+    else{
+        # Transmit error log messages.
+        send_error = process_bool_value(send_error, "true");
+
+        # Transmit timing data.
+        send_timing = process_bool_value(send_timing, "false");
+
+        # Transmit info log messages..
+        send_info = process_bool_value(send_info, "false");
+        
+        # Transmit verbose  log messages.
+        send_verbose = process_bool_value(send_verbose, "false");
     }
 
-    if(send_info!="true"){
-        send_info="false";
-    }
-
-    if(send_error!="true"){
-        send_error="false";
-    }
-
-    if(send_verbose!="true"){
-        send_verbose="false";
-    }
-
-
+    # Debuggin Mode
     if(debug!="true"){
          debug="false";
     }
 
-    if(pretty!="true"){
-        pretty="false";
-    }
-
+    # Pretty JSON mode
     if(pretty=="true"){
         n="\n";
         indent="    ";
     }
+    else{
+        pretty="false";
+    }
+
 }
 {
     # First, escape all of the double quotes in the input line, because json.
@@ -157,7 +164,7 @@ BEGIN {
             }
             else if(time_type=="elapsed_us"){
                 # 1601653546|&|7096|&|timing|&|elapsed_us|&|2169|&|start_us|&|1601653546269617|&|stop_us
-                #     1          2      3         4          5        6            7                8
+                #     1          2      3          4          5        6            7                8
                 # |&|1601653546271786|&|ReqId|&|TIMER_NAME
                 #          9              10       11
                 print_opener();
@@ -188,4 +195,14 @@ function print_opener(){
 
 function print_closer(){
     printf("%s}\n", n);
+}
+
+function process_bool_value(var_val, dfault, ret_val){
+    ret_val = dfault;
+    if (length(var_val)>0) {
+        if(var_val != "true" && var_val != "1"){
+            ret_val="false";
+        }
+    }
+    return ret_val;
 }
