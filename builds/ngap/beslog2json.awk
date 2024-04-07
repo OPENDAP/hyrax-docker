@@ -1,6 +1,21 @@
 #
 # Translates OPeNDAP bes.logs into JSON
 #
+# Log Fields type==request
+# 1601646465|&|2122|&|request|&|OLFS|&|0:0:0:0:0:0:0:1|&|USER_AGENT|&|92F3C71F959B56515C98A09088CA2A8E
+#    1          2        3       4           5              6               7
+# |&|-|&|1601646465304|&|18|&|HTTP-GET|&|/opendap/hyrax/data/nc/fnoc1.nc.dds|&|u|&|BES
+#    8     9             10     11              12                             13   14
+# |&|get.dds|&|dap2|&|/Users/ndp/OPeNDAP/hyrax/build/share/hyrax/data/nc/fnoc1.nc|&|u
+#      15       16                              17                                  18
+#
+# 1601642669|&|2122|&|timing|&|TimingFields
+# 1601642669|&|2122|&|verbose|&|MessageField
+# 1601642679|&|2122|&|info|&|MessageField
+# 1601642679|&|2122|&|error|&|MessageField
+# 1601642679|&|2122|&|request|&|RequestFields
+#
+# -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 BEGIN {
     FS="\\|&\\|";
 
@@ -16,36 +31,22 @@ BEGIN {
         n="\n";
         indent="    ";
     }
-
-
-# -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-# Log Fields type==request
-# 1601646465|&|2122|&|request|&|OLFS|&|0:0:0:0:0:0:0:1|&|USER_AGENT|&|92F3C71F959B56515C98A09088CA2A8E
-#    1          2        3       4           5              6               7
-# |&|-|&|1601646465304|&|18|&|HTTP-GET|&|/opendap/hyrax/data/nc/fnoc1.nc.dds|&|u|&|BES
-#    8     9             10     11              12                             13   14
-# |&|get.dds|&|dap2|&|/Users/ndp/OPeNDAP/hyrax/build/share/hyrax/data/nc/fnoc1.nc|&|u
-#      15       16                              17                                  18
-
-# 1601642669|&|2122|&|timing|&|TimingFields
-# 1601642669|&|2122|&|verbose|&|MessageField
-# 1601642679|&|2122|&|info|&|MessageField
-# 1601642679|&|2122|&|error|&|MessageField
-# 1601642679|&|2122|&|request|&|RequestFields
-
 }
 {
+    # First, escape all of the double quotes in the input line, because json.
+    gsub(/\"/, "\\\"");
+
     # Look for a leading [ which indicates an incorrectly constructed log entry
     if($0 ~ /^\[/){
+        # This is a logging error.
+        # Make an error log entry about the error in the log.
         printf("{ %s%s\"time\": -1", n, indent, now);
         printf(", %s%s\"pid\": -1", n, indent);
         printf(", %s%s\"type\": \"error\"", n, indent);
-        msg = "OUCH! Input line "NR" appears to use [ and ] to delimit values. SKIPPING!";
+        msg = "OUCH! Input log line "NR" appears to use [ and ] to delimit values. Line: "$0;
         printf(", %s%s\"message\": \"%s\"} %s", n, indent, msg, n);
     }
     else if($0.length() != 0) { # Don't process an empty line...
-        # First, escape all of the double quotes in the values of the log fields.
-        gsub(/\"/, "\\\"");
 
         if(debug=="true"){
             print "------------------------------------------------";
@@ -58,7 +59,8 @@ BEGIN {
         printf(", %s%s\"type\": \"%s\"",  n, indent, type, n);
 
         if(type=="request"){
-            # OLFS
+            # Field $4 aleays has the value OLFS. It marks the beginning
+            # of things sent by the OLFS. The tag not needed for ngap logs.
             #printf(", %s%s\"OLFS\": \"%s\"", n, indent,$4);
 
             # ip-address of requesting client's system.
@@ -116,34 +118,31 @@ BEGIN {
             if(time_type=="start_us"){
                 # 1601642669|&|2122|&|timing|&|start_us|&|1601642669945133|&|-|&|TIMER_NAME
                 #      1         2      3        4             5             6      7
-                printf(", %s%s\"%s\": %s", n, indent, "start_time_us", $5);
-                printf(", %s%s\"%s\": \"%s\"", n, indent, "req_id", $6);
-                printf(", %s%s\"%s\": \"%s\"", n, indent, "name:", $7);
+                printf(", %s%s\"start_time_us\": %s", n, indent, $5);
+                printf(", %s%s\"req_id\": \"%s\"", n, indent, $6);
+                printf(", %s%s\"name\": \"%s\"", n, indent, $7);
             }
             else if(time_type=="elapsed_us"){
-                #1601653546|&|7096|&|timing|&|elapsed_us|&|2169|&|start_us|&|1601653546269617|&|stop_us|&|1601653546271786|&|ReqId|&|TIMER_NAME
-                #     1          2      3         4          5        6            7                8           9              10       11
-                printf(", %s%s\"%s\": %s", n, indent, "elapsed_time_us", $5);
-                printf(", %s%s\"%s\": %s", n, indent, "start_time_us", $7);
-                printf(", %s%s\"%s\": %s", n, indent, "stop_time_us", $9);
-                printf(", %s%s\"%s\": \"%s\"", n, indent, "req_id", $10);
-                printf(", %s%s\"%s\": \"%s\"", n, indent,  "name:", $11);
+                # 1601653546|&|7096|&|timing|&|elapsed_us|&|2169|&|start_us|&|1601653546269617|&|stop_us
+                #     1          2      3         4          5        6            7                8
+                # |&|1601653546271786|&|ReqId|&|TIMER_NAME
+                #          9              10       11
+                printf(", %s%s\"elapsed_time_us\": %s", n, indent, $5);
+                printf(", %s%s\"start_time_us\": %s", n, indent, $7);
+                printf(", %s%s\"stop_time_us\": %s", n, indent, $9);
+                printf(", %s%s\"req_id\": \"%s\"", n, indent, $10);
+                printf(", %s%s\"name\": \"%s\"", n, indent, $11);
 
             }
             else {
                 printf(", %s%s\"LOG_ERROR\": \"FAILED to process: %s\"", n , indent, $0);
             }
-
         }
-        else {
-            if(debug == "true"){
-                print "Line "NR" is blank, ignored."
-            }
-        }
-
-
         printf("%s}\n", n);
     }
-
-
+    else {
+        if(debug == "true"){
+            print "# Line "NR" is blank, ignored."
+        }
+    }
 }
