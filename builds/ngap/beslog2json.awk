@@ -38,7 +38,7 @@ BEGIN {
 
         # Transmit info log messages..
         send_info = process_bool_value(send_info, "false");
-        
+
         # Transmit verbose  log messages.
         send_verbose = process_bool_value(send_verbose, "false");
     }
@@ -65,7 +65,7 @@ BEGIN {
     # Look for a leading [ which indicates an incorrectly constructed log entry
     if($0 ~ /^\[/){
         # This is a logging error.
-        if ( send_error=="true") {
+        if ( send_error=="true" ) {
             # Make an special error log entry about the error in the log.
             printf ("{ %s%s\"%stime\": -1", n, indent, prefix);
             printf (", %s%s\"%spid\": -1", n, indent, prefix);
@@ -89,64 +89,65 @@ BEGIN {
             #printf(", %s%s\"%sOLFS\": \"%s\"", n, indent, prefix, $4);
 
             # ip-address of requesting client's system.
-            printf(", %s%s\"%sclient_ip\": \"%s\"", n, indent, prefix, $5);
+            write_kvp_str("client_ip",$5);
 
             # The value of the User-Agent request header sent from the client.
-            printf(", %s%s\"%suser_agent\": \"%s\"", n, indent, prefix, $6);
+            write_kvp_str("user_agent",$6);
 
             # The session id, if present.
-            printf(", %s%s\"%ssession_id\": \"%s\"", n, indent, prefix, $7);
+            write_kvp_str("session_id",$7);
 
             # The user's user id, if a user is logged in.
-            printf(", %s%s\"%suser_id\": \"%s\"", n, indent, prefix, $8);
+            write_kvp_str("user_id",$8);
 
             # The time the the request was received.
-            printf(", %s%s\"%sstart_time\": %s", n, indent, prefix, $9);
+            write_kvp_num("start_time",$9);
 
             # We are not so sure what this number is...
-            printf(", %s%s\"%sduration\": %s", n, indent, prefix, $10);
+            write_kvp_num("duration",$10);
 
             # The HTTP verb of the request (GET, POST, etc)
-            printf(", %s%s\"%shttp_verb\": \"%s\"", n, indent, prefix, $11);
+            write_kvp_str("http_verb",$11);
 
             # The path component of the requested resource.
-            printf(", %s%s\"%surl_path\": \"%s\"", n, indent, prefix, $12);
+            write_kvp_str("url_path",$12);
 
             # The query string, if any, submitted with the request.
-            printf(", %s%s\"%squery_string\": \"%s\"", n, indent, prefix, $13);
+            write_kvp_str("query_string",$13);
 
             # Field 14 is a field that indicates the following fields orginated
             # in the BES, it is not semantically important to NGAP
-            # printf(", %s%s\"%sbes\": \"%s\"", n, indent, prefix, $14);
+            # write_kvp_str("bes",$14);
 
             # The type of BES action/request/command invoked by the request
-            printf(", %s%s\"%sbes_request\": \"%s\"", n, indent, prefix, $15);
+            write_kvp_str("bes_request",$15);
 
             # The DAP protocl
-            printf(", %s%s\"%sdap_version\": \"%s\"", n, indent, prefix, $16);
+            write_kvp_str("dap_version",$16);
 
             # The local file path to the resource.
-            printf(", %s%s\"%slocal_path\": \"%s\"", n, indent, prefix, $17);
+            write_kvp_str("local_path",$17);
 
             # Field 18 is a duplicate of field 13 and if the query string is absent
             # then field 18 will be missing entirely.
             printf(", %s%s\"%sconstraint_expression\": \"%s\"", n, indent, prefix, $18);
+            write_kvp_str("constraint_expression",$18);
 
             print_closer();
         }
         else if(type=="info" && send_info=="true"){
             print_opener();
-            printf(", %s%s\"%smessage\": \"%s\"",  n, indent,  prefix, $4);
+            write_kvp_str("message",$4);
             print_closer();
         }
         else if(type=="error" && send_error=="true"){
             print_opener();
-            printf(", %s%s\"%smessage\": \"%s\"",  n, indent,  prefix, $4);
+            write_kvp_str("message",$4);
             print_closer();
         }
         else if(type=="verbose" && send_verbose=="true"){
             print_opener();
-            printf(", %s%s\"%smessage\": \"%s\"",  n, indent,  prefix, $4);
+            write_kvp_str("message",$4);
             print_closer();
         }
         else if(type == "timing" && send_timing=="true"){
@@ -157,9 +158,9 @@ BEGIN {
                 # 1601642669|&|2122|&|timing|&|start_us|&|1601642669945133|&|-|&|TIMER_NAME
                 #      1         2      3        4             5             6      7
                 print_opener();
-                printf(", %s%s\"%sstart_time_us\": %s", n, indent, prefix, $5);
-                printf(", %s%s\"%sreq_id\": \"%s\"", n, indent, prefix, $6);
-                printf(", %s%s\"%sname\": \"%s\"", n, indent, prefix, $7);
+                write_kvp_num("start_time",$5);
+                write_kvp_str("req_id",$6);
+                write_kvp_str("name",$7);
                 print_closer();
             }
             else if(time_type=="elapsed_us"){
@@ -168,15 +169,16 @@ BEGIN {
                 # |&|1601653546271786|&|ReqId|&|TIMER_NAME
                 #          9              10       11
                 print_opener();
-                printf(", %s%s\"%selapsed_time_us\": %s", n, indent, prefix, $5);
-                printf(", %s%s\"%sstart_time_us\": %s", n, indent, prefix, $7);
-                printf(", %s%s\"%sstop_time_us\": %s", n, indent, prefix, $9);
-                printf(", %s%s\"%sreq_id\": \"%s\"", n, indent, prefix, $10);
-                printf(", %s%s\"%sname\": \"%s\"", n, indent, prefix, $11);
+                write_kvp_num("elapsed_time_us",$5);
+                write_kvp_num("start_time_us",$7);
+                write_kvp_num("stop_time_us",$9);
+                write_kvp_str("req_id",$10);
+                write_kvp_str("name",$11);
                 print_closer();
             }
             else {
-                printf(", %s%s\"%sLOG_ERROR\": \"FAILED to process: %s\"", n , indent, prefix, $0);
+                msg = "FAILED to process '"$0"'";
+                write_kvp_str("LOG_ERROR",msg);
             }
         }
     }
@@ -205,4 +207,11 @@ function process_bool_value(var_val, dfault, ret_val){
         }
     }
     return ret_val;
+}
+
+function write_kvp_num(key,value){
+    printf (", %s%s\"%s%s\": %s", n, indent, prefix, key, value);
+}
+function write_kvp_str(key,value){
+    printf (", %s%s\"%s%s\": \"%s\"", n, indent, prefix, key, value);
 }
