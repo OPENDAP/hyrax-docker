@@ -19,6 +19,25 @@
 BEGIN {
     FS="\\|&\\|";
 
+    prefix="hyrax_";
+
+    if(send_timing!="true"){
+        send_timing="false";
+    }
+
+    if(send_info!="true"){
+        send_info="false";
+    }
+
+    if(send_error!="true"){
+        send_error="false";
+    }
+
+    if(send_verbose!="true"){
+        send_verbose="false";
+    }
+
+
     if(debug!="true"){
          debug="false";
     }
@@ -39,12 +58,14 @@ BEGIN {
     # Look for a leading [ which indicates an incorrectly constructed log entry
     if($0 ~ /^\[/){
         # This is a logging error.
-        # Make an error log entry about the error in the log.
-        printf("{ %s%s\"time\": -1", n, indent, now);
-        printf(", %s%s\"pid\": -1", n, indent);
-        printf(", %s%s\"type\": \"error\"", n, indent);
-        msg = "OUCH! Input log line "NR" appears to use [ and ] to delimit values. Line: "$0;
-        printf(", %s%s\"message\": \"%s\"} %s", n, indent, msg, n);
+        if ( send_error=="true") {
+            # Make an special error log entry about the error in the log.
+            printf ("{ %s%s\"%stime\": -1", n, indent, prefix);
+            printf (", %s%s\"%spid\": -1", n, indent, prefix);
+            printf (", %s%s\"%stype\": \"error\"", n, indent, prefix);
+            msg = "OUCH! Input log line "NR" appears to use [ and ] to delimit values. Line: "$0;
+            printf (", %s%s\"%smessage\": \"%s\"} %s", n, indent, prefix, msg, n);
+        }
     }
     else if($0.length() != 0) { # Don't process an empty line...
 
@@ -52,97 +73,119 @@ BEGIN {
             print "------------------------------------------------";
             print $0;
         }
-        printf("{ %s", n);
-        printf("%s\"time\": %s", indent, $1);
-        printf(", %s%s\"pid\": %s",  n, indent, $2, n);
         type=$3;
-        printf(", %s%s\"type\": \"%s\"",  n, indent, type, n);
-
         if(type=="request"){
+            print_opener();
+
             # Field $4 aleays has the value OLFS. It marks the beginning
             # of things sent by the OLFS. The tag not needed for ngap logs.
-            #printf(", %s%s\"OLFS\": \"%s\"", n, indent,$4);
+            #printf(", %s%s\"%sOLFS\": \"%s\"", n, indent, prefix, $4);
 
             # ip-address of requesting client's system.
-            printf(", %s%s\"client_ip\": \"%s\"", n, indent,$5);
+            printf(", %s%s\"%sclient_ip\": \"%s\"", n, indent, prefix, $5);
 
             # The value of the User-Agent request header sent from the client.
-            printf(", %s%s\"user_agent\": \"%s\"", n, indent,$6);
+            printf(", %s%s\"%suser_agent\": \"%s\"", n, indent, prefix, $6);
 
             # The session id, if present.
-            printf(", %s%s\"session_id\": \"%s\"", n, indent,$7);
+            printf(", %s%s\"%ssession_id\": \"%s\"", n, indent, prefix, $7);
 
             # The user's user id, if a user is logged in.
-            printf(", %s%s\"user_id\": \"%s\"", n, indent,$8);
+            printf(", %s%s\"%suser_id\": \"%s\"", n, indent, prefix, $8);
 
             # The time the the request was received.
-            printf(", %s%s\"start_time\": %s", n, indent,$9);
+            printf(", %s%s\"%sstart_time\": %s", n, indent, prefix, $9);
 
             # We are not so sure what this number is...
-            printf(", %s%s\"duration\": %s", n, indent,$10);
+            printf(", %s%s\"%sduration\": %s", n, indent, prefix, $10);
 
             # The HTTP verb of the request (GET, POST, etc)
-            printf(", %s%s\"http_verb\": \"%s\"", n, indent,$11);
+            printf(", %s%s\"%shttp_verb\": \"%s\"", n, indent, prefix, $11);
 
             # The path component of the requested resource.
-            printf(", %s%s\"url_path\": \"%s\"", n, indent,$12);
+            printf(", %s%s\"%surl_path\": \"%s\"", n, indent, prefix, $12);
 
             # The query string, if any, submitted with the request.
-            printf(", %s%s\"query_string\": \"%s\"", n, indent,$13);
+            printf(", %s%s\"%squery_string\": \"%s\"", n, indent, prefix, $13);
 
             # Field 14 is a field that indicates the following fields orginated
             # in the BES, it is not semantically important to NGAP
-            # printf(", %s%s\"bes\": \"%s\"", n, indent,$14);
+            # printf(", %s%s\"%sbes\": \"%s\"", n, indent, prefix, $14);
 
             # The type of BES action/request/command invoked by the request
-            printf(", %s%s\"bes_request\": \"%s\"", n, indent,$15);
+            printf(", %s%s\"%sbes_request\": \"%s\"", n, indent, prefix, $15);
 
             # The DAP protocl
-            printf(", %s%s\"dap_version\": \"%s\"", n, indent,$16);
+            printf(", %s%s\"%sdap_version\": \"%s\"", n, indent, prefix, $16);
 
             # The local file path to the resource.
-            printf(", %s%s\"local_path\": \"%s\"", n, indent,$17);
+            printf(", %s%s\"%slocal_path\": \"%s\"", n, indent, prefix, $17);
 
             # Field 18 is a duplicate of field 13 and if the query string is absent
             # then field 18 will be missing entirely.
-            printf(", %s%s\"constraint_expression\": \"%s\"", n, indent, $18);
+            printf(", %s%s\"%sconstraint_expression\": \"%s\"", n, indent, prefix, $18);
 
+            print_closer();
         }
-        else if(type=="info" || type=="error" || type=="verbose" ){
-            printf(", %s%s\"message\": \"%s\"",  n, indent, $4);
+        else if(type=="info" && send_info=="true"){
+            print_opener();
+            printf(", %s%s\"%smessage\": \"%s\"",  n, indent,  prefix, $4);
+            print_closer();
         }
-        else if(type == "timing"){
+        else if(type=="error" && send_error=="true"){
+            print_opener();
+            printf(", %s%s\"%smessage\": \"%s\"",  n, indent,  prefix, $4);
+            print_closer();
+        }
+        else if(type=="verbose" && send_verbose=="true"){
+            print_opener();
+            printf(", %s%s\"%smessage\": \"%s\"",  n, indent,  prefix, $4);
+            print_closer();
+        }
+        else if(type == "timing" && send_timing=="true"){
 
             time_type = $4;
 
             if(time_type=="start_us"){
                 # 1601642669|&|2122|&|timing|&|start_us|&|1601642669945133|&|-|&|TIMER_NAME
                 #      1         2      3        4             5             6      7
-                printf(", %s%s\"start_time_us\": %s", n, indent, $5);
-                printf(", %s%s\"req_id\": \"%s\"", n, indent, $6);
-                printf(", %s%s\"name\": \"%s\"", n, indent, $7);
+                print_opener();
+                printf(", %s%s\"%sstart_time_us\": %s", n, indent, prefix, $5);
+                printf(", %s%s\"%sreq_id\": \"%s\"", n, indent, prefix, $6);
+                printf(", %s%s\"%sname\": \"%s\"", n, indent, prefix, $7);
+                print_closer();
             }
             else if(time_type=="elapsed_us"){
                 # 1601653546|&|7096|&|timing|&|elapsed_us|&|2169|&|start_us|&|1601653546269617|&|stop_us
                 #     1          2      3         4          5        6            7                8
                 # |&|1601653546271786|&|ReqId|&|TIMER_NAME
                 #          9              10       11
-                printf(", %s%s\"elapsed_time_us\": %s", n, indent, $5);
-                printf(", %s%s\"start_time_us\": %s", n, indent, $7);
-                printf(", %s%s\"stop_time_us\": %s", n, indent, $9);
-                printf(", %s%s\"req_id\": \"%s\"", n, indent, $10);
-                printf(", %s%s\"name\": \"%s\"", n, indent, $11);
-
+                print_opener();
+                printf(", %s%s\"%selapsed_time_us\": %s", n, indent, prefix, $5);
+                printf(", %s%s\"%sstart_time_us\": %s", n, indent, prefix, $7);
+                printf(", %s%s\"%sstop_time_us\": %s", n, indent, prefix, $9);
+                printf(", %s%s\"%sreq_id\": \"%s\"", n, indent, prefix, $10);
+                printf(", %s%s\"%sname\": \"%s\"", n, indent, prefix, $11);
+                print_closer();
             }
             else {
-                printf(", %s%s\"LOG_ERROR\": \"FAILED to process: %s\"", n , indent, $0);
+                printf(", %s%s\"%sLOG_ERROR\": \"FAILED to process: %s\"", n , indent, prefix, $0);
             }
         }
-        printf("%s}\n", n);
     }
     else {
         if(debug == "true"){
             print "# Line "NR" is blank, ignored."
         }
     }
+}
+function print_opener(){
+    printf("{ %s", n);
+    printf("%s\"%stime\": %s", indent, prefix, $1);
+    printf(", %s%s\"%spid\": %s",  n, indent, prefix, $2);
+    printf(", %s%s\"%stype\": \"%s\"",  n, indent, prefix, $3);
+}
+
+function print_closer(){
+    printf("%s}\n", n);
 }
