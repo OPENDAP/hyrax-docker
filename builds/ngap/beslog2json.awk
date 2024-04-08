@@ -88,9 +88,9 @@ BEGIN {
         if(type=="request"){
             print_opener();
 
-            # Field $4 aleays has the value OLFS. It marks the beginning
-            # of things sent by the OLFS. The tag not needed for ngap logs.
-            #printf(", %s%s\"%sOLFS\": \"%s\"", n, indent, prefix, $4);
+            # Field $4 always has the value "OLFS". It marks the beginning
+            # of things sent by the OLFS. The tag is not needed for ngap logs.
+            # write_kvp_str("OLFS",$4);
 
             # ip-address of requesting client's system.
             write_kvp_str("client_ip",$5);
@@ -119,8 +119,9 @@ BEGIN {
             # The query string, if any, submitted with the request.
             write_kvp_str("query_string",$13);
 
-            # Field 14 is a field that indicates the following fields orginated
-            # in the BES, it is not semantically important to NGAP
+            # Field $14 always has the value "bes" and is used to indicate
+            # that the following fields orginated in the BES. It is not 
+            # semantically important to NGAP
             # write_kvp_str("bes",$14);
 
             # The type of BES action/request/command invoked by the request
