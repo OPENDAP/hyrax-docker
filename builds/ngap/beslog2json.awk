@@ -63,11 +63,11 @@ BEGIN {
     # First, escape all of the double quotes in the input line, because json.
     gsub(/\"/, "\\\"");
 
-    # Look for a leading [ which indicates an incorrectly constructed log entry
+    # Look for a leading "[" which indicates an incorrectly formatted log entry
     if($0 ~ /^\[/){
         # This is a logging error.
         if ( send_error=="true" ) {
-            # Make an special error log entry about the error in the log.
+            # Make an special error log entry about the error in the log format.
             printf ("{ %s%s\"%stime\": -1", n, indent, prefix);
             printf (", %s%s\"%spid\": -1", n, indent, prefix);
             printf (", %s%s\"%stype\": \"error\"", n, indent, prefix);
