@@ -15,6 +15,11 @@
 # 1601642679|&|2122|&|error|&|MessageField
 # 1601642679|&|2122|&|request|&|RequestFields
 #
+#
+# You can set the control variables from the awk command line like:
+#
+#     tail -f /var/log/bes/bes.log | awk -f beslog2json.awk -v send_info=true -v send_timing=true -v prefix=""
+#
 # -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
 ########################################################################
@@ -86,12 +91,16 @@ BEGIN {
 
     if(send_all=="true"){
         # Send everything as json.
+        send_requests="true"
         send_error="true";
         send_timing="true";
         send_info="true";
         send_verbose="true";
     }
     else{
+        # Transmit request log entries.
+        send_requests=process_bool_value(send_error, "true");
+
         # Transmit error log messages.
         send_error = process_bool_value(send_error, "true");
 
@@ -152,7 +161,7 @@ BEGIN {
             print $0;
         }
         type=$3;
-        if(type=="request"){
+        if(type=="request" && send_requests=="true"){
             print_opener();
 
             # Field $4 always has the value "OLFS". It marks the beginning
