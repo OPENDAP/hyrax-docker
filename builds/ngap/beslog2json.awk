@@ -16,6 +16,61 @@
 # 1601642679|&|2122|&|request|&|RequestFields
 #
 # -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+
+
+########################################################################
+#
+# Opens a json log element with kvp for time, pid and log entry type.
+#
+function print_opener(){
+    printf("{ %s", n);
+    printf("%s\"%stime\": %s", indent, prefix, $1);
+    write_kvp_num("pid", $2);
+    write_kvp_str("type", $3);
+}
+
+########################################################################
+#
+# Closes a json element.
+#
+function print_closer(){
+    printf("%s}\n", n);
+}
+
+########################################################################
+#
+# Retuns the boolean state based on the passed value and the default.
+#
+function process_bool_value(var_val, dfault, ret_val){
+    ret_val = dfault;
+    if (length(var_val)>0) {
+        if(var_val != "true" && var_val != "1"){
+            ret_val="false";
+        }
+    }
+    return ret_val;
+}
+
+########################################################################
+#
+# Writes a key value pair in json. The value is handled as a number
+#
+function write_kvp_num(key,value){
+    printf (", %s%s\"%s%s\": %s", n, indent, prefix, key, value);
+}
+
+########################################################################
+#
+# Writes a key value pair in json. The value handled as a string.
+#
+function write_kvp_str(key,value){
+    printf (", %s%s\"%s%s\": \"%s\"", n, indent, prefix, key, value);
+}
+
+########################################################################
+#
+# BEGIN is executed one time, at the beginning of the show.
+#
 BEGIN {
     # Set the field seperator to the BES log's "|&|" business.
     FS="\\|&\\|";
@@ -59,6 +114,11 @@ BEGIN {
     }
 
 }
+#########################################################################
+#
+# This is essentially the main() of an awk program.
+# This {...} block is run on each line in the input file.
+#
 {
     # First, escape all of the double quotes in the input line, because json.
     gsub(/\"/, "\\\"");
@@ -135,7 +195,6 @@ BEGIN {
 
             # Field 18 is a duplicate of field 13 and if the query string is absent
             # then field 18 will be missing entirely.
-            printf(", %s%s\"%sconstraint_expression\": \"%s\"", n, indent, prefix, $18);
             write_kvp_str("constraint_expression",$18);
 
             print_closer();
@@ -194,51 +253,3 @@ BEGIN {
     }
 }
 
-########################################################################
-#
-# Opens a json log element with kvp for time, pib and log entry type.
-#
-function print_opener(){
-    printf("{ %s", n);
-    printf("%s\"%stime\": %s", indent, prefix, $1);
-    write_kvp_num("pid",$2);
-    write_kvp_str("type", $3);
-}
-
-########################################################################
-#
-# Closes a json element.
-#
-function print_closer(){
-    printf("%s}\n", n);
-}
-
-########################################################################
-#
-# Retuns the boolean state based on the passed value and the default.
-#
-function process_bool_value(var_val, dfault, ret_val){
-    ret_val = dfault;
-    if (length(var_val)>0) {
-        if(var_val != "true" && var_val != "1"){
-            ret_val="false";
-        }
-    }
-    return ret_val;
-}
-
-########################################################################
-#
-# Writes a key value pair in json. The value is handled as a number
-#
-function write_kvp_num(key,value){
-    printf (", %s%s\"%s%s\": %s", n, indent, prefix, key, value);
-}
-
-########################################################################
-#
-# Writes a key value pair in json. The value handled as a string.
-#
-function write_kvp_str(key,value){
-    printf (", %s%s\"%s%s\": \"%s\"", n, indent, prefix, key, value);
-}
