@@ -99,7 +99,7 @@ BEGIN {
     }
     else{
         # Transmit request log entries.
-        send_requests=process_bool_value(send_error, "true");
+        send_requests=process_bool_value(send_requests, "true");
 
         # Transmit error log messages.
         send_error = process_bool_value(send_error, "true");
