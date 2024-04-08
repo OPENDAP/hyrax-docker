@@ -16,27 +16,6 @@ echo "Greetings, I am "`whoami`"."   >&2
 export JAVA_HOME="${JAVA_HOME:-/etc/alternatives/jre}"
 echo "JAVA_HOME: ${JAVA_HOME}" >&2
 
-export SLEEP_INTERVAL="${SLEEP_INTERVAL:-60}"
-echo "SLEEP_INTERVAL: ${SLEEP_INTERVAL} seconds." >&2
-
-export SERVER_HELP_EMAIL="${SERVER_HELP_EMAIL:-not_set}"
-echo "SERVER_HELP_EMAIL: ${SERVER_HELP_EMAIL}" >&2
-
-export FOLLOW_SYMLINKS="${FOLLOW_SYMLINKS:-not_set}"
-echo "FOLLOW_SYMLINKS: ${FOLLOW_SYMLINKS}" >&2
-
-export AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:-<not set>}"
-echo "AWS_SECRET_ACCESS_KEY is ${AWS_SECRET_ACCESS_KEY}" >&2
-
-export AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID:-<not set>}"
-echo "AWS_ACCESS_KEY_ID is ${AWS_ACCESS_KEY_ID}" >&2
-
-export AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION:-<not set>}"
-echo "AWS_DEFAULT_REGION is ${AWS_DEFAULT_REGION}" >&2
-
-export NETRC_FILE="/etc/bes/ngap_netrc"
-echo "#            NETRC_FILE: ${NETRC_FILE}" >&2
-
 export CATALINA_HOME=${CATALINA_HOME:-"NOT_SET"}
 echo "#         CATALINA_HOME: ${CATALINA_HOME}" >&2
 
@@ -49,6 +28,38 @@ echo "#         OLFS_CONF_DIR: ${OLFS_CONF_DIR}" >&2
 export TOMCAT_CONTEXT_FILE="/usr/share/tomcat/conf/context.xml"
 echo "#   TOMCAT_CONTEXT_FILE: ${TOMCAT_CONTEXT_FILE}" >&2
 
+################################################################################
+echo "${HR2}" >&2
+export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-"<not set>"}
+echo "# AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}" >&2
+
+export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-"<not set>"}
+echo "#     AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}" >&2
+
+export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-"<not set>"}
+echo "#    AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}" >&2
+
+################################################################################
+echo "${HR2}" >&2
+export NETRC_FILE="/etc/bes/ngap_netrc"
+echo "#            NETRC_FILE: ${NETRC_FILE}" >&2
+
+export BES_SITE_CONF_FILE="/etc/bes/site.conf"
+echo "#    BES_SITE_CONF_FILE: ${BES_SITE_CONF_FILE}" >&2
+
+export BES_LOG_FILE="/var/log/bes/bes.log"
+echo "#          BES_LOG_FILE: ${BES_LOG_FILE}" >&2
+
+export SLEEP_INTERVAL=${SLEEP_INTERVAL:-60}
+echo "#        SLEEP_INTERVAL: ${SLEEP_INTERVAL} seconds." >&2
+
+export SERVER_HELP_EMAIL=${SERVER_HELP_EMAIL:-"not_set"}
+echo "#     SERVER_HELP_EMAIL: ${SERVER_HELP_EMAIL}" >&2
+
+export FOLLOW_SYMLINKS=${FOLLOW_SYMLINKS:-"not_set"}
+echo "#       FOLLOW_SYMLINKS: ${FOLLOW_SYMLINKS}" >&2
+echo "#" >&2
+echo "${HR1}" >&2
 
 ################################################################################
 # Inject one set of credentials into .netrc
@@ -173,8 +184,6 @@ if test "${debug}" = "true" ; then
     echo "CATALINA_HOME: ${CATALINA_HOME}"  >&2
     ls -l "$CATALINA_HOME" "$CATALINA_HOME/bin"  >&2
 fi
-
-
 
 
 #-------------------------------------------------------------------------------
