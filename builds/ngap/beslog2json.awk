@@ -203,6 +203,7 @@ function print_opener(){
     write_kvp_num("pid",$2);
     write_kvp_str("type", $3);
 }
+
 ########################################################################
 #
 # Closes a json element.
@@ -210,7 +211,6 @@ function print_opener(){
 function print_closer(){
     printf("%s}\n", n);
 }
-
 
 ########################################################################
 #
