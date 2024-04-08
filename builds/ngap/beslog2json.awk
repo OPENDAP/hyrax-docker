@@ -68,11 +68,14 @@ BEGIN {
         # This is a logging error.
         if ( send_error=="true" ) {
             # Make an special error log entry about the error in the log format.
+            # We don't call print_opener() because it's a mess so we hack it
+            # together right here...
             printf ("{ %s%s\"%stime\": -1", n, indent, prefix);
             printf (", %s%s\"%spid\": -1", n, indent, prefix);
             printf (", %s%s\"%stype\": \"error\"", n, indent, prefix);
             msg = "OUCH! Input log line "NR" appears to use [ and ] to delimit values. Line: "$0;
-            printf (", %s%s\"%smessage\": \"%s\"} %s", n, indent, prefix, msg, n);
+            write_kvp_str("message",msg);
+            print_closer();
         }
     }
     else if($0.length() != 0) { # Don't process an empty line...
