@@ -120,7 +120,7 @@ BEGIN {
             write_kvp_str("query_string",$13);
 
             # Field $14 always has the value "bes" and is used to indicate
-            # that the following fields orginated in the BES. It is not 
+            # that the following fields orginated in the BES. It is not
             # semantically important to NGAP
             # write_kvp_str("bes",$14);
 
