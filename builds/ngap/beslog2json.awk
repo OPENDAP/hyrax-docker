@@ -17,6 +17,7 @@
 #
 # -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 BEGIN {
+    # Set the field seperator to the BES log's "|&|" business.
     FS="\\|&\\|";
 
     # A namespace prefix for our variable names, if desired.
