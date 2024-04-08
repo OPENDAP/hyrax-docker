@@ -17,6 +17,26 @@
 #
 # -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
+########################################################################
+#
+# Retuns the boolean state based on the passed value and the default.
+#
+# Awk doesn't have boolean types so for this work I have it use the
+# string values of "true" and "false". If setting the value from the
+# command line like:
+#    awk -v foo=true -v bar=1
+# This function will accept "true" or 1 (and only 1) as a true value.
+#
+function process_bool_value(var_val, dfault, ret_val){
+    ret_val = dfault;
+    if (length(var_val)>0) {
+        if(var_val != "true" && var_val != "1"){
+            ret_val="false";
+        }
+    }
+    return ret_val;
+}
+
 
 ########################################################################
 #
@@ -35,20 +55,6 @@ function print_opener(){
 #
 function print_closer(){
     printf("%s}\n", n);
-}
-
-########################################################################
-#
-# Retuns the boolean state based on the passed value and the default.
-#
-function process_bool_value(var_val, dfault, ret_val){
-    ret_val = dfault;
-    if (length(var_val)>0) {
-        if(var_val != "true" && var_val != "1"){
-            ret_val="false";
-        }
-    }
-    return ret_val;
 }
 
 ########################################################################
@@ -114,9 +120,10 @@ BEGIN {
     }
 
 }
+
 #########################################################################
 #
-# This is essentially the main() of an awk program.
+# This is essentially the main() of any awk program.
 # This {...} block is run on each line in the input file.
 #
 {
