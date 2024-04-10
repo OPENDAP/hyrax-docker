@@ -70,6 +70,51 @@ function show_version(){
     loggy ""
 }
 
+
+
+function get_tomcat_tags_names(){
+    local t_count="$1"
+    loggy "Retrieving $t_count tags."
+
+    local tomcat_gh_repo="https://api.github.com/repos/apache/tomcat/tags"
+    loggy "Tomcat tomcat_gh_repo: $tomcat_gh_repo"
+
+    local remaining=$t_count
+    local tag_count=0
+    local tag_names=""
+    local ntc
+    local page=0
+    while test $remaining -gt 0
+    do
+        if test $remaining -gt 100
+        then
+            ntc=100;
+        else
+            ntc=$remaining;
+        fi
+        let "page++"
+        let "remaining-=ntc"
+
+        new_tags=$(curl -s "${tomcat_gh_repo}?per_page=${ntc}&page=${page}" | jq -r '.[] | .name')
+        #loggy "new_tags: "
+        #loggy "$new_tags"
+
+        if test -n "$tag_names"
+        then
+            tag_names=$(echo "$tag_names"; echo "" ; echo "$new_tags" )
+        else
+            tag_names="$new_tags"
+        fi
+        #loggy "tag_names: "
+        #loggy "$tag_names"
+
+    done
+
+    tag_count=$( echo "$tag_names" | wc -l )
+    loggy "Retrieved $tag_count tags from $tomcat_gh_repo"
+    echo "$tag_names" | sort -V
+}
+
 ################################################################################
 #
 # get_latest_tomcat_version_number()
@@ -80,24 +125,28 @@ function show_version(){
 # If the version is not available on the download server, the release is
 # discarded and the next most recent release is chosen.
 #
+# https://github.com/apache/tomcat
+#
 function get_latest_tomcat_version_number(){
     local tomcat_major_version="${1}"
 
     local release_endpoint_base="https://dlcdn.apache.org/tomcat/tomcat"
+    loggy "Tomcat release_endpoint_base: $release_endpoint_base"
+
     local tomcat_gh_repo="https://api.github.com/repos/apache/tomcat/tags?per_page=100"
+    loggy "Tomcat tomcat_gh_repo: $tomcat_gh_repo"
 
     local retry=true
     local ignore_list=
+    local tomcat_tags=
 
-    tomcat_versions_list=$(curl -s "${tomcat_gh_repo}")
+    tomcat_tags=$(get_tomcat_tags_names 200)
+    #loggy "Tomcat tomcat_tags: $tomcat_tags"
     while $retry ; do
-        tomcat_major_version_list=$(echo "${tomcat_versions_list}" | \
-            jq -r '.[] | .name' | \
-            sort -V | \
-            grep "^${tomcat_major_version}" )
+        tomcat_major_version_list=$(echo "${tomcat_tags}" | grep "^${tomcat_major_version}" )
 
         loggy "tomcat_major_version_list: "
-        loggy "${tomcat_major_version_list}" | awk '{print "##   "$0;}'
+        loggy "${tomcat_major_version_list}"
 
         local tomcat_version=""
         if test -n "${ignore_list}" ; then
