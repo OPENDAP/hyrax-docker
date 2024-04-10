@@ -72,8 +72,19 @@ function show_version(){
 
 
 
-function get_tomcat_tags_names(){
+################################################################################
+#
+# get_tomcat_tag_names()
+#
+# Goes to the Tomcat GitHub and retrieves the number of tag names, t_count using
+# the api.github endpoint. The function checks for the value of t_count in $1
+# and if it's not found defaults to 120. If t_count is greater than 100
+# then this code will make multiple requests to api.github in order to gather
+# the values from multiple pages.
+#
+function get_tomcat_tag_names(){
     local t_count="$1"
+    if test -n "$t_count"; then t_count=120; fi
     loggy "Retrieving $t_count tags."
 
     local tomcat_gh_repo="https://api.github.com/repos/apache/tomcat/tags"
@@ -95,10 +106,10 @@ function get_tomcat_tags_names(){
         let "page++"
         let "remaining-=ntc"
 
-        new_tags=$(curl -s "${tomcat_gh_repo}?per_page=${ntc}&page=${page}" | jq -r '.[] | .name')
+        new_tags=$(curl -s "${tomcat_gh_repo}?per_page=${ntc}&page=${page}" | \
+                    jq -r '.[] | .name')
         #loggy "new_tags: "
         #loggy "$new_tags"
-
         if test -n "$tag_names"
         then
             tag_names=$(echo "$tag_names"; echo "" ; echo "$new_tags" )
@@ -107,7 +118,6 @@ function get_tomcat_tags_names(){
         fi
         #loggy "tag_names: "
         #loggy "$tag_names"
-
     done
 
     tag_count=$( echo "$tag_names" | wc -l )
@@ -140,7 +150,7 @@ function get_latest_tomcat_version_number(){
     local ignore_list=
     local tomcat_tags=
 
-    tomcat_tags=$(get_tomcat_tags_names 200)
+    tomcat_tags=$(get_tomcat_tag_names 200)
     #loggy "Tomcat tomcat_tags: $tomcat_tags"
     while $retry ; do
         tomcat_major_version_list=$(echo "${tomcat_tags}" | grep "^${tomcat_major_version}" )
