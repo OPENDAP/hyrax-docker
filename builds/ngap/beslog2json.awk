@@ -15,14 +15,38 @@
 # 1601642679|&|2122|&|error|&|MessageField
 # 1601642679|&|2122|&|request|&|RequestFields
 #
+# -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+# The behavior of this script can be controlled by setting the values of it's
+# "control" variables from the command line invocation.
 #
-# You can set the control variables from the awk command line like:
+# The control variables are:
+#     SEND_REQUESTS (default: "true")
+#       SEND_ERRORS (default: "true")
+#       SEND_TIMING (default: "false")
+#         SEND_INFO (default: "false")
+#      SEND_VERBOSE (default: "false")
+#            PRETTY (default: "false")
+#             DEBUG (default: "false")
 #
-#     tail -f /var/log/bes/bes.log | awk -f beslog2json.awk -v send_info=true -v send_timing=true -v prefix=""
+# You can set the control variables from the awk command line
+# using awk's -v option:
 #
-# -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+#   cat /var/log/bes/bes.log | awk -f beslog2json.awk -v SEND_INFO=true -v SEND_TIMING=true
+#
+# You can have this produce multi-line pretty formatted json output by setting
+# the value of "PRETTY" to true:
+#    -v PRETTY=true
+#
+# The variables "N" and "INDENT" are set in the BEGIN section and are 
+# determined by the state of the variable "PRETTY" 
+# 
+# The value of the "PREFIX" variable is hard coded in the BEGIN statement 
+# and cannot be set by command line injection.
+#
+# -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
 
 ########################################################################
+# process_bool_value()
 #
 # Retuns the boolean state based on the passed value and the default.
 #
@@ -44,38 +68,42 @@ function process_bool_value(var_val, dfault, ret_val){
 
 
 ########################################################################
+# print_opener()
 #
 # Opens a json log element with kvp for time, pid and log entry type.
 #
 function print_opener(){
-    printf("{ %s", n);
-    printf("%s\"%stime\": %s", indent, prefix, $1);
+    printf("{ %s", N);
+    printf("%s\"%stime\": %s", INDENT, PREFIX, $1);
     write_kvp_num("pid", $2);
     write_kvp_str("type", $3);
 }
 
 ########################################################################
+# print_closer()
 #
 # Closes a json element.
 #
 function print_closer(){
-    printf("%s}\n", n);
+    printf("%s}\n", N);
 }
 
 ########################################################################
+# write_kvp_num()
 #
 # Writes a key value pair in json. The value is handled as a number
 #
 function write_kvp_num(key,value){
-    printf (", %s%s\"%s%s\": %s", n, indent, prefix, key, value);
+    printf (", %s%s\"%s%s\": %s", N, INDENT, PREFIX, key, value);
 }
 
 ########################################################################
+# write_kvp_str()
 #
 # Writes a key value pair in json. The value handled as a string.
 #
 function write_kvp_str(key,value){
-    printf (", %s%s\"%s%s\": \"%s\"", n, indent, prefix, key, value);
+    printf (", %s%s\"%s%s\": \"%s\"", N, INDENT, PREFIX, key, value);
 }
 
 ########################################################################
@@ -87,45 +115,45 @@ BEGIN {
     FS="\\|&\\|";
 
     # A namespace prefix for our variable names, if desired.
-    prefix="hyrax_";
+    PREFIX="hyrax_";
 
     if(send_all=="true"){
         # Send everything as json.
-        send_requests="true"
-        send_error="true";
-        send_timing="true";
-        send_info="true";
-        send_verbose="true";
+        SEND_REQUESTS="true"
+        SEND_ERRORS="true";
+        SEND_TIMING="true";
+        SEND_INFO="true";
+        SEND_VERBOSE="true";
     }
     else{
         # Transmit request log entries.
-        send_requests=process_bool_value(send_requests, "true");
+        SEND_REQUESTS=process_bool_value(SEND_REQUESTS, "true");
 
         # Transmit error log messages.
-        send_error = process_bool_value(send_error, "true");
+        SEND_ERRORS = process_bool_value(SEND_ERRORS, "true");
 
         # Transmit timing data.
-        send_timing = process_bool_value(send_timing, "false");
+        SEND_TIMING = process_bool_value(SEND_TIMING, "false");
 
         # Transmit info log messages..
-        send_info = process_bool_value(send_info, "false");
+        SEND_INFO = process_bool_value(SEND_INFO, "false");
 
         # Transmit verbose  log messages.
-        send_verbose = process_bool_value(send_verbose, "false");
+        SEND_VERBOSE = process_bool_value(SEND_VERBOSE, "false");
     }
 
     # Debuggin Mode
-    if(debug!="true"){
-         debug="false";
+    if(DEBUG!="true"){
+         DEBUG="false";
     }
 
     # Pretty JSON mode
-    if(pretty=="true"){
-        n="\n";
-        indent="    ";
+    if(PRETTY=="true"){
+        N ="\n";
+        INDENT="    ";
     }
     else{
-        pretty="false";
+        PRETTY="false";
     }
 
 }
@@ -142,13 +170,13 @@ BEGIN {
     # Look for a leading "[" which indicates an incorrectly formatted log entry
     if($0 ~ /^\[/){
         # This is a logging error.
-        if ( send_error=="true" ) {
+        if ( SEND_ERRORS=="true" ) {
             # Make an special error log entry about the error in the log format.
             # We don't call print_opener() because it's a mess so we hack it
             # together right here...
-            printf ("{ %s%s\"%stime\": -1", n, indent, prefix);
-            printf (", %s%s\"%spid\": -1", n, indent, prefix);
-            printf (", %s%s\"%stype\": \"error\"", n, indent, prefix);
+            printf ("{ %s%s\"%stime\": -1", N, INDENT, PREFIX);
+            printf (", %s%s\"%spid\": -1", N, INDENT, PREFIX);
+            printf (", %s%s\"%stype\": \"error\"", N, INDENT, PREFIX);
             msg = "OUCH! Input log line "NR" appears to use [ and ] to delimit values. Line: "$0;
             write_kvp_str("message",msg);
             print_closer();
@@ -156,12 +184,12 @@ BEGIN {
     }
     else if($0.length() != 0) { # Don't process an empty line...
 
-        if(debug=="true"){
+        if(DEBUG=="true"){
             print "------------------------------------------------";
             print $0;
         }
         type=$3;
-        if(type=="request" && send_requests=="true"){
+        if(type=="request" && SEND_REQUESTS=="true"){
             print_opener();
 
             # Field $4 always has the value "OLFS". It marks the beginning
@@ -215,22 +243,22 @@ BEGIN {
 
             print_closer();
         }
-        else if(type=="info" && send_info=="true"){
+        else if(type=="info" && SEND_INFO=="true"){
             print_opener();
             write_kvp_str("message",$4);
             print_closer();
         }
-        else if(type=="error" && send_error=="true"){
+        else if(type=="error" && SEND_ERRORS=="true"){
             print_opener();
             write_kvp_str("message",$4);
             print_closer();
         }
-        else if(type=="verbose" && send_verbose=="true"){
+        else if(type=="verbose" && SEND_VERBOSE=="true"){
             print_opener();
             write_kvp_str("message",$4);
             print_closer();
         }
-        else if(type == "timing" && send_timing=="true"){
+        else if(type == "timing" && SEND_TIMING=="true"){
 
             time_type = $4;
 
@@ -263,7 +291,7 @@ BEGIN {
         }
     }
     else {
-        if(debug == "true"){
+        if(DEBUG == "true"){
             print "# Line "NR" is blank, ignored."
         }
     }
