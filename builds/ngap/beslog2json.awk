@@ -72,11 +72,11 @@ function process_bool_value(var_val, dfault, ret_val){
 #
 # Opens a json log element with kvp for time, pid and log entry type.
 #
-function print_opener(){
+function print_opener(unix_time, pid, request_type){
     printf("{ %s", N);
-    printf("%s\"%stime\": %s", INDENT, PREFIX, $1);
-    write_kvp_num("pid", $2);
-    write_kvp_str("type", $3);
+    printf("%s\"%stime\": %s", INDENT, PREFIX, unix_time);
+    write_kvp_num("pid", pid);
+    write_kvp_str("type", request_type);
 }
 
 ########################################################################
@@ -172,11 +172,7 @@ BEGIN {
         # This is a logging error.
         if ( SEND_ERRORS=="true" ) {
             # Make an special error log entry about the error in the log format.
-            # We don't call print_opener() because it's a mess so we hack it
-            # together right here...
-            printf ("{ %s%s\"%stime\": -1", N, INDENT, PREFIX);
-            printf (", %s%s\"%spid\": -1", N, INDENT, PREFIX);
-            printf (", %s%s\"%stype\": \"error\"", N, INDENT, PREFIX);
+            print_opener(-1, -1, error);
             msg = "OUCH! Input log line "NR" appears to use [ and ] to delimit values. Line: "$0;
             write_kvp_str("message",msg);
             print_closer();
@@ -188,9 +184,11 @@ BEGIN {
             print "------------------------------------------------";
             print $0;
         }
+        time=$1;
+        pid=$2;
         type=$3;
         if(type=="request" && SEND_REQUESTS=="true"){
-            print_opener();
+            print_opener(time, pid, type);
 
             # Field $4 always has the value "OLFS". It marks the beginning
             # of things sent by the OLFS. The tag is not needed for ngap logs.
@@ -244,17 +242,17 @@ BEGIN {
             print_closer();
         }
         else if(type=="info" && SEND_INFO=="true"){
-            print_opener();
+            print_opener(time, pid, type);
             write_kvp_str("message",$4);
             print_closer();
         }
         else if(type=="error" && SEND_ERRORS=="true"){
-            print_opener();
+            print_opener(time, pid, type);
             write_kvp_str("message",$4);
             print_closer();
         }
         else if(type=="verbose" && SEND_VERBOSE=="true"){
-            print_opener();
+            print_opener(time, pid, type);
             write_kvp_str("message",$4);
             print_closer();
         }
@@ -265,7 +263,7 @@ BEGIN {
             if(time_type=="start_us"){
                 # 1601642669|&|2122|&|timing|&|start_us|&|1601642669945133|&|-|&|TIMER_NAME
                 #      1         2      3        4             5             6      7
-                print_opener();
+                print_opener(time, pid, type);
                 write_kvp_num("start_time",$5);
                 write_kvp_str("req_id",$6);
                 write_kvp_str("name",$7);
@@ -276,7 +274,7 @@ BEGIN {
                 #     1          2      3          4          5        6            7                8
                 # |&|1601653546271786|&|ReqId|&|TIMER_NAME
                 #          9              10       11
-                print_opener();
+                print_opener(time, pid, type);
                 write_kvp_num("elapsed_time_us",$5);
                 write_kvp_num("start_time_us",$7);
                 write_kvp_num("stop_time_us",$9);
