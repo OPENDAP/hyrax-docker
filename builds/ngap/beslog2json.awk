@@ -1,226 +1,271 @@
 #
 # Translates OPeNDAP bes.logs into JSON
 #
-BEGIN {
-    FS="\\|&\\|";
-
-    if(debug!="true"){
-         debug="false";
-    }
-
-    if(pretty!="true"){
-        pretty="false";
-    }
-
-    if(pretty=="true"){
-        n="\n";
-        indent="    ";
-    }
-
+# Log Fields type==request
+# 1601646465|&|2122|&|request|&|OLFS|&|0:0:0:0:0:0:0:1|&|USER_AGENT|&|92F3C71F959B56515C98A09088CA2A8E
+#    1          2        3       4           5              6               7
+# |&|-|&|1601646465304|&|18|&|HTTP-GET|&|/opendap/hyrax/data/nc/fnoc1.nc.dds|&|u|&|BES
+#    8     9             10     11              12                             13   14
+# |&|get.dds|&|dap2|&|/Users/ndp/OPeNDAP/hyrax/build/share/hyrax/data/nc/fnoc1.nc|&|u
+#      15       16                              17                                  18
+#
 # 1601642669|&|2122|&|timing|&|TimingFields
 # 1601642669|&|2122|&|verbose|&|MessageField
 # 1601642679|&|2122|&|info|&|MessageField
 # 1601642679|&|2122|&|error|&|MessageField
 # 1601642679|&|2122|&|request|&|RequestFields
+#
+#
+# You can set the control variables from the awk command line like:
+#
+#     tail -f /var/log/bes/bes.log | awk -f beslog2json.awk -v send_info=true -v send_timing=true -v prefix=""
+#
+# -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+
+########################################################################
+#
+# Retuns the boolean state based on the passed value and the default.
+#
+# Awk doesn't have boolean types so for this work I have it use the
+# string values of "true" and "false". If setting the value from the
+# command line like:
+#    awk -v foo=true -v bar=1
+# This function will accept "true" or 1 (and only 1) as a true value.
+#
+function process_bool_value(var_val, dfault, ret_val){
+    ret_val = dfault;
+    if (length(var_val)>0) {
+        if(var_val != "true" && var_val != "1"){
+            ret_val="false";
+        }
+    }
+    return ret_val;
+}
 
 
+########################################################################
+#
+# Opens a json log element with kvp for time, pid and log entry type.
+#
+function print_opener(){
+    printf("{ %s", n);
+    printf("%s\"%stime\": %s", indent, prefix, $1);
+    write_kvp_num("pid", $2);
+    write_kvp_str("type", $3);
+}
 
-    # -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-    # Log line base.
+########################################################################
+#
+# Closes a json element.
+#
+function print_closer(){
+    printf("%s}\n", n);
+}
 
-    # The time that the log message was written.
-    log_line_base[1]="time";
+########################################################################
+#
+# Writes a key value pair in json. The value is handled as a number
+#
+function write_kvp_num(key,value){
+    printf (", %s%s\"%s%s\": %s", n, indent, prefix, key, value);
+}
 
-    # The PID of the beslistener that wrote the log entry.
-    log_line_base[2]="pid";
+########################################################################
+#
+# Writes a key value pair in json. The value handled as a string.
+#
+function write_kvp_str(key,value){
+    printf (", %s%s\"%s%s\": \"%s\"", n, indent, prefix, key, value);
+}
 
-    # The message associate with the log entry
-    log_line_base[3]="log_name";
+########################################################################
+#
+# BEGIN is executed one time, at the beginning of the show.
+#
+BEGIN {
+    # Set the field seperator to the BES log's "|&|" business.
+    FS="\\|&\\|";
 
+    # A namespace prefix for our variable names, if desired.
+    prefix="hyrax_";
 
+    if(send_all=="true"){
+        # Send everything as json.
+        send_requests="true"
+        send_error="true";
+        send_timing="true";
+        send_info="true";
+        send_verbose="true";
+    }
+    else{
+        # Transmit request log entries.
+        send_requests=process_bool_value(send_requests, "true");
 
-    # -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-    # Request Log Fields
+        # Transmit error log messages.
+        send_error = process_bool_value(send_error, "true");
 
-# 1601646255|&|2122|&|request|&|OLFS|&|0:0:0:0:0:0:0:1|&|USER_AGENT|&|92F3C71F959B56515C98A09088CA2A8E|&|-|&|1601646255543|&|10|&|HTTP-GET|&|/opendap/hyrax/data/nc/nc4_strings.nc.dds|&|-|&|BES|&|get.dds|&|dap2|&|/Users/ndp/OPeNDAP/hyrax/build/share/hyrax/data/nc/nc4_strings.nc
-# 1601646465|&|2122|&|request|&|OLFS|&|0:0:0:0:0:0:0:1|&|USER_AGENT|&|92F3C71F959B56515C98A09088CA2A8E|&|-|&|1601646465304|&|18|&|HTTP-GET|&|/opendap/hyrax/data/nc/fnoc1.nc.dds|&|u|&|BES|&|get.dds|&|dap2|&|/Users/ndp/OPeNDAP/hyrax/build/share/hyrax/data/nc/fnoc1.nc|&|u
+        # Transmit timing data.
+        send_timing = process_bool_value(send_timing, "false");
 
-    # OLFS Tag.
-    request_log_fields[4]="OLFS";
+        # Transmit info log messages..
+        send_info = process_bool_value(send_info, "false");
 
-    # ip-address of requesting client's system.
-    request_log_fields[5]="client_ip";
+        # Transmit verbose  log messages.
+        send_verbose = process_bool_value(send_verbose, "false");
+    }
 
-    # The value of the User-Agent request header sent from the client.
-    request_log_fields[6]="user_agent";
+    # Debuggin Mode
+    if(debug!="true"){
+         debug="false";
+    }
 
-    # The session id, if present.
-    request_log_fields[7]="session_id";
-
-    # The user's user id, if a user is logged in.
-    request_log_fields[8]="user_id";
-
-    # The time the the request was received.
-    request_log_fields[9]="start_time";
-
-    # We are not so sure what this number is...
-    request_log_fields[10]="duration";
-
-    # The HTTP verb of the request (GET, POST, etc)
-    request_log_fields[11]="http_verb";
-
-    # The path component of the requested resource.
-    request_log_fields[12]="url_path";
-
-    # The query string, if any, submitted with the request.
-    request_log_fields[13]="query_string";
-
-    # Field 13 is a field that indicates the following fields orginated
-    # in the BES, it is not semantically important to NGAP
-    request_log_fields[14]="bes";
-
-    # The type of BES action/request/command invoked by the request
-    request_log_fields[15]="bes_request";
-
-    # The DAP protocl
-    request_log_fields[16]="dap_version";
-
-    # The local file path to the resource.
-    request_log_fields[17]="local_path";
-
-    # Field 18 is a duplicate of field 13 and if the query string is absent
-    # then field 18 will be missing entirely.
-    request_log_fields[18]="constraint_expression";
-
-    # -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-    # Error/Verbose/Info Fields
-
-    # The message associate with the log entry
-    msg_fields[4]="message";
-
-
-    # -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-    # Start Timing Fields
-    # 1601642669|&|2122|&|timing|&|start_us|&|1601642669943035|&|ReqId|&|TIMER_NAME
-
-    # The message associate with the log entry
-    start_time_fields[4]="start_us";
-
-    # The message associate with the log entry
-    start_time_fields[5]="start_time_us";
-
-    # The message associate with the log entry
-    start_time_fields[6]="ReqId";
-
-    # The message associate with the log entry
-    start_time_fields[7]="Name";
-
-    # -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-    # Stop Timing Fields
-    # 1601642669|&|2122|&|timing|&|stop_us|&|1601642669944587|&|elapsed_us|&|1552|&ReqId|&|TIMER_NAME
-    #     1          2      3         4            5               6           7     8        9
-    # The message associate with the log entry
-    stop_time_fields[4]="stop_us";
-
-    # The message associate with the log entry
-    stop_time_fields[5]="stop_time_us";
-
-    # The message associate with the log entry
-    stop_time_fields[6]="elapsed_us";
-
-    # The message associate with the log entry
-    stop_time_fields[6]="elapsed_time_us";
-
-    # The message associate with the log entry
-    stop_time_fields[7]="ReqId";
-
-    # The message associate with the log entry
-    stop_time_fields[4]="Name";
-
+    # Pretty JSON mode
+    if(pretty=="true"){
+        n="\n";
+        indent="    ";
+    }
+    else{
+        pretty="false";
+    }
 
 }
+
+#########################################################################
+#
+# This is essentially the main() of any awk program.
+# This {...} block is run on each line in the input file.
+#
 {
-    # First, escape all of the double quotes in the values of the log fields.
+    # First, escape all of the double quotes in the input line, because json.
     gsub(/\"/, "\\\"");
 
-    if(debug=="true"){
-        print "------------------------------------------------";
-        print $0;
-    }
-
-    ltime=$1;
-    pid=$2;
-    log_name=$3;
-    printf("{%s", n);
-    printf("%s\"time\": %s, %s", indent, ltime, n);
-    printf("%s\"pid\": \"%s\", %s", indent, pid, n);
-    printf("%s\"type\": \"%s\"", indent, log_name);
-
-    if(log_name=="request"){
-        for(i=4; i<=NF  ; i++){
-            if(i!=4 && i!=14 && i!=18){
-                printf(", %s",n);
-                if(i==9 || i==10){
-                    printf("%s\"%s\": %s",indent,request_log_fields[i],$i);
-                }
-                else {
-                    printf("%s\"%s\": \"%s\"",indent,request_log_fields[i],$i);
-                }
-             }
+    # Look for a leading "[" which indicates an incorrectly formatted log entry
+    if($0 ~ /^\[/){
+        # This is a logging error.
+        if ( send_error=="true" ) {
+            # Make an special error log entry about the error in the log format.
+            # We don't call print_opener() because it's a mess so we hack it
+            # together right here...
+            printf ("{ %s%s\"%stime\": -1", n, indent, prefix);
+            printf (", %s%s\"%spid\": -1", n, indent, prefix);
+            printf (", %s%s\"%stype\": \"error\"", n, indent, prefix);
+            msg = "OUCH! Input log line "NR" appears to use [ and ] to delimit values. Line: "$0;
+            write_kvp_str("message",msg);
+            print_closer();
         }
     }
-    else if(log_name=="info" || log_name=="error" || log_name=="verbose" ){
-        printf(", %s",n);
-        printf("%s\"%s\": \"%s\"", indent, msg_fields[4], $4);
-    }
-    else if(log_name == "timing"){
+    else if($0.length() != 0) { # Don't process an empty line...
 
-        time_type = $4;
-
-        if(time_type=="start_us"){
-            # 1601642669|&|2122|&|timing|&|start_us|&|1601642669945133|&|-|&|TIMER_NAME
-            #      1         2      3        4             5             6      7
-            printf(", %s%s\"%s\": %s", n, indent, "start_time_us", $5);
-            printf(", %s%s\"%s\": \"%s\"", n, indent, "req_id", $6);
-            printf(", %s%s\"%s\": \"%s\"", n, indent, "name:", $7);
+        if(debug=="true"){
+            print "------------------------------------------------";
+            print $0;
         }
-        else if(time_type=="elapsed_us"){
-            #1601653546|&|7096|&|timing|&|elapsed_us|&|2169|&|start_us|&|1601653546269617|&|stop_us|&|1601653546271786|&|ReqId|&|TIMER_NAME
-            #     1          2      3         4          5        6            7                8           9              10       11
-            printf(", %s%s\"%s\": %s", n, indent, "elapsed_time_us", $5);
-            printf(", %s%s\"%s\": %s", n, indent, "start_time_us", $7);
-            printf(", %s%s\"%s\": %s", n, indent, "stop_time_us", $9);
-            printf(", %s%s\"%s\": \"%s\"", n, indent, "req_id", $10);
-            printf(", %s%s\"%s\": \"%s\"", n, indent,  "name:", $11);
+        type=$3;
+        if(type=="request" && send_requests=="true"){
+            print_opener();
 
-        }
-        else {
-            printf(", %s%s\"LOG_ERROR\": \"FAILED to process: %s\"", n , indent, $0);
-        }
+            # Field $4 always has the value "OLFS". It marks the beginning
+            # of things sent by the OLFS. The tag is not needed for ngap logs.
+            # write_kvp_str("OLFS",$4);
 
+            # ip-address of requesting client's system.
+            write_kvp_str("client_ip",$5);
+
+            # The value of the User-Agent request header sent from the client.
+            write_kvp_str("user_agent",$6);
+
+            # The session id, if present.
+            write_kvp_str("session_id",$7);
+
+            # The user's user id, if a user is logged in.
+            write_kvp_str("user_id",$8);
+
+            # The time the the request was received.
+            write_kvp_num("start_time",$9);
+
+            # We are not so sure what this number is...
+            write_kvp_num("duration",$10);
+
+            # The HTTP verb of the request (GET, POST, etc)
+            write_kvp_str("http_verb",$11);
+
+            # The path component of the requested resource.
+            write_kvp_str("url_path",$12);
+
+            # The query string, if any, submitted with the request.
+            write_kvp_str("query_string",$13);
+
+            # Field $14 always has the value "bes" and is used to indicate
+            # that the following fields orginated in the BES. It is not
+            # semantically important to NGAP
+            # write_kvp_str("bes",$14);
+
+            # The type of BES action/request/command invoked by the request
+            write_kvp_str("bes_request",$15);
+
+            # The DAP protocl
+            write_kvp_str("dap_version",$16);
+
+            # The local file path to the resource.
+            write_kvp_str("local_path",$17);
+
+            # Field 18 is a duplicate of field 13 and if the query string is absent
+            # then field 18 will be missing entirely.
+            write_kvp_str("constraint_expression",$18);
+
+            print_closer();
+        }
+        else if(type=="info" && send_info=="true"){
+            print_opener();
+            write_kvp_str("message",$4);
+            print_closer();
+        }
+        else if(type=="error" && send_error=="true"){
+            print_opener();
+            write_kvp_str("message",$4);
+            print_closer();
+        }
+        else if(type=="verbose" && send_verbose=="true"){
+            print_opener();
+            write_kvp_str("message",$4);
+            print_closer();
+        }
+        else if(type == "timing" && send_timing=="true"){
+
+            time_type = $4;
+
+            if(time_type=="start_us"){
+                # 1601642669|&|2122|&|timing|&|start_us|&|1601642669945133|&|-|&|TIMER_NAME
+                #      1         2      3        4             5             6      7
+                print_opener();
+                write_kvp_num("start_time",$5);
+                write_kvp_str("req_id",$6);
+                write_kvp_str("name",$7);
+                print_closer();
+            }
+            else if(time_type=="elapsed_us"){
+                # 1601653546|&|7096|&|timing|&|elapsed_us|&|2169|&|start_us|&|1601653546269617|&|stop_us
+                #     1          2      3          4          5        6            7                8
+                # |&|1601653546271786|&|ReqId|&|TIMER_NAME
+                #          9              10       11
+                print_opener();
+                write_kvp_num("elapsed_time_us",$5);
+                write_kvp_num("start_time_us",$7);
+                write_kvp_num("stop_time_us",$9);
+                write_kvp_str("req_id",$10);
+                write_kvp_str("name",$11);
+                print_closer();
+            }
+            else {
+                msg = "FAILED to process '"$0"'";
+                write_kvp_str("LOG_ERROR",msg);
+            }
+        }
     }
     else {
-        # old way
-        if (NF > 3){
-            for(i=1; i<=NF  ; i++){
-                if(i!=3 && i!=13 && i!=17){
-                    if(i>1)
-                        printf(", %s",n);
-                    printf("%s\"%s\": \"%s\"",indent,request_log_fields[i],$i);
-                }
-            }
+        if(debug == "true"){
+            print "# Line "NR" is blank, ignored."
         }
-        else {
-            for(i=1; i<=NF ; i++){
-                if(i>1) {
-                    printf(", %s",n);
-                }
-                printf("%s\"%s\": \"%s\"",indent,msg_fields[i],$i);
-            }
-       }
-
     }
-
-    printf("%s}\n", n);
-
 }
+
