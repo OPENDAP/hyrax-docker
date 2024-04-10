@@ -72,11 +72,17 @@ function process_bool_value(var_val, dfault, ret_val){
 #
 # Opens a json log element with kvp for time, pid and log entry type.
 #
-function print_opener(unix_time, pid, request_type){
+# Expects 3 parameters:
+#
+# unix_time - An integer value of seconds since epoch
+# pid - The processes id of the process that created the log entry
+# log_type - The type of log entry: request|error|info|timing|verbose
+#
+function print_opener(unix_time, pid, log_type){
     printf("{ %s", N);
     printf("%s\"%stime\": %s", INDENT, PREFIX, unix_time);
     write_kvp_num("pid", pid);
-    write_kvp_str("type", request_type);
+    write_kvp_str("type", log_type);
 }
 
 ########################################################################
