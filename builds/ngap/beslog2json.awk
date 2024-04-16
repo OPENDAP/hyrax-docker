@@ -121,8 +121,7 @@ BEGIN {
     FS="\\|&\\|";
 
     # A namespace prefix for our variable names, if desired.
-    #PREFIX="hyrax_";
-    PREFIX=""
+    PREFIX="hyrax_";
 
     if(send_all=="true"){
         # Send everything as json.
