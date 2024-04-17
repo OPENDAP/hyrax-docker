@@ -140,13 +140,13 @@ BEGIN {
         SEND_ERRORS = process_bool_value(SEND_ERRORS, "true");
 
         # Transmit timing data.
-        SEND_TIMING = process_bool_value(SEND_TIMING, "false");
+        SEND_TIMING = process_bool_value(SEND_TIMING, "true");
 
         # Transmit info log messages..
-        SEND_INFO = process_bool_value(SEND_INFO, "false");
+        SEND_INFO = process_bool_value(SEND_INFO, "true");
 
         # Transmit verbose  log messages.
-        SEND_VERBOSE = process_bool_value(SEND_VERBOSE, "false");
+        SEND_VERBOSE = process_bool_value(SEND_VERBOSE, "true");
     }
 
     # Debuggin Mode
@@ -267,7 +267,8 @@ BEGIN {
 
             time_type = $4;
 
-            if(time_type=="start_us"){
+            # start timing record is skipped with 1==0 clause
+            if( 1==0 && time_type=="start_us"){
                 # 1601642669|&|2122|&|timing|&|start_us|&|1601642669945133|&|-|&|TIMER_NAME
                 #      1         2      3        4             5             6      7
                 print_opener(time, pid, type);
@@ -290,8 +291,8 @@ BEGIN {
                 print_closer();
             }
             else {
-                msg = "FAILED to process '"$0"'";
-                write_kvp_str("LOG_ERROR",msg);
+                #msg = "FAILED to process '"$0"'";
+                #write_kvp_str("LOG_ERROR",msg);
             }
         }
     }
