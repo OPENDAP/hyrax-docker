@@ -115,7 +115,6 @@ if test -n "${HOST}"  &&  test -n "${USERNAME}"  &&  test -n "${PASSWORD}" ; the
 fi
 ################################################################################
 
-
 ################################################################################
 # Inject olfs.xml configuration document.
 #
@@ -131,7 +130,6 @@ if test -n "${OLFS_XML}"  ; then
     echo "#" >&2
 fi
 ################################################################################
-
 
 ################################################################################
 # Inject user-access.xml document to define the servers relationship to
@@ -150,8 +148,6 @@ if test -n "${USER_ACCESS_XML}"  ; then
 fi
 ################################################################################
 
-
-
 ################################################################################
 # Inject BES configuration site.conf document to configure the BES to operate
 # in the NGAP environment.
@@ -167,7 +163,6 @@ if test -n "${BES_SITE_CONF}" ; then
     echo "#" >&2
 fi
 ################################################################################
-
 
 ################################################################################
 # Inject Tomcat's context.xml configuration document to configure the Tomcat to
