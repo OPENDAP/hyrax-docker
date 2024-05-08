@@ -64,6 +64,17 @@ echo "#    AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}" >&2
 
 ################################################################################
 echo "${HR2}" >&2
+export NGAP_CERTIFICATE_FILE="/usr/share/tomcat/conf/NGAP-CA-certificate.crt"
+echo "#   NGAP_CERTIFICATE_FILE: ${NGAP_CERTIFICATE_FILE}" >&2
+
+export NGAP_CERTIFICATE_CHAIN_FILE="/usr/share/tomcat/conf/NGAP-CA-certificate-chain.crt"
+echo "#   NGAP_CERTIFICATE_CHAIN_FILE: ${NGAP_CERTIFICATE_CHAIN_FILE}" >&2
+
+export NGAP_CERTIFICATE_KEY_FILE="/usr/share/tomcat/conf/NGAP-CA-certificate.key"
+echo "#   NGAP_CERTIFICATE_KEY: ${NGAP_CERTIFICATE_KEY_FILE}" >&2
+
+################################################################################
+echo "${HR2}" >&2
 export NETRC_FILE="/etc/bes/ngap_netrc"
 echo "#            NETRC_FILE: ${NETRC_FILE}" >&2
 
@@ -104,7 +115,6 @@ if test -n "${HOST}"  &&  test -n "${USERNAME}"  &&  test -n "${PASSWORD}" ; the
 fi
 ################################################################################
 
-
 ################################################################################
 # Inject olfs.xml configuration document.
 #
@@ -120,7 +130,6 @@ if test -n "${OLFS_XML}"  ; then
     echo "#" >&2
 fi
 ################################################################################
-
 
 ################################################################################
 # Inject user-access.xml document to define the servers relationship to
@@ -139,8 +148,6 @@ if test -n "${USER_ACCESS_XML}"  ; then
 fi
 ################################################################################
 
-
-
 ################################################################################
 # Inject BES configuration site.conf document to configure the BES to operate
 # in the NGAP environment.
@@ -157,7 +164,6 @@ if test -n "${BES_SITE_CONF}" ; then
 fi
 ################################################################################
 
-
 ################################################################################
 # Inject Tomcat's context.xml configuration document to configure the Tomcat to
 # utilize Session Management in the NGAP environment.
@@ -172,6 +178,47 @@ if test -n "${TOMCAT_CONTEXT_XML}" ; then
 fi
 ################################################################################
 
+################################################################################
+# Inject Tomcat's NGAP[CA] certificate document to configure the Tomcat to
+# utilize SSL/TLS Data-In-Transit in the NGAP environment.
+#
+# Test if the bes.conf env variable is set (by way of not unset) and not empty
+if test -n "${NGAP_CERTIFICATE}" ; then
+    echo "${HR2}" >&2
+    echo "# Tomcat  file: ${NGAP_CERTIFICATE_FILE}" >&2
+    echo "${NGAP_CERTIFICATE}" > ${NGAP_CERTIFICATE_FILE}
+    cat "${NGAP_CERTIFICATE_FILE}" | awk '{print "##    "$0;}' >&2
+    echo "#" >&2
+fi
+################################################################################
+
+################################################################################
+# Inject Tomcat's NGAP[CA] certificate-chain to configure the Tomcat to
+# utilize SSL/TLS Data-In-Transit in the NGAP environment.
+#
+# Test if the bes.conf env variable is set (by way of not unset) and not empty
+if test -n "${NGAP_CERTIFICATE_CHAIN}" ; then
+    echo "${HR2}" >&2
+    echo "# Tomcat  file: ${NGAP_CREDENTIALS_CHAIN_FILE}" >&2
+    echo "${NGAP_CERTIFICATE_CHAIN}" > ${NGAP_CERTIFICATE_CHAIN_FILE}
+    cat "${NGAP_CERTIFICATE_CHAIN_FILE}" | awk '{print "##    "$0;}' >&2
+    echo "#" >&2
+fi
+################################################################################
+
+################################################################################
+# Inject Tomcat's NGAP[CA] certificate key to configure the Tomcat to
+# utilize SSL/TLS Data-In-Transit in the NGAP environment.
+#
+# Test if the bes.conf env variable is set (by way of not unset) and not empty
+if test -n "${NGAP_CERTIFICATE_KEY}" ; then
+    echo "${HR2}" >&2
+    echo "# Tomcat  file: ${NGAP_CERTIFICATE_KEY_FILE}" >&2
+    echo "${NGAP_CERTIFICATE_KEY}" > ${NGAP_CERTIFICATE_KEY_FILE}
+    cat "${NGAP_CERTIFICATE_KEY_FILE}" | awk '{print "##    "$0;}' >&2
+    echo "#" >&2
+fi
+################################################################################
 
 ################################################################################
 # Inject an NGAP Cumulus Configuration
