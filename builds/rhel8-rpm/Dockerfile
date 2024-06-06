@@ -15,8 +15,6 @@
 # Set one or more individual labels
 FROM redhat/ubi8:latest
 
-
-
 LABEL vendor="OPeNDAP"
 LABEL org.opendap.hyrax.version=${HYRAX_VERSION}
 LABEL org.opendap.hyrax.release-date=${RELEASE_DATE}
