@@ -1,0 +1,247 @@
+###############################################################################################
+# 
+# Dockerfile for single container Hyrax
+#
+#
+# Some shell state reference:
+# set -f # "set -o noglob"  Disable file name generation using metacharacters (globbing).
+# set -v # "set -o verbose" Prints shell input lines as they are read.
+# set -x # "set -o xtrace"  Print command traces before executing command.
+# set -e #  Exit on error.
+#
+# In general use "set -e" when running commands that matter and don't use
+# it for debugging stuff.
+#
+# Set one or more individual labels
+FROM redhat/ubi8:latest
+
+
+
+LABEL vendor="OPeNDAP"
+LABEL org.opendap.hyrax.version=${HYRAX_VERSION}
+LABEL org.opendap.hyrax.release-date=${RELEASE_DATE}
+LABEL org.opendap.hyrax.version.is-production="false"
+
+MAINTAINER support@opendap.org
+
+USER root
+
+################################################################
+# Update and install the needful.
+#
+# Installing autoconf automake git bc for the tests install. The tests
+# are installed in the container but not run until a later stage of the
+# Travis build (or at a later time). They need to be part of the container,
+# however, to be run, so install them as part of this Dockerfile.
+RUN set -e && dnf update  -y
+RUN set -e && dnf install -y make curl unzip which autoconf automake emacs vim
+RUN set -e && dnf install -y diffutils
+RUN set -e && dnf install -y procps
+RUN set -e && dnf install -y python3 git bc valgrind gdb
+RUN set -e && dnf install -y java-11-openjdk-devel
+# Temporary Hack to fix broken OpenJDK-11.0.20.0.8-2
+RUN set -e && dnf install -y tzdata-java
+#
+RUN set -e && dnf clean all
+RUN set -e && which diff
+#
+RUN set -e && python3 -m pip install --upgrade pip
+RUN set -e && python3 -m pip install --no-cache-dir awscli
+
+################################################################
+# Install the latest libdap snapshot
+#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
+RUN set -e \
+    && echo "Installing the libdap rpm: ${LIBDAP_RPM}" \
+    && ls -l ./libdap* \
+    && dnf -y install ./libdap-*.rpm \
+    && rm -f ./${LIBDAP_RPM}
+
+RUN echo "libdap4 is installed."
+
+################################################################
+# Install the latest BES snapshot
+#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
+RUN set -e \
+    && echo "Installing the latest BES rpm: ${BES_RPM}" \
+    && ls -l ./bes* \
+    && dnf -y install ./bes-*.rpm \
+    && rm -f ./${BES_RPM}
+
+RUN echo "besdaemon is here: "`which besdaemon`
+
+################################################################
+# Install and Setup Tomcat
+#
+# Make tomcat user and group
+#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
+RUN set -e && useradd -m -U -d /home/tomcat -s /bin/false tomcat
+#
+# Install the Tomcat package that should have been copied into
+# the root directory prior to this layer.
+#
+RUN set -e \
+    && tar -xvf "/${TOMCAT_DISTRO}.tar.gz" -C /home/tomcat >&2 \
+    && ln -s /home/tomcat/${TOMCAT_DISTRO} /usr/share/tomcat >&2 \
+    && ln -s /home/tomcat/${TOMCAT_DISTRO} /tomcat >&2 \
+    && rm -rvf /usr/share/tomcat/webapps/* >&2 \
+    && mkdir -p /var/log/tomcat \
+    && chown -R tomcat:tomcat /var/log/tomcat /home/tomcat
+COPY tomcat.service /etc/systemd/system/tomcat.service
+RUN set -e && systemctl enable tomcat
+#RUN firewall-cmd --add-port 8080/tcp --permanent
+#RUN firewall-cmd --reload
+
+ENV CATALINA_HOME /usr/share/tomcat
+ENV PATH $CATALINA_HOME/bin:$PATH
+RUN set -e && echo "CATALINA_HOME: ${CATALINA_HOME}" >&2
+
+# Install our modified server.xml so that the server compresses responses.
+COPY tomcat9-server.xml /
+RUN set -e \
+    && mv /tomcat9-server.xml ${CATALINA_HOME}/conf/server.xml \
+    && chown -R tomcat:tomcat ${CATALINA_HOME}/conf/server.xml
+
+RUN set -e \
+    && echo "Cleaning up Tomcat distribution files..." >&2 \
+    && rm -fv "/${TOMCAT_DISTRO}.tar.gz"
+
+################################################################
+# Install the OLFS web application
+#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
+ENV ROOT=/dev/shm
+
+RUN echo "Installing the latest olfs distribution (${OLFS_VERSION})." >&2
+RUN set -e \
+    && echo "working_dir: "`pwd`  >&2 \
+    && ls -l . \
+    && tar -C ${ROOT} -xzvf ./${OLFS_DISTRO}.tgz \
+    && ls -l ${ROOT} \
+    && echo "Unpacking warfile..."  >&2 \
+    && mkdir -p $(readlink -f ${CATALINA_HOME})/webapps/${DEPLOYMENT_CONTEXT}/ \
+    && unzip -o ${ROOT}/${OLFS_DISTRO}/opendap.war -d ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/ \
+    && echo "Cleaning up."  >&2 \
+    && rm -rf ${ROOT}/${OLFS_DISTRO} ./${OLFS_DISTRO}.tgz
+
+RUN set -e \
+    && echo "Installing the latest dynamic robots.txt distribution (${OLFS_VERSION})."  >&2 \
+    && ls -l ./robots* \
+    && tar -C ${ROOT} -xzf ./${ROBOTS_DISTRO}.tgz \
+    && ls -l ${ROOT}/${ROBOTS_DISTRO} \
+    && echo "Unpacking dynamic robots.txt warfile..."  >&2 \
+    && unzip -o ${ROOT}/${ROBOTS_DISTRO}/ROOT.war -d ${CATALINA_HOME}/webapps/ROOT/ \
+    && echo "Cleaning up dynamic robots.txt snapshot..."  >&2 \
+    && rm -rf ${ROOT}/${ROBOTS_DISTRO} ${ROBOTS_DISTRO}.tgz
+
+# Fix ownership and access permissions
+RUN set -e \
+    && mkdir -p ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/logs \
+    && chown -R tomcat:tomcat ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/logs \
+    && chmod 700 ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/logs
+
+################################################################
+# Clean up the Hyrax distribution binaries.
+#
+RUN rm -vf /libdap*.rpm /bes*.rpm /olfs*.tgz /robots*.tgz /apache*
+#
+################################################################
+
+################################################################
+# retrieve and install the ncWMS web application
+#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
+
+ARG NCWMS_VERSION
+ENV NCWMS_VERSION ${NCWMS_VERSION:-"2.5.2"}
+RUN echo "NCWMS_VERSION: ${NCWMS_VERSION}"
+ENV NCWMS_WAR_URL="https://github.com/Reading-eScience-Centre/ncwms/releases/download/ncwms-${NCWMS_VERSION}/ncWMS2.war"
+RUN echo "NCWMS_WAR_URL: ${NCWMS_WAR_URL}"
+
+RUN if [ $USE_NCWMS = "true" ]; then \
+        echo "Installing ncWMS..."; \
+        curl -sfSL ${NCWMS_WAR_URL} -o /dev/shm/ncWMS.war; \
+        unzip -o /dev/shm/ncWMS.war -d ${CATALINA_HOME}/webapps/ncWMS2/; \
+        rm -rf /dev/shm/*; \
+    else \
+        echo "ncWMS will NOT be installed."; \
+    fi
+
+# set a default ncWMS admin if DEVELOPER_MODE is enabled.
+RUN if [ ${DEVELOPER_MODE} = "true" ] && [ $USE_NCWMS = "true" ]; then \
+        echo "DEVELOPER MODE: Adding ncWMS admin credentials"; \
+        sed -i 'sX</tomcat-users>X<role rolename="ncWMS-admin"/> <user username="admin" password="admin" roles="ncWMS-admin"/> </tomcat-users>X' ${CATALINA_HOME}/conf/tomcat-users.xml; \
+    else \
+        echo "No ncWMS admin credentials installed."; \
+    fi
+    
+#
+# make ncWMS work without further configuration 
+# We will need to adjust this target if we
+# decide to run as a different (not root) user.
+COPY ncWMS_config.xml /root/.ncWMS2/config.xml
+RUN  chmod +r /root/.ncWMS2/config.xml
+
+COPY olfs_viewers.xml /tmp/olfs_viewers.xml
+RUN if [ $USE_NCWMS = "true" ]; then \
+        # If we're installing ncWMS then we copy 
+        # to the server a viewers.xml which has
+        # been templated so that the ncWMS host can be installed 
+        # at startup.        
+        mv /tmp/olfs_viewers.xml ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/viewers.xml; \
+    else \
+        echo "Skipping OLFS/ncWMS confguration installation."; \
+    fi
+
+################################################################
+#
+# Retrieve, verify, and install the hyrax_regression_tests
+# project
+#
+#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
+ENV TEST_INSTALL_DIR="/hyrax_regression_tests"
+RUN set -e \
+    && echo "Retrieving, and building hyrax regression tests." \
+    && echo "h_r_t will be in: ${TEST_INSTALL_DIR}" \
+    && mkdir -p ${TEST_INSTALL_DIR} \
+    && git clone -v https://github.com/opendap/hyrax_regression_tests ${TEST_INSTALL_DIR} \
+    && cd ${TEST_INSTALL_DIR} \
+    && autoreconf -vif \
+    && ./configure
+
+# In order to get the executable "testsuite" to build we have to run
+# "make check" But that will fail at build time so the "make check" call
+# ends up pretty tortured to avoid a build error.
+RUN set -e \
+    && cd ${TEST_INSTALL_DIR} \
+    && make testsuite > mk.log 2>&1 \
+    && echo "SUCCESS: hyrax_regression_tests ready!"
+################################################################
+
+RUN ls -l /usr/libexec/
+
+################################################################
+# TEMPORARY
+# Grab the cleanup files script for managing orphaned files
+# from fileout_netcdf
+COPY cleanup_files.sh /
+RUN chmod +x /cleanup_files.sh
+# TEMPORARY
+################################################################
+
+
+COPY entrypoint.sh /
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT [ "/entrypoint.sh" ]
+
+EXPOSE 8009
+EXPOSE 8080
+EXPOSE 8443
+EXPOSE 10022
+EXPOSE 11002
+
+# can't use USER with entrypoint that needs root
+# use gosu or, as done, enable bes user write so the entrypoint does not need root
+RUN chown -R bes /etc/bes
+USER root
+
+CMD ["-"]
+
