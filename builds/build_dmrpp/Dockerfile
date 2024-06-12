@@ -201,7 +201,7 @@ ENV CATALINA_OPTS "-Djava.library.path=/usr/local/apr/lib"
 
 RUN set -e && echo "#########################################################"
 RUN set -e && which java && java -version
-RUN set -e && alternatives --list
+# RUN set -e && alternatives --list
 RUN set -e && echo "#########################################################"
 ################################################################
 # Install the build dmr++ web application
