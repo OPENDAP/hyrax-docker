@@ -106,4 +106,4 @@ waitForHyrax
 
 echo "Testing the following image: ${test_image_name}"
 set -x
-docker exec -it hyrax /bin/bash -c "cd hyrax_regression_tests; ./testsuite --hyraxurl=\"${end_point}\" ${netrc_file} ${tests}"
+docker exec -it hyrax /bin/bash -c "cd hyrax_regression_tests; ./testsuite --hyraxurl=\"${end_point}\" ${netrc_file} ${tests}; ./show_fails"
