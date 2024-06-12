@@ -221,7 +221,7 @@ jobs:
           "${DOCKER_NAME}"
         - docker image ls -a
 
-    - stage: disabled
+    - stage: BUILD
       name: "Build opendap/hyrax:ngap-snapshot (RH8)"
       script:
         - cd builds
