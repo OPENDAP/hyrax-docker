@@ -187,7 +187,7 @@ ENV CATALINA_OPTS "-Djava.library.path=/usr/local/apr/lib"
 
 # Uninstall Java-1.8.0 installed by Ant
 RUN set -e && yum remove -y java-1.8.0-openjdk >&2
-RUN set -e && dnf install -y java-11-openjdk-devel
+RUN set -e && dnf install -y java-11-openjdk-devel >&2
 RUN set -e && which java && java -version
 ################################################################
 # Retrieve, verify, and install the NGAP/OLFS web application
