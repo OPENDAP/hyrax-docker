@@ -53,14 +53,24 @@ echo "#            NCWMS_BASE: ${NCWMS_BASE}" >&2
 
 ################################################################################
 echo "${HR2}" >&2
-export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-"<not set>"}
-echo "# AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}" >&2
 
-export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-"<not set>"}
-echo "#     AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}" >&2
+if test -n "${AWS_SECRET_ACCESS_KEY}"
+then
+    echo "# AWS_ACCESS_KEY_ID: HAS BEEN SET" >&2
+else
+    echo "# AWS_ACCESS_KEY_ID: HAS NOT BEEN SET" >&2
+fi
 
-export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-"<not set>"}
+if test -n "${AWS_SECRET_ACCESS_KEY}"
+then
+    echo "# AWS_SECRET_ACCESS_KEY: HAS BEEN SET" >&2
+else
+    echo "# AWS_SECRET_ACCESS_KEY: HAS NOT BEEN SET" >&2
+fi
+
+export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-"us-west-2"}
 echo "#    AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}" >&2
+
 
 ################################################################################
 echo "${HR2}" >&2
