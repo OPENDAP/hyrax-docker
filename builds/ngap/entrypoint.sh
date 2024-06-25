@@ -54,7 +54,7 @@ echo "#            NCWMS_BASE: ${NCWMS_BASE}" >&2
 ################################################################################
 echo "${HR2}" >&2
 
-if test -n "${AWS_SECRET_ACCESS_KEY}"
+if test -n "${AWS_ACCESS_KEY_ID}"
 then
     echo "# AWS_ACCESS_KEY_ID: HAS BEEN SET" >&2
 else
