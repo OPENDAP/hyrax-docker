@@ -8,7 +8,7 @@
 
 #echo "entrypoint.sh  command line: \"$@\""
 echo "############################## HYRAX ##################################" >&2
-echo "Greetings, I am "`whoami`"."   >&2
+echo "Greetings, I am "`whoami`" (uid: "`echo $UID`")."   >&2
 # set -e
 # set -x
 
