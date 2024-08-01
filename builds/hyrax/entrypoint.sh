@@ -13,31 +13,42 @@ echo "Greetings, I am "`whoami`"."   >&2
 # set -x
 
 
-export JAVA_HOME="${JAVA_HOME:-/etc/alternatives/jre}"
+export JAVA_HOME=${JAVA_HOME:-"/etc/alternatives/jre"}
 echo "JAVA_HOME: ${JAVA_HOME}" >&2
 
-export SLEEP_INTERVAL="${SLEEP_INTERVAL:-60}"
+export SLEEP_INTERVAL=${SLEEP_INTERVAL:-60}
 echo "SLEEP_INTERVAL: ${SLEEP_INTERVAL} seconds." >&2
 
-export SERVER_HELP_EMAIL="${SERVER_HELP_EMAIL:-not_set}"
+export SERVER_HELP_EMAIL=${SERVER_HELP_EMAIL:-"not_set"}
 echo "SERVER_HELP_EMAIL: ${SERVER_HELP_EMAIL}" >&2
 
-export FOLLOW_SYMLINKS="${FOLLOW_SYMLINKS:-not_set}"
+export FOLLOW_SYMLINKS=${FOLLOW_SYMLINKS:-"false"}
 echo "FOLLOW_SYMLINKS: ${FOLLOW_SYMLINKS}" >&2
 
-export NCWMS_BASE="${NCWMS_BASE:-https://localhost:8080}"
+export NCWMS_BASE=${NCWMS_BASE:-"https://localhost:8080"}
 echo "NCWMS_BASE: ${NCWMS_BASE}" >&2
 
-export AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:-<not set>}"
-echo "AWS_SECRET_ACCESS_KEY is ${AWS_SECRET_ACCESS_KEY}" >&2
+# AWS ##########################################################################
+echo "${HR2}" >&2
+if test -n "${AWS_ACCESS_KEY_ID}"
+then
+    echo "# AWS_ACCESS_KEY_ID: HAS BEEN SET" >&2
+else
+    echo "# AWS_ACCESS_KEY_ID: HAS NOT BEEN SET" >&2
+fi
 
-export AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID:-<not set>}"
-echo "AWS_ACCESS_KEY_ID is ${AWS_ACCESS_KEY_ID}" >&2
+if test -n "${AWS_SECRET_ACCESS_KEY}"
+then
+    echo "# AWS_SECRET_ACCESS_KEY: HAS BEEN SET" >&2
+else
+    echo "# AWS_SECRET_ACCESS_KEY: HAS NOT BEEN SET" >&2
+fi
 
-export AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION:-<not set>}"
-echo "AWS_DEFAULT_REGION is ${AWS_DEFAULT_REGION}" >&2
+export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-"us-west-2"}
+echo "#    AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}" >&2
 
-export DEBUG="${DEBUG:-false}"
+
+export DEBUG=${DEBUG:-false}
 
 while getopts "de:sn:i:k:r:" opt; do
   echo "Processing command line opt: ${opt}" >&2
@@ -58,13 +69,13 @@ while getopts "de:sn:i:k:r:" opt; do
       DEBUG=true
       echo "Debug is enabled" >&2
       ;;
-    k)
-      export AWS_SECRET_ACCESS_KEY="${OPTARG}"
-      echo "Found command line value for AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}" >&2;
-      ;;
     i)
       export AWS_ACCESS_KEY_ID="${OPTARG}"
-      echo "Found command line value for AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}" >&2;
+      echo "Found command line value for AWS_ACCESS_KEY_ID." >&2;
+      ;;
+    k)
+      export AWS_SECRET_ACCESS_KEY="${OPTARG}"
+      echo "Found command line value for AWS_SECRET_ACCESS_KEY." >&2;
       ;;
     r)
       export AWS_DEFAULT_REGION="${OPTARG}"
