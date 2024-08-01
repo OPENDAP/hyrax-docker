@@ -8,7 +8,7 @@
 
 #echo "entrypoint.sh  command line: \"$@\""
 echo "############################## HYRAX ##################################" >&2
-echo "Greetings, I am "`whoami`" (uid: "`echo $UID`")."   >&2
+echo "Greetings, I am "`whoami`" (uid: "`echo ${UID}`")."   >&2
 # set -e
 # set -x
 
@@ -142,8 +142,11 @@ fi
 # Start the BES daemon process
 # /usr/bin/besdaemon -i /usr -c /etc/bes/bes.conf -r /var/run/bes.pid
 bes_uid=$(id -u bes)
+echo "bes_uid: ${bes_uid}" >&2
 bes_gid=$(id -g bes)
-echo "Launching besd [uid: ${bes_uid} gid: ${bes_gid}]" >&2
+echo "bes_gid: ${bes_gid}" >&2
+
+echo "Launching besd..." >&2
 /usr/bin/besctl start
 status=$?
 if test $status -ne 0 ; then
