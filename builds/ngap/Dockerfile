@@ -175,7 +175,10 @@ RUN set -e \
 RUN set -e \
     && export JAVA_HOME="$(dirname $(dirname $(readlink -f $(which javac))))" >&2 \
     && echo $JAVA_HOME >&2 \
+    && tar -tf "/${CATALINA_HOME}/bin/tomcat-native.tar.gz" >&2 \
     && tar -xvf "/${CATALINA_HOME}/bin/tomcat-native.tar.gz" -C ${CATALINA_HOME}/bin >&2 \
+    && ls -l ${CATALINA_HOME}/bin >&2 \
+    && ls -l ${CATALINA_HOME}/bin/tomcat-native-1.3.0-src >&2 \
     && cd ${CATALINA_HOME}/bin/tomcat-native-1.3.0-src/native >&2 \
     && ./configure >&2 \
     && make >&2 \
