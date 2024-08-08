@@ -11,7 +11,7 @@
 # - Source this file into your working shell
 # - Read this file to see the commands
 # - And then use the functions defined herein
-#   do the Docker things in your working shell
+#   do the Docker things in your working shell.
 #
 #------------------------------------------------------------------------------
 
