@@ -1,6 +1,6 @@
 # Hyrax docker
 
-## Current Version: <font style="font-size: 300%;">**Hyrax-1.17.0-1**</font>
+## Current Version: <font style="font-size: 300%;">**Hyrax-1.17.0-1**</font> [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14015001.svg)](https://doi.org/10.5281/zenodo.14015001)
 
 **Hyrax-1.17.0** is composed of:
 
