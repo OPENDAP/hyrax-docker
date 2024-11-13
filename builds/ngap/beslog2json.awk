@@ -81,7 +81,11 @@ function process_bool_value(var_val, dfault, ret_val){
 #
 function print_opener(unix_time, pid, log_type){
     printf("{ %s", N);
-    printf("%s\"%stime\": %s", INDENT, PREFIX, unix_time);
+    if(unix_time ~ /^[0-9]+$/){ 
+        printf("%s\"%stime\": %s", INDENT, PREFIX, unix_time);
+    } else { 
+        printf("%s\"%stime\": \"%s\"", INDENT, PREFIX, unix_time);
+    }
     write_kvp_num("pid", pid);
     write_kvp_str("type", log_type);
 }
