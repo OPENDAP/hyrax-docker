@@ -1,11 +1,12 @@
 #
 # Translates OPeNDAP bes.logs into JSON
 #
+#
 # Log Fields type==request
 # 1601646465|&|2122|&|request|&|OLFS|&|0:0:0:0:0:0:0:1|&|USER_AGENT|&|92F3C71F959B56515C98A09088CA2A8E
 #    1          2        3       4           5              6               7
-# |&|-|&|1601646465304|&|18|&|HTTP-GET|&|/opendap/hyrax/data/nc/fnoc1.nc.dds|&|u|&|BES
-#    8     9             10     11              12                             13   14
+# |&|-|&|1601646465304|&|REQUEST-ID|&|HTTP-GET|&|/opendap/hyrax/data/nc/fnoc1.nc.dds|&|u|&|BES
+#    8     9             10             11              12                             13   14
 # |&|get.dds|&|dap2|&|/Users/ndp/OPeNDAP/hyrax/build/share/hyrax/data/nc/fnoc1.nc|&|u
 #      15       16                              17                                  18
 #
@@ -215,8 +216,8 @@ BEGIN {
             # The time the the request was received.
             write_kvp_num("start_time",$9);
 
-            # We are not so sure what this number is...
-            write_kvp_num("duration",$10);
+            # The request_id for the request...
+            write_kvp_str("req_id",$10);
 
             # The HTTP verb of the request (GET, POST, etc)
             write_kvp_str("http_verb",$11);
