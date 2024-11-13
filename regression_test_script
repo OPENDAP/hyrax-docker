@@ -108,5 +108,6 @@ echo "Testing the following image: ${test_image_name}"
 set -x
 docker exec -it hyrax /bin/bash -c "cd hyrax_regression_tests; ./testsuite --hyraxurl=\"${end_point}\" ${netrc_file} ${tests}; ./show_fails"
 
-docker exec -it hyrax  /bin/bash -c "cd /var/log/bes; cat bes.log" | jq '.'
+echo "Checking beslog2json.awk"
+docker exec -it hyrax /bin/bash -c "cd /var/log/bes; cat bes.log" | awk -f builds/ngap/beslog2json.awk | jq '.'
 echo "JQ STATUS: $?"
