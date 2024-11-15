@@ -46,6 +46,18 @@
 #
 # -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
 
+
+
+
+
+function escape_json_str(str) {
+    gsub(/\"/, "\\\"", str);
+    gsub(/\\/, "\\\\", str);
+    gsub(/\n/, "\\n", str);
+    gsub(/\t/, "\\t", str);
+    return str;
+}
+
 ########################################################################
 # process_bool_value()
 #
@@ -81,6 +93,8 @@ function process_bool_value(var_val, dfault, ret_val){
 #
 function print_opener(unix_time, pid, log_type){
     printf("{ %s", N);
+    # If the unix_time value is a number, 
+    # then don't surround it with double quotes.
     if(unix_time ~ /^[0-9]+$/){ 
         printf("%s\"%stime\": %s", INDENT, PREFIX, unix_time);
     } else { 
@@ -105,6 +119,9 @@ function print_closer(){
 # Writes a key value pair in json. The value is handled as a number
 #
 function write_kvp_num(key,value){
+    if(length(value)==0){
+        value = "-1";
+    }
     printf (", %s%s\"%s%s\": %s", N, INDENT, PREFIX, key, value);
 }
 
@@ -114,7 +131,10 @@ function write_kvp_num(key,value){
 # Writes a key value pair in json. The value handled as a string.
 #
 function write_kvp_str(key,value){
-    printf (", %s%s\"%s%s\": \"%s\"", N, INDENT, PREFIX, key, value);
+    if(length(value)==0){
+        value = "-";
+    }
+    printf (", %s%s\"%s%s\": \"%s\"", N, INDENT, PREFIX, key, escape_json_str(value));
 }
 
 ########################################################################
