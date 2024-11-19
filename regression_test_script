@@ -117,11 +117,12 @@ docker cp hyrax:/var/log/bes/bes.log .
 echo "############################################################################"
 echo "# head ./bes.log"
 head ./bes.log
+#head -100 ./bes.log | awk -f builds/ngap/beslog2json.awk > ./bes.json
 awk -f builds/ngap/beslog2json.awk ./bes.log > ./bes.json
 echo "############################################################################"
 echo "# head ./bes.json"
 head ./bes.json
 echo "############################################################################"
-jq '.' ./bes.json
+jq '.' ./bes.json > /dev/null
 echo "JQ STATUS: $?"
 
