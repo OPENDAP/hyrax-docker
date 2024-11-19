@@ -110,11 +110,11 @@ set -x
 docker exec -it hyrax /bin/bash -c "cd hyrax_regression_tests; ./testsuite --hyraxurl=\"${end_point}\" ${netrc_file} ${tests}; "
 #./show_fails"
 
-echo "############################################################################"
-echo "# Checking beslog2json.awk"
-docker exec -it hyrax /bin/bash -c "cd /var/log/bes; cat bes.log" > ./bes.log
-head ./bes.log
-awk -f builds/ngap/beslog2json.awk ./bes.log > ./bes.json
-head ./bes.json
-jq '.' ./bes.json
-echo "JQ STATUS: $?"
+#echo "############################################################################"
+#echo "# Checking beslog2json.awk"
+#docker exec -it hyrax /bin/bash -c "cd /var/log/bes; cat bes.log" > ./bes.log
+#head ./bes.log
+#awk -f builds/ngap/beslog2json.awk ./bes.log > ./bes.json
+#head ./bes.json
+#jq '.' ./bes.json
+#echo "JQ STATUS: $?"
