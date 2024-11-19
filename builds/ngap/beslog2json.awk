@@ -47,17 +47,6 @@
 # -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
 
 
-
-
-
-function escape_json_str(str) {
-    gsub(/\"/, "\\\"", str);
-    gsub(/\\/, "\\\\", str);
-    #gsub(/\n/, "\\n", str);
-    #gsub(/\t/, "\\t", str);
-    return str;
-}
-
 ########################################################################
 # process_bool_value()
 #
@@ -134,7 +123,7 @@ function write_kvp_str(key,value){
     if(length(value)==0){
         value = "-";
     }
-    printf (", %s%s\"%s%s\": \"%s\"", N, INDENT, PREFIX, key, escape_json_str(value));
+    printf (", %s%s\"%s%s\": \"%s\"", N, INDENT, PREFIX, key, value);
 }
 
 ########################################################################
