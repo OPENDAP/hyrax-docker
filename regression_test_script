@@ -118,3 +118,4 @@ docker exec -it hyrax /bin/bash -c "cd hyrax_regression_tests; ./testsuite --hyr
 #head ./bes.json
 #jq '.' ./bes.json
 #echo "JQ STATUS: $?"
+
