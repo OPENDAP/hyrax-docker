@@ -118,8 +118,10 @@ echo "# head ./bes.log"
 head ./bes.log
 cat ./bes.log | python3 builds/ngap/beslog2json.py > ./bes.json
 echo "############################################################################"
-echo "# head ./bes.json"
-head ./bes.json
+echo "# head -20 ./bes.json"
+head -n 10 ./bes.json
+echo "# tail -20 ./bes.json"
+tail -n 20 ./bes.json
 echo "############################################################################"
 jq '.' ./bes.json > /dev/null
 echo "JQ STATUS: $?"
