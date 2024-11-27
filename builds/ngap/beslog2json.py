@@ -251,12 +251,100 @@ def timing_log_to_json(log_fields, json_log_line):
     return send_it
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
+##########################################################
+# Populate response dictionary with a processing error.
+#
 def processing_error(msg, json_log_line):
     now = int(time.time())
     json_log_line[TIME_KEY] = now
     json_log_line[PID_KEY]  = os.getpid()
     json_log_line[TYPE_KEY] = ERROR_MESSAGE_TYPE
     json_log_line[MESSAGE_KEY] =  (msg)
+    return True
+
+
+##########################################################
+#  Process a timing log record with [] delimiters.
+# [UTC Wed Nov 27 18:48:20 2024][pid:117][thread:139661163814208][timing][ELAPSED][4 us][STARTED][1732733300645844 us][STOPPED][1732733300645848 us][-][Command timing: BESXMLInterface::transmit_data() - ]
+#  0 - [UTC Wed Nov 27 18:48:20 2024]
+#  1 - [pid:117]
+#  2 - [thread:139661163814208]
+#  3 - [timing]
+#  4 - [ELAPSED]
+#  5 - [4 us]
+#  6 - [STARTED]
+#  7 - [1732733300645844 us]
+#  8 - [STOPPED]
+#  9 - [1732733300645848 us]
+# 10 - [-]
+# 11 - [Command timing: BESXMLInterface::transmit_data() - ]
+def square_bracket_timing_record(log_fields, json_log_line):
+    debug("square_bracket_timing_record() - BEGIN")
+    send_it = False
+    #if TRANSMIT_TIMING_LOG:
+
+    if True :
+        debug(f"square_bracket_timing_record() - Processing timing log line")
+        if log_fields[4] == "ELAPSED":
+            debug("square_bracket_timing_record() - Found ELAPSED ")
+            elapsed_us = log_fields[5]
+            elapsed_us = elapsed_us[:-3]
+            debug(f"square_bracket_timing_record() - elapsed_us: {elapsed_us} ")
+            json_log_line[ELAPSED_TIME_KEY] = int(elapsed_us)
+
+            start_us = log_fields[7]
+            start_us = start_us[:-3]
+            debug(f"square_bracket_timing_record() - start_us: {start_us} ")
+            json_log_line[START_TIME_KEY] = int(start_us)
+
+            stop_us = log_fields[9]
+            stop_us = stop_us[:-3]
+            debug(f"square_bracket_timing_record() - stop_us: {stop_us} ")
+            json_log_line[STOP_TIME_KEY] = int(stop_us)
+
+            json_log_line[REQUEST_ID_TIMER_KEY] = log_fields[10]
+            json_log_line[TIMER_NAME_KEY] = log_fields[11]
+            send_it = True
+            debug(f"square_bracket_timing_record() - json: {json.dumps(json_log_line)} ")
+            debug(f"square_bracket_timing_record() - send_it: {send_it} ")
+        else:
+            return processing_error(f"Failed to identify timing data in log_line: {log_line}", json_log_line)
+    else:
+        debug("TRANSMIT_TIMING_LOG: {str(TRANSMIT_TIMING_LOG)}")
+
+    return send_it
+
+
+##########################################################
+# Process a log line that has [] delimiters.
+# @TODO Not a full implementation, just timing logs for now.
+def square_bracket_log_line(log_line, json_log_line):
+    send_it = False
+    sqb_delimiter = "]["
+    log_fields = log_line.split(sqb_delimiter)
+
+    time_str = log_fields[0]
+    if time_str.startswith("["):
+        time_str = time_str[1:]
+    json_log_line[TIME_KEY] = time_str
+
+    pid = log_fields[1]
+    pid = pid[4:]
+    json_log_line[PID_KEY]  = int(pid)
+
+    thread = log_fields[2]
+    thread = thread[7:]
+
+    type = log_fields[3]
+    json_log_line[TYPE_KEY]  = type
+
+    debug(json.dumps(json_log_line))
+    if type == TIMING_MESSAGE_TYPE:
+        send_it = square_bracket_timing_record(log_fields, json_log_line)
+    else:
+        return processing_error(f"Incompatible log_line: {log_line}", json_log_line)
+
+    return send_it
 
 
 
@@ -290,11 +378,11 @@ def beslog2json():
             break
 
         if log_line.startswith("["):
-            msg = (f"OUCH! Incompatible input log line {line_count} appears to use [ and ] to "
-            f"delimit values. Line: {log_line}")
-            debug(msg)
-            processing_error(msg, json_log_line)
-            send_it = True
+            #msg = (f"OUCH! Incompatible input log line {line_count} appears to use [ and ] to "
+            #f"delimit values. Line: {log_line}")
+            #debug(msg)
+            #processing_error(msg, json_log_line)
+            send_it = square_bracket_log_line(log_line, json_log_line)
         else:
             debug("Log Line(" + str(line_count) + "): " + log_line)
             log_fields = log_line.split(bes_log_field_delimiter)
