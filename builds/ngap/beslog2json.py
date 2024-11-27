@@ -281,9 +281,7 @@ def processing_error(msg, json_log_line):
 def square_bracket_timing_record(log_fields, json_log_line):
     debug("square_bracket_timing_record() - BEGIN")
     send_it = False
-    #if TRANSMIT_TIMING_LOG:
-
-    if True :
+    if TRANSMIT_TIMING_LOG:
         debug(f"square_bracket_timing_record() - Processing timing log line")
         if log_fields[4] == "ELAPSED":
             debug("square_bracket_timing_record() - Found ELAPSED ")
@@ -310,7 +308,7 @@ def square_bracket_timing_record(log_fields, json_log_line):
         else:
             return processing_error(f"Failed to identify timing data in log_line: {log_line}", json_log_line)
     else:
-        debug("TRANSMIT_TIMING_LOG: {str(TRANSMIT_TIMING_LOG)}")
+        debug(f"TRANSMIT_TIMING_LOG: {str(TRANSMIT_TIMING_LOG)}")
 
     return send_it
 
@@ -342,7 +340,7 @@ def square_bracket_log_line(log_line, json_log_line):
     if type == TIMING_MESSAGE_TYPE:
         send_it = square_bracket_timing_record(log_fields, json_log_line)
     else:
-        return processing_error(f"Incompatible log_line: {log_line}", json_log_line)
+        send_it = processing_error(f"Incompatible log_line: {log_line}", json_log_line)
 
     return send_it
 
@@ -378,10 +376,6 @@ def beslog2json():
             break
 
         if log_line.startswith("["):
-            #msg = (f"OUCH! Incompatible input log line {line_count} appears to use [ and ] to "
-            #f"delimit values. Line: {log_line}")
-            #debug(msg)
-            #processing_error(msg, json_log_line)
             send_it = square_bracket_log_line(log_line, json_log_line)
         else:
             debug("Log Line(" + str(line_count) + "): " + log_line)
@@ -422,8 +416,7 @@ def beslog2json():
                     
                 except Exception as e:
                     msg = (f"OUCH! Incompatible input log line {line_count} failed with the "
-                    f"message: {str(e)} log_line: {log_line}")
-
+                    f"message: \"{str(e)}\" log_line: {log_line}")
                     debug(msg)
                     processing_error(msg, json_log_line)
                     send_it = True
