@@ -25,6 +25,9 @@ import re
 import json
 import getopt
 import ast
+import time
+import os
+
 
 
 debug_flag = False 
@@ -225,6 +228,16 @@ def timing_log_to_json(log_fields, json_log_line):
     return send_it
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
+def processing_error(msg, json_log_line):
+    now = int(time.time())
+    json_log_line[TIME_KEY] = now
+    json_log_line[PID_KEY]  = os.getpid()
+    json_log_line[TYPE_KEY] = ERROR_MESSAGE_TYPE
+    json_log_line[MESSAGE_KEY] =  (msg)
+
+
+
+
 ##########################################################
 ##########################################################
 ##########################################################
@@ -239,10 +252,12 @@ def beslog2json():
         line_count += 1
         json_log_line={}
         log_line=""
-        
+
+        # Get the current Unix time
+
         try:
             log_line = input()
-            debug("log_line: "+log_line)
+            debug(f"log_line:  {log_line}")
         except EOFError:
             debug("End of input reached. Exiting...")
             break     
@@ -252,7 +267,11 @@ def beslog2json():
             break
 
         if log_line.startswith("["):
-            debug("Skipping log line " + str(line_count) + " containing '][' delimiters")
+            msg = (f"OUCH! Incompatible input log line {line_count} appears to use [ and ] to "
+            f"delimit values. Line: {log_line}")
+            debug(msg)
+            processing_error(msg, json_log_line)
+            send_it = True
         else:
             debug("Log Line(" + str(line_count) + "): " + log_line)
             log_fields = log_line.split(bes_log_field_delimiter)
@@ -285,18 +304,28 @@ def beslog2json():
                     else:
                         debug("UNKNOWN LOG MESSAGE TYPE: " + log_line)
                     
-                except Exception as e: 
-                     debug("Caught " + str(e) + " Skipping log_line: " + log_line)
-                     
-                if send_it:
-                    print(json.dumps(json_log_line))
-    
+                except Exception as e:
+                    msg = (f"OUCH! Incompatible input log line {line_count} failed with the "
+                    f"message: {str(e)} log_line: {log_line}")
+
+                    debug(msg)
+                    processing_error(msg, json_log_line)
+                    send_it = True
+
                 debug("---------------------------------------------")
             else:
-                debug("Skipping non compliant log line: " + log_line)
-    
-    
+                msg =  (f"OUCH! Incompatible input log line {line_count}  log_line: {log_line}")
+                debug(msg)
+                processing_error(msg, json_log_line)
+                send_it = True
 
+        if send_it:
+            print(json.dumps(json_log_line))
+
+
+##########################################################
+# Print usage statement to stderr.
+#
 def usage():
     the_words = """
 beslog2json.py
@@ -330,6 +359,9 @@ beslog2json.py
 """
     print(the_words, file=sys.stderr)
 
+##########################################################
+# main
+#
 def main(argv):
     global debug_flag
     global TRANSMIT_REQUEST_LOG
