@@ -434,9 +434,10 @@ echo "#" >&2
 # TEMPORARY ###################################################################
 /cleanup_files.sh >&2 &
 
-# This 'tail -f' may not work in the background in which case we need to find
-# an alternate way
+# The old AWKy way
 # tail -f "${BES_LOG_FILE}" | awk -f beslog2json.awk &
+
+# The new snakey way.
 tail -f "${BES_LOG_FILE}" | python3 beslog2json.py &
 
 # TEMPORARY ###################################################################
