@@ -392,7 +392,12 @@ def beslog2json():
                 send_it = False
                 
                 try:
-                    json_log_line[TIME_KEY] = int(log_fields[0])
+                    time_str = log_fields[0]
+                    if time_str.isnumeric():
+                        json_log_line[TIME_KEY] = int(log_fields[0])
+                    else:
+                        json_log_line[TIME_KEY] = log_fields[0]
+
                     json_log_line[PID_KEY]  = int(log_fields[1])
                     log_record_type = log_fields[2]
                     json_log_line[TYPE_KEY] = log_record_type
