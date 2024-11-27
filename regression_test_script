@@ -112,13 +112,12 @@ docker exec -it hyrax /bin/bash -c "cd hyrax_regression_tests; ./testsuite --hyr
 
 echo "############################################################################"
 echo "# Checking beslog2json.awk"
-# docker exec -it hyrax /bin/bash -c "cd /var/log/bes; cat bes.log" > ./bes.log
+echo "# Acquiring bes.log from docker image."
 docker cp hyrax:/var/log/bes/bes.log .
 echo "############################################################################"
 echo "# head ./bes.log"
 head ./bes.log
-#head -100 ./bes.log | awk -f builds/ngap/beslog2json.awk > ./bes.json
-awk -f builds/ngap/beslog2json.awk ./bes.log > ./bes.json
+cat ./bes.log | python3 builds/ngap/beslog2json.py > ./bes.json
 echo "############################################################################"
 echo "# head ./bes.json"
 head ./bes.json
