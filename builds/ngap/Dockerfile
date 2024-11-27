@@ -266,6 +266,9 @@ RUN set -e \
 COPY beslog2json.awk /
 RUN  set -e && chmod +x beslog2json.awk
 
+COPY beslog2json.py /
+RUN  set -e && chmod +x beslog2json.py
+
 ################################################################
 # TEMPORARY
 # Grab the cleanup files script for managing orphaned files

@@ -436,7 +436,8 @@ echo "#" >&2
 
 # This 'tail -f' may not work in the background in which case we need to find
 # an alternate way
-tail -f "${BES_LOG_FILE}" | awk -f beslog2json.awk &
+# tail -f "${BES_LOG_FILE}" | awk -f beslog2json.awk &
+tail -f "${BES_LOG_FILE}" | python3 beslog2json.py &
 
 # TEMPORARY ###################################################################
 
@@ -480,9 +481,6 @@ while /bin/true; do
         echo "#   BESD_STATUS: $BESD_STATUS     besd_pid: $besd_pid" >&2
         echo "# TOMCAT_STATUS: $TOMCAT_STATUS tomcat_pid: $tomcat_pid" >&2
     fi
-
-    # Moved to outside this loop and background.
-    # tail -f "${BES_LOG_FILE}" | awk -f beslog2json.awk
 
 done
 #-------------------------------------------------------------------------------
