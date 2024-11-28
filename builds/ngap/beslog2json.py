@@ -194,17 +194,8 @@ def add_prefix_to_request_log_keys():
 def debug(msg):
     """Writes msg to stderr when the debug_flag is enabled"""
     if debug_flag:
-        print("#", msg, file=sys.stderr)
+        print("#", msg.replace("\n","\\n"), file=sys.stderr)
         sys.stderr.flush()
-
-
-##########################################################
-def torf(bool_val):
-    """Returns 'true' or 'false' according to the value of bool_val"""
-    if bool_val:
-        return "true"
-    else:
-        return "false"
 
 ##########################################################
 def eord(bool_val):
@@ -217,7 +208,7 @@ def eord(bool_val):
 ##########################################################
 def show_config():
     """Shows the configuration state when in debuggin mode"""
-    debug(f"debug_flag is  {torf(debug_flag)}")
+    debug(f"debug_flag is {str(debug_flag).lower()}")
     debug(f"TRANSMIT_REQUEST_LOG is {eord(TRANSMIT_REQUEST_LOG)}")
     debug(f"TRANSMIT_INFO_LOG is {eord(TRANSMIT_INFO_LOG)}")
     debug(f"TRANSMIT_ERROR_LOG is {eord(TRANSMIT_ERROR_LOG)}")
@@ -228,7 +219,6 @@ def show_config():
 def request_log_to_json(log_fields, json_log_line):
     """Ingests a BES request log record"""
     debug("Processing REQUEST_MESSAGE_TYPE")
-
     send_it = False
     if TRANSMIT_REQUEST_LOG:
         json_log_line[CLIENT_IP_KEY] = log_fields[4]
@@ -243,11 +233,11 @@ def request_log_to_json(log_fields, json_log_line):
         json_log_line[BES_ACTION_KEY] = log_fields[14]
         json_log_line[RETURN_AS_KEY] = log_fields[15]
         json_log_line[LOCAL_PATH_KEY] = log_fields[16]
-
         if len(log_fields) > 17:
             json_log_line[CE_KEY] = log_fields[17]
         else:
             json_log_line[CE_KEY] = "-"
+
         send_it = True
     else:
         debug(f"TRANSMIT_REQUEST_LOG: {eord(TRANSMIT_REQUEST_LOG)}")
@@ -273,7 +263,6 @@ def info_log_to_json(log_fields, json_log_line):
 def error_log_to_json(log_fields, json_log_line):
     """Ingests a BES error log record"""
     debug("Processing ERROR_MESSAGE_TYPE")
-
     send_it = False
     if TRANSMIT_ERROR_LOG:
         json_log_line[MESSAGE_KEY] = log_fields[3]
@@ -288,7 +277,6 @@ def error_log_to_json(log_fields, json_log_line):
 def verbose_log_to_json(log_fields, json_log_line):
     """Ingests a BES verbose log record"""
     debug("Processing VERBOSE_MESSAGE_TYPE")
-
     send_it = False
     if TRANSMIT_VERBOSE_LOG:
         json_log_line[MESSAGE_KEY] = log_fields[3]
@@ -320,13 +308,11 @@ def timing_log_to_json(log_fields, json_log_line):
 
 ##########################################################
 def processing_error(msg, json_log_line):
-    """Populate response dictionary with a processing error message"""
+    """Populate response dictionary with a log_line processing error"""
     # Use the current Unix time
     json_log_line[TIME_KEY] = int(time.time())
-
     # Use the PID of this beslog2json process.
     json_log_line[PID_KEY]  = os.getpid()
-
     json_log_line[TYPE_KEY] = ERROR_MESSAGE_TYPE
     json_log_line[MESSAGE_KEY] = msg
     return True
@@ -374,7 +360,6 @@ def square_bracket_timing_record(log_fields, json_log_line):
             json_log_line[TIMER_NAME_KEY] = log_fields[11]
             send_it = True
             debug(f"{prolog} json: {json.dumps(json_log_line)} ")
-            debug(f"{prolog} send_it: {send_it} ")
         else:
             return processing_error(f"{prolog} Failed to identify timing data in log_fields: {log_fields}", json_log_line)
     else:
@@ -385,9 +370,9 @@ def square_bracket_timing_record(log_fields, json_log_line):
 
 ##########################################################
 # @TODO Not a full implementation, just timing logs for now.
-def square_bracket_log_line(log_line, json_log_line):
+def square_bracket_log_record(log_line, json_log_line):
     """Process a BES log line that has [] delimiters."""
-    #send_it = False
+    prolog ="square_bracket_log_record()"
     log_fields = log_line.split(bes_square_bracket_log_delimiter)
 
     # Remove the leading open square bracket character from the time string.
@@ -401,14 +386,16 @@ def square_bracket_log_line(log_line, json_log_line):
 
     # This value is not used...
     # thread = log_fields[2][7:]
-    log_record_type = log_fields[3];
+    log_record_type = log_fields[3]
     json_log_line[TYPE_KEY] = log_record_type
 
     debug(json.dumps(json_log_line))
     if log_record_type == TIMING_MESSAGE_TYPE:
         send_it = square_bracket_timing_record(log_fields, json_log_line)
     else:
-        send_it = processing_error(f"Incompatible log_line: {log_line}", json_log_line)
+        # @TODO Not a full implementation, just timing logs for now.
+        send_it = processing_error(f"{prolog} Unable to process log_line: \"{log_line}\" Only timing "
+                                   f"message are supported for square bracket delimited logs;", json_log_line)
 
     return send_it
 
@@ -424,9 +411,10 @@ def beslog2json(line_count, log_line):
     #line_count=0
     #show_config()
     json_log_line={}
+    prolog ="beslog2json()"
 
     if log_line.startswith("["):
-        send_it = square_bracket_log_line(log_line, json_log_line)
+        send_it = square_bracket_log_record(log_line, json_log_line)
     else:
         log_fields = log_line.split(bes_log_field_delimiter)
         debug(f"log_fields length: {len(log_fields)}")
@@ -458,12 +446,12 @@ def beslog2json(line_count, log_line):
                     send_it = timing_log_to_json(log_fields, json_log_line)
 
                 else:
-                    msg = f"UNKNOWN LOG RECORD TYPE {log_record_type} log_line: {log_line}"
+                    msg = f"{prolog} UNKNOWN LOG RECORD TYPE {log_record_type} log_line: {log_line}"
                     debug(msg)
                     send_it = processing_error(msg, json_log_line)
 
         else:
-            msg = f"OUCH! Incompatible input log line {line_count}  log_line: {log_line}"
+            msg = f"{prolog} OUCH! Incompatible input log line {line_count}  log_line: {log_line}"
             debug(msg)
             send_it = processing_error(msg, json_log_line)
 
@@ -473,6 +461,8 @@ def beslog2json(line_count, log_line):
 ##########################################################
 def read_from_stdin():
     """Reads BES log lines from stdin and turns them into JSON records."""
+    prolog="read_from_stdin()"
+
     line_count=0
     show_config()
     while True:
@@ -494,7 +484,7 @@ def read_from_stdin():
         try:
             beslog2json(line_count, log_line)
         except Exception as e:
-            msg = (f"OUCH! Incompatible input log line {line_count} failed with the "
+            msg = (f"{prolog} OUCH! Incompatible input log line {line_count} failed with the "
                    f"message: \"{str(e)}\" log_line: {log_line}")
             debug(msg)
             json_log_line={}
@@ -502,9 +492,11 @@ def read_from_stdin():
             print(json.dumps(json_log_line))
 
 
+
 ##########################################################
 def read_from_file(filename):
     """Reads BES log lines from filename and turns them into JSON records."""
+    prolog="read_from_file()"
     with open(filename, 'r') as log_file:
         line_count=0
         show_config()
@@ -512,17 +504,16 @@ def read_from_file(filename):
             line_count += 1
             debug("-------------------------------------------------------------------------")
             debug(f"line: {line_count}")
-            debug(f"log_line:  {log_line}")
+            debug(f"log_line: {log_line}")
 
             if not log_line:
                 debug(f"Failed to read line from file: {filename} line_count: {line_count} Exiting...")
                 break
 
-            debug(f"Log Line({str(line_count)}): {log_line}")
             try:
                 beslog2json(line_count, log_line)
             except Exception as e:
-                msg = (f"OUCH! Incompatible input log line {line_count} failed with the "
+                msg = (f"{prolog} OUCH! Incompatible input log line {line_count} failed with the "
                        f"message: \"{str(e)}\" log_line: {log_line}")
                 debug(msg)
                 json_log_line={}
