@@ -371,6 +371,7 @@ def beslog2json():
         line_count += 1
         json_log_line={}
         log_line=""
+        send_it = False
 
         debug("-------------------------------------------------------------------------")
         debug(f"line: {line_count}")
@@ -394,8 +395,6 @@ def beslog2json():
             debug(f"log_fields length: {len(log_fields)}")
 
             if len(log_fields) > 3:
-                send_it = False
-
                 try:
                     time_str = log_fields[0]
                     if time_str.isnumeric():
@@ -434,10 +433,9 @@ def beslog2json():
                     send_it = processing_error(msg, json_log_line)
 
             else:
-                msg =  (f"OUCH! Incompatible input log line {line_count}  log_line: {log_line}")
+                msg = f"OUCH! Incompatible input log line {line_count}  log_line: {log_line}"
                 debug(msg)
-                processing_error(msg, json_log_line)
-                send_it = True
+                send_it = processing_error(msg, json_log_line)
 
         if send_it:
             print(json.dumps(json_log_line))
