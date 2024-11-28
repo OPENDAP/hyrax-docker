@@ -329,10 +329,10 @@ def square_bracket_timing_record(log_fields, json_log_line):
 # @TODO Not a full implementation, just timing logs for now.
 def square_bracket_log_line(log_line, json_log_line):
     """Process a BES log line that has [] delimiters."""
-    send_it = False
+    #send_it = False
     log_fields = log_line.split(bes_square_bracket_log_delimiter)
 
-    # Remove the leadin "["  from the time string.
+    # Remove the leading open square bracket character from the time string.
     time_str = log_fields[0]
     if time_str.startswith("["):
         time_str = time_str[1:]
@@ -344,8 +344,7 @@ def square_bracket_log_line(log_line, json_log_line):
     # This value is not used...
     # thread = log_fields[2][7:]
 
-    type = log_fields[3]
-    json_log_line[TYPE_KEY]  = type
+    json_log_line[TYPE_KEY] = log_fields[3]
 
     debug(json.dumps(json_log_line))
     if type == TIMING_MESSAGE_TYPE:
@@ -368,8 +367,8 @@ def beslog2json():
     while True:
         line_count += 1
         json_log_line={}
-        log_line=""
-        send_it = False
+        #log_line=""
+        #send_it = False
 
         debug("-------------------------------------------------------------------------")
         debug(f"line: {line_count}")
