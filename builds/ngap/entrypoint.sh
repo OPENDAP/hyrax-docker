@@ -438,7 +438,7 @@ echo "#" >&2
 # tail -f "${BES_LOG_FILE}" | awk -f beslog2json.awk &
 
 # The new snakey way.
-tail -f "${BES_LOG_FILE}" | python3 beslog2json.py &
+tail -f "${BES_LOG_FILE}" | python3 beslog2json.py -p hyrax &
 
 # TEMPORARY ###################################################################
 

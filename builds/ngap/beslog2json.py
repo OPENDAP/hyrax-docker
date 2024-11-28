@@ -587,9 +587,8 @@ DESCRIPTION
             Turns on debugging output which is transmitted on stderr.
 
 EXAMPLE
-    tail -f bes.log | python3 beslog2json.py -t true -p hyrax 
-
-
+    tail -f bes.log | python3 beslog2json.py -t true -p besd 
+    
 beslog2json.py
 """
     print(the_words, file=sys.stderr)
