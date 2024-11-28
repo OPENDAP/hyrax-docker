@@ -68,13 +68,22 @@ TRANSMIT_VERBOSE_LOG = True
 TRANSMIT_TIMING_LOG  = False
 
 ##########################################################
-# Common To Log Record Keys
-TIME_KEY="time"
-PID_KEY="pid"
-TYPE_KEY="type"
-MESSAGE_KEY="message"
+# BES Log Message Type Values
+BES_REQUEST_LOG_RECORD_TYPE = "request"
+BES_INFO_LOG_RECORD_TYPE    = "info"
+BES_ERROR_LOG_RECORD_TYPE   = "error"
+BES_VERBOSE_LOG_RECORD_TYPE = "verbose"
+BES_TIMING_LOG_RECORD_TYPE  = "timing"
 
-def add_prefix_to_common_log_keys():
+##########################################################
+# JSON Shared Log Record Keys (may receive a user supplied prefix)
+TIME_KEY    = "time"
+PID_KEY     = "pid"
+TYPE_KEY    = "type"
+MESSAGE_KEY = "message"
+
+def add_prefix_to_shared_log_keys():
+    """Applies user supplied prefix to shared log record keys """
     global TIME_KEY
     global PID_KEY
     global TYPE_KEY
@@ -86,23 +95,17 @@ def add_prefix_to_common_log_keys():
         TYPE_KEY = the_prefix + TYPE_KEY
         MESSAGE_KEY = the_prefix + MESSAGE_KEY
 
-##########################################################
-# Log Message Type Keys
-REQUEST_MESSAGE_TYPE="request"
-INFO_MESSAGE_TYPE="info"
-ERROR_MESSAGE_TYPE="error"
-VERBOSE_MESSAGE_TYPE="verbose"
-TIMING_MESSAGE_TYPE="timing"
 
 ##########################################################
-# Timing Log Keys
-ELAPSED_TIME_KEY="elapsed-us"
-START_TIME_KEY="start-us"
-STOP_TIME_KEY="stop-us"
-REQUEST_ID_TIMER_KEY="request-id"
-TIMER_NAME_KEY="timer-name"
+# Timing Log Keys (may receive a user supplied prefix)
+ELAPSED_TIME_KEY     = "elapsed-us"
+START_TIME_KEY       = "start-us"
+STOP_TIME_KEY        = "stop-us"
+REQUEST_ID_TIMER_KEY = "request-id"
+TIMER_NAME_KEY       = "timer-name"
 
 def add_prefix_to_timing_log_keys():
+    """Applies user supplied prefix to timing log record keys """
     global ELAPSED_TIME_KEY
     global START_TIME_KEY
     global STOP_TIME_KEY
@@ -117,7 +120,7 @@ def add_prefix_to_timing_log_keys():
         TIMER_NAME_KEY = the_prefix + TIMER_NAME_KEY
 
 ######################################################################################################
-# Request Log Keys
+# Request Log Keys  (may receive a user supplied prefix)
 # Log Fields type==request
 # 1601646465|&|2122|&|request|&|OLFS|&|0:0:0:0:0:0:0:1|&|USER_AGENT|&|92F3C71F959B56515C98A09088CA2A8E
 #    0          1        2       3           4              5               6
@@ -145,21 +148,22 @@ def add_prefix_to_timing_log_keys():
 # 16: local_path
 # 17: ce
 
-CLIENT_IP_KEY="client-ip" # field 4
-USER_AGENT_KEY="user-agent" # field 5
-SESSION_ID_KEY="session-id" # field 6
-USER_ID_KEY="user-id" # field 7
-OLFS_START_TIME_KEY="olfs-start-time" # field 8
-REQUEST_ID_KEY="requiest-id" # field 9
-HTTP_VERB_KEY="http-verb" # field 10
-URL_PATH_KEY="url-path" # field 11
-QUERY_STRING_KEY="query-string" # field 12
-BES_ACTION_KEY="bes-action" # field 14
-RETURN_AS_KEY="return-as" # field 15
-LOCAL_PATH_KEY="local-path" # field 16
-CE_KEY="constraint-expression" # field 17
+CLIENT_IP_KEY       = "client-ip" # field 4
+USER_AGENT_KEY      = "user-agent" # field 5
+SESSION_ID_KEY      = "session-id" # field 6
+USER_ID_KEY         = "user-id" # field 7
+OLFS_START_TIME_KEY = "olfs-start-time" # field 8
+REQUEST_ID_KEY      = "requiest-id" # field 9
+HTTP_VERB_KEY       = "http-verb" # field 10
+URL_PATH_KEY        = "url-path" # field 11
+QUERY_STRING_KEY    = "query-string" # field 12
+BES_ACTION_KEY      = "bes-action" # field 14
+RETURN_AS_KEY       = "return-as" # field 15
+LOCAL_PATH_KEY      = "local-path" # field 16
+CE_KEY              = "constraint-expression" # field 17
 
 def add_prefix_to_request_log_keys():
+    """Applies user supplied prefix to request log record keys """
     global CLIENT_IP_KEY
     global USER_AGENT_KEY
     global SESSION_ID_KEY
@@ -216,27 +220,27 @@ def show_config():
     debug(f"TRANSMIT_TIMING_LOG is {eord(TRANSMIT_TIMING_LOG)}")
 
 ##########################################################
-def request_log_to_json(log_fields, json_log_line):
+def request_log_to_json(log_fields, json_log_record):
     """Ingests a BES request log record"""
     debug("Processing REQUEST_MESSAGE_TYPE")
     send_it = False
     if TRANSMIT_REQUEST_LOG:
-        json_log_line[CLIENT_IP_KEY] = log_fields[4]
-        json_log_line[USER_AGENT_KEY] = log_fields[5]
-        json_log_line[SESSION_ID_KEY] = log_fields[6]
-        json_log_line[USER_ID_KEY] = log_fields[7]
-        json_log_line[OLFS_START_TIME_KEY] = log_fields[8]
-        json_log_line[REQUEST_ID_KEY] = log_fields[9]
-        json_log_line[HTTP_VERB_KEY] = log_fields[10]
-        json_log_line[URL_PATH_KEY] = log_fields[11]
-        json_log_line[QUERY_STRING_KEY] = log_fields[12]
-        json_log_line[BES_ACTION_KEY] = log_fields[14]
-        json_log_line[RETURN_AS_KEY] = log_fields[15]
-        json_log_line[LOCAL_PATH_KEY] = log_fields[16]
+        json_log_record[CLIENT_IP_KEY] = log_fields[4]
+        json_log_record[USER_AGENT_KEY] = log_fields[5]
+        json_log_record[SESSION_ID_KEY] = log_fields[6]
+        json_log_record[USER_ID_KEY] = log_fields[7]
+        json_log_record[OLFS_START_TIME_KEY] = log_fields[8]
+        json_log_record[REQUEST_ID_KEY] = log_fields[9]
+        json_log_record[HTTP_VERB_KEY] = log_fields[10]
+        json_log_record[URL_PATH_KEY] = log_fields[11]
+        json_log_record[QUERY_STRING_KEY] = log_fields[12]
+        json_log_record[BES_ACTION_KEY] = log_fields[14]
+        json_log_record[RETURN_AS_KEY] = log_fields[15]
+        json_log_record[LOCAL_PATH_KEY] = log_fields[16]
         if len(log_fields) > 17:
-            json_log_line[CE_KEY] = log_fields[17]
+            json_log_record[CE_KEY] = log_fields[17]
         else:
-            json_log_line[CE_KEY] = "-"
+            json_log_record[CE_KEY] = "-"
 
         send_it = True
     else:
@@ -246,12 +250,12 @@ def request_log_to_json(log_fields, json_log_line):
 
 
 ##########################################################
-def info_log_to_json(log_fields, json_log_line):
+def info_log_to_json(log_fields, json_log_record):
     """Ingests a BES info log record"""
     debug("Processing INFO_MESSAGE_TYPE")
     send_it = False
     if TRANSMIT_INFO_LOG:
-        json_log_line[MESSAGE_KEY] = log_fields[3]
+        json_log_record[MESSAGE_KEY] = log_fields[3]
         send_it = True
     else:
         debug(f"TRANSMIT_INFO_LOG: {eord(TRANSMIT_INFO_LOG)}")
@@ -260,12 +264,12 @@ def info_log_to_json(log_fields, json_log_line):
 
 
 ##########################################################
-def error_log_to_json(log_fields, json_log_line):
+def error_log_to_json(log_fields, json_log_record):
     """Ingests a BES error log record"""
     debug("Processing ERROR_MESSAGE_TYPE")
     send_it = False
     if TRANSMIT_ERROR_LOG:
-        json_log_line[MESSAGE_KEY] = log_fields[3]
+        json_log_record[MESSAGE_KEY] = log_fields[3]
         send_it = True
     else:
         debug(f"TRANSMIT_ERROR_LOG: {eord(TRANSMIT_ERROR_LOG)}")
@@ -274,12 +278,12 @@ def error_log_to_json(log_fields, json_log_line):
 
 
 ##########################################################
-def verbose_log_to_json(log_fields, json_log_line):
+def verbose_log_to_json(log_fields, json_log_record):
     """Ingests a BES verbose log record"""
     debug("Processing VERBOSE_MESSAGE_TYPE")
     send_it = False
     if TRANSMIT_VERBOSE_LOG:
-        json_log_line[MESSAGE_KEY] = log_fields[3]
+        json_log_record[MESSAGE_KEY] = log_fields[3]
         send_it = True
     else:
         debug(f"TRANSMIT_VERBOSE_LOG: {eord(TRANSMIT_VERBOSE_LOG)}")
@@ -288,17 +292,17 @@ def verbose_log_to_json(log_fields, json_log_line):
 
 
 ##########################################################
-def timing_log_to_json(log_fields, json_log_line):
+def timing_log_to_json(log_fields, json_log_record):
     """Ingests a BES timing log record"""
     debug("Processing TIMING_MESSAGE_TYPE")
     send_it = False
     if TRANSMIT_TIMING_LOG:
         if log_fields[3] == ELAPSED_TIME_KEY :
-            json_log_line[ELAPSED_TIME_KEY] = int(log_fields[4])
-            json_log_line[START_TIME_KEY] = int(log_fields[6])
-            json_log_line[STOP_TIME_KEY] = int(log_fields[8])
-            json_log_line[REQUEST_ID_TIMER_KEY] = log_fields[9]
-            json_log_line[TIMER_NAME_KEY] = log_fields[10]
+            json_log_record[ELAPSED_TIME_KEY] = int(log_fields[4])
+            json_log_record[START_TIME_KEY] = int(log_fields[6])
+            json_log_record[STOP_TIME_KEY] = int(log_fields[8])
+            json_log_record[REQUEST_ID_TIMER_KEY] = log_fields[9]
+            json_log_record[TIMER_NAME_KEY] = log_fields[10]
             send_it = True
     else:
         debug(f"TRANSMIT_TIMING_LOG is {eord(TRANSMIT_TIMING_LOG)}")
@@ -307,19 +311,19 @@ def timing_log_to_json(log_fields, json_log_line):
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 ##########################################################
-def processing_error(msg, json_log_line):
+def processing_error(msg, json_log_record):
     """Populate response dictionary with a log_line processing error"""
     # Use the current Unix time
-    json_log_line[TIME_KEY] = int(time.time())
+    json_log_record[TIME_KEY] = int(time.time())
     # Use the PID of this beslog2json process.
-    json_log_line[PID_KEY]  = os.getpid()
-    json_log_line[TYPE_KEY] = ERROR_MESSAGE_TYPE
-    json_log_line[MESSAGE_KEY] = msg
+    json_log_record[PID_KEY]  = os.getpid()
+    json_log_record[TYPE_KEY] = BES_ERROR_LOG_RECORD_TYPE
+    json_log_record[MESSAGE_KEY] = msg
     return True
 
 
 ##########################################################
-def square_bracket_timing_record(log_fields, json_log_line):
+def square_bracket_timing_record(log_fields, json_log_record):
     """
     Process a BES timing log record that has [] delimiters.
     Timing log entry example and forensics:
@@ -346,22 +350,22 @@ def square_bracket_timing_record(log_fields, json_log_line):
             debug(f"{prolog} Found ELAPSED ")
             elapsed_us = log_fields[5][:-3]
             debug(f"{prolog} elapsed_us: {elapsed_us} ")
-            json_log_line[ELAPSED_TIME_KEY] = int(elapsed_us)
+            json_log_record[ELAPSED_TIME_KEY] = int(elapsed_us)
 
             start_us = log_fields[7][:-3]
             debug(f"{prolog} start_us: {start_us} ")
-            json_log_line[START_TIME_KEY] = int(start_us)
+            json_log_record[START_TIME_KEY] = int(start_us)
 
             stop_us = log_fields[9][:-3]
             debug(f"{prolog} stop_us: {stop_us} ")
-            json_log_line[STOP_TIME_KEY] = int(stop_us)
+            json_log_record[STOP_TIME_KEY] = int(stop_us)
 
-            json_log_line[REQUEST_ID_TIMER_KEY] = log_fields[10]
-            json_log_line[TIMER_NAME_KEY] = log_fields[11]
+            json_log_record[REQUEST_ID_TIMER_KEY] = log_fields[10]
+            json_log_record[TIMER_NAME_KEY] = log_fields[11]
             send_it = True
-            debug(f"{prolog} json: {json.dumps(json_log_line)} ")
+            debug(f"{prolog} json: {json.dumps(json_log_record)} ")
         else:
-            return processing_error(f"{prolog} Failed to identify timing data in log_fields: {log_fields}", json_log_line)
+            return processing_error(f"{prolog} Failed to identify timing data in log_fields: {log_fields}", json_log_record)
     else:
         debug(f"TRANSMIT_TIMING_LOG: {eord(TRANSMIT_TIMING_LOG)}")
 
@@ -370,7 +374,7 @@ def square_bracket_timing_record(log_fields, json_log_line):
 
 ##########################################################
 # @TODO Not a full implementation, just timing logs for now.
-def square_bracket_log_record(log_line, json_log_line):
+def square_bracket_log_record(log_line, json_log_record):
     """Process a BES log line that has [] delimiters."""
     prolog ="square_bracket_log_record()"
     log_fields = log_line.split(bes_square_bracket_log_delimiter)
@@ -379,23 +383,23 @@ def square_bracket_log_record(log_line, json_log_line):
     time_str = log_fields[0]
     if time_str.startswith("["):
         time_str = time_str[1:]
-    json_log_line[TIME_KEY] = time_str
+    json_log_record[TIME_KEY] = time_str
 
     pid = log_fields[1][4:]
-    json_log_line[PID_KEY]  = int(pid)
+    json_log_record[PID_KEY]  = int(pid)
 
     # This value is not used...
     # thread = log_fields[2][7:]
     log_record_type = log_fields[3]
-    json_log_line[TYPE_KEY] = log_record_type
+    json_log_record[TYPE_KEY] = log_record_type
 
-    debug(json.dumps(json_log_line))
-    if log_record_type == TIMING_MESSAGE_TYPE:
-        send_it = square_bracket_timing_record(log_fields, json_log_line)
+    debug(json.dumps(json_log_record))
+    if log_record_type == BES_TIMING_LOG_RECORD_TYPE:
+        send_it = square_bracket_timing_record(log_fields, json_log_record)
     else:
         # @TODO Not a full implementation, just timing logs for now.
         send_it = processing_error(f"{prolog} Unable to process log_line: \"{log_line}\" Only timing "
-                                   f"message are supported for square bracket delimited logs;", json_log_line)
+                                   f"message are supported for square bracket delimited logs;", json_log_record)
 
     return send_it
 
@@ -410,11 +414,11 @@ def beslog2json(line_count, log_line):
     """
     #line_count=0
     #show_config()
-    json_log_line={}
+    json_log_record={}
     prolog ="beslog2json()"
 
     if log_line.startswith("["):
-        send_it = square_bracket_log_record(log_line, json_log_line)
+        send_it = square_bracket_log_record(log_line, json_log_record)
     else:
         log_fields = log_line.split(bes_log_field_delimiter)
         debug(f"log_fields length: {len(log_fields)}")
@@ -422,41 +426,41 @@ def beslog2json(line_count, log_line):
         if len(log_fields) > 3:
                 time_str = log_fields[0]
                 if time_str.isnumeric():
-                    json_log_line[TIME_KEY] = int(log_fields[0])
+                    json_log_record[TIME_KEY] = int(log_fields[0])
                 else:
-                    json_log_line[TIME_KEY] = log_fields[0]
+                    json_log_record[TIME_KEY] = log_fields[0]
 
-                json_log_line[PID_KEY]  = int(log_fields[1])
+                json_log_record[PID_KEY]  = int(log_fields[1])
                 log_record_type = log_fields[2]
-                json_log_line[TYPE_KEY] = log_record_type
+                json_log_record[TYPE_KEY] = log_record_type
 
-                if log_record_type == REQUEST_MESSAGE_TYPE:
-                    send_it = request_log_to_json(log_fields, json_log_line)
+                if log_record_type == BES_REQUEST_LOG_RECORD_TYPE:
+                    send_it = request_log_to_json(log_fields, json_log_record)
 
-                elif log_record_type == INFO_MESSAGE_TYPE:
-                    send_it = info_log_to_json(log_fields, json_log_line)
+                elif log_record_type == BES_INFO_LOG_RECORD_TYPE:
+                    send_it = info_log_to_json(log_fields, json_log_record)
 
-                elif log_record_type == ERROR_MESSAGE_TYPE:
-                    send_it = error_log_to_json(log_fields, json_log_line)
+                elif log_record_type == BES_ERROR_LOG_RECORD_TYPE:
+                    send_it = error_log_to_json(log_fields, json_log_record)
 
-                elif log_record_type == VERBOSE_MESSAGE_TYPE:
-                    send_it = verbose_log_to_json(log_fields, json_log_line)
+                elif log_record_type == BES_VERBOSE_LOG_RECORD_TYPE:
+                    send_it = verbose_log_to_json(log_fields, json_log_record)
 
-                elif log_record_type == TIMING_MESSAGE_TYPE:
-                    send_it = timing_log_to_json(log_fields, json_log_line)
+                elif log_record_type == BES_TIMING_LOG_RECORD_TYPE:
+                    send_it = timing_log_to_json(log_fields, json_log_record)
 
                 else:
                     msg = f"{prolog} UNKNOWN LOG RECORD TYPE {log_record_type} log_line: {log_line}"
                     debug(msg)
-                    send_it = processing_error(msg, json_log_line)
+                    send_it = processing_error(msg, json_log_record)
 
         else:
             msg = f"{prolog} OUCH! Incompatible input log line {line_count}  log_line: {log_line}"
             debug(msg)
-            send_it = processing_error(msg, json_log_line)
+            send_it = processing_error(msg, json_log_record)
 
     if send_it:
-        print(json.dumps(json_log_line))
+        print(json.dumps(json_log_record))
 
 ##########################################################
 def read_from_stdin():
@@ -487,9 +491,9 @@ def read_from_stdin():
             msg = (f"{prolog} OUCH! Incompatible input log line {line_count} failed with the "
                    f"message: \"{str(e)}\" log_line: {log_line}")
             debug(msg)
-            json_log_line={}
-            processing_error(msg, json_log_line)
-            print(json.dumps(json_log_line))
+            json_log_record={}
+            processing_error(msg, json_log_record)
+            print(json.dumps(json_log_record))
 
 
 
@@ -516,9 +520,9 @@ def read_from_file(filename):
                 msg = (f"{prolog} OUCH! Incompatible input log line {line_count} failed with the "
                        f"message: \"{str(e)}\" log_line: {log_line}")
                 debug(msg)
-                json_log_line={}
-                processing_error(msg, json_log_line)
-                print(json.dumps(json_log_line))
+                json_log_record={}
+                processing_error(msg, json_log_record)
+                print(json.dumps(json_log_record))
 
 ##########################################################
 def usage():
@@ -565,10 +569,10 @@ DESCRIPTION
 
         -p value, --prefix value
             A (short) string that will be prepended to the 
-            name of every field in the response json with a 
+            name of every field in the json log record with a 
             separating '-' character. The prefix string should 
             be alpha/numeric with no special characters. For 
-            example none of:  ",.-_ !?><$#^+ and similar.
+            example none of:  ",][}{.-_ !?><$#^+ and similar.
             
         -f value, --filename value
             The path/filename of the BES log file to use as 
@@ -631,7 +635,7 @@ def main(argv):
 
         elif opt in ("-p", "--prefix"):
             the_prefix  = arg + "-"
-            add_prefix_to_common_log_keys()
+            add_prefix_to_shared_log_keys()
             add_prefix_to_request_log_keys()
             add_prefix_to_timing_log_keys()
 
