@@ -43,10 +43,8 @@
 # 1601642679|&|2122|&|error|&|MessageField
 #
 import sys
-import re
 import json
 import getopt
-import ast
 import time
 import os
 
@@ -320,7 +318,7 @@ def square_bracket_timing_record(log_fields, json_log_line):
             debug(f"{prolog} json: {json.dumps(json_log_line)} ")
             debug(f"{prolog} send_it: {send_it} ")
         else:
-            return processing_error(f"{prolog} Failed to identify timing data in log_line: {log_line}", json_log_line)
+            return processing_error(f"{prolog} Failed to identify timing data in log_fields: {log_fields}", json_log_line)
     else:
         debug(f"TRANSMIT_TIMING_LOG: {eord(TRANSMIT_TIMING_LOG)}")
 
@@ -424,7 +422,7 @@ def beslog2json():
                     else:
                         msg = f"UNKNOWN LOG RECORD TYPE {log_record_type} log_line: {log_line}"
                         debug(msg)
-                        send_it = processing_error(msg)
+                        send_it = processing_error(msg, json_log_line)
 
                 except Exception as e:
                     msg = (f"OUCH! Incompatible input log line {line_count} failed with the "
