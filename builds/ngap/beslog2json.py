@@ -49,6 +49,7 @@ import time
 import os
 
 
+the_prefix=""
 ##########################################################
 # Global variable for debuggin control.
 debug_flag = False
@@ -67,10 +68,23 @@ TRANSMIT_VERBOSE_LOG = True
 TRANSMIT_TIMING_LOG  = False
 
 ##########################################################
-# Keys Common To All Log Formats
+# Common To Log Record Keys
 TIME_KEY="time"
 PID_KEY="pid"
 TYPE_KEY="type"
+MESSAGE_KEY="message"
+
+def add_prefix_to_common_log_keys():
+    global TIME_KEY
+    global PID_KEY
+    global TYPE_KEY
+    global MESSAGE_KEY
+
+    if len(the_prefix) != 0 :
+        TIME_KEY = the_prefix + TIME_KEY
+        PID_KEY = the_prefix + PID_KEY
+        TYPE_KEY = the_prefix + TYPE_KEY
+        MESSAGE_KEY = the_prefix + MESSAGE_KEY
 
 ##########################################################
 # Log Message Type Keys
@@ -82,12 +96,25 @@ TIMING_MESSAGE_TYPE="timing"
 
 ##########################################################
 # Timing Log Keys
-MESSAGE_KEY="message"
-ELAPSED_TIME_KEY="elapsed_us"
-START_TIME_KEY="start_us"
-STOP_TIME_KEY="stop_us"
-REQUEST_ID_TIMER_KEY="request_id"
-TIMER_NAME_KEY="timer_name"
+ELAPSED_TIME_KEY="elapsed-us"
+START_TIME_KEY="start-us"
+STOP_TIME_KEY="stop-us"
+REQUEST_ID_TIMER_KEY="request-id"
+TIMER_NAME_KEY="timer-name"
+
+def add_prefix_to_timing_log_keys():
+    global ELAPSED_TIME_KEY
+    global START_TIME_KEY
+    global STOP_TIME_KEY
+    global REQUEST_ID_TIMER_KEY
+    global TIMER_NAME_KEY
+
+    if len(the_prefix) != 0 :
+        ELAPSED_TIME_KEY = the_prefix + ELAPSED_TIME_KEY
+        START_TIME_KEY = the_prefix + START_TIME_KEY
+        STOP_TIME_KEY = the_prefix + STOP_TIME_KEY
+        REQUEST_ID_TIMER_KEY = the_prefix + REQUEST_ID_TIMER_KEY
+        TIMER_NAME_KEY = the_prefix + TIMER_NAME_KEY
 
 ######################################################################################################
 # Request Log Keys
@@ -131,6 +158,37 @@ BES_ACTION_KEY="bes-action" # field 14
 RETURN_AS_KEY="return-as" # field 15
 LOCAL_PATH_KEY="local-path" # field 16
 CE_KEY="constraint-expression" # field 17
+
+def add_prefix_to_request_log_keys():
+    global CLIENT_IP_KEY
+    global USER_AGENT_KEY
+    global SESSION_ID_KEY
+    global USER_ID_KEY
+    global OLFS_START_TIME_KEY
+    global REQUEST_ID_KEY
+    global HTTP_VERB_KEY
+    global URL_PATH_KEY
+    global QUERY_STRING_KEY
+    global BES_ACTION_KEY
+    global RETURN_AS_KEY
+    global LOCAL_PATH_KEY
+    global CE_KEY
+
+    if len(the_prefix) != 0 :
+        CLIENT_IP_KEY = the_prefix + CLIENT_IP_KEY
+        USER_AGENT_KEY = the_prefix + USER_AGENT_KEY
+        SESSION_ID_KEY = the_prefix + SESSION_ID_KEY
+        USER_ID_KEY = the_prefix + USER_ID_KEY
+        OLFS_START_TIME_KEY = the_prefix + OLFS_START_TIME_KEY
+        REQUEST_ID_KEY = the_prefix + REQUEST_ID_KEY
+        HTTP_VERB_KEY = the_prefix + HTTP_VERB_KEY
+        URL_PATH_KEY = the_prefix + URL_PATH_KEY
+        QUERY_STRING_KEY = the_prefix + QUERY_STRING_KEY
+        BES_ACTION_KEY = the_prefix + BES_ACTION_KEY
+        RETURN_AS_KEY = the_prefix + RETURN_AS_KEY
+        LOCAL_PATH_KEY = the_prefix + LOCAL_PATH_KEY
+        CE_KEY = the_prefix + CE_KEY
+
 
 ##########################################################
 def debug(msg):
@@ -277,7 +335,7 @@ def processing_error(msg, json_log_line):
 ##########################################################
 def square_bracket_timing_record(log_fields, json_log_line):
     """
-    Process a BES log line that has [] delimiters.
+    Process a BES timing log record that has [] delimiters.
     Timing log entry example and forensics:
     log: [UTC Wed Nov 27 18:48:20 2024][pid:117][thread:139661163814208][timing][ELAPSED][4 us][STARTED][1732733300645844 us][STOPPED][1732733300645848 us][-][Command timing: BESXMLInterface::transmit_data() - ]
      0 - [UTC Wed Nov 27 18:48:20 2024]
@@ -343,11 +401,11 @@ def square_bracket_log_line(log_line, json_log_line):
 
     # This value is not used...
     # thread = log_fields[2][7:]
-
-    json_log_line[TYPE_KEY] = log_fields[3]
+    log_record_type = log_fields[3];
+    json_log_line[TYPE_KEY] = log_record_type
 
     debug(json.dumps(json_log_line))
-    if type == TIMING_MESSAGE_TYPE:
+    if log_record_type == TIMING_MESSAGE_TYPE:
         send_it = square_bracket_timing_record(log_fields, json_log_line)
     else:
         send_it = processing_error(f"Incompatible log_line: {log_line}", json_log_line)
@@ -355,24 +413,72 @@ def square_bracket_log_line(log_line, json_log_line):
     return send_it
 
 
+
 ##########################################################
-def beslog2json():
+def beslog2json(line_count, log_line):
     """
-    Converts BES log content into a kvp json representation.processing_error
+    Converts a BES log record into a kvp json representation.
     - Input is only read from stdin and output is written to stdout.
     - Reads lines until EOF is encountered.
     """
+    #line_count=0
+    #show_config()
+    json_log_line={}
+
+    if log_line.startswith("["):
+        send_it = square_bracket_log_line(log_line, json_log_line)
+    else:
+        log_fields = log_line.split(bes_log_field_delimiter)
+        debug(f"log_fields length: {len(log_fields)}")
+
+        if len(log_fields) > 3:
+                time_str = log_fields[0]
+                if time_str.isnumeric():
+                    json_log_line[TIME_KEY] = int(log_fields[0])
+                else:
+                    json_log_line[TIME_KEY] = log_fields[0]
+
+                json_log_line[PID_KEY]  = int(log_fields[1])
+                log_record_type = log_fields[2]
+                json_log_line[TYPE_KEY] = log_record_type
+
+                if log_record_type == REQUEST_MESSAGE_TYPE:
+                    send_it = request_log_to_json(log_fields, json_log_line)
+
+                elif log_record_type == INFO_MESSAGE_TYPE:
+                    send_it = info_log_to_json(log_fields, json_log_line)
+
+                elif log_record_type == ERROR_MESSAGE_TYPE:
+                    send_it = error_log_to_json(log_fields, json_log_line)
+
+                elif log_record_type == VERBOSE_MESSAGE_TYPE:
+                    send_it = verbose_log_to_json(log_fields, json_log_line)
+
+                elif log_record_type == TIMING_MESSAGE_TYPE:
+                    send_it = timing_log_to_json(log_fields, json_log_line)
+
+                else:
+                    msg = f"UNKNOWN LOG RECORD TYPE {log_record_type} log_line: {log_line}"
+                    debug(msg)
+                    send_it = processing_error(msg, json_log_line)
+
+        else:
+            msg = f"OUCH! Incompatible input log line {line_count}  log_line: {log_line}"
+            debug(msg)
+            send_it = processing_error(msg, json_log_line)
+
+    if send_it:
+        print(json.dumps(json_log_line))
+
+##########################################################
+def read_from_stdin():
+    """Reads BES log lines from stdin and turns them into JSON records."""
     line_count=0
     show_config()
     while True:
         line_count += 1
-        json_log_line={}
-        #log_line=""
-        #send_it = False
-
         debug("-------------------------------------------------------------------------")
         debug(f"line: {line_count}")
-
         try:
             log_line = input()
             debug(f"log_line:  {log_line}")
@@ -384,59 +490,44 @@ def beslog2json():
             debug("Unable to read from input(). Exiting...")
             break
 
-        if log_line.startswith("["):
-            send_it = square_bracket_log_line(log_line, json_log_line)
-        else:
-            debug(f"Log Line({str(line_count)}): {log_line}")
-            log_fields = log_line.split(bes_log_field_delimiter)
-            debug(f"log_fields length: {len(log_fields)}")
-
-            if len(log_fields) > 3:
-                try:
-                    time_str = log_fields[0]
-                    if time_str.isnumeric():
-                        json_log_line[TIME_KEY] = int(log_fields[0])
-                    else:
-                        json_log_line[TIME_KEY] = log_fields[0]
-
-                    json_log_line[PID_KEY]  = int(log_fields[1])
-                    log_record_type = log_fields[2]
-                    json_log_line[TYPE_KEY] = log_record_type
-
-                    if log_record_type == REQUEST_MESSAGE_TYPE:
-                        send_it = request_log_to_json(log_fields, json_log_line)
-
-                    elif log_record_type == INFO_MESSAGE_TYPE:
-                        send_it = info_log_to_json(log_fields, json_log_line)
-
-                    elif log_record_type == ERROR_MESSAGE_TYPE:
-                        send_it = error_log_to_json(log_fields, json_log_line)
-
-                    elif log_record_type == VERBOSE_MESSAGE_TYPE:
-                        send_it = verbose_log_to_json(log_fields, json_log_line)
-
-                    elif log_record_type == TIMING_MESSAGE_TYPE:
-                        send_it = timing_log_to_json(log_fields, json_log_line)
-
-                    else:
-                        msg = f"UNKNOWN LOG RECORD TYPE {log_record_type} log_line: {log_line}"
-                        debug(msg)
-                        send_it = processing_error(msg, json_log_line)
-
-                except Exception as e:
-                    msg = (f"OUCH! Incompatible input log line {line_count} failed with the "
-                    f"message: \"{str(e)}\" log_line: {log_line}")
-                    debug(msg)
-                    send_it = processing_error(msg, json_log_line)
-
-            else:
-                msg = f"OUCH! Incompatible input log line {line_count}  log_line: {log_line}"
-                debug(msg)
-                send_it = processing_error(msg, json_log_line)
-
-        if send_it:
+        debug(f"Log Line({str(line_count)}): {log_line}")
+        try:
+            beslog2json(line_count, log_line)
+        except Exception as e:
+            msg = (f"OUCH! Incompatible input log line {line_count} failed with the "
+                   f"message: \"{str(e)}\" log_line: {log_line}")
+            debug(msg)
+            json_log_line={}
+            processing_error(msg, json_log_line)
             print(json.dumps(json_log_line))
 
+
+##########################################################
+def read_from_file(filename):
+    """Reads BES log lines from filename and turns them into JSON records."""
+    with open(filename, 'r') as log_file:
+        line_count=0
+        show_config()
+        for log_line in log_file:
+            line_count += 1
+            debug("-------------------------------------------------------------------------")
+            debug(f"line: {line_count}")
+            debug(f"log_line:  {log_line}")
+
+            if not log_line:
+                debug(f"Failed to read line from file: {filename} line_count: {line_count} Exiting...")
+                break
+
+            debug(f"Log Line({str(line_count)}): {log_line}")
+            try:
+                beslog2json(line_count, log_line)
+            except Exception as e:
+                msg = (f"OUCH! Incompatible input log line {line_count} failed with the "
+                       f"message: \"{str(e)}\" log_line: {log_line}")
+                debug(msg)
+                json_log_line={}
+                processing_error(msg, json_log_line)
+                print(json.dumps(json_log_line))
 
 ##########################################################
 def usage():
@@ -448,26 +539,56 @@ NAME
     beslog2json.py - Convert BES log lines to valid json formatted kvp.
 
 SYNOPSIS
-    tail -f bes.log | python3 beslog2json.py [-d] [-r value] [-i value] [-e value] [-v value] [-t value]
+    beslog2json.py [-d][-r value][-i value][-e value][-v value][-t value][-p value][-f value]
 
 DESCRIPTION
-    Reads bes log lines from stdin and writes their JSON kvp to stdout.
-    You can control the json output as follows:
+    Reads BES log lines from stdin (default) or from a file 
+    (using -f). Writes a json result to stdout. Using stdin 
+    allows one to run a shell process that transmit the bes 
+    log to this program, endlessly.
+    
+        tail -f /var/log/bes/bes.log | python3 beslog2json.py 
+        
+    You can control what appears in json output, as well as 
+    specify a file to read and a debugging option as follows:
 
-       -r value, --request value
-           Passing value that begins with an 'f' or 'F' will evaluate to False. All else evaluates to True.
+        -r value, --request value
+            Passing value that begins with an 'f' or 'F' will 
+            evaluate to False. All else evaluates to True.
 
-       -i value, --info value
-           Passing value that begins with an 'f' or 'F' will evaluate to False. All else evaluates to True.
+        -i value, --info value
+            Passing value that begins with an 'f' or 'F' will e
+            valuate to False. All else evaluates to True.
 
-       -e value, --error value
-           Passing value that begins with an 'f' or 'F' will evaluate to False. All else evaluates to True.
+        -e value, --error value
+            Passing value that begins with an 'f' or 'F' will 
+            evaluate to False. All else evaluates to True.
 
-       -v value, --verbose value
-           Passing value that begins with an 'f' or 'F' will evaluate to False. All else evaluates to True.
+        -v value, --verbose value
+            Passing value that begins with an 'f' or 'F' will 
+            evaluate to False. All else evaluates to True.
 
-       -t value, --timing value
-           Passing value that begins with an 'f' or 'F' will evaluate to False. All else evaluates to True.
+        -t value, --timing value
+            Passing value that begins with an 'f' or 'F' will 
+            evaluate to False. All else evaluates to True.
+
+        -p value, --prefix value
+            A (short) string that will be prepended to the 
+            name of every field in the response json with a 
+            separating '-' character. The prefix string should 
+            be alpha/numeric with no special characters. For 
+            example none of:  ",.-_ !?><$#^+ and similar.
+            
+        -f value, --filename value
+            The path/filename of the BES log file to use as 
+            input. (primarily for testing)
+
+        -d, --debug
+            Turns on debugging output which is transmitted on stderr.
+
+EXAMPLE
+    tail -f bes.log | python3 beslog2json.py -t true -p hyrax 
+
 
 beslog2json.py
 """
@@ -488,9 +609,12 @@ def main(argv):
     global TRANSMIT_ERROR_LOG
     global TRANSMIT_VERBOSE_LOG
     global TRANSMIT_TIMING_LOG
+    global the_prefix
+
+    input_filename=""
 
     try:
-        opts, args = getopt.getopt(argv, "hdr:i:e:v:t:", ["help", "debug", "requests=", "info=", "error=", "verbose=", "timing="])
+        opts, args = getopt.getopt(argv, "hdr:i:e:v:t:p:f:", ["help", "debug", "requests=", "info=", "error=", "verbose=", "timing=", "prefix=", "filename="])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -515,10 +639,23 @@ def main(argv):
         elif opt in ("-t", "--timing"):
             TRANSMIT_TIMING_LOG  = not arg.lower().startswith("f")
 
+        elif opt in ("-p", "--prefix"):
+            the_prefix  = arg + "-"
+            add_prefix_to_common_log_keys()
+            add_prefix_to_request_log_keys()
+            add_prefix_to_timing_log_keys()
+
         elif opt in ("-d", "--debug"):
             debug_flag = True
 
-    beslog2json()
+        elif opt in ("-f", "--filename"):
+            input_filename = arg
+
+
+    if len(input_filename) > 0:
+        read_from_file(input_filename)
+    else:
+        read_from_stdin()
 
 
 if __name__ == "__main__":
