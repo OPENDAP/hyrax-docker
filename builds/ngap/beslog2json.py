@@ -218,7 +218,7 @@ def request_log_to_json(log_fields, json_log_record):
          14       15                              16                                  17
 
     Request Log Record
-    
+
     Field#: key-name
     ------:--------------------
          0: start-time
@@ -250,18 +250,18 @@ def request_log_to_json(log_fields, json_log_record):
     debug("Processing REQUEST_MESSAGE_TYPE")
     send_it = False
     if TRANSMIT_REQUEST_LOG:
-        json_log_record[CLIENT_IP_KEY] = log_fields[4]
-        json_log_record[USER_AGENT_KEY] = log_fields[5]
-        json_log_record[SESSION_ID_KEY] = log_fields[6]
-        json_log_record[USER_ID_KEY] = log_fields[7]
+        json_log_record[CLIENT_IP_KEY]       = log_fields[4]
+        json_log_record[USER_AGENT_KEY]      = log_fields[5]
+        json_log_record[SESSION_ID_KEY]      = log_fields[6]
+        json_log_record[USER_ID_KEY]         = log_fields[7]
         json_log_record[OLFS_START_TIME_KEY] = log_fields[8]
-        json_log_record[REQUEST_ID_KEY] = log_fields[9]
-        json_log_record[HTTP_VERB_KEY] = log_fields[10]
-        json_log_record[URL_PATH_KEY] = log_fields[11]
-        json_log_record[QUERY_STRING_KEY] = log_fields[12]
-        json_log_record[BES_ACTION_KEY] = log_fields[14]
-        json_log_record[RETURN_AS_KEY] = log_fields[15]
-        json_log_record[LOCAL_PATH_KEY] = log_fields[16]
+        json_log_record[REQUEST_ID_KEY]      = log_fields[9]
+        json_log_record[HTTP_VERB_KEY]       = log_fields[10]
+        json_log_record[URL_PATH_KEY]        = log_fields[11]
+        json_log_record[QUERY_STRING_KEY]    = log_fields[12]
+        json_log_record[BES_ACTION_KEY]      = log_fields[14]
+        json_log_record[RETURN_AS_KEY]       = log_fields[15]
+        json_log_record[LOCAL_PATH_KEY]      = log_fields[16]
         if len(log_fields) > 17:
             json_log_record[CE_KEY] = log_fields[17]
         else:
@@ -374,7 +374,7 @@ def timing_log_to_json(log_fields, json_log_record):
 ##########################################################
 def processing_error(msg, json_log_record):
     """
-    Populate response dictionary with a log_line processing error.
+    Populate the json_log_record dictionary with a log_line processing error.
 
     Args:
         msg: The error message string
@@ -441,7 +441,7 @@ def square_bracket_timing_record(log_fields, json_log_record):
             json_log_record[REQUEST_ID_TIMER_KEY] = log_fields[10]
             json_log_record[TIMER_NAME_KEY] = log_fields[11]
             send_it = True
-            debug(f"{prolog} json: {json.dumps(json_log_record)} ")
+            debug(f"{prolog} json: {json.dumps(json_log_record, sort_keys=True)} ")
         else:
             return processing_error(f"{prolog} Failed to identify timing data in log_fields: {log_fields}", json_log_record)
     else:
@@ -480,7 +480,7 @@ def square_bracket_log_record(log_line, json_log_record):
     log_record_type = log_fields[3]
     json_log_record[TYPE_KEY] = log_record_type
 
-    debug(json.dumps(json_log_record))
+    debug(json.dumps(json_log_record, sort_keys=True))
     if log_record_type == "timing":
         send_it = square_bracket_timing_record(log_fields, json_log_record)
     else:
@@ -499,8 +499,6 @@ def beslog2json(line_count, log_line):
 
     After the BES log line is processed the json result is written to stdout.
     """
-    #line_count=0
-    #show_config()
     json_log_record={}
     prolog ="beslog2json()"
 
@@ -547,7 +545,7 @@ def beslog2json(line_count, log_line):
             send_it = processing_error(msg, json_log_record)
 
     if send_it:
-        print(json.dumps(json_log_record))
+        print(json.dumps(json_log_record, sort_keys=True))
 
 ##########################################################
 def read_from_stdin():
@@ -558,7 +556,6 @@ def read_from_stdin():
     prolog="read_from_stdin()"
 
     line_count=0
-    show_config()
     while True:
         line_count += 1
         debug("-------------------------------------------------------------------------")
@@ -583,7 +580,7 @@ def read_from_stdin():
             debug(msg)
             json_log_record={}
             processing_error(msg, json_log_record)
-            print(json.dumps(json_log_record))
+            print(json.dumps(json_log_record, sort_keys=True))
 
 
 
@@ -598,7 +595,6 @@ def read_from_file(filename):
     prolog="read_from_file()"
     with open(filename, 'r') as log_file:
         line_count=0
-        show_config()
         for log_line in log_file:
             line_count += 1
             debug("-------------------------------------------------------------------------")
@@ -617,7 +613,7 @@ def read_from_file(filename):
                 debug(msg)
                 json_log_record={}
                 processing_error(msg, json_log_record)
-                print(json.dumps(json_log_record))
+                print(json.dumps(json_log_record, sort_keys=True))
 
 ##########################################################
 def usage():
@@ -740,6 +736,7 @@ def main(argv):
         elif opt in ("-f", "--filename"):
             input_filename = arg
 
+    show_config()
 
     if len(input_filename) > 0:
         read_from_file(input_filename)
