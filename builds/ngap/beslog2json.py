@@ -55,6 +55,7 @@ the_prefix=""
 debug_flag = False
 
 ##########################################################
+# The usual delimiter suspects
 bes_log_field_delimiter = "|&|"
 bes_square_bracket_log_delimiter = "]["
 
@@ -68,20 +69,13 @@ TRANSMIT_VERBOSE_LOG = True
 TRANSMIT_TIMING_LOG  = False
 
 ##########################################################
-# BES Log Message Type Values
-BES_REQUEST_LOG_RECORD_TYPE = "request"
-BES_INFO_LOG_RECORD_TYPE    = "info"
-BES_ERROR_LOG_RECORD_TYPE   = "error"
-BES_VERBOSE_LOG_RECORD_TYPE = "verbose"
-BES_TIMING_LOG_RECORD_TYPE  = "timing"
-
-##########################################################
 # JSON Shared Log Record Keys (may receive a user supplied prefix)
+# We make variables for these because they may get modified
+# by a user injected prefix.
 TIME_KEY    = "time"
 PID_KEY     = "pid"
 TYPE_KEY    = "type"
 MESSAGE_KEY = "message"
-
 def add_prefix_to_shared_log_keys():
     """Applies user supplied prefix to shared log record keys """
     global TIME_KEY
@@ -97,13 +91,15 @@ def add_prefix_to_shared_log_keys():
 
 
 ##########################################################
-# Timing Log Keys (may receive a user supplied prefix)
+# Timing Log Keys
+# Log Fields type=="timing"
+# We make variables for these because they may get modified
+# by a user injected prefix.
 ELAPSED_TIME_KEY     = "elapsed-us"
 START_TIME_KEY       = "start-us"
 STOP_TIME_KEY        = "stop-us"
 REQUEST_ID_TIMER_KEY = "request-id"
 TIMER_NAME_KEY       = "timer-name"
-
 def add_prefix_to_timing_log_keys():
     """Applies user supplied prefix to timing log record keys """
     global ELAPSED_TIME_KEY
@@ -121,47 +117,21 @@ def add_prefix_to_timing_log_keys():
 
 ######################################################################################################
 # Request Log Keys  (may receive a user supplied prefix)
-# Log Fields type==request
-# 1601646465|&|2122|&|request|&|OLFS|&|0:0:0:0:0:0:0:1|&|USER_AGENT|&|92F3C71F959B56515C98A09088CA2A8E
-#    0          1        2       3           4              5               6
-# |&|-|&|1601646465304|&|REQUEST-ID|&|HTTP-GET|&|/opendap/hyrax/data/nc/fnoc1.nc.dds|&|u|&|BES
-#    7     8              9             10              11                             12   13
-# |&|get.dds|&|dap2|&|/Users/ndp/OPeNDAP/hyrax/build/share/hyrax/data/nc/fnoc1.nc|&|u
-#      14       15                              16                                  17
-#
-#  0: start_time
-#  1: pid
-#  2: request type
-#  3: olfs boundary tag (ignored)
-#  4: client_ip
-#  5: user_agent
-#  6: session_id
-#  7: user_id
-#  8: olfs_start_time
-#  9: request_id
-# 10: http_verb
-# 11: url_path
-# 12: query_string
-# 13: bes boundary key (ignored)
-# 14: bes action
-# 15: return as
-# 16: local_path
-# 17: ce
-
-CLIENT_IP_KEY       = "client-ip" # field 4
-USER_AGENT_KEY      = "user-agent" # field 5
-SESSION_ID_KEY      = "session-id" # field 6
-USER_ID_KEY         = "user-id" # field 7
-OLFS_START_TIME_KEY = "olfs-start-time" # field 8
-REQUEST_ID_KEY      = "requiest-id" # field 9
-HTTP_VERB_KEY       = "http-verb" # field 10
-URL_PATH_KEY        = "url-path" # field 11
-QUERY_STRING_KEY    = "query-string" # field 12
-BES_ACTION_KEY      = "bes-action" # field 14
-RETURN_AS_KEY       = "return-as" # field 15
-LOCAL_PATH_KEY      = "local-path" # field 16
-CE_KEY              = "constraint-expression" # field 17
-
+# Log Fields type=="request"
+# We make variables for these because they may get modified by a user injected prefix.
+CLIENT_IP_KEY       = "client-ip"
+USER_AGENT_KEY      = "user-agent"
+SESSION_ID_KEY      = "session-id"
+USER_ID_KEY         = "user-id"
+OLFS_START_TIME_KEY = "olfs-start-time"
+REQUEST_ID_KEY      = "requiest-id"
+HTTP_VERB_KEY       = "http-verb"
+URL_PATH_KEY        = "url-path"
+QUERY_STRING_KEY    = "query-string"
+BES_ACTION_KEY      = "bes-action"
+RETURN_AS_KEY       = "return-as"
+LOCAL_PATH_KEY      = "local-path"
+CE_KEY              = "ce"
 def add_prefix_to_request_log_keys():
     """Applies user supplied prefix to request log record keys """
     global CLIENT_IP_KEY
@@ -196,14 +166,27 @@ def add_prefix_to_request_log_keys():
 
 ##########################################################
 def debug(msg):
-    """Writes msg to stderr when the debug_flag is enabled"""
+    """
+        Writes msg to stderr when the debug_flag is enabled
+
+        Args:
+            msg: The message to write to stderr
+    """
     if debug_flag:
         print("#", msg.replace("\n","\\n"), file=sys.stderr)
         sys.stderr.flush()
 
 ##########################################################
 def eord(bool_val):
-    """Returns 'enabled' or 'disabled' according to the value of bool_val"""
+    """
+    Converts a boolean to the strings 'enabled' or 'disabled' according to the value the boolean
+
+    Args:
+        bool_val: The boolean values to convert to 'enabled' or 'disabled'
+
+    Returns:
+        The string 'enabled' or 'disabled' depending on the value of bool_val
+    """
     if bool_val:
         return "enabled"
     else:
@@ -211,17 +194,59 @@ def eord(bool_val):
 
 ##########################################################
 def show_config():
-    """Shows the configuration state when in debuggin mode"""
-    debug(f"debug_flag is {str(debug_flag).lower()}")
-    debug(f"TRANSMIT_REQUEST_LOG is {eord(TRANSMIT_REQUEST_LOG)}")
-    debug(f"TRANSMIT_INFO_LOG is {eord(TRANSMIT_INFO_LOG)}")
-    debug(f"TRANSMIT_ERROR_LOG is {eord(TRANSMIT_ERROR_LOG)}")
-    debug(f"TRANSMIT_VERBOSE_LOG is {eord(TRANSMIT_VERBOSE_LOG)}")
-    debug(f"TRANSMIT_TIMING_LOG is {eord(TRANSMIT_TIMING_LOG)}")
+    """Transmits the configuration state to stderr when in debug mode is enabled"""
+    if debug_flag:
+        debug(f"debug_flag is {str(debug_flag).lower()}")
+        debug(f"TRANSMIT_REQUEST_LOG is {eord(TRANSMIT_REQUEST_LOG)}")
+        debug(f"TRANSMIT_INFO_LOG is {eord(TRANSMIT_INFO_LOG)}")
+        debug(f"TRANSMIT_ERROR_LOG is {eord(TRANSMIT_ERROR_LOG)}")
+        debug(f"TRANSMIT_VERBOSE_LOG is {eord(TRANSMIT_VERBOSE_LOG)}")
+        debug(f"TRANSMIT_TIMING_LOG is {eord(TRANSMIT_TIMING_LOG)}")
 
 ##########################################################
 def request_log_to_json(log_fields, json_log_record):
-    """Ingests a BES request log record"""
+    """
+    Ingests a BES request log record
+
+    Request Log Codex  (may receive a user supplied prefix)
+    Log Fields type==request
+    1601646465|&|2122|&|request|&|OLFS|&|0:0:0:0:0:0:0:1|&|USER_AGENT|&|92F3C71F959B56515C98A09088CA2A8E
+       0          1        2       3           4              5               6
+    |&|-|&|1601646465304|&|REQUEST-ID|&|HTTP-GET|&|/opendap/hyrax/data/nc/fnoc1.nc.dds|&|u|&|BES
+       7     8              9             10              11                             12   13
+    |&|get.dds|&|dap2|&|/Users/ndp/OPeNDAP/hyrax/build/share/hyrax/data/nc/fnoc1.nc|&|u
+         14       15                              16                                  17
+
+    Request Log Record
+    
+    Field#: key-name
+    ------:--------------------
+         0: start-time
+         1: pid
+         2: type of log record
+         3: olfs boundary tag (ignored)
+         4: client-ip
+         5: user-agent
+         6: session-id
+         7: user-id
+         8: olfs-start-time
+         9: request-id
+        10: http-verb
+        11: url-path
+        12: query-string
+        13: bes boundary key (ignored)
+        14: bes-action
+        15: return-as
+        16: local-path
+        17: ce
+
+    Args:
+        log_fields: The BES log line, parsed into fields, to process
+        json_log_record: The dictionary to populate with the json log fields.
+
+    Returns:
+        A boolean indicating if the json result should be transmitted.
+    """
     debug("Processing REQUEST_MESSAGE_TYPE")
     send_it = False
     if TRANSMIT_REQUEST_LOG:
@@ -251,7 +276,16 @@ def request_log_to_json(log_fields, json_log_record):
 
 ##########################################################
 def info_log_to_json(log_fields, json_log_record):
-    """Ingests a BES info log record"""
+    """
+    Ingests a BES info log record
+
+    Args:
+        log_fields: The BES log line, parsed into fields, to process
+        json_log_record: The dictionary to populate with the json log fields.
+
+    Returns:
+        A boolean indicating if the json result should be transmitted.
+    """
     debug("Processing INFO_MESSAGE_TYPE")
     send_it = False
     if TRANSMIT_INFO_LOG:
@@ -265,7 +299,16 @@ def info_log_to_json(log_fields, json_log_record):
 
 ##########################################################
 def error_log_to_json(log_fields, json_log_record):
-    """Ingests a BES error log record"""
+    """
+    Ingests a BES error log record
+
+    Args:
+        log_fields: The BES log line, parsed into fields, to process
+        json_log_record: The dictionary to populate with the json log fields.
+
+    Returns:
+        A boolean indicating if the json result should be transmitted.
+    """
     debug("Processing ERROR_MESSAGE_TYPE")
     send_it = False
     if TRANSMIT_ERROR_LOG:
@@ -279,7 +322,16 @@ def error_log_to_json(log_fields, json_log_record):
 
 ##########################################################
 def verbose_log_to_json(log_fields, json_log_record):
-    """Ingests a BES verbose log record"""
+    """
+    Ingests a BES verbose log record
+
+    Args:
+    log_fields: The BES log line, parsed into fields, to process
+    json_log_record: The dictionary to populate with the json log fields.
+
+    Returns:
+    A boolean indicating if the json result should be transmitted.
+    """
     debug("Processing VERBOSE_MESSAGE_TYPE")
     send_it = False
     if TRANSMIT_VERBOSE_LOG:
@@ -293,7 +345,16 @@ def verbose_log_to_json(log_fields, json_log_record):
 
 ##########################################################
 def timing_log_to_json(log_fields, json_log_record):
-    """Ingests a BES timing log record"""
+    """
+    Ingests a BES timing log record
+
+    Args:
+    log_fields: The BES log line, parsed into fields, to process
+    json_log_record: The dictionary to populate with the json log fields.
+
+    Returns:
+    A boolean indicating if the json result should be transmitted.
+    """
     debug("Processing TIMING_MESSAGE_TYPE")
     send_it = False
     if TRANSMIT_TIMING_LOG:
@@ -312,12 +373,21 @@ def timing_log_to_json(log_fields, json_log_record):
 
 ##########################################################
 def processing_error(msg, json_log_record):
-    """Populate response dictionary with a log_line processing error"""
+    """
+    Populate response dictionary with a log_line processing error.
+
+    Args:
+        msg: The error message string
+        json_log_record: The JSON log record dictionary
+
+     Returns:
+        A boolean indicating if the json result should be transmitted.
+   """
     # Use the current Unix time
     json_log_record[TIME_KEY] = int(time.time())
     # Use the PID of this beslog2json process.
     json_log_record[PID_KEY]  = os.getpid()
-    json_log_record[TYPE_KEY] = BES_ERROR_LOG_RECORD_TYPE
+    json_log_record[TYPE_KEY] = "error"
     json_log_record[MESSAGE_KEY] = msg
     return True
 
@@ -326,6 +396,7 @@ def processing_error(msg, json_log_record):
 def square_bracket_timing_record(log_fields, json_log_record):
     """
     Process a BES timing log record that has [] delimiters.
+
     Timing log entry example and forensics:
     log: [UTC Wed Nov 27 18:48:20 2024][pid:117][thread:139661163814208][timing][ELAPSED][4 us][STARTED][1732733300645844 us][STOPPED][1732733300645848 us][-][Command timing: BESXMLInterface::transmit_data() - ]
      0 - [UTC Wed Nov 27 18:48:20 2024]
@@ -340,6 +411,13 @@ def square_bracket_timing_record(log_fields, json_log_record):
      9 - [1732733300645848 us]
     10 - [-]
     11 - [Command timing: BESXMLInterface::transmit_data() - ]
+
+    Args:
+        log_fields: The BES log line (with [] delimiters) parsed into fields
+        json_log_record: The dictionary to populate with the json log fields.
+
+    Returns:
+        A boolean indicating if the json result should be transmitted.
     """
     prolog ="square_bracket_timing_record()"
     debug(f"{prolog} BEGIN")
@@ -375,7 +453,16 @@ def square_bracket_timing_record(log_fields, json_log_record):
 ##########################################################
 # @TODO Not a full implementation, just timing logs for now.
 def square_bracket_log_record(log_line, json_log_record):
-    """Process a BES log line that has [] delimiters."""
+    """
+    Process a BES log line that has [] delimiters.
+
+    Args:
+        log_line: The BES log line (with [] delimiters) to process
+        json_log_record: The dictionary to populate with the json log fields.
+
+    Returns:
+        A boolean indicating if the json result should be transmitted.
+    """
     prolog ="square_bracket_log_record()"
     log_fields = log_line.split(bes_square_bracket_log_delimiter)
 
@@ -394,7 +481,7 @@ def square_bracket_log_record(log_line, json_log_record):
     json_log_record[TYPE_KEY] = log_record_type
 
     debug(json.dumps(json_log_record))
-    if log_record_type == BES_TIMING_LOG_RECORD_TYPE:
+    if log_record_type == "timing":
         send_it = square_bracket_timing_record(log_fields, json_log_record)
     else:
         # @TODO Not a full implementation, just timing logs for now.
@@ -409,8 +496,8 @@ def square_bracket_log_record(log_line, json_log_record):
 def beslog2json(line_count, log_line):
     """
     Converts a BES log record into a kvp json representation.
-    - Input is only read from stdin and output is written to stdout.
-    - Reads lines until EOF is encountered.
+
+    After the BES log line is processed the json result is written to stdout.
     """
     #line_count=0
     #show_config()
@@ -434,19 +521,19 @@ def beslog2json(line_count, log_line):
                 log_record_type = log_fields[2]
                 json_log_record[TYPE_KEY] = log_record_type
 
-                if log_record_type == BES_REQUEST_LOG_RECORD_TYPE:
+                if log_record_type == "request":
                     send_it = request_log_to_json(log_fields, json_log_record)
 
-                elif log_record_type == BES_INFO_LOG_RECORD_TYPE:
+                elif log_record_type == "info":
                     send_it = info_log_to_json(log_fields, json_log_record)
 
-                elif log_record_type == BES_ERROR_LOG_RECORD_TYPE:
+                elif log_record_type == "error":
                     send_it = error_log_to_json(log_fields, json_log_record)
 
-                elif log_record_type == BES_VERBOSE_LOG_RECORD_TYPE:
+                elif log_record_type == "verbose":
                     send_it = verbose_log_to_json(log_fields, json_log_record)
 
-                elif log_record_type == BES_TIMING_LOG_RECORD_TYPE:
+                elif log_record_type == "timing":
                     send_it = timing_log_to_json(log_fields, json_log_record)
 
                 else:
@@ -464,7 +551,10 @@ def beslog2json(line_count, log_line):
 
 ##########################################################
 def read_from_stdin():
-    """Reads BES log lines from stdin and turns them into JSON records."""
+    """
+    Reads BES log lines from stdin and turns them into JSON records on stdout.
+    Reads lines until EOF is encountered.
+    """
     prolog="read_from_stdin()"
 
     line_count=0
@@ -499,7 +589,12 @@ def read_from_stdin():
 
 ##########################################################
 def read_from_file(filename):
-    """Reads BES log lines from filename and turns them into JSON records."""
+    """
+    Reads BES log lines from a file and turns them into JSON records on stdout.
+
+    Args:
+        filename: The name of the file containing the BES log records with the |&| seperator.
+    """
     prolog="read_from_file()"
     with open(filename, 'r') as log_file:
         line_count=0
