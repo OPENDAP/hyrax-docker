@@ -49,17 +49,21 @@ import time
 import os
 
 
+
+###############################################################################
+# The optional user supplied key prefix.
 the_prefix=""
-##########################################################
+
+###############################################################################
 # Global variable for debuggin control.
 debug_flag = False
 
-##########################################################
+###############################################################################
 # The usual delimiter suspects
 bes_log_field_delimiter = "|&|"
 bes_square_bracket_log_delimiter = "]["
 
-##########################################################
+###############################################################################
 # Default configuration for what gets written out as JSON
 # These may be overridden by command line options.
 TRANSMIT_REQUEST_LOG = True
@@ -68,7 +72,7 @@ TRANSMIT_ERROR_LOG   = True
 TRANSMIT_VERBOSE_LOG = True
 TRANSMIT_TIMING_LOG  = False
 
-##########################################################
+###############################################################################
 # JSON Shared Log Record Keys (may receive a user supplied prefix)
 # We make variables for these because they may get modified
 # by a user injected prefix.
@@ -90,7 +94,7 @@ def add_prefix_to_shared_log_keys():
         MESSAGE_KEY = the_prefix + MESSAGE_KEY
 
 
-##########################################################
+###############################################################################
 # Timing Log Keys
 # Log Fields type=="timing"
 # We make variables for these because they may get modified
@@ -115,7 +119,7 @@ def add_prefix_to_timing_log_keys():
         REQUEST_ID_TIMER_KEY = the_prefix + REQUEST_ID_TIMER_KEY
         TIMER_NAME_KEY = the_prefix + TIMER_NAME_KEY
 
-######################################################################################################
+###########################################################################################################################
 # Request Log Keys  (may receive a user supplied prefix)
 # Log Fields type=="request"
 # We make variables for these because they may get modified by a user injected prefix.
@@ -164,7 +168,7 @@ def add_prefix_to_request_log_keys():
         CE_KEY = the_prefix + CE_KEY
 
 
-##########################################################
+###############################################################################
 def debug(msg):
     """
         Writes msg to stderr when the debug_flag is enabled
@@ -176,7 +180,7 @@ def debug(msg):
         print("#", msg.replace("\n","\\n"), file=sys.stderr)
         sys.stderr.flush()
 
-##########################################################
+###############################################################################
 def eord(bool_val):
     """
     Converts a boolean to the strings 'enabled' or 'disabled' according to the value the boolean
@@ -192,7 +196,7 @@ def eord(bool_val):
     else:
         return "disabled"
 
-##########################################################
+###############################################################################
 def show_config():
     """Transmits the configuration state to stderr when in debug mode is enabled"""
     if debug_flag:
@@ -203,7 +207,7 @@ def show_config():
         debug(f"TRANSMIT_VERBOSE_LOG is {eord(TRANSMIT_VERBOSE_LOG)}")
         debug(f"TRANSMIT_TIMING_LOG is {eord(TRANSMIT_TIMING_LOG)}")
 
-##########################################################
+###############################################################################
 def request_log_to_json(log_fields, json_log_record):
     """
     Ingests a BES request log record
@@ -274,7 +278,7 @@ def request_log_to_json(log_fields, json_log_record):
     return send_it
 
 
-##########################################################
+###############################################################################
 def info_log_to_json(log_fields, json_log_record):
     """
     Ingests a BES info log record
@@ -297,7 +301,7 @@ def info_log_to_json(log_fields, json_log_record):
     return send_it
 
 
-##########################################################
+###############################################################################
 def error_log_to_json(log_fields, json_log_record):
     """
     Ingests a BES error log record
@@ -320,7 +324,7 @@ def error_log_to_json(log_fields, json_log_record):
     return send_it
 
 
-##########################################################
+###############################################################################
 def verbose_log_to_json(log_fields, json_log_record):
     """
     Ingests a BES verbose log record
@@ -343,7 +347,7 @@ def verbose_log_to_json(log_fields, json_log_record):
     return send_it
 
 
-##########################################################
+###############################################################################
 def timing_log_to_json(log_fields, json_log_record):
     """
     Ingests a BES timing log record
@@ -371,7 +375,7 @@ def timing_log_to_json(log_fields, json_log_record):
     return send_it
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-##########################################################
+###############################################################################
 def processing_error(msg, json_log_record):
     """
     Populate the json_log_record dictionary with a log_line processing error.
@@ -392,7 +396,7 @@ def processing_error(msg, json_log_record):
     return True
 
 
-##########################################################
+###############################################################################
 def square_bracket_timing_record(log_fields, json_log_record):
     """
     Process a BES timing log record that has [] delimiters.
@@ -450,7 +454,7 @@ def square_bracket_timing_record(log_fields, json_log_record):
     return send_it
 
 
-##########################################################
+###############################################################################
 # @TODO Not a full implementation, just timing logs for now.
 def square_bracket_log_record(log_line, json_log_record):
     """
@@ -492,7 +496,7 @@ def square_bracket_log_record(log_line, json_log_record):
 
 
 
-##########################################################
+###############################################################################
 def beslog2json(line_count, log_line):
     """
     Converts a BES log record into a kvp json representation.
@@ -547,7 +551,7 @@ def beslog2json(line_count, log_line):
     if send_it:
         print(json.dumps(json_log_record, sort_keys=True))
 
-##########################################################
+###############################################################################
 def read_from_stdin():
     """
     Reads BES log lines from stdin and turns them into JSON records on stdout.
@@ -584,7 +588,7 @@ def read_from_stdin():
 
 
 
-##########################################################
+###############################################################################
 def read_from_file(filename):
     """
     Reads BES log lines from a file and turns them into JSON records on stdout.
@@ -615,7 +619,7 @@ def read_from_file(filename):
                 processing_error(msg, json_log_record)
                 print(json.dumps(json_log_record, sort_keys=True))
 
-##########################################################
+###############################################################################
 def usage():
     """Print usage statement to stderr"""
     the_words = """
@@ -679,12 +683,12 @@ beslog2json.py
 """
     print(the_words, file=sys.stderr)
 
-##########################################################
-##########################################################
-##########################################################
+###############################################################################
+###############################################################################
+###############################################################################
 
 
-##########################################################
+###############################################################################
 # main
 #
 def main(argv):
