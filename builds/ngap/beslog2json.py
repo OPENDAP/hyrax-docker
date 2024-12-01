@@ -721,7 +721,9 @@ beslog2json.py
 ###############################################################################
 # main
 def main(argv):
-    """main(): In which we read the BES log lines and write the json. woot."""
+    """main(): In which we parse arguments and call functions toread the BES log
+    lines, and write the json. woot."""
+
     global debug_flag
     global TRANSMIT_REQUEST_LOG
     global TRANSMIT_INFO_LOG
@@ -730,7 +732,6 @@ def main(argv):
     global TRANSMIT_TIMING_LOG
     global SORT_KEYS
     global the_prefix
-
 
     input_filename=""
 
