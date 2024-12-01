@@ -73,6 +73,11 @@ TRANSMIT_VERBOSE_LOG = True
 TRANSMIT_TIMING_LOG  = False
 
 ###############################################################################
+# Sort thr keys in thr JSON (including debugging)
+# These may be overridden by command line options.
+SORT_KEYS = False
+
+###############################################################################
 # JSON Shared Log Record Keys (may receive a user supplied prefix)
 # We make variables for these because they may get modified
 # by a user injected prefix.
@@ -200,12 +205,19 @@ def eord(bool_val):
 def show_config():
     """Transmits the configuration state to stderr when in debug mode is enabled"""
     if debug_flag:
-        debug(f"debug_flag is {str(debug_flag).lower()}")
-        debug(f"TRANSMIT_REQUEST_LOG is {eord(TRANSMIT_REQUEST_LOG)}")
-        debug(f"TRANSMIT_INFO_LOG is {eord(TRANSMIT_INFO_LOG)}")
-        debug(f"TRANSMIT_ERROR_LOG is {eord(TRANSMIT_ERROR_LOG)}")
-        debug(f"TRANSMIT_VERBOSE_LOG is {eord(TRANSMIT_VERBOSE_LOG)}")
-        debug(f"TRANSMIT_TIMING_LOG is {eord(TRANSMIT_TIMING_LOG)}")
+        debug("###################################################")
+        debug("beslog2json.py configuration")
+        debug("")
+        debug(f"  debug_flag: {str(debug_flag).lower()}")
+        debug(f"  the_prefix: '{the_prefix}'")
+        debug(f"  SORT_KEYS:  {str(SORT_KEYS).lower()}")
+        debug("")
+        debug(f"  TRANSMIT_REQUEST_LOG: {eord(TRANSMIT_REQUEST_LOG)}")
+        debug(f"  TRANSMIT_INFO_LOG:    {eord(TRANSMIT_INFO_LOG)}")
+        debug(f"  TRANSMIT_ERROR_LOG:   {eord(TRANSMIT_ERROR_LOG)}")
+        debug(f"  TRANSMIT_VERBOSE_LOG: {eord(TRANSMIT_VERBOSE_LOG)}")
+        debug(f"  TRANSMIT_TIMING_LOG:  {eord(TRANSMIT_TIMING_LOG)}")
+        debug("")
 
 ###############################################################################
 def request_log_to_json(log_fields, json_log_record):
@@ -451,6 +463,8 @@ def square_bracket_timing_record(log_fields, json_log_record):
     else:
         debug(f"TRANSMIT_TIMING_LOG: {eord(TRANSMIT_TIMING_LOG)}")
 
+    debug(f"{prolog} END")
+
     return send_it
 
 
@@ -622,14 +636,14 @@ def read_from_file(filename):
 ###############################################################################
 def usage():
     """Print usage statement to stderr"""
-    the_words = """
+    the_words = f"""
 beslog2json.py
 
 NAME
     beslog2json.py - Convert BES log lines to valid json formatted kvp.
 
 SYNOPSIS
-    beslog2json.py [-d][-r value][-i value][-e value][-v value][-t value][-p value][-f value]
+    beslog2json.py [-d][-r value][-i value][-e value][-v value][-t value][-p value][-f value][-s value]
 
 DESCRIPTION
     Reads BES log lines from stdin (default) or from a file 
@@ -643,41 +657,57 @@ DESCRIPTION
     specify a file to read and a debugging option as follows:
 
         -r value, --request value
-            Passing value that begins with an 'f' or 'F' will 
-            evaluate to False. All else evaluates to True.
-
+            Adds BES log lines of type 'request' to the json
+            output. Passing 'value' that begins with an 'f'  
+            or 'F' will evaluate to False. All else evaluates to True.
+            (set to: {TRANSMIT_REQUEST_LOG})
+            
         -i value, --info value
-            Passing value that begins with an 'f' or 'F' will e
-            valuate to False. All else evaluates to True.
-
+            Adds BES log lines of type 'info' to the json
+            output. Passing 'value' that begins with an 'f' 
+            or 'F' will evaluate to False. All else evaluates to True.
+            (set to: {TRANSMIT_INFO_LOG})
+            
         -e value, --error value
-            Passing value that begins with an 'f' or 'F' will 
-            evaluate to False. All else evaluates to True.
-
+            Adds BES log lines of type 'error' to the json
+            output. Passing 'value' that begins with an 'f' 
+            or 'F' will evaluate to False. All else evaluates to True.
+            (set to: {TRANSMIT_ERROR_LOG})
+        
         -v value, --verbose value
-            Passing value that begins with an 'f' or 'F' will 
-            evaluate to False. All else evaluates to True.
-
+            Adds BES log lines of type 'verbose' to the json
+            output. Passing 'value' that begins with an 'f' 
+            or 'F' will evaluate to False. All else evaluates to True.
+            (set to: {TRANSMIT_VERBOSE_LOG})
+            
         -t value, --timing value
-            Passing value that begins with an 'f' or 'F' will 
-            evaluate to False. All else evaluates to True.
+            Adds BES log lines of type 'timing' to the json
+            output. Passing 'value' that begins with an 'f' 
+            or 'F' will evaluate to False. All else evaluates to True.
+            (set to: {TRANSMIT_TIMING_LOG})
 
         -p value, --prefix value
             A (short) string that will be prepended to the 
             name of every field in the json log record with a 
             separating '-' character. The prefix string should 
             be alpha/numeric with no special characters. For 
-            example none of:  ",][}{.-_ !?><$#^+ and similar.
+            example none of:  ",][}}{{.-_ !?><$#^+ and similar.
             
         -f value, --filename value
-            The path/filename of the BES log file to use as 
-            input. (primarily for testing)
+            Where 'value' is a valid path expression to a file
+            containing BES log output that utilizes the '|&|' 
+            as the field separator.
+
+        -s value, --sort value
+            Passing 'value' that begins with an 'f' or 'F' will
+            evaluate to False. All else evaluates to True.
 
         -d, --debug
             Turns on debugging output which is transmitted on stderr.
 
 EXAMPLE
     tail -f bes.log | python3 beslog2json.py -t true -p besd 
+    python3 beslog2json.py -f bes.log -t true -p besd -s true
     
 beslog2json.py
 """
@@ -690,20 +720,22 @@ beslog2json.py
 
 ###############################################################################
 # main
-#
 def main(argv):
+    """main(): In which we read the BES log lines and write the json. woot."""
     global debug_flag
     global TRANSMIT_REQUEST_LOG
     global TRANSMIT_INFO_LOG
     global TRANSMIT_ERROR_LOG
     global TRANSMIT_VERBOSE_LOG
     global TRANSMIT_TIMING_LOG
+    global SORT_KEYS
     global the_prefix
+
 
     input_filename=""
 
     try:
-        opts, args = getopt.getopt(argv, "hdr:i:e:v:t:p:f:", ["help", "debug", "requests=", "info=", "error=", "verbose=", "timing=", "prefix=", "filename="])
+        opts, args = getopt.getopt(argv, "hdsr:i:e:v:t:p:f:", ["help", "debug", "sort=", "requests=", "info=", "error=", "verbose=", "timing=", "prefix=", "filename="])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -712,6 +744,9 @@ def main(argv):
         if opt in ("-h", "--help"):
             usage()
             sys.exit()
+
+        elif opt in ("-f", "--filename"):
+            input_filename = arg
 
         elif opt in ("-r", "--requests"):
             TRANSMIT_REQUEST_LOG = not arg.lower().startswith("f")
@@ -737,8 +772,11 @@ def main(argv):
         elif opt in ("-d", "--debug"):
             debug_flag = True
 
-        elif opt in ("-f", "--filename"):
-            input_filename = arg
+        elif opt in ("-s", "--sort"):
+            SORT_KEYS = not arg.lower().startswith("f")
+
+        elif opt in ("-s", "--timing"):
+            TRANSMIT_TIMING_LOG  = not arg.lower().startswith("f")
 
     show_config()
 
