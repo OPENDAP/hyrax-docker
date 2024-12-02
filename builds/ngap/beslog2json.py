@@ -685,7 +685,12 @@ DESCRIPTION
             output. Passing 'value' that begins with an 'f' 
             or 'F' will evaluate to False. All else evaluates to True.
             (set to: {TRANSMIT_TIMING_LOG})
-
+            
+        -a, --all
+            Causes all of the BES log lines to be transmitted. 
+            This is essentially the same as using the arguments:
+            '-r true -i true -e true -v true -t true'             
+            
         -p value, --prefix value
             A (short) string that will be prepended to the 
             name of every field in the json log record with a 
@@ -736,7 +741,7 @@ def main(argv):
     input_filename=""
 
     try:
-        opts, args = getopt.getopt(argv, "hdsr:i:e:v:t:p:f:", ["help", "debug", "sort=", "requests=", "info=", "error=", "verbose=", "timing=", "prefix=", "filename="])
+        opts, args = getopt.getopt(argv, "hadsr:i:e:v:t:p:f:", ["help", "debug", "all", "sort=", "requests=", "info=", "error=", "verbose=", "timing=", "prefix=", "filename="])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -751,6 +756,13 @@ def main(argv):
 
         elif opt in ("-r", "--requests"):
             TRANSMIT_REQUEST_LOG = not arg.lower().startswith("f")
+
+        elif opt in ("-a", "--all"):
+            TRANSMIT_REQUEST_LOG = True
+            TRANSMIT_INFO_LOG    = True
+            TRANSMIT_ERROR_LOG   = True
+            TRANSMIT_VERBOSE_LOG = True
+            TRANSMIT_TIMING_LOG  = True
 
         elif opt in ("-i", "--info"):
             TRANSMIT_INFO_LOG    = not arg.lower().startswith("f")
