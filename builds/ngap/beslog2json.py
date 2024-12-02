@@ -75,7 +75,7 @@ TRANSMIT_TIMING_LOG  = False
 ###############################################################################
 # Sort thr keys in thr JSON (including debugging)
 # These may be overridden by command line options.
-SORT_KEYS = False
+SORT_KEYS = True
 
 ###############################################################################
 # JSON Shared Log Record Keys (may receive a user supplied prefix)
@@ -457,7 +457,7 @@ def square_bracket_timing_record(log_fields, json_log_record):
             json_log_record[REQUEST_ID_TIMER_KEY] = log_fields[10]
             json_log_record[TIMER_NAME_KEY] = log_fields[11]
             send_it = True
-            debug(f"{prolog} json: {json.dumps(json_log_record, sort_keys=True)} ")
+            debug(f"{prolog} json: {json.dumps(json_log_record, sort_keys=SORT_KEYS)} ")
         else:
             return processing_error(f"{prolog} Failed to identify timing data in log_fields: {log_fields}", json_log_record)
     else:
@@ -498,7 +498,7 @@ def square_bracket_log_record(log_line, json_log_record):
     log_record_type = log_fields[3]
     json_log_record[TYPE_KEY] = log_record_type
 
-    debug(json.dumps(json_log_record, sort_keys=True))
+    debug(json.dumps(json_log_record, sort_keys=SORT_KEYS))
     if log_record_type == "timing":
         send_it = square_bracket_timing_record(log_fields, json_log_record)
     else:
@@ -563,7 +563,7 @@ def beslog2json(line_count, log_line):
             send_it = processing_error(msg, json_log_record)
 
     if send_it:
-        print(json.dumps(json_log_record, sort_keys=True))
+        print(json.dumps(json_log_record, sort_keys=SORT_KEYS))
 
 ###############################################################################
 def read_from_stdin():
@@ -598,7 +598,7 @@ def read_from_stdin():
             debug(msg)
             json_log_record={}
             processing_error(msg, json_log_record)
-            print(json.dumps(json_log_record, sort_keys=True))
+            print(json.dumps(json_log_record, sort_keys=SORT_KEYS))
 
 
 
@@ -631,7 +631,7 @@ def read_from_file(filename):
                 debug(msg)
                 json_log_record={}
                 processing_error(msg, json_log_record)
-                print(json.dumps(json_log_record, sort_keys=True))
+                print(json.dumps(json_log_record, sort_keys=SORT_KEYS))
 
 ###############################################################################
 def usage():
