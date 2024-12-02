@@ -116,7 +116,7 @@ docker cp hyrax:/var/log/bes/bes.log .
 echo "############################################################################"
 echo "# head ./bes.log"
 head ./bes.log
-cat ./bes.log | python3 builds/ngap/beslog2json.py -t true > ./bes.json
+cat ./bes.log | ./builds/ngap/beslog2json.py -t true > ./bes.json
 echo "############################################################################"
 echo "# head -20 ./bes.json"
 head -n 10 ./bes.json
