@@ -434,9 +434,11 @@ echo "#" >&2
 # TEMPORARY ###################################################################
 /cleanup_files.sh >&2 &
 
-# This 'tail -f' may not work in the background in which case we need to find
-# an alternate way
-tail -f "${BES_LOG_FILE}" | awk -f beslog2json.awk &
+# The old AWKy way
+# tail -f "${BES_LOG_FILE}" | awk -f beslog2json.awk &
+
+# The new snakey way.
+tail -f "${BES_LOG_FILE}" | ./beslog2json.py -p hyrax &
 
 # TEMPORARY ###################################################################
 
@@ -480,9 +482,6 @@ while /bin/true; do
         echo "#   BESD_STATUS: $BESD_STATUS     besd_pid: $besd_pid" >&2
         echo "# TOMCAT_STATUS: $TOMCAT_STATUS tomcat_pid: $tomcat_pid" >&2
     fi
-
-    # Moved to outside this loop and background.
-    # tail -f "${BES_LOG_FILE}" | awk -f beslog2json.awk
 
 done
 #-------------------------------------------------------------------------------

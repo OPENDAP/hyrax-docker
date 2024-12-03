@@ -23,9 +23,9 @@
 # The control variables are:
 #     SEND_REQUESTS (default: "true")
 #       SEND_ERRORS (default: "true")
-#       SEND_TIMING (default: "false")
-#         SEND_INFO (default: "false")
-#      SEND_VERBOSE (default: "false")
+#       SEND_TIMING (default: "true")
+#         SEND_INFO (default: "true")
+#      SEND_VERBOSE (default: "true")
 #            PRETTY (default: "false")
 #             DEBUG (default: "false")
 #
@@ -57,7 +57,7 @@
 #    awk -v foo=true -v bar=1
 # This function will accept "true" or 1 (and only 1) as a true value.
 #
-function process_bool_value(var_val, dfault, ret_val){
+function process_bool_value(var_val, dfault){
     ret_val = dfault;
     if (length(var_val)>0) {
         if(var_val != "true" && var_val != "1"){
@@ -81,7 +81,13 @@ function process_bool_value(var_val, dfault, ret_val){
 #
 function print_opener(unix_time, pid, log_type){
     printf("{ %s", N);
-    printf("%s\"%stime\": %s", INDENT, PREFIX, unix_time);
+    # If the unix_time value is a number, 
+    # then don't surround it with double quotes.
+    if(unix_time ~ /^[0-9]+$/){ 
+        printf("%s\"%stime\": %s", INDENT, PREFIX, unix_time);
+    } else { 
+        printf("%s\"%stime\": \"%s\"", INDENT, PREFIX, unix_time);
+    }
     write_kvp_num("pid", pid);
     write_kvp_str("type", log_type);
 }
@@ -101,6 +107,9 @@ function print_closer(){
 # Writes a key value pair in json. The value is handled as a number
 #
 function write_kvp_num(key,value){
+    if(length(value)==0){
+        value = "-1";
+    }
     printf (", %s%s\"%s%s\": %s", N, INDENT, PREFIX, key, value);
 }
 
@@ -110,6 +119,9 @@ function write_kvp_num(key,value){
 # Writes a key value pair in json. The value handled as a string.
 #
 function write_kvp_str(key,value){
+    if(length(value)==0){
+        value = "-";
+    }
     printf (", %s%s\"%s%s\": \"%s\"", N, INDENT, PREFIX, key, value);
 }
 
@@ -126,7 +138,7 @@ BEGIN {
 
     if(send_all=="true"){
         # Send everything as json.
-        SEND_REQUESTS="true"
+        SEND_REQUESTS="true";
         SEND_ERRORS="true";
         SEND_TIMING="true";
         SEND_INFO="true";
