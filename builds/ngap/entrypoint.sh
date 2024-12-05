@@ -81,7 +81,7 @@ export NGAP_CERTIFICATE_CHAIN_FILE="/usr/share/tomcat/conf/NGAP-CA-certificate-c
 echo "#   NGAP_CERTIFICATE_CHAIN_FILE: ${NGAP_CERTIFICATE_CHAIN_FILE}" >&2
 
 export NGAP_CERTIFICATE_KEY_FILE="/usr/share/tomcat/conf/NGAP-CA-certificate.key"
-echo "#   NGAP_CERTIFICATE_KEY: ${NGAP_CERTIFICATE_KEY_FILE}" >&2
+echo "#   NGAP_CERTIFICATE_KEY_FILE: ${NGAP_CERTIFICATE_KEY_FILE}" >&2
 
 ################################################################################
 echo "${HR2}" >&2
@@ -120,7 +120,7 @@ if test -n "${HOST}"  &&  test -n "${USERNAME}"  &&  test -n "${PASSWORD}" ; the
     chown bes:bes "${NETRC_FILE}"
     chmod 400 "${NETRC_FILE}"
     echo "#  "$(ls -l "${NETRC_FILE}")  >&2
-    cat "${NETRC_FILE}" | awk '{print "##    "$0;}' >&2
+    # cat "${NETRC_FILE}" | awk '{print "##    "$0;}' >&2
     echo "#" >&2
 fi
 ################################################################################
@@ -136,7 +136,8 @@ if test -n "${OLFS_XML}"  ; then
     OLFS_XML_FILE="${OLFS_CONF_DIR}/olfs.xml"
     echo "# Updating OLFS configuration file: ${OLFS_XML_FILE}" >&2
     echo "${OLFS_XML}" > ${OLFS_XML_FILE}
-    cat "${OLFS_XML_FILE}" | awk '{print "##    "$0;}' >&2
+    echo "#  "$(ls -l "${OLFS_XML_FILE}")  >&2
+    # cat "${OLFS_XML_FILE}" | awk '{print "##    "$0;}' >&2
     echo "#" >&2
 fi
 ################################################################################
@@ -153,7 +154,8 @@ if test -n "${USER_ACCESS_XML}"  ; then
     USER_ACCESS_XML_FILE="${OLFS_CONF_DIR}/user-access.xml"
     echo "# Updating OLFS user access controls: ${USER_ACCESS_XML_FILE}" >&2
     echo "${USER_ACCESS_XML}" > ${USER_ACCESS_XML_FILE}
-    cat "${USER_ACCESS_XML_FILE}" | awk '{print "##    "$0;}' >&2
+    echo "#  "$(ls -l "${USER_ACCESS_XML_FILE}")  >&2
+    # cat "${USER_ACCESS_XML_FILE}" | awk '{print "##    "$0;}' >&2
     echo "#" >&2
 fi
 ################################################################################
@@ -169,7 +171,8 @@ if test -n "${BES_SITE_CONF}" ; then
     # echo "${BES_SITE_CONF}" > ${BES_SITE_CONF_FILE}
     # @TODO THis seems like a crappy hack, we should just change the source file in BitBucket to be correct
     echo "${BES_SITE_CONF}" | sed -e "s+BES.LogName=stdout+BES.LogName=${BES_LOG_FILE}+g" > ${BES_SITE_CONF_FILE}
-    cat "${BES_SITE_CONF_FILE}" | awk '{print "##    "$0;}' >&2
+    echo "#  "$(ls -l "${BES_SITE_CONF_FILE}")  >&2
+    # cat "${BES_SITE_CONF_FILE}" | awk '{print "##    "$0;}' >&2
     echo "#" >&2
 fi
 ################################################################################
@@ -183,7 +186,8 @@ if test -n "${TOMCAT_CONTEXT_XML}" ; then
     echo "${HR2}" >&2
     echo "# Tomcat context.xml file: ${TOMCAT_CONTEXT_FILE}" >&2
     echo "${TOMCAT_CONTEXT_XML}" > ${TOMCAT_CONTEXT_FILE}
-    cat "${TOMCAT_CONTEXT_FILE}" | awk '{print "##    "$0;}' >&2
+    echo "#  "$(ls -l "${TOMCAT_CONTEXT_FILE}")  >&2
+    # cat "${TOMCAT_CONTEXT_FILE}" | awk '{print "##    "$0;}' >&2
     echo "#" >&2
 fi
 ################################################################################
@@ -197,7 +201,8 @@ if test -n "${NGAP_CERTIFICATE}" ; then
     echo "${HR2}" >&2
     echo "# Tomcat  file: ${NGAP_CERTIFICATE_FILE}" >&2
     echo "${NGAP_CERTIFICATE}" > ${NGAP_CERTIFICATE_FILE}
-    cat "${NGAP_CERTIFICATE_FILE}" | awk '{print "##    "$0;}' >&2
+    echo "#  "$(ls -l "${NGAP_CERTIFICATE_FILE}")  >&2
+    # cat "${NGAP_CERTIFICATE_FILE}" | awk '{print "##    "$0;}' >&2
     echo "#" >&2
 fi
 ################################################################################
@@ -211,7 +216,8 @@ if test -n "${NGAP_CERTIFICATE_CHAIN}" ; then
     echo "${HR2}" >&2
     echo "# Tomcat  file: ${NGAP_CREDENTIALS_CHAIN_FILE}" >&2
     echo "${NGAP_CERTIFICATE_CHAIN}" > ${NGAP_CERTIFICATE_CHAIN_FILE}
-    cat "${NGAP_CERTIFICATE_CHAIN_FILE}" | awk '{print "##    "$0;}' >&2
+    echo "#  "$(ls -l "${NGAP_CERTIFICATE_CHAIN_FILE}")  >&2
+    # cat "${NGAP_CERTIFICATE_CHAIN_FILE}" | awk '{print "##    "$0;}' >&2
     echo "#" >&2
 fi
 ################################################################################
@@ -225,7 +231,8 @@ if test -n "${NGAP_CERTIFICATE_KEY}" ; then
     echo "${HR2}" >&2
     echo "# Tomcat  file: ${NGAP_CERTIFICATE_KEY_FILE}" >&2
     echo "${NGAP_CERTIFICATE_KEY}" > ${NGAP_CERTIFICATE_KEY_FILE}
-    cat "${NGAP_CERTIFICATE_KEY_FILE}" | awk '{print "##    "$0;}' >&2
+    echo "#  "$(ls -l "${NGAP_CERTIFICATE_KEY_FILE}")  >&2
+    # cat "${NGAP_CERTIFICATE_KEY_FILE}" | awk '{print "##    "$0;}' >&2
     echo "#" >&2
 fi
 ################################################################################
@@ -282,15 +289,15 @@ while getopts "de:sn:" opt; do
       ;;
     k)
       export AWS_SECRET_ACCESS_KEY="${OPTARG}"
-      echo "Set AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}" >&2;
+      echo "Set AWS_SECRET_ACCESS_KEY" >&2;
       ;;
     i)
       export AWS_ACCESS_KEY_ID="${OPTARG}"
-      echo "# Set AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}" >&2;
+      echo "# Set AWS_ACCESS_KEY_ID" >&2;
       ;;
     r)
       export AWS_DEFAULT_REGION="${OPTARG}"
-      echo "# Set AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}" >&2;
+      echo "# Set AWS_DEFAULT_REGION" >&2;
       ;;
 
     \?)
