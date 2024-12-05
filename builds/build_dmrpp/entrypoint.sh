@@ -12,11 +12,12 @@ echo "Greetings, I am "`whoami`"."   >&2
 # set -e
 # set -x
 
+export NOT_SET="<not-set>"
 
 export JAVA_HOME="${JAVA_HOME:-/etc/alternatives/jre}"
 echo "JAVA_HOME: ${JAVA_HOME}" >&2
 
-export CATALINA_HOME=${CATALINA_HOME:-"NOT_SET"}
+export CATALINA_HOME=${CATALINA_HOME:-"$NOT_SET"}
 echo "#         CATALINA_HOME: ${CATALINA_HOME}" >&2
 
 export DEPLOYMENT_CONTEXT=${DEPLOYMENT_CONTEXT:-"ROOT"}
@@ -30,14 +31,23 @@ echo "#   TOMCAT_CONTEXT_FILE: ${TOMCAT_CONTEXT_FILE}" >&2
 
 ################################################################################
 echo "${HR2}" >&2
-export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-"<not set>"}
-echo "# AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}" >&2
+export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-"$NOT_SET"}
+#echo "#     AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}" >&2
+if test AWS_SECRET_ACCESS_KEY = $NOT_SET; then
+  echo "# AWS_SECRET_ACCESS_KEY has not been set." >&2
+fi
 
-export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-"<not set>"}
-echo "#     AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}" >&2
+export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-"$NOT_SET"}
+#echo "#     AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}" >&2
+if test AWS_ACCESS_KEY_ID = $NOT_SET; then
+  echo "# AWS_ACCESS_KEY_ID has not been set." >&2
+fi
 
-export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-"<not set>"}
-echo "#    AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}" >&2
+export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-"$NOT_SET"}
+# echo "#    AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}" >&2
+if test AWS_DEFAULT_REGION = $NOT_SET; then
+  echo "# AWS_DEFAULT_REGION has not been set." >&2
+fi
 
 ################################################################################
 echo "${HR2}" >&2
@@ -48,7 +58,7 @@ export NGAP_CERTIFICATE_CHAIN_FILE="/usr/share/tomcat/conf/NGAP-CA-certificate-c
 echo "#   NGAP_CERTIFICATE_CHAIN_FILE: ${NGAP_CERTIFICATE_CHAIN_FILE}" >&2
 
 export NGAP_CERTIFICATE_KEY_FILE="/usr/share/tomcat/conf/NGAP-CA-certificate.key"
-echo "#   NGAP_CERTIFICATE_KEY: ${NGAP_CERTIFICATE_KEY_FILE}" >&2
+echo "#   NGAP_CERTIFICATE_KEY_FILE: ${NGAP_CERTIFICATE_KEY_FILE}" >&2
 
 ################################################################################
 echo "${HR2}" >&2
@@ -85,7 +95,7 @@ if test -n "${HOST}"  &&  test -n "${USERNAME}"  &&  test -n "${PASSWORD}" ; the
     chown bes:bes "${NETRC_FILE}"
     chmod 400 "${NETRC_FILE}"
     echo "#  "$(ls -l "${NETRC_FILE}")  >&2
-    cat "${NETRC_FILE}" | awk '{print "##    "$0;}' >&2
+    # cat "${NETRC_FILE}" | awk '{print "##    "$0;}' >&2
     echo "#" >&2
 fi
 ################################################################################
@@ -100,7 +110,8 @@ if test -n "${OLFS_XML}"  ; then
     OLFS_XML_FILE="${OLFS_CONF_DIR}/build_dmrpp.xml"
     echo "# Updating build_pmrpp configuration file: ${OLFS_XML_FILE}" >&2
     echo "${OLFS_XML}" > ${OLFS_XML_FILE}
-    cat "${OLFS_XML_FILE}" | awk '{print "##    "$0;}' >&2
+    echo "#  "$(ls -l "${OLFS_XML_FILE}")  >&2
+    #cat "${OLFS_XML_FILE}" | awk '{print "##    "$0;}' >&2
     echo "#" >&2
 fi
 ################################################################################
@@ -117,7 +128,8 @@ if test -n "${USER_ACCESS_XML}"  ; then
     USER_ACCESS_XML_FILE="${OLFS_CONF_DIR}/user-access.xml"
     echo "# Updating OLFS user access controls: ${USER_ACCESS_XML_FILE}" >&2
     echo "${USER_ACCESS_XML}" > ${USER_ACCESS_XML_FILE}
-    cat "${USER_ACCESS_XML_FILE}" | awk '{print "##    "$0;}' >&2
+    echo "#  "$(ls -l "${USER_ACCESS_XML_FILE}")  >&2
+    # cat "${USER_ACCESS_XML_FILE}" | awk '{print "##    "$0;}' >&2
     echo "#" >&2
 fi
 ################################################################################
@@ -133,7 +145,8 @@ if test -n "${BES_SITE_CONF}" ; then
     # echo "${BES_SITE_CONF}" > ${BES_SITE_CONF_FILE}
     # @TODO THis seems like a crappy hack, we should just change the source file in BitBucket to be correct
     echo "${BES_SITE_CONF}" | sed -e "s+BES.LogName=stdout+BES.LogName=${BES_LOG_FILE}+g" > ${BES_SITE_CONF_FILE}
-    cat "${BES_SITE_CONF_FILE}" | awk '{print "##    "$0;}' >&2
+    echo "#  "$(ls -l "${BES_SITE_CONF_FILE}")  >&2
+    # cat "${BES_SITE_CONF_FILE}" | awk '{print "##    "$0;}' >&2
     echo "#" >&2
 fi
 ################################################################################
@@ -145,9 +158,10 @@ fi
 # Test if the bes.conf env variable is set (by way of not unset) and not empty
 if test -n "${NGAP_CERTIFICATE}" ; then
     echo "${HR2}" >&2
-    echo "# Tomcat  file: ${NGAP_CERTIFICATE_FILE}" >&2
+    echo "# Tomcat NGAP_CERTIFICATE_FILE file: ${NGAP_CERTIFICATE_FILE}" >&2
     echo "${NGAP_CERTIFICATE}" > ${NGAP_CERTIFICATE_FILE}
-    cat "${NGAP_CERTIFICATE_FILE}" | awk '{print "##    "$0;}' >&2
+    echo "#  "$(ls -l "${NGAP_CERTIFICATE_FILE}")  >&2
+    #cat "${NGAP_CERTIFICATE_FILE}" | awk '{print "##    "$0;}' >&2
     echo "#" >&2
 fi
 ################################################################################
@@ -159,9 +173,10 @@ fi
 # Test if the bes.conf env variable is set (by way of not unset) and not empty
 if test -n "${NGAP_CERTIFICATE_CHAIN}" ; then
     echo "${HR2}" >&2
-    echo "# Tomcat  file: ${NGAP_CREDENTIALS_CHAIN_FILE}" >&2
+    echo "# Tomcat NGAP_CREDENTIALS_CHAIN_FILE file: ${NGAP_CREDENTIALS_CHAIN_FILE}" >&2
     echo "${NGAP_CERTIFICATE_CHAIN}" > ${NGAP_CERTIFICATE_CHAIN_FILE}
-    cat "${NGAP_CERTIFICATE_CHAIN_FILE}" | awk '{print "##    "$0;}' >&2
+    echo "#  "$(ls -l "${NGAP_CERTIFICATE_CHAIN_FILE}")  >&2
+    #cat "${NGAP_CERTIFICATE_CHAIN_FILE}" | awk '{print "##    "$0;}' >&2
     echo "#" >&2
 fi
 ################################################################################
@@ -175,7 +190,8 @@ if test -n "${NGAP_CERTIFICATE_KEY}" ; then
     echo "${HR2}" >&2
     echo "# Tomcat  file: ${NGAP_CERTIFICATE_KEY_FILE}" >&2
     echo "${NGAP_CERTIFICATE_KEY}" > ${NGAP_CERTIFICATE_KEY_FILE}
-    cat "${NGAP_CERTIFICATE_KEY_FILE}" | awk '{print "##    "$0;}' >&2
+    echo "#  "$(ls -l "${NGAP_CERTIFICATE_KEY_FILE}")  >&2
+    # cat "${NGAP_CERTIFICATE_KEY_FILE}" | awk '{print "##    "$0;}' >&2
     echo "#" >&2
 fi
 ################################################################################
