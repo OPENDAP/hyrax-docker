@@ -64,7 +64,8 @@ bes_log_field_delimiter = "|&|"
 bes_square_bracket_log_delimiter = "]["
 
 ###############################################################################
-# Default configuration for what gets written out as JSON
+# Default configuration for what types of log records will be
+# converted to JSON
 # These may be overridden by command line options.
 TRANSMIT_REQUEST_LOG = True
 TRANSMIT_INFO_LOG    = True
@@ -73,7 +74,7 @@ TRANSMIT_VERBOSE_LOG = True
 TRANSMIT_TIMING_LOG  = False
 
 ###############################################################################
-# Sort thr keys in thr JSON (including debugging)
+# Sort the keys in the JSON (including debugging)
 # These may be overridden by command line options.
 SORT_KEYS = True
 
@@ -643,7 +644,7 @@ NAME
     beslog2json.py - Convert BES log lines to valid json formatted kvp.
 
 SYNOPSIS
-    beslog2json.py [-d][-r value][-i value][-e value][-v value][-t value][-p value][-f value][-s value]
+    beslog2json.py [-h][-d][-a][-r value][-i value][-e value][-v value][-t value][-p value][-f value][-s value]
 
 DESCRIPTION
     Reads BES log lines from stdin (default) or from a file 
@@ -711,8 +712,8 @@ DESCRIPTION
             Turns on debugging output which is transmitted on stderr.
 
 EXAMPLE
-    tail -f bes.log | python3 beslog2json.py -t true -p besd 
-    python3 beslog2json.py -f bes.log -t true -p besd -s true
+    tail -f bes.log | ./beslog2json.py -t true -p besd 
+    ./beslog2json.py -f bes.log -t true -p besd -s true
     
 beslog2json.py
 """
@@ -746,6 +747,7 @@ def main(argv):
         usage()
         sys.exit(2)
 
+    arg: str
     for opt, arg in opts:
         if opt in ("-h", "--help"):
             usage()
@@ -777,7 +779,9 @@ def main(argv):
             TRANSMIT_TIMING_LOG  = not arg.lower().startswith("f")
 
         elif opt in ("-p", "--prefix"):
-            the_prefix  = arg + "-"
+            the_prefix = arg
+            if not the_prefix.endswith("-"):
+                the_prefix += "-"
             add_prefix_to_shared_log_keys()
             add_prefix_to_request_log_keys()
             add_prefix_to_timing_log_keys()

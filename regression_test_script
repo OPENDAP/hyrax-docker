@@ -75,7 +75,7 @@ function waitForHyrax() {
                 done_flag="yup";
             fi
         fi
-        let now=`date "+%s"`
+        let now=$(date "+%s")
         let elapsed=$now-$start;
         # echo "elapsed: $elapsed"
         if [ ${elapsed} -gt ${time_out} ]
