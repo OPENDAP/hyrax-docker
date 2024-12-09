@@ -464,7 +464,10 @@ def square_bracket_timing_record(log_fields, json_log_record):
             json_log_record[STOP_TIME_KEY] = int(stop_us)
 
             json_log_record[REQUEST_ID_TIMER_KEY] = log_fields[10]
-            json_log_record[TIMER_NAME_KEY] = log_fields[11]
+            timer_name = log_fields[11]
+            if timer_name.endswith("]"):
+                timer_name = timer_name[:-1]
+            json_log_record[TIMER_NAME_KEY] = timer_name
             send_it = True
             debug(f"{prolog} json: {json.dumps(json_log_record, sort_keys=SORT_KEYS)} ")
         else:
