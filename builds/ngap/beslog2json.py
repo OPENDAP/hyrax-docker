@@ -134,7 +134,7 @@ USER_AGENT_KEY      = "user-agent"
 SESSION_ID_KEY      = "session-id"
 USER_ID_KEY         = "user-id"
 OLFS_START_TIME_KEY = "olfs-start-time"
-REQUEST_ID_KEY      = "requiest-id"
+REQUEST_ID_KEY      = "request-id"
 HTTP_VERB_KEY       = "http-verb"
 URL_PATH_KEY        = "url-path"
 QUERY_STRING_KEY    = "query-string"
@@ -271,7 +271,15 @@ def request_log_to_json(log_fields, json_log_record):
         json_log_record[USER_AGENT_KEY]      = log_fields[5]
         json_log_record[SESSION_ID_KEY]      = log_fields[6]
         json_log_record[USER_ID_KEY]         = log_fields[7]
-        json_log_record[OLFS_START_TIME_KEY] = log_fields[8]
+
+        # Time format may or may not be in unix time format.
+        # If it's not numeric we treat the value as a string.
+        olfs_stime = log_fields[8]
+        if olfs_stime.isnumeric():
+            json_log_record[OLFS_START_TIME_KEY] = int(olfs_stime)
+        else:
+            json_log_record[OLFS_START_TIME_KEY] = olfs_stime
+
         json_log_record[REQUEST_ID_KEY]      = log_fields[9]
         json_log_record[HTTP_VERB_KEY]       = log_fields[10]
         json_log_record[URL_PATH_KEY]        = log_fields[11]
@@ -528,35 +536,37 @@ def beslog2json(line_count, log_line):
         debug(f"log_fields length: {len(log_fields)}")
 
         if len(log_fields) > 3:
-                time_str = log_fields[0]
-                if time_str.isnumeric():
-                    json_log_record[TIME_KEY] = int(log_fields[0])
-                else:
-                    json_log_record[TIME_KEY] = log_fields[0]
+            # Time format may or may not be in unix time format.
+            # If it's not numeric we treat the value as a string.
+            time_str = log_fields[0]
+            if time_str.isnumeric():
+                json_log_record[TIME_KEY] = int(time_str)
+            else:
+                json_log_record[TIME_KEY] = time_str
 
-                json_log_record[PID_KEY]  = int(log_fields[1])
-                log_record_type = log_fields[2]
-                json_log_record[TYPE_KEY] = log_record_type
+            json_log_record[PID_KEY]  = int(log_fields[1])
+            log_record_type = log_fields[2]
+            json_log_record[TYPE_KEY] = log_record_type
 
-                if log_record_type == "request":
-                    send_it = request_log_to_json(log_fields, json_log_record)
+            if log_record_type == "request":
+                send_it = request_log_to_json(log_fields, json_log_record)
 
-                elif log_record_type == "info":
-                    send_it = info_log_to_json(log_fields, json_log_record)
+            elif log_record_type == "info":
+                send_it = info_log_to_json(log_fields, json_log_record)
 
-                elif log_record_type == "error":
-                    send_it = error_log_to_json(log_fields, json_log_record)
+            elif log_record_type == "error":
+                send_it = error_log_to_json(log_fields, json_log_record)
 
-                elif log_record_type == "verbose":
-                    send_it = verbose_log_to_json(log_fields, json_log_record)
+            elif log_record_type == "verbose":
+                send_it = verbose_log_to_json(log_fields, json_log_record)
 
-                elif log_record_type == "timing":
-                    send_it = timing_log_to_json(log_fields, json_log_record)
+            elif log_record_type == "timing":
+                send_it = timing_log_to_json(log_fields, json_log_record)
 
-                else:
-                    msg = f"{prolog} UNKNOWN LOG RECORD TYPE {log_record_type} log_line: {log_line}"
-                    debug(msg)
-                    send_it = processing_error(msg, json_log_record)
+            else:
+                msg = f"{prolog} UNKNOWN LOG RECORD TYPE {log_record_type} log_line: {log_line}"
+                debug(msg)
+                send_it = processing_error(msg, json_log_record)
 
         else:
             msg = f"{prolog} OUCH! Incompatible input log line {line_count}  log_line: {log_line}"
