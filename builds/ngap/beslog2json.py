@@ -389,20 +389,11 @@ def timing_log_to_json(log_fields, json_log_record):
     if TRANSMIT_TIMING_LOG:
         if log_fields[4] == ELAPSED_TIME_KEY :
             json_log_record[ELAPSED_TIME_KEY] = int(log_fields[5])
-            debug(f"json_log_record[ELAPSED_TIME_KEY]: {json_log_record[ELAPSED_TIME_KEY]}")
             json_log_record[START_TIME_KEY] = int(log_fields[7])
-            debug(f"json_log_record[START_TIME_KEY]: {json_log_record[START_TIME_KEY]}")
             json_log_record[STOP_TIME_KEY] = int(log_fields[9])
-            debug(f"json_log_record[STOP_TIME_KEY]: {json_log_record[STOP_TIME_KEY]}")
             json_log_record[REQUEST_ID_TIMER_KEY] = log_fields[10]
-            debug(f"json_log_record[REQUEST_ID_TIMER_KEY]: {json_log_record[REQUEST_ID_TIMER_KEY]}")
             json_log_record[TIMER_NAME_KEY] = log_fields[11]
-            debug(f"json_log_record[TIMER_NAME_KEY]: {json_log_record[TIMER_NAME_KEY]}")
             send_it = True
-        else:
-            debug(f"Timer record missing ELAPSED_TIME_KEY  {ELAPSED_TIME_KEY}\n log fields: \b\n{json.dumps(log_fields, indent=4)}")
-            print()
-
     else:
         debug(f"TRANSMIT_TIMING_LOG is {eord(TRANSMIT_TIMING_LOG)}")
 
