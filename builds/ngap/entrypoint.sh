@@ -175,6 +175,11 @@ if test -n "${BES_SITE_CONF}" ; then
     # cat "${BES_SITE_CONF_FILE}" | awk '{print "##    "$0;}' >&2
     echo "#" >&2
 fi
+
+# Add AWS instance-id to the BES site.conf
+export instance_id=$(curl -L http://169.254.169.254/latest/meta-data/instance-id)
+echo "# instance_id: ${instance_id}" >&2
+echo "AWS.instance-id=${instance_id}" >> "${BES_SITE_CONF_FILE}"
 ################################################################################
 
 ################################################################################
@@ -258,7 +263,6 @@ fi
 #    echo "#" >&2
 #fi
 ################################################################################
-
 
 
 ################################################################################

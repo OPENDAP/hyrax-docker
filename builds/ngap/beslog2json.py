@@ -82,19 +82,22 @@ SORT_KEYS = True
 # JSON Shared Log Record Keys (may receive a user supplied prefix)
 # We make variables for these because they may get modified
 # by a user injected prefix.
-TIME_KEY    = "time"
-PID_KEY     = "pid"
-TYPE_KEY    = "type"
-MESSAGE_KEY = "message"
+TIME_KEY            = "time"
+INSTANCE_ID_KEY     = "instance-id"
+PID_KEY             = "pid"
+TYPE_KEY            = "type"
+MESSAGE_KEY         = "message"
 def add_prefix_to_shared_log_keys():
     """Applies user supplied prefix to shared log record keys """
     global TIME_KEY
+    global INSTANCE_ID_KEY
     global PID_KEY
     global TYPE_KEY
     global MESSAGE_KEY
 
     if len(the_prefix) != 0 :
         TIME_KEY = the_prefix + TIME_KEY
+        INSTANCE_ID_KEY = the_prefix + INSTANCE_ID_KEY
         PID_KEY = the_prefix + PID_KEY
         TYPE_KEY = the_prefix + TYPE_KEY
         MESSAGE_KEY = the_prefix + MESSAGE_KEY
@@ -239,23 +242,24 @@ def request_log_to_json(log_fields, json_log_record):
     Field#: key-name
     ------:--------------------
          0: start-time
-         1: pid
-         2: type of log record
-         3: olfs boundary tag (ignored)
-         4: client-ip
-         5: user-agent
-         6: session-id
-         7: user-id
-         8: olfs-start-time
-         9: request-id
-        10: http-verb
-        11: url-path
-        12: query-string
-        13: bes boundary key (ignored)
-        14: bes-action
-        15: return-as
-        16: local-path
-        17: ce
+         1: instance-id
+         2: pid
+         3: type of log record
+         4: olfs boundary tag (ignored)
+         5: client-ip
+         6: user-agent
+         7: session-id
+         8: user-id
+         9: olfs-start-time
+        10: request-id
+        11: http-verb
+        12: url-path
+        13: query-string
+        14: bes boundary key (ignored)
+        15: bes-action
+        16: return-as
+        17: local-path
+        18: ce
 
     Args:
         log_fields: The BES log line, parsed into fields, to process
@@ -267,28 +271,28 @@ def request_log_to_json(log_fields, json_log_record):
     debug("Processing REQUEST_MESSAGE_TYPE")
     send_it = False
     if TRANSMIT_REQUEST_LOG:
-        json_log_record[CLIENT_IP_KEY]       = log_fields[4]
-        json_log_record[USER_AGENT_KEY]      = log_fields[5]
-        json_log_record[SESSION_ID_KEY]      = log_fields[6]
-        json_log_record[USER_ID_KEY]         = log_fields[7]
+        json_log_record[CLIENT_IP_KEY]       = log_fields[5]
+        json_log_record[USER_AGENT_KEY]      = log_fields[6]
+        json_log_record[SESSION_ID_KEY]      = log_fields[7]
+        json_log_record[USER_ID_KEY]         = log_fields[8]
 
         # Time format may or may not be in unix time format.
         # If it's not numeric we treat the value as a string.
-        olfs_stime = log_fields[8]
+        olfs_stime = log_fields[9]
         if olfs_stime.isnumeric():
             json_log_record[OLFS_START_TIME_KEY] = int(olfs_stime)
         else:
             json_log_record[OLFS_START_TIME_KEY] = olfs_stime
 
-        json_log_record[REQUEST_ID_KEY]      = log_fields[9]
-        json_log_record[HTTP_VERB_KEY]       = log_fields[10]
-        json_log_record[URL_PATH_KEY]        = log_fields[11]
-        json_log_record[QUERY_STRING_KEY]    = log_fields[12]
-        json_log_record[BES_ACTION_KEY]      = log_fields[14]
-        json_log_record[RETURN_AS_KEY]       = log_fields[15]
-        json_log_record[LOCAL_PATH_KEY]      = log_fields[16]
-        if len(log_fields) > 17:
-            json_log_record[CE_KEY] = log_fields[17]
+        json_log_record[REQUEST_ID_KEY]      = log_fields[10]
+        json_log_record[HTTP_VERB_KEY]       = log_fields[11]
+        json_log_record[URL_PATH_KEY]        = log_fields[12]
+        json_log_record[QUERY_STRING_KEY]    = log_fields[13]
+        json_log_record[BES_ACTION_KEY]      = log_fields[15]
+        json_log_record[RETURN_AS_KEY]       = log_fields[16]
+        json_log_record[LOCAL_PATH_KEY]      = log_fields[17]
+        if len(log_fields) > 18:
+            json_log_record[CE_KEY] = log_fields[18]
         else:
             json_log_record[CE_KEY] = "-"
 
@@ -314,7 +318,7 @@ def info_log_to_json(log_fields, json_log_record):
     debug("Processing INFO_MESSAGE_TYPE")
     send_it = False
     if TRANSMIT_INFO_LOG:
-        json_log_record[MESSAGE_KEY] = log_fields[3]
+        json_log_record[MESSAGE_KEY] = log_fields[4]
         send_it = True
     else:
         debug(f"TRANSMIT_INFO_LOG: {eord(TRANSMIT_INFO_LOG)}")
@@ -337,7 +341,7 @@ def error_log_to_json(log_fields, json_log_record):
     debug("Processing ERROR_MESSAGE_TYPE")
     send_it = False
     if TRANSMIT_ERROR_LOG:
-        json_log_record[MESSAGE_KEY] = log_fields[3]
+        json_log_record[MESSAGE_KEY] = log_fields[4]
         send_it = True
     else:
         debug(f"TRANSMIT_ERROR_LOG: {eord(TRANSMIT_ERROR_LOG)}")
@@ -360,7 +364,7 @@ def verbose_log_to_json(log_fields, json_log_record):
     debug("Processing VERBOSE_MESSAGE_TYPE")
     send_it = False
     if TRANSMIT_VERBOSE_LOG:
-        json_log_record[MESSAGE_KEY] = log_fields[3]
+        json_log_record[MESSAGE_KEY] = log_fields[4]
         send_it = True
     else:
         debug(f"TRANSMIT_VERBOSE_LOG: {eord(TRANSMIT_VERBOSE_LOG)}")
@@ -383,13 +387,22 @@ def timing_log_to_json(log_fields, json_log_record):
     debug("Processing TIMING_MESSAGE_TYPE")
     send_it = False
     if TRANSMIT_TIMING_LOG:
-        if log_fields[3] == ELAPSED_TIME_KEY :
-            json_log_record[ELAPSED_TIME_KEY] = int(log_fields[4])
-            json_log_record[START_TIME_KEY] = int(log_fields[6])
-            json_log_record[STOP_TIME_KEY] = int(log_fields[8])
-            json_log_record[REQUEST_ID_TIMER_KEY] = log_fields[9]
-            json_log_record[TIMER_NAME_KEY] = log_fields[10]
+        if log_fields[4] == ELAPSED_TIME_KEY :
+            json_log_record[ELAPSED_TIME_KEY] = int(log_fields[5])
+            debug(f"json_log_record[ELAPSED_TIME_KEY]: {json_log_record[ELAPSED_TIME_KEY]}")
+            json_log_record[START_TIME_KEY] = int(log_fields[7])
+            debug(f"json_log_record[START_TIME_KEY]: {json_log_record[START_TIME_KEY]}")
+            json_log_record[STOP_TIME_KEY] = int(log_fields[9])
+            debug(f"json_log_record[STOP_TIME_KEY]: {json_log_record[STOP_TIME_KEY]}")
+            json_log_record[REQUEST_ID_TIMER_KEY] = log_fields[10]
+            debug(f"json_log_record[REQUEST_ID_TIMER_KEY]: {json_log_record[REQUEST_ID_TIMER_KEY]}")
+            json_log_record[TIMER_NAME_KEY] = log_fields[11]
+            debug(f"json_log_record[TIMER_NAME_KEY]: {json_log_record[TIMER_NAME_KEY]}")
             send_it = True
+        else:
+            debug(f"Timer record missing ELAPSED_TIME_KEY  {ELAPSED_TIME_KEY}\n log fields: \b\n{json.dumps(log_fields, indent=4)}")
+            print()
+
     else:
         debug(f"TRANSMIT_TIMING_LOG is {eord(TRANSMIT_TIMING_LOG)}")
 
@@ -547,8 +560,9 @@ def beslog2json(line_count, log_line):
             else:
                 json_log_record[TIME_KEY] = time_str
 
-            json_log_record[PID_KEY]  = int(log_fields[1])
-            log_record_type = log_fields[2]
+            json_log_record[INSTANCE_ID_KEY]  = log_fields[1]
+            json_log_record[PID_KEY]  = int(log_fields[2])
+            log_record_type = log_fields[3]
             json_log_record[TYPE_KEY] = log_record_type
 
             if log_record_type == "request":
