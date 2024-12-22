@@ -57,7 +57,7 @@ function loggy() {
         "\"${INSTANCE_ID_KEY}\": \"${SYSTEM_ID}\"," \
         "\"${PID_KEY}\": "$(echo $$)"," \
         "\"${TYPE_KEY}\": \"start-up\"," \
-        "\"${MESSAGE_KEY}\": \"$*\"" \
+        "\"${MESSAGE_KEY}\": \"# $*\"" \
         "}" >&2
 }
 
@@ -85,8 +85,8 @@ function get_aws_instance_id() {
   loggy "http_status: $http_status"
   if test $curl_status -ne 0 || test $http_status -gt 400; then
     loggy "WARNING! Failed to determine the AWS instance-d by requesting: ${aws_instance_id_url} (curl_status: $curl_status http_status: $http_status)"
-    loggy "Inventing an instance-id value."
-    instance_id="hyrax-"$(python3 -c 'import uuid; print(str(uuid.uuid4()))')
+    loggy "Inventing a random instance-id value."
+    instance_id="h-"$(python3 -c 'import uuid; print(str(uuid.uuid4()))')
   else
     instance_id=$(cat $id_file)
   fi
@@ -108,7 +108,6 @@ loggy "${HRH}"
 loggy "Greetings, I am "$(whoami)"."
 set -e
 #set -x
-loggy ""
 
 ################################################################################
 loggy "${HR1}"
@@ -116,37 +115,34 @@ SYSTEM_ID=$(get_aws_instance_id)
 
 ################################################################################
 loggy "${HR1}"
-loggy "     Checking AWS CLI: "
-loggy ""
-aws configure list 2>&1 | awk '{print "##    "$0;}' >&2
-status=$?
-if test $status -ne 0; then
-  loggy "WARNING: Problem with AWS CLI! (status: ${status})"
+loggy "Checking AWS CLI: "
+acl=$(aws configure list 2>&1)
+acl_status=$?
+loggy $acl
+if test $acl_status -ne 0; then
+  loggy "WARNING: Problem with AWS CLI! (status: ${acl_status})"
 fi
-loggy ""
 
 ################################################################################
 loggy "${HR2}"
-loggy "         JAVA VERSION: "
-java -version 2>&1 | awk '{print "##                       "$0;}' >&2
-loggy ""
+loggy "JAVA VERSION: " $(java -version 2>&1)
 export JAVA_HOME=${JAVA_HOME:-"/etc/alternatives/jre"}
-loggy "            JAVA_HOME: ${JAVA_HOME}"
+loggy "JAVA_HOME: ${JAVA_HOME}"
 
 export CATALINA_HOME=${CATALINA_HOME:-"NOT_SET"}
-loggy "        CATALINA_HOME: ${CATALINA_HOME}"
+loggy "CATALINA_HOME: ${CATALINA_HOME}"
 
 export DEPLOYMENT_CONTEXT=${DEPLOYMENT_CONTEXT:-"ROOT"}
-loggy "   DEPLOYMENT_CONTEXT: ${DEPLOYMENT_CONTEXT}"
+loggy "DEPLOYMENT_CONTEXT: ${DEPLOYMENT_CONTEXT}"
 
 export OLFS_CONF_DIR="${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf"
-loggy "        OLFS_CONF_DIR: ${OLFS_CONF_DIR}"
+loggy "OLFS_CONF_DIR: ${OLFS_CONF_DIR}"
 
 export TOMCAT_CONTEXT_FILE="/usr/share/tomcat/conf/context.xml"
-loggy "  TOMCAT_CONTEXT_FILE: ${TOMCAT_CONTEXT_FILE}"
+loggy "TOMCAT_CONTEXT_FILE: ${TOMCAT_CONTEXT_FILE}"
 
 export NCWMS_BASE=${NCWMS_BASE:-"https://localhost:8080"}
-loggy "           NCWMS_BASE: ${NCWMS_BASE}"
+loggy "NCWMS_BASE: ${NCWMS_BASE}"
 
 ################################################################################
 loggy "${HR2}"
@@ -164,39 +160,38 @@ else
 fi
 
 export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-"us-west-2"}
-loggy "   AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}"
+loggy "AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}"
 
 ################################################################################
 loggy "${HR2}"
 export NGAP_CERTIFICATE_FILE="/usr/share/tomcat/conf/NGAP-CA-certificate.crt"
-loggy "  NGAP_CERTIFICATE_FILE: ${NGAP_CERTIFICATE_FILE}"
+loggy "NGAP_CERTIFICATE_FILE: ${NGAP_CERTIFICATE_FILE}"
 
 export NGAP_CERTIFICATE_CHAIN_FILE="/usr/share/tomcat/conf/NGAP-CA-certificate-chain.crt"
-loggy "  NGAP_CERTIFICATE_CHAIN_FILE: ${NGAP_CERTIFICATE_CHAIN_FILE}"
+loggy "NGAP_CERTIFICATE_CHAIN_FILE: ${NGAP_CERTIFICATE_CHAIN_FILE}"
 
 export NGAP_CERTIFICATE_KEY_FILE="/usr/share/tomcat/conf/NGAP-CA-certificate.key"
-loggy "  NGAP_CERTIFICATE_KEY_FILE: ${NGAP_CERTIFICATE_KEY_FILE}"
+loggy "NGAP_CERTIFICATE_KEY_FILE: ${NGAP_CERTIFICATE_KEY_FILE}"
 
 ################################################################################
 loggy "${HR2}"
 export NETRC_FILE="/etc/bes/ngap_netrc"
-loggy "           NETRC_FILE: ${NETRC_FILE}"
+loggy "NETRC_FILE: ${NETRC_FILE}"
 
 export BES_SITE_CONF_FILE="/etc/bes/site.conf"
-loggy "   BES_SITE_CONF_FILE: ${BES_SITE_CONF_FILE}"
+loggy "BES_SITE_CONF_FILE: ${BES_SITE_CONF_FILE}"
 
 export BES_LOG_FILE="/var/log/bes/bes.log"
-loggy "         BES_LOG_FILE: ${BES_LOG_FILE}"
+loggy "BES_LOG_FILE: ${BES_LOG_FILE}"
 
 export SLEEP_INTERVAL=${SLEEP_INTERVAL:-60}
-loggy "       SLEEP_INTERVAL: ${SLEEP_INTERVAL} seconds."
+loggy "SLEEP_INTERVAL: ${SLEEP_INTERVAL} seconds."
 
 export SERVER_HELP_EMAIL=${SERVER_HELP_EMAIL:-"not_set"}
-loggy "    SERVER_HELP_EMAIL: ${SERVER_HELP_EMAIL}"
+loggy "SERVER_HELP_EMAIL: ${SERVER_HELP_EMAIL}"
 
 export FOLLOW_SYMLINKS=${FOLLOW_SYMLINKS:-"not_set"}
-loggy "      FOLLOW_SYMLINKS: ${FOLLOW_SYMLINKS}"
-loggy ""
+loggy "FOLLOW_SYMLINKS: ${FOLLOW_SYMLINKS}"
 loggy "${HR1}"
 
 ################################################################################
@@ -207,14 +202,13 @@ if test -n "${HOST}" && test -n "${USERNAME}" && test -n "${PASSWORD}"; then
   loggy "${HR2}"
   loggy "Updating netrc file: ${NETRC_FILE}"
   # machine is a domain name or a ip address, not a URL.
-  loggy "machine ${HOST}" | sed -e "s_https:__g" -e "s_http:__g" -e "s+/++g" >>"${NETRC_FILE}"
-  loggy "    login ${USERNAME}" >>"${NETRC_FILE}"
-  loggy "    password ${PASSWORD}" >>"${NETRC_FILE}"
+  echo "machine ${HOST}" | sed -e "s_https:__g" -e "s_http:__g" -e "s+/++g" >>"${NETRC_FILE}"
+  echo "    login ${USERNAME}" >>"${NETRC_FILE}"
+  echo "    password ${PASSWORD}" >>"${NETRC_FILE}"
   chown bes:bes "${NETRC_FILE}"
   chmod 400 "${NETRC_FILE}"
-  loggy " "$(ls -l "${NETRC_FILE}") >&2
-  # cat "${NETRC_FILE}" | awk '{print "##    "$0;}' >&2
-  loggy ""
+  loggy " "$(ls -l "${NETRC_FILE}")
+  # loggy $( cat "${NETRC_FILE}" )
 fi
 ################################################################################
 
@@ -228,10 +222,9 @@ if test -n "${OLFS_XML}"; then
   loggy "${HR2}"
   OLFS_XML_FILE="${OLFS_CONF_DIR}/olfs.xml"
   loggy "Updating OLFS configuration file: ${OLFS_XML_FILE}"
-  loggy "${OLFS_XML}" >${OLFS_XML_FILE}
-  loggy " "$(ls -l "${OLFS_XML_FILE}") >&2
-  # cat "${OLFS_XML_FILE}" | awk '{print "##    "$0;}' >&2
-  loggy ""
+  echo "${OLFS_XML}" >${OLFS_XML_FILE}
+  loggy " "$(ls -l "${OLFS_XML_FILE}")
+  # loggy $( cat "${OLFS_XML_FILE}" )
 fi
 ################################################################################
 
@@ -246,10 +239,9 @@ if test -n "${USER_ACCESS_XML}"; then
   loggy "${HR2}"
   USER_ACCESS_XML_FILE="${OLFS_CONF_DIR}/user-access.xml"
   loggy "Updating OLFS user access controls: ${USER_ACCESS_XML_FILE}"
-  loggy "${USER_ACCESS_XML}" >${USER_ACCESS_XML_FILE}
-  loggy " "$(ls -l "${USER_ACCESS_XML_FILE}") >&2
-  # cat "${USER_ACCESS_XML_FILE}" | awk '{print "##    "$0;}' >&2
-  loggy ""
+  echo "${USER_ACCESS_XML}" >${USER_ACCESS_XML_FILE}
+  loggy " "$(ls -l "${USER_ACCESS_XML_FILE}")
+  # loggy ( cat "${USER_ACCESS_XML_FILE}" )
 fi
 ################################################################################
 
@@ -261,15 +253,16 @@ fi
 if test -n "${BES_SITE_CONF}"; then
   loggy "${HR2}"
   loggy "Updating BES site.conf: ${BES_SITE_CONF_FILE}"
-  # loggy "${BES_SITE_CONF}" > ${BES_SITE_CONF_FILE}
+  # echo "${BES_SITE_CONF}" > ${BES_SITE_CONF_FILE}
   # @TODO THis seems like a crappy hack, we should just change the source file in BitBucket to be correct
-  loggy "${BES_SITE_CONF}" | sed -e "s+BES.LogName=stdout+BES.LogName=${BES_LOG_FILE}+g" >${BES_SITE_CONF_FILE}
-  loggy " "$(ls -l "${BES_SITE_CONF_FILE}") >&2
-  # cat "${BES_SITE_CONF_FILE}" | awk '{print "##    "$0;}' >&2
-  loggy ""
+  echo "${BES_SITE_CONF}" | sed -e "s+BES.LogName=stdout+BES.LogName=${BES_LOG_FILE}+g" >${BES_SITE_CONF_FILE}
+  loggy " "$(ls -l "${BES_SITE_CONF_FILE}")
+  # loggy $( cat "${BES_SITE_CONF_FILE}" )
 fi
+#
+# Update site.conf with the instance-id of this system.
 echo "AWS.instance-id=${SYSTEM_ID}" >>"${BES_SITE_CONF_FILE}"
-loggy $(tail -1 "${BES_SITE_CONF_FILE}")
+loggy $( tail -1 "${BES_SITE_CONF_FILE}" )
 ################################################################################
 
 ################################################################################
@@ -280,10 +273,9 @@ loggy $(tail -1 "${BES_SITE_CONF_FILE}")
 if test -n "${TOMCAT_CONTEXT_XML}"; then
   loggy "${HR2}"
   loggy "Tomcat context.xml file: ${TOMCAT_CONTEXT_FILE}"
-  loggy "${TOMCAT_CONTEXT_XML}" >${TOMCAT_CONTEXT_FILE}
-  loggy " "$(ls -l "${TOMCAT_CONTEXT_FILE}") >&2
-  # cat "${TOMCAT_CONTEXT_FILE}" | awk '{print "##    "$0;}' >&2
-  loggy ""
+  echo "${TOMCAT_CONTEXT_XML}" >${TOMCAT_CONTEXT_FILE}
+  loggy " "$(ls -l "${TOMCAT_CONTEXT_FILE}")
+  # loggy $(cat "${TOMCAT_CONTEXT_FILE}" )
 fi
 ################################################################################
 
@@ -295,10 +287,9 @@ fi
 if test -n "${NGAP_CERTIFICATE}"; then
   loggy "${HR2}"
   loggy "Tomcat  file: ${NGAP_CERTIFICATE_FILE}"
-  loggy "${NGAP_CERTIFICATE}" >${NGAP_CERTIFICATE_FILE}
-  loggy " "$(ls -l "${NGAP_CERTIFICATE_FILE}") >&2
-  # cat "${NGAP_CERTIFICATE_FILE}" | awk '{print "##    "$0;}' >&2
-  loggy ""
+  echo "${NGAP_CERTIFICATE}" >${NGAP_CERTIFICATE_FILE}
+  loggy " "$(ls -l "${NGAP_CERTIFICATE_FILE}")
+  # loggy $(cat "${NGAP_CERTIFICATE_FILE}" )
 fi
 ################################################################################
 
@@ -310,10 +301,9 @@ fi
 if test -n "${NGAP_CERTIFICATE_CHAIN}"; then
   loggy "${HR2}"
   loggy "Tomcat  file: ${NGAP_CREDENTIALS_CHAIN_FILE}"
-  loggy "${NGAP_CERTIFICATE_CHAIN}" >${NGAP_CERTIFICATE_CHAIN_FILE}
-  loggy " "$(ls -l "${NGAP_CERTIFICATE_CHAIN_FILE}") >&2
-  # cat "${NGAP_CERTIFICATE_CHAIN_FILE}" | awk '{print "##    "$0;}' >&2
-  loggy ""
+  echo "${NGAP_CERTIFICATE_CHAIN}" >${NGAP_CERTIFICATE_CHAIN_FILE}
+  loggy " "$(ls -l "${NGAP_CERTIFICATE_CHAIN_FILE}")
+  # loggy $(cat "${NGAP_CERTIFICATE_CHAIN_FILE}" )
 fi
 ################################################################################
 
@@ -325,10 +315,9 @@ fi
 if test -n "${NGAP_CERTIFICATE_KEY}"; then
   loggy "${HR2}"
   loggy "Tomcat  file: ${NGAP_CERTIFICATE_KEY_FILE}"
-  loggy "${NGAP_CERTIFICATE_KEY}" >${NGAP_CERTIFICATE_KEY_FILE}
-  loggy " "$(ls -l "${NGAP_CERTIFICATE_KEY_FILE}") >&2
-  # cat "${NGAP_CERTIFICATE_KEY_FILE}" | awk '{print "##    "$0;}' >&2
-  loggy ""
+  echo "${NGAP_CERTIFICATE_KEY}" >${NGAP_CERTIFICATE_KEY_FILE}
+  loggy " "$(ls -l "${NGAP_CERTIFICATE_KEY_FILE}")
+  # loggy $(cat "${NGAP_CERTIFICATE_KEY_FILE}" )
 fi
 ################################################################################
 
@@ -345,12 +334,12 @@ fi
 #    loggy "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "
 #    loggy "Amending BES site.conf file: ${BES_SITE_CONF_FILE}"
 #  {
-#    loggy "NGAP.S3.distribution.endpoint.url=${S3_DISTRIBUTION_ENDPOINT}"
-#    loggy "NGAP.S3.refresh.margin=${S3_REFRESH_MARGIN}"
-#    loggy "NGAP.S3.region=${S3_AWS_REGION}"
-#    loggy "NGAP.S3.url.base=${S3_BASE_URL}"
-#  } | tee -a "${BES_SITE_CONF_FILE}"
-#    loggy ""
+#    echo "NGAP.S3.distribution.endpoint.url=${S3_DISTRIBUTION_ENDPOINT}"
+#    echo "NGAP.S3.refresh.margin=${S3_REFRESH_MARGIN}"
+#    echo "NGAP.S3.region=${S3_AWS_REGION}"
+#    echo "NGAP.S3.url.base=${S3_BASE_URL}"
+#  }  >> "${BES_SITE_CONF_FILE}"
+#  loggy $(tail -4 "${BES_SITE_CONF_FILE}" )
 #fi
 ################################################################################
 
@@ -398,13 +387,13 @@ while getopts "de:sn:" opt; do
     loggy "options: [-e xxx] [-n yyy] [-s] [-d] [-i xxx] [-k xxx] [-r xxx]"
     loggy " -e xxx where xxx is the email address of the admin contact for the server."
     loggy " -s When present causes the BES to follow symbolic links."
-    loggy " -n yyy where yyy is the protocol, server and port part " >&2
-    loggy "    of the ncWMS service (for example http://foo.com:8090)." >&2
-    loggy " -d Enables debugging output for this script." >&2
+    loggy " -n yyy where yyy is the protocol, server and port part "
+    loggy "    of the ncWMS service (for example http://foo.com:8090)."
+    loggy " -d Enables debugging output for this script."
     loggy " -i xxx Where xxx is an AWS CLI AWS_ACCESS_KEY_ID."
     loggy " -k xxx Where xxx is an AWS CLI AWS_SECRET_ACCESS_KEY."
     loggy " -r xxx Where xxx is an AWS CLI AWS_DEFAULT_REGION."
-    loggy "EXITING NOW" >&2
+    loggy "EXITING NOW"
     exit 2
     ;;
   esac
@@ -415,11 +404,10 @@ done
 
 if test "${debug}" = "true"; then
   loggy "${HR2}"
-  loggy "CATALINA_HOME: ${CATALINA_HOME}" >&2
-  loggy "   " $(ls -l "${CATALINA_HOME}") >&2
-  loggy "CATALINA_HOME/bin: ${CATALINA_HOME}/bin" >&2
-  loggy "   " $(ls -l "${CATALINA_HOME}/bin") >&2
-  loggy ""
+  loggy "CATALINA_HOME: ${CATALINA_HOME}"
+  loggy "   " $(ls -l "${CATALINA_HOME}")
+  loggy "CATALINA_HOME/bin: ${CATALINA_HOME}/bin"
+  loggy "   " $(ls -l "${CATALINA_HOME}/bin")
 fi
 
 ################################################################################
@@ -429,10 +417,9 @@ fi
 VIEWERS_XML="${OLFS_CONF_DIR}/viewers.xml"
 if test "${debug}" = "true"; then
   loggy "${HR2}"
-  loggy "NCWMS: Using NCWMS_BASE: ${NCWMS_BASE}" >&2
-  loggy "NCWMS: Setting ncWMS access URLs in viewers.xml (if needed)." >&2
-  loggy "" $(ls -l "${VIEWERS_XML}") >&2
-  loggy ""
+  loggy "NCWMS: Using NCWMS_BASE: ${NCWMS_BASE}"
+  loggy "NCWMS: Setting ncWMS access URLs in viewers.xml (if needed)."
+  loggy $(ls -l "${VIEWERS_XML}")
 fi
 
 if test -f "${VIEWERS_XML}"; then
@@ -441,8 +428,7 @@ fi
 
 if test "${debug}" = "true"; then
   loggy "${VIEWERS_XML}: "
-  loggy $(cat "${VIEWERS_XML}" | awk '{print "#    "$0;}') >&2
-  loggy ""
+  loggy $(cat "${VIEWERS_XML}" | awk '{print "#    "$0;}')
 fi
 ################################################################################
 
@@ -455,9 +441,8 @@ if test "${debug}" = "true"; then
   logback_xml="${OLFS_CONF_DIR}/logback.xml"
   ngap_logback_xml="${OLFS_CONF_DIR}/logback-ngap.xml"
   cp "${ngap_logback_xml}" "${logback_xml}"
-  loggy "Enabled Logback (slf4j) debug logging for NGAP." >&2
-  loggy $(cat "${logback_xml}" | awk '{print "#    "$0;}') >&2
-  loggy "" >&2
+  loggy "Enabled Logback (slf4j) debug logging for NGAP."
+  loggy $( cat "${logback_xml}" )
 fi
 ################################################################################
 
@@ -469,13 +454,11 @@ if test "${SERVER_HELP_EMAIL}" != "not_set"; then
   loggy "${HR2}"
   loggy "Setting Admin Contact To: $SERVER_HELP_EMAIL"
   sed -i "s/admin.email.address@your.domain.name/$SERVER_HELP_EMAIL/" /etc/bes/bes.conf
-  loggy "" >&2
 fi
 if test "${FOLLOW_SYMLINKS}" != "not_set"; then
   loggy "${HR2}"
   loggy "Setting BES FollowSymLinks to YES."
   sed -i "s/^BES.Catalog.catalog.FollowSymLinks=No/BES.Catalog.catalog.FollowSymLinks=Yes/" /etc/bes/bes.conf
-  loggy ""
 fi
 ################################################################################
 
@@ -494,7 +477,6 @@ if test $status -ne 0; then
 fi
 besd_pid=$(ps aux | grep /usr/bin/besdaemon | grep -v grep | awk '{print $2;}' -)
 loggy "The besd is UP! [pid: ${besd_pid}]"
-loggy ""
 
 #-------------------------------------------------------------------------------
 # Start Tomcat process
@@ -525,7 +507,6 @@ while test $initial_pid -eq $tomcat_pid; do
 done
 # New pid and we should be good to go.
 loggy "Tomcat is UP! pid: ${tomcat_pid}"
-loggy ""
 
 # TEMPORARY ###################################################################
 /cleanup_files.sh >&2 &
@@ -539,7 +520,6 @@ tail -f "${BES_LOG_FILE}" | ./beslog2json.py --prefix "${LOG_KEY_PREFIX}" &
 # TEMPORARY ###################################################################
 
 loggy "Hyrax Has Arrived..."
-loggy ""
 loggy "${HR1}"
 #-------------------------------------------------------------------------------
 while /bin/true; do
@@ -547,6 +527,7 @@ while /bin/true; do
   if test $debug = true; then loggy "Checking Hyrax Operational State..."; fi
   besd_ps=$(ps -f $besd_pid)
   BESD_STATUS=$?
+  if test $debug = true; then loggy "besd_ps: ${besd_ps}"; fi
   if test $debug = true; then loggy "BESD_STATUS: ${BESD_STATUS}"; fi
   if test $BESD_STATUS -ne 0; then
     loggy "BESD_STATUS: $BESD_STATUS bes_pid:$bes_pid"
@@ -573,8 +554,8 @@ while /bin/true; do
   fi
 
   if test $debug = true; then
-    loggy "${HR1}" >&2
-    date >&2
+    loggy "${HR1}"
+    loggy $(date)
     loggy "  BESD_STATUS: $BESD_STATUS     besd_pid: $besd_pid"
     loggy "TOMCAT_STATUS: $TOMCAT_STATUS tomcat_pid: $tomcat_pid"
   fi
