@@ -125,7 +125,7 @@ fi
 
 ################################################################################
 loggy "${HR2}"
-loggy "JAVA VERSION: " $(java -version 2>&1)
+loggy "JAVA VERSION: " $( java -version 2>&1 | sed -e "s/\"//g"; ) # Java version has undesired double quote chars
 export JAVA_HOME=${JAVA_HOME:-"/etc/alternatives/jre"}
 loggy "JAVA_HOME: ${JAVA_HOME}"
 
@@ -469,8 +469,9 @@ bes_uid=$(id -u bes)
 bes_gid=$(id -g bes)
 loggy "${HRB}"
 loggy "Launching besd [uid: ${bes_uid} gid: ${bes_gid}]"
-/usr/bin/besctl start >&2 # dropped debug control -d "/dev/null,timing"  - ndp 10/12/2023
+/usr/bin/besctl start 2>&1 > ./besctl.log # dropped debug control -d "/dev/null,timing"  - ndp 10/12/2023
 status=$?
+loggy $(cat ./besctl.log)
 if test $status -ne 0; then
   loggy "ERROR: Failed to start BES: $status"
   exit $status
