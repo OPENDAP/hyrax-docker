@@ -178,12 +178,17 @@ fi
 
 # Add AWS instance-id to the BES site.conf
 aws_instance_id_url="http://169.254.169.254/latest/meta-data/instance-id"
-instance_id=$( curl --max-time 1 -L "$aws_instance_id_url" )
+id_file="./instance-id.txt"
+http_status=$(curl -w "%{http_code}" --max-time 5 -o "$id_file" -L "$aws_instance_id_url")
 curl_status=$?
-if test $curl_status -ne 0 ; then
-  echo "# AWS instance was not located at: ${aws_instance_id_url} curl_status: $curl_status" >&2
+echo "# curl_status: $curl_status" >&2
+echo "# http_status: $http_status" >&2
+if test $curl_status -ne 0 || test $http_status -gt 400 ; then
+  echo "# AWS instance was not located at: ${aws_instance_id_url} curl_status: $curl_status http_status: $http_status" >&2
   echo "# Creating instance-d value..." >&2
   instance_id=$( python3 -c 'import uuid; print(str(uuid.uuid4()))' )
+else
+  instance_id=$(cat $id_file)
 fi
 echo "# instance_id: ${instance_id}" >&2
 echo "AWS.instance-id=${instance_id}" >> "${BES_SITE_CONF_FILE}"
