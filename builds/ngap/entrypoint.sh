@@ -456,14 +456,10 @@ loggy "Tomcat is UP! pid: ${tomcat_pid}"
 
 # TEMPORARY ###################################################################
 /cleanup_files.sh >&2 &
-
-# The old AWKy way
-# tail -f "${BES_LOG_FILE}" | awk -f beslog2json.awk &
-
-# The new snakey way.
-tail -f "${BES_LOG_FILE}" | ./beslog2json.py --prefix "${LOG_KEY_PREFIX}" &
-
 # TEMPORARY ###################################################################
+
+# Get the bes log, make it json, and send it to stdout
+tail -f "${BES_LOG_FILE}" | ./beslog2json.py --prefix "${LOG_KEY_PREFIX}" &
 
 loggy "Hyrax Has Arrived..."
 #-------------------------------------------------------------------------------
