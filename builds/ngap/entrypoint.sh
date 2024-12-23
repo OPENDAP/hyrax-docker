@@ -5,12 +5,7 @@
 # set -v # "set -o verbose" Prints shell input lines as they are read.
 # set -x # "set -o xtrace"  Print command traces before executing command.
 # set -e #  Exit on error.
-export HRH="########################### HYRAX #################################"
-export HRB="########################### besd ##################################"
-export HRT="####################### Tomcat/OLFS ################################"
-export HR0="###################################################################"
-export HR1="#-----------------------------------------------------------------"
-export HR2="#-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --"
+export debug="false"
 
 export SYSTEM_ID=${INSTANCE_ID:-"undetermined"}
 export LOG_KEY_PREFIX=${LOG_KEY_PREFIX:-"hyrax"}
@@ -104,17 +99,15 @@ function get_aws_instance_id() {
 set_log_key_names
 
 #loggy "entrypoint.sh  command line: \"$@\""
-loggy "${HRH}"
+loggy "########################### HYRAX #################################"
 loggy "Greetings, I am "$(whoami)"."
 set -e
 #set -x
 
 ################################################################################
-loggy "${HR1}"
 SYSTEM_ID=$(get_aws_instance_id)
 
 ################################################################################
-loggy "${HR1}"
 loggy "Checking AWS CLI: "
 acl=$(aws configure list 2>&1)
 acl_status=$?
@@ -124,7 +117,6 @@ if test $acl_status -ne 0; then
 fi
 
 ################################################################################
-loggy "${HR2}"
 loggy "JAVA VERSION: " $( java -version 2>&1 | sed -e "s/\"//g"; ) # Java version has undesired double quote chars
 export JAVA_HOME=${JAVA_HOME:-"/etc/alternatives/jre"}
 loggy "JAVA_HOME: ${JAVA_HOME}"
@@ -145,8 +137,6 @@ export NCWMS_BASE=${NCWMS_BASE:-"https://localhost:8080"}
 loggy "NCWMS_BASE: ${NCWMS_BASE}"
 
 ################################################################################
-loggy "${HR2}"
-
 if test -n "${AWS_ACCESS_KEY_ID}"; then
   loggy "AWS_ACCESS_KEY_ID: HAS BEEN SET"
 else
@@ -163,7 +153,6 @@ export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-"us-west-2"}
 loggy "AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}"
 
 ################################################################################
-loggy "${HR2}"
 export NGAP_CERTIFICATE_FILE="/usr/share/tomcat/conf/NGAP-CA-certificate.crt"
 loggy "NGAP_CERTIFICATE_FILE: ${NGAP_CERTIFICATE_FILE}"
 
@@ -174,7 +163,6 @@ export NGAP_CERTIFICATE_KEY_FILE="/usr/share/tomcat/conf/NGAP-CA-certificate.key
 loggy "NGAP_CERTIFICATE_KEY_FILE: ${NGAP_CERTIFICATE_KEY_FILE}"
 
 ################################################################################
-loggy "${HR2}"
 export NETRC_FILE="/etc/bes/ngap_netrc"
 loggy "NETRC_FILE: ${NETRC_FILE}"
 
@@ -192,19 +180,17 @@ loggy "SERVER_HELP_EMAIL: ${SERVER_HELP_EMAIL}"
 
 export FOLLOW_SYMLINKS=${FOLLOW_SYMLINKS:-"not_set"}
 loggy "FOLLOW_SYMLINKS: ${FOLLOW_SYMLINKS}"
-loggy "${HR1}"
 
 ################################################################################
 # Inject one set of credentials into .netrc
 # Only modify the .netrc file if all three environment variables are defined
 #
 if test -n "${HOST}" && test -n "${USERNAME}" && test -n "${PASSWORD}"; then
-  loggy "${HR2}"
   loggy "Updating netrc file: ${NETRC_FILE}"
   # machine is a domain name or a ip address, not a URL.
   echo "machine ${HOST}" | sed -e "s_https:__g" -e "s_http:__g" -e "s+/++g" >>"${NETRC_FILE}"
-  echo "    login ${USERNAME}" >>"${NETRC_FILE}"
-  echo "    password ${PASSWORD}" >>"${NETRC_FILE}"
+  echo "    login ${USERNAME}" >> "${NETRC_FILE}"
+  echo "    password ${PASSWORD}" >> "${NETRC_FILE}"
   chown bes:bes "${NETRC_FILE}"
   chmod 400 "${NETRC_FILE}"
   loggy " "$(ls -l "${NETRC_FILE}")
@@ -219,11 +205,10 @@ fi
 # not empty and use it's value if present and non-empty.olfs
 #
 if test -n "${OLFS_XML}"; then
-  loggy "${HR2}"
   OLFS_XML_FILE="${OLFS_CONF_DIR}/olfs.xml"
   loggy "Updating OLFS configuration file: ${OLFS_XML_FILE}"
-  echo "${OLFS_XML}" >${OLFS_XML_FILE}
-  loggy " "$(ls -l "${OLFS_XML_FILE}")
+  echo "${OLFS_XML}" > ${OLFS_XML_FILE}
+  loggy " "$( ls -l "${OLFS_XML_FILE}" )
   # loggy $( cat "${OLFS_XML_FILE}" )
 fi
 ################################################################################
@@ -236,10 +221,9 @@ fi
 # not empty
 #
 if test -n "${USER_ACCESS_XML}"; then
-  loggy "${HR2}"
   USER_ACCESS_XML_FILE="${OLFS_CONF_DIR}/user-access.xml"
   loggy "Updating OLFS user access controls: ${USER_ACCESS_XML_FILE}"
-  echo "${USER_ACCESS_XML}" >${USER_ACCESS_XML_FILE}
+  echo "${USER_ACCESS_XML}" > ${USER_ACCESS_XML_FILE}
   loggy " "$(ls -l "${USER_ACCESS_XML_FILE}")
   # loggy ( cat "${USER_ACCESS_XML_FILE}" )
 fi
@@ -251,18 +235,17 @@ fi
 #
 # Test if the bes.conf env variable is set (by way of not unset) and not empty
 if test -n "${BES_SITE_CONF}"; then
-  loggy "${HR2}"
   loggy "Updating BES site.conf: ${BES_SITE_CONF_FILE}"
   # echo "${BES_SITE_CONF}" > ${BES_SITE_CONF_FILE}
   # @TODO THis seems like a crappy hack, we should just change the source file in BitBucket to be correct
   echo "${BES_SITE_CONF}" | sed -e "s+BES.LogName=stdout+BES.LogName=${BES_LOG_FILE}+g" >${BES_SITE_CONF_FILE}
-  loggy " "$(ls -l "${BES_SITE_CONF_FILE}")
+  loggy " "$( ls -l "${BES_SITE_CONF_FILE}" )
   # loggy $( cat "${BES_SITE_CONF_FILE}" )
 fi
 #
 # Update site.conf with the instance-id of this system.
-echo "AWS.instance-id=${SYSTEM_ID}" >>"${BES_SITE_CONF_FILE}"
-loggy $( tail -1 "${BES_SITE_CONF_FILE}" )
+echo "AWS.instance-id=${SYSTEM_ID}" >> "${BES_SITE_CONF_FILE}"
+loggy "instance-id in site.conf: "$( tail -1 "${BES_SITE_CONF_FILE}" )
 ################################################################################
 
 ################################################################################
@@ -271,10 +254,9 @@ loggy $( tail -1 "${BES_SITE_CONF_FILE}" )
 #
 # Test if the bes.conf env variable is set (by way of not unset) and not empty
 if test -n "${TOMCAT_CONTEXT_XML}"; then
-  loggy "${HR2}"
-  loggy "Tomcat context.xml file: ${TOMCAT_CONTEXT_FILE}"
-  echo "${TOMCAT_CONTEXT_XML}" >${TOMCAT_CONTEXT_FILE}
-  loggy " "$(ls -l "${TOMCAT_CONTEXT_FILE}")
+  loggy "Writing Tomcat context.xml file: ${TOMCAT_CONTEXT_FILE}"
+  echo "${TOMCAT_CONTEXT_XML}" > ${TOMCAT_CONTEXT_FILE}
+  loggy " "$( ls -l "${TOMCAT_CONTEXT_FILE}" )
   # loggy $(cat "${TOMCAT_CONTEXT_FILE}" )
 fi
 ################################################################################
@@ -285,10 +267,9 @@ fi
 #
 # Test if the bes.conf env variable is set (by way of not unset) and not empty
 if test -n "${NGAP_CERTIFICATE}"; then
-  loggy "${HR2}"
-  loggy "Tomcat  file: ${NGAP_CERTIFICATE_FILE}"
-  echo "${NGAP_CERTIFICATE}" >${NGAP_CERTIFICATE_FILE}
-  loggy " "$(ls -l "${NGAP_CERTIFICATE_FILE}")
+  loggy "Writing certificate file: ${NGAP_CERTIFICATE_FILE}"
+  echo "${NGAP_CERTIFICATE}" > "${NGAP_CERTIFICATE_FILE}"
+  loggy " "$( ls -l "${NGAP_CERTIFICATE_FILE}" )
   # loggy $(cat "${NGAP_CERTIFICATE_FILE}" )
 fi
 ################################################################################
@@ -299,10 +280,9 @@ fi
 #
 # Test if the bes.conf env variable is set (by way of not unset) and not empty
 if test -n "${NGAP_CERTIFICATE_CHAIN}"; then
-  loggy "${HR2}"
-  loggy "Tomcat  file: ${NGAP_CREDENTIALS_CHAIN_FILE}"
-  echo "${NGAP_CERTIFICATE_CHAIN}" >${NGAP_CERTIFICATE_CHAIN_FILE}
-  loggy " "$(ls -l "${NGAP_CERTIFICATE_CHAIN_FILE}")
+  loggy "Writing credentials chain file: ${NGAP_CREDENTIALS_CHAIN_FILE}"
+  echo "${NGAP_CERTIFICATE_CHAIN}" > "${NGAP_CERTIFICATE_CHAIN_FILE}"
+  loggy " "$( ls -l "${NGAP_CERTIFICATE_CHAIN_FILE}" )
   # loggy $(cat "${NGAP_CERTIFICATE_CHAIN_FILE}" )
 fi
 ################################################################################
@@ -313,34 +293,11 @@ fi
 #
 # Test if the bes.conf env variable is set (by way of not unset) and not empty
 if test -n "${NGAP_CERTIFICATE_KEY}"; then
-  loggy "${HR2}"
-  loggy "Tomcat  file: ${NGAP_CERTIFICATE_KEY_FILE}"
-  echo "${NGAP_CERTIFICATE_KEY}" >${NGAP_CERTIFICATE_KEY_FILE}
-  loggy " "$(ls -l "${NGAP_CERTIFICATE_KEY_FILE}")
+  loggy "Writing key file: ${NGAP_CERTIFICATE_KEY_FILE}"
+  echo "${NGAP_CERTIFICATE_KEY}" > "${NGAP_CERTIFICATE_KEY_FILE}"
+  loggy " "$( ls -l "${NGAP_CERTIFICATE_KEY_FILE}" )
   # loggy $(cat "${NGAP_CERTIFICATE_KEY_FILE}" )
 fi
-################################################################################
-
-################################################################################
-# Inject an NGAP Cumulus Configuration
-# Only amend the /etc/bes/site.conf file if all the necessary environment
-# variables are defined
-#
-#if [ -n "${S3_DISTRIBUTION_ENDPOINT}" ] &&  \
-#   [ -n "${S3_REFRESH_MARGIN}" ] && \
-#   [ -n "${S3_AWS_REGION}" ] && \
-#   [ -n "${S3_BASE_URL}" ]; then
-#
-#    loggy "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "
-#    loggy "Amending BES site.conf file: ${BES_SITE_CONF_FILE}"
-#  {
-#    echo "NGAP.S3.distribution.endpoint.url=${S3_DISTRIBUTION_ENDPOINT}"
-#    echo "NGAP.S3.refresh.margin=${S3_REFRESH_MARGIN}"
-#    echo "NGAP.S3.region=${S3_AWS_REGION}"
-#    echo "NGAP.S3.url.base=${S3_BASE_URL}"
-#  }  >> "${BES_SITE_CONF_FILE}"
-#  loggy $(tail -4 "${BES_SITE_CONF_FILE}" )
-#fi
 ################################################################################
 
 ################################################################################
@@ -348,9 +305,8 @@ fi
 # Process commandline arguments
 #
 #
-debug=false
 
-while getopts "de:sn:" opt; do
+while getopts "e:sn:" opt; do
   loggy "Processing command line opt: ${opt}"
   case $opt in
   e)
@@ -364,10 +320,6 @@ while getopts "de:sn:" opt; do
   n)
     export NCWMS_BASE=$OPTARG
     loggy "Set NCWMS_BASE: ${NCWMS_BASE}"
-    ;;
-  d)
-    export debug=true
-    loggy "Debug is enabled"
     ;;
   k)
     export AWS_SECRET_ACCESS_KEY="${OPTARG}"
@@ -403,7 +355,6 @@ done
 ################################################################################
 
 if test "${debug}" = "true"; then
-  loggy "${HR2}"
   loggy "CATALINA_HOME: ${CATALINA_HOME}"
   loggy "   " $(ls -l "${CATALINA_HOME}")
   loggy "CATALINA_HOME/bin: ${CATALINA_HOME}/bin"
@@ -416,7 +367,6 @@ fi
 #
 VIEWERS_XML="${OLFS_CONF_DIR}/viewers.xml"
 if test "${debug}" = "true"; then
-  loggy "${HR2}"
   loggy "NCWMS: Using NCWMS_BASE: ${NCWMS_BASE}"
   loggy "NCWMS: Setting ncWMS access URLs in viewers.xml (if needed)."
   loggy $(ls -l "${VIEWERS_XML}")
@@ -436,7 +386,6 @@ fi
 #
 # Configure OLFS debug logging if debug is enabled.
 if test "${debug}" = "true"; then
-  loggy "${HR2}"
   loggy "Configuring OLFS to debug logging..."
   logback_xml="${OLFS_CONF_DIR}/logback.xml"
   ngap_logback_xml="${OLFS_CONF_DIR}/logback-ngap.xml"
@@ -451,12 +400,10 @@ fi
 # modify bes.conf based on environment variables before startup.
 #
 if test "${SERVER_HELP_EMAIL}" != "not_set"; then
-  loggy "${HR2}"
   loggy "Setting Admin Contact To: $SERVER_HELP_EMAIL"
   sed -i "s/admin.email.address@your.domain.name/$SERVER_HELP_EMAIL/" /etc/bes/bes.conf
 fi
 if test "${FOLLOW_SYMLINKS}" != "not_set"; then
-  loggy "${HR2}"
   loggy "Setting BES FollowSymLinks to YES."
   sed -i "s/^BES.Catalog.catalog.FollowSymLinks=No/BES.Catalog.catalog.FollowSymLinks=Yes/" /etc/bes/bes.conf
 fi
@@ -467,7 +414,6 @@ fi
 # /usr/bin/besdaemon -i /usr -c /etc/bes/bes.conf -r /var/run/bes.pid
 bes_uid=$(id -u bes)
 bes_gid=$(id -g bes)
-loggy "${HRB}"
 loggy "Launching besd [uid: ${bes_uid} gid: ${bes_gid}]"
 /usr/bin/besctl start 2>&1 > ./besctl.log # dropped debug control -d "/dev/null,timing"  - ndp 10/12/2023
 status=$?
@@ -482,7 +428,6 @@ loggy "The besd is UP! [pid: ${besd_pid}]"
 #-------------------------------------------------------------------------------
 # Start Tomcat process
 #
-loggy "${HRT}"
 loggy "Starting tomcat/olfs..."
 
 # mv ${OLFS_CONF_DIR}/logback.xml ${OLFS_CONF_DIR}/logback.xml.OFF
@@ -521,15 +466,14 @@ tail -f "${BES_LOG_FILE}" | ./beslog2json.py --prefix "${LOG_KEY_PREFIX}" &
 # TEMPORARY ###################################################################
 
 loggy "Hyrax Has Arrived..."
-loggy "${HR1}"
 #-------------------------------------------------------------------------------
 while /bin/true; do
   sleep ${SLEEP_INTERVAL}
-  if test $debug = true; then loggy "Checking Hyrax Operational State..."; fi
+  if test "$debug" = "true"; then loggy "Checking Hyrax Operational State..."; fi
   besd_ps=$(ps -f $besd_pid)
   BESD_STATUS=$?
-  if test $debug = true; then loggy "besd_ps: ${besd_ps}"; fi
-  if test $debug = true; then loggy "BESD_STATUS: ${BESD_STATUS}"; fi
+  if test "$debug" = "true"; then loggy "besd_ps: ${besd_ps}"; fi
+  if test "$debug" = "true"; then loggy "BESD_STATUS: ${BESD_STATUS}"; fi
   if test $BESD_STATUS -ne 0; then
     loggy "BESD_STATUS: $BESD_STATUS bes_pid:$bes_pid"
     loggy "The BES daemon appears to have died! Exiting."
@@ -538,7 +482,7 @@ while /bin/true; do
 
   tomcat_ps=$(ps -f "${tomcat_pid}")
   TOMCAT_STATUS=$?
-  if test $debug = true; then loggy "TOMCAT_STATUS: ${TOMCAT_STATUS}"; fi
+  if test "$debug" = "true"; then loggy "TOMCAT_STATUS: ${TOMCAT_STATUS}"; fi
   if test $TOMCAT_STATUS -ne 0; then
     loggy "TOMCAT_STATUS: $TOMCAT_STATUS tomcat_pid:$tomcat_pid"
     loggy "Tomcat appears to have died! Exiting."
@@ -554,8 +498,7 @@ while /bin/true; do
     exit $TOMCAT_STATUS
   fi
 
-  if test $debug = true; then
-    loggy "${HR1}"
+  if test "$debug" = "true"; then
     loggy $(date)
     loggy "  BESD_STATUS: $BESD_STATUS     besd_pid: $besd_pid"
     loggy "TOMCAT_STATUS: $TOMCAT_STATUS tomcat_pid: $tomcat_pid"
