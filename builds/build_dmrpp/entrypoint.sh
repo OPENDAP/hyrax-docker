@@ -5,6 +5,7 @@
 # set -v # "set -o verbose" Prints shell input lines as they are read.
 # set -x # "set -o xtrace"  Print command traces before executing command.
 # set -e #  Exit on error.
+export debug="false"
 
 #echo "entrypoint.sh  command line: \"$@\""
 echo "############################## HYRAX ##################################" >&2
@@ -205,9 +206,8 @@ fi
 # Process commandline arguments
 #
 #
-debug=false
 
-while getopts "de:si:k:r:" opt; do
+while getopts "e:si:k:r:" opt; do
   echo "Processing command line opt: ${opt}" >&2
   case $opt in
     e)
@@ -217,10 +217,6 @@ while getopts "de:si:k:r:" opt; do
     s)
       export FOLLOW_SYMLINKS="Yes"
       echo "Set FollowSymLinks to: ${FOLLOW_SYMLINKS}" >&2
-      ;;
-    d)
-      export debug=true
-      echo "Debug is enabled" >&2
       ;;
     k)
       export AWS_SECRET_ACCESS_KEY="${OPTARG}"
@@ -335,11 +331,12 @@ while /bin/true; do
     echo "Checking Hyrax Operational State..." >&2
     besd_ps=`ps -f $besd_pid`
     BESD_STATUS=$?
-    echo "BESD_STATUS: ${BESD_STATUS}" >&2
+    if test "$debug" = "true"; then loggy "besd_ps: ${besd_ps}"; fi
+    if test "$debug" = "true"; then loggy "BESD_STATUS: ${BESD_STATUS}"; fi
 
     tomcat_ps=$(ps -f "${tomcat_pid}")
     TOMCAT_STATUS=$?
-    echo "TOMCAT_STATUS: ${TOMCAT_STATUS}" >&2
+    if test "$debug" = "true"; then loggy "TOMCAT_STATUS: ${TOMCAT_STATUS}"; fi
 
     if test $BESD_STATUS -ne 0 ; then
         echo "BESD_STATUS: $BESD_STATUS bes_pid:$bes_pid" >&2
@@ -359,13 +356,6 @@ while /bin/true; do
         cat /usr/share/tomcat/logs/localhost* >&2
         echo "localhost.log [END]" >&2
         exit 2
-    fi
-    
-    if test $debug = true ; then
-        echo "-------------------------------------------------------------------"  >&2
-        date >&2
-        echo "BESD_STATUS: $BESD_STATUS  besd_pid:$besd_pid" >&2
-        echo "TOMCAT_STATUS: $TOMCAT_STATUS tomcat_pid:$tomcat_pid" >&2
     fi
 done
 #-------------------------------------------------------------------------------
