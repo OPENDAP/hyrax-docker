@@ -263,9 +263,7 @@ RUN set -e \
     && make testsuite > mk.log 2>&1 \
     && echo "SUCCESS: hyrax_regression_tests ready!"
 
-COPY beslog2json.awk /
-RUN  set -e && chmod +x beslog2json.awk
-
+# Inject the BES log to json record converter (python)
 COPY beslog2json.py /
 RUN  set -e && chmod +x beslog2json.py
 
