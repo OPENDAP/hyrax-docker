@@ -108,11 +108,12 @@ def add_prefix_to_shared_log_keys():
 # Log Fields type=="timing"
 # We make variables for these because they may get modified
 # by a user injected prefix.
-ELAPSED_TIME_KEY     = "elapsed-us"
-START_TIME_KEY       = "start-us"
-STOP_TIME_KEY        = "stop-us"
-REQUEST_ID_TIMER_KEY = "request-id"
-TIMER_NAME_KEY       = "timer-name"
+ELAPSED_TIME_KEY_BASE = "elapsed-us"
+ELAPSED_TIME_KEY      = ELAPSED_TIME_KEY_BASE
+START_TIME_KEY        = "start-us"
+STOP_TIME_KEY         = "stop-us"
+REQUEST_ID_TIMER_KEY  = "request-id"
+TIMER_NAME_KEY        = "timer-name"
 def add_prefix_to_timing_log_keys():
     """Applies user supplied prefix to timing log record keys """
     global ELAPSED_TIME_KEY
@@ -122,7 +123,7 @@ def add_prefix_to_timing_log_keys():
     global TIMER_NAME_KEY
 
     if len(the_prefix) != 0 :
-        ELAPSED_TIME_KEY = the_prefix + ELAPSED_TIME_KEY
+        ELAPSED_TIME_KEY = the_prefix + ELAPSED_TIME_KEY_BASE
         START_TIME_KEY = the_prefix + START_TIME_KEY
         STOP_TIME_KEY = the_prefix + STOP_TIME_KEY
         REQUEST_ID_TIMER_KEY = the_prefix + REQUEST_ID_TIMER_KEY
@@ -387,7 +388,7 @@ def timing_log_to_json(log_fields, json_log_record):
     debug("Processing TIMING_MESSAGE_TYPE")
     send_it = False
     if TRANSMIT_TIMING_LOG:
-        if log_fields[4] == ELAPSED_TIME_KEY :
+        if log_fields[4] == ELAPSED_TIME_KEY_BASE :
             json_log_record[ELAPSED_TIME_KEY] = int(log_fields[5])
             json_log_record[START_TIME_KEY] = int(log_fields[7])
             json_log_record[STOP_TIME_KEY] = int(log_fields[9])
@@ -809,9 +810,6 @@ def main(argv):
 
         elif opt in ("-s", "--sort"):
             SORT_KEYS = not arg.lower().startswith("f")
-
-        elif opt in ("-s", "--timing"):
-            TRANSMIT_TIMING_LOG  = not arg.lower().startswith("f")
 
     show_config()
 
