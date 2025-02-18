@@ -187,6 +187,11 @@ startup_log "NETRC_FILE: ${NETRC_FILE}"
 export BES_SITE_CONF_FILE="/etc/bes/site.conf"
 startup_log "BES_SITE_CONF_FILE: ${BES_SITE_CONF_FILE}"
 
+# Added to support signing URLs for S3 access to a bucket for the DMR++ Ownership
+# objective. jhrg 2/18/25
+export CM_CONFIG_FILE="/etc/bes/CM.config"
+startup_log "CM_CONFIG_FILE: ${CM_CONFIG_FILE}"
+
 export BES_LOG_FILE="/var/log/bes/bes.log"
 startup_log "BES_LOG_FILE: ${BES_LOG_FILE}"
 
@@ -263,6 +268,13 @@ fi
 #
 # Update site.conf with the instance-id of this system.
 echo "AWS.instance-id=${SYSTEM_ID}" >> "${BES_SITE_CONF_FILE}"
+
+# Append the name of the CredentialsManager config file. Note that the name
+# 'CredentialsManager.config' is set in the BES source code at CredentialsManager.h:38.
+# The information is written to the CM_CONFIG_FILE below, after the call to getopts.
+# jhrg 2/18/25
+echo "CredentialsManager.config = ${CM_CONFIG_FILE}" >> "${BES_SITE_CONF_FILE}"
+
 startup_log "instance-id in site.conf: "$( tail -1 "${BES_SITE_CONF_FILE}" )
 ################################################################################
 
@@ -424,6 +436,22 @@ fi
 if test "${FOLLOW_SYMLINKS}" != "not_set"; then
   startup_log "Setting BES FollowSymLinks to YES."
   sed -i "s/^BES.Catalog.catalog.FollowSymLinks=No/BES.Catalog.catalog.FollowSymLinks=Yes/" /etc/bes/bes.conf
+fi
+################################################################################
+
+################################################################################
+#
+# Make the CCM_CONFIG_FILE here since some of the information it uses could be modified
+# by values passed into the Docker container when this code runs (i.e., via getopts).
+# jhrg 2/18/25
+#
+if test -n "${AWS_ACCESS_KEY_ID}" -a -n "${AWS_SECRET_ACCESS_KEY}"
+then
+  echo "cloudydap = url:https://s3.amazonaws.com/cloudydap/" >> ${CM_CONFIG_FILE}
+  echo "cloudydap += id:${AWS_ACCESS_KEY_ID}" >> ${CM_CONFIG_FILE}
+  echo "cloudydap += key:${AWS_SECRET_ACCESS_KEY}" >> ${CM_CONFIG_FILE}
+  echo "cloudydap += region:${AWS_DEFAULT_REGION}" >> ${CM_CONFIG_FILE}
+  echo "cloudydap += bucket:cloudydap" >> ${CM_CONFIG_FILE}
 fi
 ################################################################################
 
