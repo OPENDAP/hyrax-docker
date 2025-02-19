@@ -14,7 +14,9 @@ branches:
   only:
     - master
     # Debate: enable test-deploy or not? See also below. jhrg 2/19/25
-    #- /.*-test-deploy$/
+    # On a test-deply branch, explicitly set DEPLOY_ME for a given container, below,
+    # in the 'jobs' section. jhrg 2/19/25
+    - /.*-test-deploy$/
 
 notifications:
   email:
@@ -60,8 +62,8 @@ env:
 before_install:
   - pip3 install awscli
   - if test "${TRAVIS_PULL_REQUEST}" = "false"; then export DEPLOY_ME="true"; else export DEPLOY_ME="false"; fi
-  # test-deploy? jhrg 2/19/25
-  # - if echo "$TRAVIS_BRANCH" | grep -q '.*-test-deploy$' > /dev/null 2>&1; then export DEPLOY_ME="true"; fi
+  # test-deploy? On a test-deply branch, explicitly set DEPLOY_ME for a given container, below. jhrg 2/19/25
+  - if echo "$TRAVIS_BRANCH" | grep -q '.*-test-deploy$' > /dev/null 2>&1; then export DEPLOY_ME="false"; fi
 
 install:
   - echo "print env:"
