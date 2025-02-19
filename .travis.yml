@@ -242,6 +242,7 @@ jobs:
           "${S3_BUILD_BUCKET}"
           "${DOCKER_NAME}"
           "${OLFS_VERSION}" 2>&1
+        # This container's tags are modified with the suffix -cm for testing the credentials injection hack. jhrg 2/19/25
         - docker build
           --build-arg TOMCAT_VERSION
           --build-arg RELEASE_DATE
@@ -249,8 +250,8 @@ jobs:
           --build-arg LIBDAP_VERSION
           --build-arg BES_VERSION
           --build-arg OLFS_VERSION
-          --tag "${SNAPSHOT_IMAGE_TAG}"
-          --tag "${BUILD_VERSION_TAG}"
+          --tag "${SNAPSHOT_IMAGE_TAG}-cm"
+          --tag "${BUILD_VERSION_TAG}-cm"
           "${DOCKER_NAME}"
         - docker image ls -a
 
