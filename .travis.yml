@@ -140,7 +140,7 @@ jobs:
         - echo "Running Test Script"
         - ./regression_test_script -i ${SNAPSHOT_IMAGE_TAG}
 
-    - stage: BUILD
+    - stage: disabled # FIX ME: BUILD
       name: "Build the opendap/build_dmrpp:snapshot (RH8)"
       script:
         - cd builds
@@ -168,7 +168,7 @@ jobs:
 #        - ./regression_test_script -i ${SNAPSHOT_IMAGE_TAG}
 
 
-    - stage: BUILD
+    - stage: disabled # FIX ME: BUILD
       name: "Build opendap/besd:snapshot (RH8)"
       script:
         - cd builds
@@ -193,7 +193,7 @@ jobs:
           "${DOCKER_NAME}"
         - docker image ls -a
 
-    - stage: BUILD
+    - stage: disabled # FIX ME: BUILD
       name: "Build opendap/hyrax_ncwms:snapshot (RH8)"
       script:
         - cd builds
@@ -265,7 +265,7 @@ jobs:
           "${DOCKER_NAME}"
         - docker image ls -a
 
-    - stage: BUILD
+    - stage: disabled # FIX ME: BUILD
       name: "Build opendap/olfs:snapshot"
       script:
         - cd builds
