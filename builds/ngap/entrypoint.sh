@@ -18,6 +18,8 @@ export LOG_KEY_PREFIX=${LOG_KEY_PREFIX:-"hyrax"}
 ##########################################################################
 # ologgy() - The old simple loggy.
 #
+# Never used. jhrg 2/19/25
+#
 function ologgy() {
   echo "# $*" >&2
 }
@@ -189,6 +191,8 @@ startup_log "BES_SITE_CONF_FILE: ${BES_SITE_CONF_FILE}"
 
 # Added to support signing URLs for S3 access to a bucket for the DMR++ Ownership
 # objective. jhrg 2/18/25
+#
+# As is done with the AWS Key id and secret, should this be passed in fro Bamboo? jhrg 2/19/25
 export CM_CONFIG_FILE="/etc/bes/CM.config"
 startup_log "CM_CONFIG_FILE: ${CM_CONFIG_FILE}"
 
@@ -265,17 +269,18 @@ if test -n "${BES_SITE_CONF}"; then
   startup_log " "$( ls -l "${BES_SITE_CONF_FILE}" )
   # loggy $( cat "${BES_SITE_CONF_FILE}" )
 fi
-#
-# Update site.conf with the instance-id of this system.
-echo "AWS.instance-id=${SYSTEM_ID}" >> "${BES_SITE_CONF_FILE}"
-
+#\
 # Append the name of the CredentialsManager config file. Note that the name
 # 'CredentialsManager.config' is set in the BES source code at CredentialsManager.h:38.
 # The information is written to the CM_CONFIG_FILE below, after the call to getopts.
 # jhrg 2/18/25
-echo "CredentialsManager.config = ${CM_CONFIG_FILE}" >> "${BES_SITE_CONF_FILE}"
+if test -n "${CM_CONFIG_FILE}"; then
+  echo "CredentialsManager.config = ${CM_CONFIG_FILE}" >> "${BES_SITE_CONF_FILE}"
+fi
 
-startup_log "instance-id in site.conf: "$( tail -1 "${BES_SITE_CONF_FILE}" )
+# Update site.conf with the instance-id of this system.
+echo "AWS.instance-id=${SYSTEM_ID}" >> "${BES_SITE_CONF_FILE}"
+startup_log "instance-id in site.conf: $(tail -1 ${BES_SITE_CONF_FILE})"
 ################################################################################
 
 ################################################################################
