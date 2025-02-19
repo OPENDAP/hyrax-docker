@@ -233,8 +233,12 @@ jobs:
         - cd builds
         - export DOCKER_NAME="ngap"
         - source ./build-rh8
-        - export SNAPSHOT_IMAGE_TAG="opendap/hyrax:${DOCKER_NAME}-snapshot"
-        - export BUILD_VERSION_TAG=opendap/hyrax:${DOCKER_NAME}-${HYRAX_VERSION}
+        # Add '-td' to mark these as test-deploy images. jhrg 2/19/25
+        # REMOVE BEFORE MERGE
+        - export SNAPSHOT_IMAGE_TAG=opendap/hyrax:${DOCKER_NAME}-snapshot-td
+        - export BUILD_VERSION_TAG=opendap/hyrax:${DOCKER_NAME}-${HYRAX_VERSION}-td
+        - export DEPLOY_ME="true"
+        # End test-deploy hack
         - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
         - show_version
         - get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_VERSION}"
@@ -256,12 +260,10 @@ jobs:
           --build-arg LIBDAP_VERSION
           --build-arg BES_VERSION
           --build-arg OLFS_VERSION
-          --tag "${SNAPSHOT_IMAGE_TAG}-cm"
-          --tag "${BUILD_VERSION_TAG}-cm"
+          --tag "${SNAPSHOT_IMAGE_TAG}"
+          --tag "${BUILD_VERSION_TAG}"
           "${DOCKER_NAME}"
         - docker image ls -a
-        # REMOVE BEFORE MERGE jhrg 2/19/25
-        - export DEPLOY_ME="true"
 
     - stage: BUILD
       name: "Build opendap/olfs:snapshot"
