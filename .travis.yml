@@ -254,6 +254,8 @@ jobs:
           --tag "${BUILD_VERSION_TAG}-cm"
           "${DOCKER_NAME}"
         - docker image ls -a
+        # REMOVE BEFORE MERGE jhrg 2/19/25
+        - export DEPLOY_ME="true"
 
     - stage: BUILD
       name: "Build opendap/olfs:snapshot"
