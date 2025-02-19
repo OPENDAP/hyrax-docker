@@ -13,6 +13,8 @@ services:
 branches:
   only:
     - master
+    # Debate: enable test-deploy or not? See also below. jhrg 2/19/25
+    #- /.*-test-deploy$/
 
 notifications:
   email:
@@ -58,6 +60,8 @@ env:
 before_install:
   - pip3 install awscli
   - if test "${TRAVIS_PULL_REQUEST}" = "false"; then export DEPLOY_ME="true"; else export DEPLOY_ME="false"; fi
+  # test-deploy? jhrg 2/19/25
+  # - if echo "$TRAVIS_BRANCH" | grep -q '.*-test-deploy$' > /dev/null 2>&1; then export DEPLOY_ME="true"; fi
 
 install:
   - echo "print env:"
@@ -298,5 +302,5 @@ deploy:
   - provider: script
     script: bash ${TRAVIS_BUILD_DIR}/deploy_to_docker_hub.sh
     on:
-      branch: master
+      all_branches: true
       condition: ${DEPLOY_ME} = "true"
