@@ -91,7 +91,7 @@ stages:
   - name: BUILD_AND_TEST
     if:  branch = master
   - name: BUILD
-    if:  branch = master
+    if:  branch = master OR branch =~ .*-test-deploy$
   - name: TEST_DEPLOYED_IMAGE
     if: branch = master
   - name: disabled
