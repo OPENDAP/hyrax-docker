@@ -450,13 +450,16 @@ fi
 # by values passed into the Docker container when this code runs (i.e., via getopts).
 # jhrg 2/18/25
 #
+# Note that the sub-key 'url' (below) needs to match the value of the BES key 'NGAP.DataSourceLocation'
+# in the NGAP bitbucket build & deployment project for Hyrax. jhrg 2/21/25
+#
 if test -n "${AWS_ACCESS_KEY_ID}" -a -n "${AWS_SECRET_ACCESS_KEY}"
 then
-  echo "cloudydap = url:https://s3.amazonaws.com/cloudydap/" >> ${CM_CONFIG_FILE}
+  echo "cloudydap = url:https://dmrpp-sit-poc.s3.us-west-2.amazonaws.com/" >> ${CM_CONFIG_FILE}
   echo "cloudydap += id:${AWS_ACCESS_KEY_ID}" >> ${CM_CONFIG_FILE}
   echo "cloudydap += key:${AWS_SECRET_ACCESS_KEY}" >> ${CM_CONFIG_FILE}
   echo "cloudydap += region:${AWS_DEFAULT_REGION}" >> ${CM_CONFIG_FILE}
-  echo "cloudydap += bucket:cloudydap" >> ${CM_CONFIG_FILE}
+  echo "cloudydap += bucket:this-is-never-used" >> ${CM_CONFIG_FILE}
 fi
 ################################################################################
 
