@@ -462,6 +462,7 @@ then
   echo "cloudydap += bucket:this-is-never-used" >> ${CM_CONFIG_FILE}
   # Set the permissions on the config file with credentials to rw for the owner only. jhrg 2/24/25
   chmod 600 ${CM_CONFIG_FILE}
+  chown bes ${CM_CONFIG_FILE}
 fi
 ################################################################################
 
