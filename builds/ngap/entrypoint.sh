@@ -479,7 +479,7 @@ startup_log "Tomcat is UP! pid: ${tomcat_pid}"
 #-------------------------------------------------------------------------------
 # Get the bes log, make it json, and send it to stdout
 #
-tail -f "${BES_LOG_FILE}" | ./beslog2json.py --prefix "${LOG_KEY_PREFIX}" &
+tail -f "${BES_LOG_FILE}" | beslog2json.py --prefix "${LOG_KEY_PREFIX}" &
 
 #-------------------------------------------------------------------------------
 startup_log "Hyrax Has Arrived..."
