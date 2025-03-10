@@ -108,6 +108,9 @@ RUN if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else ec
 # Travis build (or at a later time). They need to be part of the container,
 # however, to be run, so install them as part of this Dockerfile.
 RUN set -e && dnf update  -y
+RUN set -e && dnf install -y python3.11
+RUN set -e && python3 --version
+
 RUN set -e && dnf install -y make curl unzip which autoconf automake emacs vim
 RUN set -e && dnf install -y diffutils
 RUN set -e && dnf install -y procps
@@ -122,7 +125,6 @@ RUN set -e && dnf install -y openssl-devel
 RUN set -e && dnf clean all
 RUN set -e && which diff
 #
-RUN set -e && python3 --version
 RUN set -e && curl -sS https://bootstrap.pypa.io/get-pip.py | python3
 RUN set -e && python3 -m pip install --upgrade pip
 RUN set -e && python3 -m pip install --no-cache-dir awscli
