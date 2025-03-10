@@ -12,6 +12,7 @@ echo "Greetings, I am "`whoami`" (uid: "`echo ${UID}`")."   >&2
 # set -e
 # set -x
 
+echo "PythonVersion: "$(python3 --version)
 
 export JAVA_HOME=${JAVA_HOME:-"/etc/alternatives/jre"}
 echo "JAVA_HOME: ${JAVA_HOME}" >&2

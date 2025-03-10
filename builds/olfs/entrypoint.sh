@@ -12,6 +12,7 @@ echo "############################## OLFS ##################################";  
 echo "Greetings, I am "`whoami`".";   >&2
 set -e
 #set -x
+echo "PythonVersion: "$(python3 --version)
 
 export SLEEP_INTERVAL=${SLEEP_INTERVAL:-60}
 echo "SLEEP_INTERVAL: ${SLEEP_INTERVAL} seconds." >&2

@@ -74,6 +74,8 @@ RUN set -e \
     && dnf install -y tzdata-java \
     && dnf clean all
 #
+RUN set -e && python3 --version
+RUN set -e && curl -sS https://bootstrap.pypa.io/get-pip.py | python3
 RUN set -e && python3 -m pip install --upgrade pip
 RUN set -e && python3 -m pip install awscli
 
