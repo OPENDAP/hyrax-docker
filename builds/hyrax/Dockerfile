@@ -123,6 +123,7 @@ RUN set -e && dnf install -y tzdata-java
 RUN set -e && dnf clean all
 RUN set -e && which diff
 #
+RUN set -e && python3 --version
 RUN set -e && curl -sS https://bootstrap.pypa.io/get-pip.py | python3
 RUN set -e && python3 -m pip install --upgrade pip
 RUN set -e && python3 -m pip install --no-cache-dir awscli
