@@ -69,7 +69,7 @@ RUN set -e && \
 RUN set -e \
     && dnf update  -y \
     && dnf install -y curl unzip which emacs vim \
-    && dnf install -y python3 bc \
+    && dnf install -y bc \
     && dnf install -y java-11-openjdk-devel \
     && dnf install -y tzdata-java \
     && dnf clean all

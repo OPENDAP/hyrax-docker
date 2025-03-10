@@ -49,7 +49,7 @@ USER root
 
 # Update and install the needful.
 RUN set -e \
-    && dnf install -y which bc python3 emacs vim  \
+    && dnf install -y which bc emacs vim  \
     && dnf install -y procps \
     && dnf update -y \
     && dnf clean all \
