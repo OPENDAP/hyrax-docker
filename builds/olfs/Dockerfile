@@ -66,13 +66,12 @@ RUN set -e && \
 #
 # Installing utils for debugging convenience.
 #
-RUN set -e \
-    && dnf update  -y \
-    && dnf install -y curl unzip which emacs vim \
-    && dnf install -y bc \
-    && dnf install -y java-11-openjdk-devel \
-    && dnf install -y tzdata-java \
-    && dnf clean all
+RUN set -e  && dnf update  -y
+RUN set -e && dnf install -y curl unzip which emacs vim
+RUN set -e && dnf install -y bc
+RUN set -e && dnf install -y java-11-openjdk-devel
+RUN set -e && dnf install -y tzdata-java
+RUN set -e && dnf clean all
 #
 RUN set -e && python3 --version
 RUN set -e && curl -sS https://bootstrap.pypa.io/get-pip.py | python3
