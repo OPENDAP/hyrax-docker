@@ -121,6 +121,7 @@ startup_log "########################### HYRAX #################################
 startup_log "Greetings, I am "$(whoami)"."
 set -e
 #set -x
+echo "PythonVersion: "$(python3 --version)
 
 ################################################################################
 SYSTEM_ID=$(get_aws_instance_id)
