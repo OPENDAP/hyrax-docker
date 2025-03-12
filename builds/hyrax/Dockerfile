@@ -121,7 +121,7 @@ RUN set -e && dnf install -y make curl unzip which autoconf automake emacs vim \
     && dnf install -y git bc valgrind gdb \
     && dnf install -y java-11-openjdk-devel
 # Temporary Hack to fix broken OpenJDK-11.0.20.0.8-2
-RUN set -e  && dnf install -y tzdata-java
+RUN set -e && dnf install -y tzdata-java
 #
 
 RUN set -e && curl -sS https://bootstrap.pypa.io/get-pip.py | python3 \
