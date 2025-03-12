@@ -112,7 +112,7 @@ RUN if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else ec
 # Travis build (or at a later time). They need to be part of the container,
 # however, to be run, so install them as part of this Dockerfile.
 RUN set -e && dnf update  -y
-RUN set -e && dnf install -y python3.11\
+RUN set -e && dnf install -y python3.11 \
     && python3 --version
 
 RUN set -e && dnf install -y make curl unzip which autoconf automake emacs vim \
@@ -271,7 +271,7 @@ RUN if [ $USE_NCWMS = "true" ]; then \
         # If we're installing ncWMS then we copy 
         # to the server a viewers.xml which has
         # been templated so that the ncWMS host can be installed 
-        # at startup.        
+        # at startup.
         mv /tmp/olfs_viewers.xml ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/viewers.xml; \
     else \
         echo "Skipping OLFS/ncWMS confguration installation."; \
