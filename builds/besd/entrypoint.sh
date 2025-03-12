@@ -11,7 +11,10 @@
 echo "############################## BESD ##################################";   >&2
 echo "Greetings, I am "`whoami`".";   >&2
 
-if [ $SERVER_HELP_EMAIL ] && [ -n $SERVER_HELP_EMAIL ] ; then    
+
+echo "PythonVersion: "$(python3 --version)
+
+if [ $SERVER_HELP_EMAIL ] && [ -n $SERVER_HELP_EMAIL ] ; then
     echo "Found exisiting SERVER_HELP_EMAIL: $SERVER_HELP_EMAIL"  
 else 
     SERVER_HELP_EMAIL="not_set"

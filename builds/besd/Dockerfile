@@ -48,12 +48,17 @@ MAINTAINER support@opendap.org
 USER root
 
 # Update and install the needful.
-RUN set -e \
-    && dnf install -y which bc python3 emacs vim  \
+RUN set -e && dnf install -y python3.11 \
+    && python3 --version
+
+RUN set -e && dnf install -y which bc emacs vim \
     && dnf install -y procps \
     && dnf update -y \
-    && dnf clean all \
-    && python3 -m pip install awscli
+    && dnf clean all
+
+RUN set -e && curl -sS https://bootstrap.pypa.io/get-pip.py | python3 \
+    && python3 -m pip install --upgrade pip \
+    && python3 -m pip install --no-cache-dir awscli
 
 ###############################################################
 # Retrieve and install the latest libdap snapshot
