@@ -20,7 +20,7 @@ else
     SERVER_HELP_EMAIL="not_set"
     echo "SERVER_HELP_EMAIL is $SERVER_HELP_EMAIL"
 fi
-if [ $FOLLOW_SYMLINKS ] && [ -n $FOLLOW_SYMLINKS ] ; then    
+if [ $FOLLOW_SYMLINKS ] && [ -n $FOLLOW_SYMLINKS ] ; then
     echo "Found exisiting FOLLOW_SYMLINKS: $FOLLOW_SYMLINKS"  
 else 
     FOLLOW_SYMLINKS="not_set";
