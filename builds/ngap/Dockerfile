@@ -97,26 +97,26 @@ RUN set -e && \
 # Travis build (or at a later time). They need to be part of the container,
 # however, to be run, so install them as part of this Dockerfile.
 RUN set -e && dnf update  -y
-RUN set -e && dnf install -y python3.11
-RUN set -e && python3 --version
+RUN set -e && dnf install -y python3.11 \
+    && python3 --version
 
-RUN set -e && dnf install -y make curl unzip which autoconf automake emacs vim
-RUN set -e && dnf install -y diffutils
-RUN set -e && dnf install -y procps
-RUN set -e && dnf install -y git bc valgrind gdb
-RUN set -e && dnf install -y java-11-openjdk-devel
+RUN set -e && dnf install -y make curl unzip which autoconf automake emacs vim \
+    && dnf install -y diffutils \
+    && dnf install -y procps \
+    && dnf install -y git bc valgrind gdb \
+    && dnf install -y java-11-openjdk-devel \
+    && dnf install -y redhat-rpm-config \
+    && dnf install -y apr-devel \
+    && dnf install -y openssl-devel \
 # Temporary Hack to fix broken OpenJDK-11.0.20.0.8-2
 RUN set -e && dnf install -y tzdata-java
 # Temporary Hack to add missing Apache Portable Runtime library for Tomcat
-RUN set -e && dnf install -y redhat-rpm-config
-RUN set -e && dnf install -y apr-devel
-RUN set -e && dnf install -y openssl-devel
 #
 RUN set -e && dnf clean all
 #
-RUN set -e && curl -sS https://bootstrap.pypa.io/get-pip.py | python3
-RUN set -e && python3 -m pip install --upgrade pip
-RUN set -e && python3 -m pip install awscli
+RUN set -e && curl -sS https://bootstrap.pypa.io/get-pip.py | python3 \
+    && python3 -m pip install --upgrade pip \
+    && python3 -m pip install awscli
 
 ################################################################
 # Install the latest libdap snapshot
