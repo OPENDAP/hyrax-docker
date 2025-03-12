@@ -107,7 +107,7 @@ RUN set -e && dnf install -y make curl unzip which autoconf automake emacs vim \
     && dnf install -y java-11-openjdk-devel \
     && dnf install -y redhat-rpm-config \
     && dnf install -y apr-devel \
-    && dnf install -y openssl-devel \
+    && dnf install -y openssl-devel
 # Temporary Hack to fix broken OpenJDK-11.0.20.0.8-2
 RUN set -e && dnf install -y tzdata-java
 # Temporary Hack to add missing Apache Portable Runtime library for Tomcat
