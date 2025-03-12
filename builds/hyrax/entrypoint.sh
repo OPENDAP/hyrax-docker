@@ -12,6 +12,7 @@ echo "Greetings, I am "`whoami`" (uid: "`echo ${UID}`")."   >&2
 # set -e
 # set -x
 
+echo "PythonVersion: "$(python3 --version)
 
 export JAVA_HOME=${JAVA_HOME:-"/etc/alternatives/jre"}
 echo "JAVA_HOME: ${JAVA_HOME}" >&2
@@ -138,6 +139,7 @@ if test $status -ne 0 ; then
     echo "WARNING: Problem with AWS CLI! (status: ${status})" >&2
 fi
 
+echo "PythonVersion: "$(python3 --version)
 #-------------------------------------------------------------------------------
 # Start the BES daemon process
 # /usr/bin/besdaemon -i /usr -c /etc/bes/bes.conf -r /var/run/bes.pid

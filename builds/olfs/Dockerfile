@@ -66,16 +66,19 @@ RUN set -e && \
 #
 # Installing utils for debugging convenience.
 #
-RUN set -e \
-    && dnf update  -y \
-    && dnf install -y curl unzip which emacs vim \
-    && dnf install -y python3 bc \
+RUN set -e  && dnf update  -y
+RUN set -e && dnf install -y python3.11 \
+    && python3 --version
+
+RUN set -e && dnf install -y curl unzip which emacs vim \
+    && dnf install -y bc \
     && dnf install -y java-11-openjdk-devel \
     && dnf install -y tzdata-java \
     && dnf clean all
 #
-RUN set -e && python3 -m pip install --upgrade pip
-RUN set -e && python3 -m pip install awscli
+RUN set -e && curl -sS https://bootstrap.pypa.io/get-pip.py | python3 \
+    && python3 -m pip install --upgrade pip \
+    && python3 -m pip install awscli
 
 
 ################################################################

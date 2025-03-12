@@ -12,6 +12,7 @@ echo "############################## HYRAX ##################################" >
 echo "Greetings, I am "`whoami`"."   >&2
 # set -e
 # set -x
+echo "PythonVersion: "$(python3 --version)
 
 export NOT_SET="<not-set>"
 

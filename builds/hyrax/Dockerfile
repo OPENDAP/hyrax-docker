@@ -112,19 +112,25 @@ RUN if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else ec
 # Travis build (or at a later time). They need to be part of the container,
 # however, to be run, so install them as part of this Dockerfile.
 RUN set -e && dnf update  -y
-RUN set -e && dnf install -y make curl unzip which autoconf automake emacs vim
-RUN set -e && dnf install -y diffutils
-RUN set -e && dnf install -y procps
-RUN set -e && dnf install -y python3 git bc valgrind gdb
-RUN set -e && dnf install -y java-11-openjdk-devel
+RUN set -e && dnf install -y python3.11 \
+    && python3 --version
+
+RUN set -e && dnf install -y make curl unzip which autoconf automake emacs vim \
+    && dnf install -y diffutils \
+    && dnf install -y procps \
+    && dnf install -y git bc valgrind gdb \
+    && dnf install -y java-11-openjdk-devel
 # Temporary Hack to fix broken OpenJDK-11.0.20.0.8-2
 RUN set -e && dnf install -y tzdata-java
+#
+
+RUN set -e && curl -sS https://bootstrap.pypa.io/get-pip.py | python3 \
+    && python3 -m pip install --upgrade pip \
+    && python3 -m pip install --no-cache-dir awscli
 #
 RUN set -e && dnf clean all
 RUN set -e && which diff
 #
-RUN set -e && python3 -m pip install --upgrade pip
-RUN set -e && python3 -m pip install --no-cache-dir awscli
 
 
 
@@ -265,7 +271,7 @@ RUN if [ $USE_NCWMS = "true" ]; then \
         # If we're installing ncWMS then we copy 
         # to the server a viewers.xml which has
         # been templated so that the ncWMS host can be installed 
-        # at startup.        
+        # at startup.
         mv /tmp/olfs_viewers.xml ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/viewers.xml; \
     else \
         echo "Skipping OLFS/ncWMS confguration installation."; \

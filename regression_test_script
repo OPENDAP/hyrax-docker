@@ -113,10 +113,12 @@ echo "##########################################################################
 echo "# Checking beslog2json.awk"
 echo "# Acquiring bes.log from docker image."
 docker cp hyrax:/var/log/bes/bes.log .
+echo "# Acquiring beslog2json.py from docker image."
+docker cp hyrax:/usr/bin/beslog2json.py .
 echo "############################################################################"
 echo "# head ./bes.log"
 head ./bes.log
-cat ./bes.log | ./builds/ngap/beslog2json.py --all > ./bes.json
+cat ./bes.log | ./beslog2json.py --all > ./bes.json
 echo "############################################################################"
 echo "# head -20 ./bes.json"
 head -n 10 ./bes.json

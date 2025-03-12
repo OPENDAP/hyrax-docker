@@ -121,6 +121,7 @@ startup_log "########################### HYRAX #################################
 startup_log "Greetings, I am "$(whoami)"."
 set -e
 #set -x
+echo "PythonVersion: "$(python3 --version)
 
 ################################################################################
 SYSTEM_ID=$(get_aws_instance_id)
@@ -479,7 +480,7 @@ startup_log "Tomcat is UP! pid: ${tomcat_pid}"
 #-------------------------------------------------------------------------------
 # Get the bes log, make it json, and send it to stdout
 #
-tail -f "${BES_LOG_FILE}" | ./beslog2json.py --prefix "${LOG_KEY_PREFIX}" &
+tail -f "${BES_LOG_FILE}" | beslog2json.py --prefix "${LOG_KEY_PREFIX}" &
 
 #-------------------------------------------------------------------------------
 startup_log "Hyrax Has Arrived..."
