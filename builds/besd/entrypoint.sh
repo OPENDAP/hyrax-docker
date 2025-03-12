@@ -14,13 +14,13 @@ echo "Greetings, I am "`whoami`".";   >&2
 
 echo "PythonVersion: "$(python3 --version)
 
-if [ $SERVER_HELP_EMAIL ] && [ -n $SERVER_HELP_EMAIL ] ; then    
+if [ $SERVER_HELP_EMAIL ] && [ -n $SERVER_HELP_EMAIL ] ; then
     echo "Found exisiting SERVER_HELP_EMAIL: $SERVER_HELP_EMAIL"  
 else 
     SERVER_HELP_EMAIL="not_set"
     echo "SERVER_HELP_EMAIL is $SERVER_HELP_EMAIL"
 fi
-if [ $FOLLOW_SYMLINKS ] && [ -n $FOLLOW_SYMLINKS ] ; then    
+if [ $FOLLOW_SYMLINKS ] && [ -n $FOLLOW_SYMLINKS ] ; then
     echo "Found exisiting FOLLOW_SYMLINKS: $FOLLOW_SYMLINKS"  
 else 
     FOLLOW_SYMLINKS="not_set";
