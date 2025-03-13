@@ -120,7 +120,7 @@ ls -l ./beslog2json.py
 echo "############################################################################"
 echo "# head ./bes.log"
 head ./bes.log
-cat ./bes.log | ./beslog2json.py --all > ./bes.json
+cat ./bes.log | python3 ./beslog2json.py --all > ./bes.json
 echo "############################################################################"
 echo "# head -20 ./bes.json"
 head -n 10 ./bes.json
