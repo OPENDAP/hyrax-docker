@@ -111,6 +111,7 @@ docker exec -it hyrax /bin/bash -c "cd hyrax_regression_tests; ./testsuite --hyr
 #./show_fails"
 echo "############################################################################"
 echo "# Checking beslog2json.awk"
+echo "# Python Version: '$(python3 --version)'"
 echo "# Acquiring bes.log from docker image."
 docker cp hyrax:/var/log/bes/bes.log .
 echo "# Acquiring beslog2json.py from docker image."
