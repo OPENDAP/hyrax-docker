@@ -484,16 +484,13 @@ startup_log "Tomcat is UP! pid: ${tomcat_pid}"
 #
 tail -f "${BES_LOG_FILE}" | beslog2json.py --prefix "${LOG_KEY_PREFIX}" &
 
-#-------------------------------------------------------------------------------
-startup_log "Hyrax Has Arrived..."
 start_time=
 now=
 suptime=
 start_time=$(date  "+%s")
-
-export up_time=
-export now=
-
+#-------------------------------------------------------------------------------
+startup_log "Hyrax Has Arrived...(time: $start_time)"
+#-------------------------------------------------------------------------------
 while /bin/true; do
   sleep ${SLEEP_INTERVAL}
 
