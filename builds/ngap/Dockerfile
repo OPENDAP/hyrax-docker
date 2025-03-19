@@ -100,7 +100,7 @@ RUN set -e && dnf update  -y
 RUN set -e && dnf install -y python3.11 \
     && python3 --version
 
-RUN set -e && dnf install -y make curl unzip which autoconf automake emacs vim \
+RUN set -e && dnf install -y make curl unzip which autoconf automake emacs vim jq \
     && dnf install -y diffutils \
     && dnf install -y procps \
     && dnf install -y git bc valgrind gdb \

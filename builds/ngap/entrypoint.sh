@@ -8,8 +8,10 @@
 export debug="false"
 
 export SYSTEM_ID=${INSTANCE_ID:-"undetermined"}
-export LOG_KEY_PREFIX=${LOG_KEY_PREFIX:-"hyrax"}
-
+export LOG_KEY_PREFIX=${LOG_KEY_PREFIX:-"hyrax-"}
+if [[ "$LOG_KEY_PREFIX" != *"-" ]]; then
+    LOG_KEY_PREFIX="${LOG_KEY_PREFIX}-"
+fi
 ##########################################################################
 #
 # Functions
@@ -28,19 +30,19 @@ function ologgy() {
 #
 function set_log_key_names() {
   export TIME_KEY
-  TIME_KEY="${LOG_KEY_PREFIX}-time"
+  TIME_KEY="${LOG_KEY_PREFIX}time"
 
   export INSTANCE_ID_KEY
-  INSTANCE_ID_KEY="${LOG_KEY_PREFIX}-instance-id"
+  INSTANCE_ID_KEY="${LOG_KEY_PREFIX}instance-id"
 
   export PID_KEY
-  PID_KEY="${LOG_KEY_PREFIX}-pid"
+  PID_KEY="${LOG_KEY_PREFIX}pid"
 
   export TYPE_KEY
-  TYPE_KEY="${LOG_KEY_PREFIX}-type"
+  TYPE_KEY="${LOG_KEY_PREFIX}type"
 
   export MESSAGE_KEY
-  MESSAGE_KEY="${LOG_KEY_PREFIX}-message"
+  MESSAGE_KEY="${LOG_KEY_PREFIX}message"
 }
 
 ##########################################################################
@@ -52,7 +54,7 @@ function startup_log() {
         "\"${INSTANCE_ID_KEY}\": \"${SYSTEM_ID}\"," \
         "\"${PID_KEY}\": "$(echo $$)"," \
         "\"${TYPE_KEY}\": \"start-up\"," \
-        "\"${MESSAGE_KEY}\": \"# $*\"" \
+        "\"${MESSAGE_KEY}\": "$(echo -n $* | jq -Rsa '.') \
         "}" >&2
 }
 
@@ -61,7 +63,7 @@ function heartbeat_log() {
         "\"${INSTANCE_ID_KEY}\": \"${SYSTEM_ID}\"," \
         "\"${PID_KEY}\": "$(echo $$)"," \
         "\"${TYPE_KEY}\": \"heartbeat\"," \
-        "\"${MESSAGE_KEY}\": \"# $*\"" \
+        "\"${MESSAGE_KEY}\": "$(echo -n $* | jq -Rsa '.') \
         "}" >&2
 }
 
@@ -70,7 +72,7 @@ function error_log() {
         "\"${INSTANCE_ID_KEY}\": \"${SYSTEM_ID}\"," \
         "\"${PID_KEY}\": "$(echo $$)"," \
         "\"${TYPE_KEY}\": \"error\"," \
-        "\"${MESSAGE_KEY}\": \"# $*\"" \
+        "\"${MESSAGE_KEY}\": "$(echo -n $* | jq -Rsa '.') \
         "}" >&2
 }
 
@@ -482,13 +484,22 @@ startup_log "Tomcat is UP! pid: ${tomcat_pid}"
 #
 tail -f "${BES_LOG_FILE}" | beslog2json.py --prefix "${LOG_KEY_PREFIX}" &
 
+start_time=
+now=
+suptime=
+start_time=$(date  "+%s")
 #-------------------------------------------------------------------------------
-startup_log "Hyrax Has Arrived..."
-
+startup_log "Hyrax Has Arrived...(time: $start_time)"
+#-------------------------------------------------------------------------------
 while /bin/true; do
   sleep ${SLEEP_INTERVAL}
+
+  # Compute service_uptime in hours
+  now=$(date  "+%s")
+  suptime=$(echo "scale=4; ($now - $start_time)/60/60" | bc)
+
   if test "$debug" = "true"; then
-    heartbeat_log "Checking Hyrax Operational State...";
+    heartbeat_log "Checking Hyrax Operational State. service_uptime: ${suptime} hours";
   fi
 
   besd_ps=$(ps -f $besd_pid)
@@ -503,7 +514,7 @@ while /bin/true; do
 
   if test $BESD_STATUS -ne 0; then
     error_log "BESD_STATUS: $BESD_STATUS bes_pid:$bes_pid"
-    error_log "The BES daemon appears to have died! Exiting."
+    error_log "The BES daemon appears to have died! Exiting. (service_uptime: ${suptime} hours)"
     exit $BESD_STATUS
   fi
 
@@ -511,16 +522,17 @@ while /bin/true; do
   TOMCAT_STATUS=$?
   if test "$debug" = "true"; then heartbeat_log "TOMCAT_STATUS: ${TOMCAT_STATUS}"; fi
   if test $TOMCAT_STATUS -ne 0; then
+    log_lines=100
     error_log "TOMCAT_STATUS: $TOMCAT_STATUS tomcat_pid:$tomcat_pid"
-    error_log "Tomcat appears to have died! Exiting."
+    error_log "Tomcat appears to have died! Exiting.  (service_uptime: ${suptime} hours)"
     error_log "Tomcat Console Log [BEGIN]"
-    error_log $(cat /var/log/tomcat/console.log)
+    error_log $(tail --lines $log_lines /var/log/tomcat/console.log)
     error_log "Tomcat Console Log [END]"
     error_log "catalina.out [BEGIN]"
-    error_log $(cat /usr/share/tomcat/logs/catalina.out)
+    error_log $(tail --lines $log_lines /usr/share/tomcat/logs/catalina.out)
     error_log "catalina.out [END]"
     error_log "localhost.log [BEGIN]"
-    error_log $(cat /usr/share/tomcat/logs/localhost*)
+    error_log $(tail --lines $log_lines  $(ls -t /usr/share/tomcat/logs/localhost* | head -1))
     error_log "localhost.log [END]"
     exit $TOMCAT_STATUS
   fi
