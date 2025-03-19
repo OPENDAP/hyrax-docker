@@ -486,7 +486,9 @@ tail -f "${BES_LOG_FILE}" | beslog2json.py --prefix "${LOG_KEY_PREFIX}" &
 
 #-------------------------------------------------------------------------------
 startup_log "Hyrax Has Arrived..."
-export start_time=
+start_time=
+now=
+suptime=
 start_time=$(date  "+%s")
 
 export up_time=
@@ -494,11 +496,13 @@ export now=
 
 while /bin/true; do
   sleep ${SLEEP_INTERVAL}
+
+  # Compute service_uptime in hours
   now=$(date  "+%s")
-  uptime=$(echo "scale=4; ($now - $start_time)/60/60" | bc)
+  suptime=$(echo "scale=4; ($now - $start_time)/60/60" | bc)
 
   if test "$debug" = "true"; then
-    heartbeat_log "Checking Hyrax Operational State. uptime: ${uptime} hours";
+    heartbeat_log "Checking Hyrax Operational State. service_uptime: ${suptime} hours";
   fi
 
   besd_ps=$(ps -f $besd_pid)
@@ -513,7 +517,7 @@ while /bin/true; do
 
   if test $BESD_STATUS -ne 0; then
     error_log "BESD_STATUS: $BESD_STATUS bes_pid:$bes_pid"
-    error_log "The BES daemon appears to have died! Exiting. (uptime: ${uptime} hours)"
+    error_log "The BES daemon appears to have died! Exiting. (service_uptime: ${suptime} hours)"
     exit $BESD_STATUS
   fi
 
@@ -523,7 +527,7 @@ while /bin/true; do
   if test $TOMCAT_STATUS -ne 0; then
     log_lines=100
     error_log "TOMCAT_STATUS: $TOMCAT_STATUS tomcat_pid:$tomcat_pid"
-    error_log "Tomcat appears to have died! Exiting.  (uptime: ${uptime} hours)"
+    error_log "Tomcat appears to have died! Exiting.  (service_uptime: ${suptime} hours)"
     error_log "Tomcat Console Log [BEGIN]"
     error_log $(tail --lines $log_lines /var/log/tomcat/console.log)
     error_log "Tomcat Console Log [END]"
