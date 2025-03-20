@@ -109,6 +109,27 @@ function get_aws_instance_id() {
   echo "$instance_id"
 }
 ##########################################################################
+# write_tomcat_logs()
+# Writes the last log_lines of the Tomcat logs console.log, catalina.out,
+# and the  most recent localhost*.log files as error log messages.
+#
+function write_tomcat_logs() {
+    local log_lines="$1"
+    local wait_time="$2"
+
+    error_log "Tomcat Console Log [BEGIN]"
+    error_log $(tail --lines $log_lines /var/log/tomcat/console.log)
+    error_log "Tomcat Console Log [END]"
+    error_log "catalina.out [BEGIN]"
+    error_log $(tail --lines $log_lines /usr/share/tomcat/logs/catalina.out)
+    error_log "catalina.out [END]"
+    error_log "localhost.log [BEGIN]"
+    error_log $(tail --lines $log_lines  $(ls -t /usr/share/tomcat/logs/localhost* | head -1))
+    error_log "localhost.log [END]"
+    sleep $wait_time
+}
+
+##########################################################################
 ##########################################################################
 ##########################################################################
 #
@@ -123,7 +144,7 @@ startup_log "########################### HYRAX #################################
 startup_log "Greetings, I am "$(whoami)"."
 set -e
 #set -x
-echo "PythonVersion: "$(python3 --version)
+startup_log "PythonVersion: "$(python3 --version)
 
 ################################################################################
 SYSTEM_ID=$(get_aws_instance_id)
@@ -193,7 +214,7 @@ startup_log "BES_SITE_CONF_FILE: ${BES_SITE_CONF_FILE}"
 export BES_LOG_FILE="/var/log/bes/bes.log"
 startup_log "BES_LOG_FILE: ${BES_LOG_FILE}"
 
-export SLEEP_INTERVAL=${SLEEP_INTERVAL:-60}
+export SLEEP_INTERVAL=${SLEEP_INTERVAL:-10}
 startup_log "SLEEP_INTERVAL: ${SLEEP_INTERVAL} seconds."
 
 export SERVER_HELP_EMAIL=${SERVER_HELP_EMAIL:-"not_set"}
@@ -522,18 +543,9 @@ while /bin/true; do
   TOMCAT_STATUS=$?
   if test "$debug" = "true"; then heartbeat_log "TOMCAT_STATUS: ${TOMCAT_STATUS}"; fi
   if test $TOMCAT_STATUS -ne 0; then
-    log_lines=100
     error_log "TOMCAT_STATUS: $TOMCAT_STATUS tomcat_pid:$tomcat_pid"
     error_log "Tomcat appears to have died! Exiting.  (service_uptime: ${suptime} hours)"
-    error_log "Tomcat Console Log [BEGIN]"
-    error_log $(tail --lines $log_lines /var/log/tomcat/console.log)
-    error_log "Tomcat Console Log [END]"
-    error_log "catalina.out [BEGIN]"
-    error_log $(tail --lines $log_lines /usr/share/tomcat/logs/catalina.out)
-    error_log "catalina.out [END]"
-    error_log "localhost.log [BEGIN]"
-    error_log $(tail --lines $log_lines  $(ls -t /usr/share/tomcat/logs/localhost* | head -1))
-    error_log "localhost.log [END]"
+    write_tomcat_logs 100 5 # [number of log lines to grab from each file ] [time to sleep after sending]
     exit $TOMCAT_STATUS
   fi
 
