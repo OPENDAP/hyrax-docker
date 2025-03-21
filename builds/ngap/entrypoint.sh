@@ -545,7 +545,7 @@ while /bin/true; do
   if test $TOMCAT_STATUS -ne 0; then
     error_log "TOMCAT_STATUS: $TOMCAT_STATUS tomcat_pid:$tomcat_pid"
     error_log "Tomcat appears to have died! Exiting.  (service_uptime: ${suptime} hours)"
-    write_tomcat_logs 100 5 # [number of log lines to grab from each file ] [time to sleep after sending]
+    # write_tomcat_logs 100 5 # [number of log lines to grab from each file] [time to sleep after sending]
     exit $TOMCAT_STATUS
   fi
 
