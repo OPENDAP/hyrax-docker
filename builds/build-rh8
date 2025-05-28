@@ -5,7 +5,7 @@ HR3="- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
 export BUILD_RECIPE_FILE=${1:-"../snapshot.time"}
 export S3_BUILD_BUCKET=${S3_BUILD_BUCKET:-"opendap.travis.build"}
 export DOCKER_NAME=${DOCKER_NAME:-"hyrax"}
-export TOMCAT_MAJOR_VERSION=${TOMCAT_MAJOR_VERSION:-"9"}
+export TOMCAT_MAJOR_VERSION=${TOMCAT_MAJOR_VERSION:-"11"}
 export SLEEP_INTERVAL=${SLEEP_INTERVAL:-60}
 export NO_CACHE=${NO_CACHE:-""}
 
@@ -174,8 +174,8 @@ function get_latest_tomcat_version_number(){
         local release_endpoint_url="${release_endpoint_base}-${tomcat_major_version}/v${tomcat_version}"
         loggy "release_endpoint_url=${release_endpoint_url}"
 
-        status=$(curl -s -o /dev/null -w "%{response_code}" "${release_endpoint_url}")
-        if test $status -eq 404 ; then
+        stat=$(curl -s -o /dev/null -w "%{response_code}" "${release_endpoint_url}")
+        if test $stat -eq 404 ; then
             loggy "Candidate tomcat_version: ${tomcat_version} not found on download site: ${release_endpoint_url} "
             if test -n "${tomcat_version}"; then
                 ignore_list+="${ignore_list}  -e ${tomcat_version} "

@@ -32,7 +32,7 @@ ENV RELEASE_DATE ${RELEASE_DATE:-"${NOW}"}
 RUN echo "RELEASE_DATE: ${RELEASE_DATE}"
 
 ARG TOMCAT_VERSION
-ENV TOMCAT_VERSION ${TOMCAT_VERSION:-"9.0.64"}
+ENV TOMCAT_VERSION ${TOMCAT_VERSION:-"11.0.7"}
 RUN echo "TOMCAT_VERSION: ${TOMCAT_VERSION}"
 ENV TOMCAT_DISTRO="apache-tomcat-${TOMCAT_VERSION}"
 COPY "${TOMCAT_DISTRO}.tar.gz" /
@@ -166,9 +166,9 @@ ENV PATH $CATALINA_HOME/bin:$PATH
 RUN set -e && echo "CATALINA_HOME: ${CATALINA_HOME}" >&2
 
 # Install our modified server.xml so that the server compresses responses.
-COPY tomcat9-server.xml /
+COPY tomcat11-server.xml /
 RUN set -e \
-    && mv /tomcat9-server.xml ${CATALINA_HOME}/conf/server.xml \
+    && mv /tomcat11-server.xml ${CATALINA_HOME}/conf/server.xml \
     && chown -R tomcat:tomcat ${CATALINA_HOME}/conf/server.xml
 
 RUN set -e \
@@ -235,10 +235,10 @@ RUN set -e \
     && git clone --depth 1 https://github.com/OPENDAP/olfs \
     && echo "Copying elasticache client" \
     && cp olfs/resources/ngap/lib/elasticache-java-cluster-client-1.1.2.jar ${CATALINA_HOME}/lib \
-    && echo "Copying memcached Session Manager" \
-    && cp olfs/resources/ngap/lib/memcached-session-manager-2.3.2.jar ${CATALINA_HOME}/lib \
-    && echo "Copying memcached Session Manager TC9" \
-    && cp olfs/resources/ngap/lib/memcached-session-manager-tc9-2.3.2.jar ${CATALINA_HOME}/lib \
+    && echo "Copying redisson Session Manager" \
+    && cp olfs/resources/ngap/lib/redisson-all-3.48.0.jar ${CATALINA_HOME}/lib \
+    && echo "Copying redisson Session Manager TC11" \
+    && cp olfs/resources/ngap/lib/redisson-tomcat-11-3.48.0.jar ${CATALINA_HOME}/lib \
     && chown -R tomcat:tomcat  ${CATALINA_HOME}/lib \
     && rm -rfv olfs
 
