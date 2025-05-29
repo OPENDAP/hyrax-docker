@@ -32,12 +32,15 @@ function read_build_recipe() {
     export BES_VERSION=""
     export BUILD_DMRPP_VERSION=""
     export LIBDAP_VERSION=""
+    #export APR_VERSION=""
     RELEASE_DATE=${RELEASE_DATE:-$(echo "${build_recipe}" | grep hyrax | awk '{print $2;}')}
     HYRAX_VERSION=${HYRAX_VERSION:-$(echo "${build_recipe}" | grep hyrax | awk '{print $1;}' | sed "s/hyrax-//g" )}
     OLFS_VERSION=${OLFS_VERSION:-$(echo "${build_recipe}" | grep olfs | sed "s/olfs-//g" | awk '{print $1;}')}
     BES_VERSION=${BES_VERSION:-$(echo "${build_recipe}" | grep bes | sed "s/bes-//g" | awk '{print $1;}')}
     BUILD_DMRPP_VERSION=${BUILD_DMRPP_VERSION:-$(echo "${build_recipe}" | grep "build_dmrpp-" | sed "s/build_dmrpp-//g" | awk '{print $1;}')}
     LIBDAP_VERSION=${LIBDAP_VERSION:-$(echo "${build_recipe}" | grep libdap4 | sed "s/libdap4-//g"| awk '{print $1;}')}
+    #APR_VERSION="1.7.6-1"
+    #APR_VERSION=${APR_VERSION:-$(echo "${build_recipe}" | grep apr | sed "s/apr-//g" | awk '{print $1;}')}
 }
 read_build_recipe "${BUILD_RECIPE_FILE}"
 
@@ -64,6 +67,7 @@ function show_version(){
     loggy ""
     loggy "TOMCAT_MAJOR_VERSION: ${TOMCAT_MAJOR_VERSION}"
     loggy "      TOMCAT_VERSION: ${TOMCAT_VERSION}"
+    loggy "  APACHE_APR_VERSION: ${APR_VERSION}"
     loggy ""
     loggy "            NO_CACHE: ${NO_CACHE}"
     loggy ""
@@ -429,7 +433,50 @@ function s3_get_besd_distro() {
     return 0
 }
 
+################################################################################
+#
+# s3_get_apache_apr_distro() - Get the rpm and war files need for a Hyrax installation
+#    from the identified S3 bucket.
+#    $1 - The AWS S3 bucket from which to pull the Hyrax components
+#    $2 - The directory into which to place the Hyrax components.
+#    $3 - The APR version number ##.##.##-##
+#    $4 - A debug flag, if present (i.e. not empty string) then the devel and
+#         debuginfo rpm files for Apache APR will be retrieved as well.
+#
+function s3_get_apache_apr_distro() {
+    loggy "${HR2}"
+    loggy "TASK: s3_get_apache_apr_distro()"
+    local s3_bucket="${1}"
+    loggy "         s3_bucket: ${s3_bucket}"
+    local target_dir="${2}"
+    loggy "        target_dir: ${target_dir}"
+    local apr_version="${3}"
+    loggy "    apr_version: ${apr_version}"
+    local debug="${4}"
+    loggy "             debug: ${debug}"
 
+    set -e
+
+    loggy "Cleaning up..."
+    rm -fv "${target_dir}/*.rpm"
+
+    loggy ""
+    s3_pull "${s3_bucket}" \
+            "apr-${apr_version}.x86_64.rpm" \
+            "${target_dir}"
+
+    if test -n "${debug}"; then # Only get the debug libs when invoked in debug mode
+    s3_pull "${s3_bucket}" \
+                "apr-devel-${apr_version}.x86_64.rpm" \
+                "${target_dir}"
+    s3_pull "${s3_bucket}" \
+                "apr-debuginfo-${apr_version}.x86_64.rpm" \
+                "${target_dir}"
+    fi
+    set +e
+    loggy ""
+    return 0
+}
 
 function curl_pull(){
     local release_url="${1}"
