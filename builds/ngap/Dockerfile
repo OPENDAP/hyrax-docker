@@ -66,12 +66,16 @@ ARG OLFS_VERSION
 ENV OLFS_VERSION=${OLFS_VERSION:-"unknown"}
 RUN echo "OLFS_VERSION: ${OLFS_VERSION}"
 
+ARG REDIS_VERSION
+ENV REDIS_VERSION="redisson-3.48.0"
+RUN echo "REDIS_VERSION: ${REDIS_VERSION}"
+
 ARG NGAP_DISTRO
-ENV NGAP_DISTRO="ngap-redission-3.48.0-webapp"
-#ENV NGAP_DISTRO=${NGAP_DISTRO:-"ngap-${OLFS_VERSION}-webapp"}
+#ENV NGAP_DISTRO="ngap-redisson-3.48.0-webapp"
+ENV NGAP_DISTRO=${NGAP_DISTRO:-"ngap-${REDIS_VERSION}-webapp"}
 RUN echo "NGAP_DISTRO: ${NGAP_DISTRO}"
-COPY ${NGAP_DISTRO}.tgz /
-#COPY ${NGAP_DISTRO}.tgz /${NGAP_DISTRO}.tgz
+#COPY ${NGAP_DISTRO}.tgz /
+COPY ${NGAP_DISTRO}.tgz /${NGAP_DISTRO}.tgz
 RUN tar -tf /${NGAP_DISTRO}.tgz
 
 ARG APR_VERSION
@@ -255,7 +259,11 @@ RUN set -e \
 # Install Memcached Session Manager jars into the Tomcat: ${CATALINA_HOME}/lib
 RUN set -e \
     && echo "Installing Session Manager jar files. Cloning OLFS..." \
-    && git clone --depth 1 https://github.com/OPENDAP/olfs \
+    && git clone https://github.com/OPENDAP/olfs \
+    #&& git clone --depth 1 https://github.com/OPENDAP/olfs \
+    && cd olfs \
+    && git checkout tomcat-11 \
+    && cd .. \
     && echo "Copying elasticache client" \
     && cp olfs/resources/ngap/lib/elasticache-java-cluster-client-1.1.2.jar ${CATALINA_HOME}/lib \
     && echo "Copying redisson Session Manager" \
