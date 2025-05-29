@@ -72,6 +72,16 @@ RUN echo "NGAP_DISTRO: ${NGAP_DISTRO}"
 COPY ${NGAP_DISTRO}.tgz /${NGAP_DISTRO}.tgz
 RUN tar -tf /${NGAP_DISTRO}.tgz
 
+ARG APR_VERSION
+ENV APR_VERSION="1.7.6-1"
+RUN echo "APR_VERSION: ${APR_VERSION}"
+
+ARG APACHE_APR_RPM
+ENV APACHE_APR_RPM=${APACHE_APR_RPM:-"apr-${APR_VERSION}.x86_64.rpm"}
+RUN echo "APACHE_APR_RPM: ${APACHE_APR_RPM}"
+COPY ${APACHED_APR_RPM} apr-devel-* apr-debuginfo-* /
+RUN ls -l /apr-* >&2
+
 ARG TOMCAT_CONNECTION_TIMEOUT_MS
 ENV TOMCAT_CONNECTION_TIMEOUT_MS=${TOMCAT_CONNECTION_TIMEOUT_MS:-"1000000"}
 RUN echo "TOMCAT_CONNECTION_TIMEOUT_MS: ${TOMCAT_CONNECTION_TIMEOUT_MS}"
@@ -104,9 +114,8 @@ RUN set -e && dnf install -y make curl unzip which autoconf automake emacs vim j
     && dnf install -y diffutils \
     && dnf install -y procps \
     && dnf install -y git bc valgrind gdb \
-    && dnf install -y java-11-openjdk-devel \
+    && dnf install -y java-17-openjdk-devel \
     && dnf install -y redhat-rpm-config \
-    && dnf install -y apr-devel \
     && dnf install -y openssl-devel
 # Temporary Hack to fix broken OpenJDK-11.0.20.0.8-2
 RUN set -e && dnf install -y tzdata-java
@@ -140,6 +149,16 @@ RUN set -e \
 
 RUN echo "besdaemon is here: "`which besdaemon`
 
+################################################################
+# Install the Apache-Portable-Runtime (Apache APR)
+#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
+RUN set -e \
+    && echo "Installing the Apache APR rpm: ${APACHE_APR_RPM}" >&2 \
+    && ls -l ./apr* \
+    && dnf -y install ./apr-*.rpm \
+    && rm -f ./${APACHE_APR_RPM}
+
+RUN echo "Apache APR is installed."
 ################################################################
 # Install and Setup Tomcat
 #
@@ -182,8 +201,8 @@ RUN set -e \
     && echo "JAVA_HOME ${JAVA_HOME}" >&2 \
     && tar -xvf "/${CATALINA_HOME}/bin/tomcat-native.tar.gz" -C ${CATALINA_HOME}/bin >&2 \
     && ls -l ${CATALINA_HOME}/bin >&2 \
-    && ls -l ${CATALINA_HOME}/bin/tomcat-native-1.3.1-src >&2 \
-    && cd ${CATALINA_HOME}/bin/tomcat-native-1.3.1-src/native >&2 \
+    && ls -l ${CATALINA_HOME}/bin/tomcat-native-2.0.8-src >&2 \
+    && cd ${CATALINA_HOME}/bin/tomcat-native-2.0.8-src/native >&2 \
     && ./configure >&2 \
     && make >&2 \
     && make install >&2 \
