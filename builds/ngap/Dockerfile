@@ -67,9 +67,11 @@ ENV OLFS_VERSION=${OLFS_VERSION:-"unknown"}
 RUN echo "OLFS_VERSION: ${OLFS_VERSION}"
 
 ARG NGAP_DISTRO
-ENV NGAP_DISTRO=${NGAP_DISTRO:-"ngap-${OLFS_VERSION}-webapp"}
+ENV NGAP_DISTRO="ngap-redission-3.48.0-webapp"
+#ENV NGAP_DISTRO=${NGAP_DISTRO:-"ngap-${OLFS_VERSION}-webapp"}
 RUN echo "NGAP_DISTRO: ${NGAP_DISTRO}"
-COPY ${NGAP_DISTRO}.tgz /${NGAP_DISTRO}.tgz
+COPY ${NGAP_DISTRO}.tgz /
+#COPY ${NGAP_DISTRO}.tgz /${NGAP_DISTRO}.tgz
 RUN tar -tf /${NGAP_DISTRO}.tgz
 
 ARG APR_VERSION
@@ -156,6 +158,7 @@ RUN set -e \
     && echo "Installing the Apache APR rpm: ${APACHE_APR_RPM}" >&2 \
     && ls -l ./apr* \
     && dnf -y install ./apr-*.rpm \
+    && dnf list installed | grep apr >&2 \
     && rm -f ./${APACHE_APR_RPM}
 
 RUN echo "Apache APR is installed."
@@ -203,10 +206,11 @@ RUN set -e \
     && ls -l ${CATALINA_HOME}/bin >&2 \
     && ls -l ${CATALINA_HOME}/bin/tomcat-native-2.0.8-src >&2 \
     && cd ${CATALINA_HOME}/bin/tomcat-native-2.0.8-src/native >&2 \
-    && ./configure >&2 \
-    && make >&2 \
-    && make install >&2 \
     && echo "SUCCESS: Tomcat Native-APR Library installed"
+#    && ./configure >&2 \
+#    && make >&2 \
+#    && make install >&2 \
+#    && echo "SUCCESS: Tomcat Native-APR Library installed"
 
 ENV CATALINA_OPTS "-Djava.library.path=/usr/local/apr/lib"
 
@@ -255,6 +259,8 @@ RUN set -e \
     && echo "Copying elasticache client" \
     && cp olfs/resources/ngap/lib/elasticache-java-cluster-client-1.1.2.jar ${CATALINA_HOME}/lib \
     && echo "Copying redisson Session Manager" \
+    && cp olfs/resources/ngap/lib/redisson-3.48.0.jar ${CATALINA_HOME}/lib \
+    && echo "Copying redisson all" \
     && cp olfs/resources/ngap/lib/redisson-all-3.48.0.jar ${CATALINA_HOME}/lib \
     && echo "Copying redisson Session Manager TC11" \
     && cp olfs/resources/ngap/lib/redisson-tomcat-11-3.48.0.jar ${CATALINA_HOME}/lib \
