@@ -231,6 +231,10 @@ function get_tomcat_distro(){
     local tomcat_distro="apache-tomcat-${tomcat_version}.tar.gz"
     loggy "         tomcat_distro: ${tomcat_distro}"
 
+
+    #
+    # @TODO We may want to consider using this download endpoint: https://downloads.apache.org/tomcat/tomcat-9/v9.0.105/bin/
+    #
     local tomcat_major_url="https://archive.apache.org/dist/tomcat/tomcat-${tomcat_major_version}"
     loggy "      tomcat_major_url: ${tomcat_major_url}"
 
