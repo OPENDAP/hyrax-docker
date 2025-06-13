@@ -245,13 +245,12 @@ function get_tomcat_distro(){
         curl ${silent} -o "${tomcat_distro_file}" "${tomcat_distro_url}"
         curl_status=$?
         if test $curl_status -ne 0; then
-            echo "WARNING! cURL Failed to retrieve Tomcat distribution. status $status url: ${tomcat_distro_url}" >&2
+            echo "WARNING! cURL Failed to retrieve Tomcat distribution. curl_status: $curl_status url: ${tomcat_distro_url}" >&2
         else
             found_it=0
             break
         fi
     done
-
     if test $found_it -ne 0 ; then
         echo "ERROR! cURL Failed to retrieve Tomcat distribution." >&2
         return 2
