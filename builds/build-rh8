@@ -233,7 +233,7 @@ function get_tomcat_distro(){
 
     local curl_status=1 # Fails unless it succeeded
     local found_it=1    # 0 when found
-    for download_endpoint in "$tde2" "$tde1"
+    for download_endpoint in "$tde1" "$tde2"
     do
         loggy "Trying download_endpoint: ${download_endpoint}"
 
@@ -251,6 +251,7 @@ function get_tomcat_distro(){
             break
         fi
     done
+
     if test $found_it -ne 0 ; then
         echo "ERROR! cURL Failed to retrieve Tomcat distribution." >&2
         return 2
