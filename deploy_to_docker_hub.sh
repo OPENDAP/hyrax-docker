@@ -12,7 +12,7 @@ echo $DOCKER_HUB_PSWD | docker login -u $DOCKER_HUB_UID --password-stdin
 echo "Deploying ${SNAPSHOT_IMAGE_TAG} to Docker Hub"
 docker push ${SNAPSHOT_IMAGE_TAG}
 echo "Deploying ${BUILD_VERSION_TAG} to Docker Hub"
-docker push ${BUILD_VERSION_TAG}
+#docker push ${BUILD_VERSION_TAG}
 
 echo "Docker Hub deployment complete."
 
