@@ -13,7 +13,7 @@
 # it for debugging stuff.
 #
 # Set one or more individual labels
-FROM rockylinux:8
+FROM rockylinux:9
 
 # ENV DEPLOYMENT_CONTEXT="ROOT"
 ENV DEFAULT_NGAP_DEPLOYMENT_CONTEXT="ngap"
@@ -47,7 +47,7 @@ ENV LIBDAP_VERSION=${LIBDAP_VERSION:-"snapshot"}
 RUN echo "LIBDAP_VERSION: ${LIBDAP_VERSION}"
 
 ARG LIBDAP_RPM
-ENV LIBDAP_RPM=${LIBDAP_RPM:-"libdap-${LIBDAP_VERSION}.el8.x86_64.rpm"}
+ENV LIBDAP_RPM=${LIBDAP_RPM:-"libdap-${LIBDAP_VERSION}.el9.x86_64.rpm"}
 RUN echo "LIBDAP_RPM: ${LIBDAP_RPM}"
 COPY ${LIBDAP_RPM} libdap-devel-* libdap-debuginfo-* /
 RUN ls -l /libdap-*  >&2
@@ -57,7 +57,7 @@ ENV BES_VERSION=${BES_VERSION:-"snapshot"}
 RUN echo "BES_VERSION: ${BES_VERSION}"
 
 ARG BES_RPM
-ENV BES_RPM=${BES_RPM:-"bes-${BES_VERSION}.static.el8.x86_64.rpm"}
+ENV BES_RPM=${BES_RPM:-"bes-${BES_VERSION}.static.el9.x86_64.rpm"}
 RUN echo "BES_RPM: ${BES_RPM}"
 COPY ${BES_RPM} bes-devel-* bes-debuginfo-* /
 RUN ls -l /bes-* >&2
@@ -72,11 +72,17 @@ RUN echo "REDIS_VERSION: ${REDIS_VERSION}"
 
 ARG NGAP_DISTRO
 #ENV NGAP_DISTRO="ngap-redisson-3.48.0-webapp"
-ENV NGAP_DISTRO=${NGAP_DISTRO:-"ngap-${REDIS_VERSION}-webapp"}
+ENV NGAP_DISTRO=${NGAP_DISTRO:-"${REDIS_VERSION}-webapp"}
 RUN echo "NGAP_DISTRO: ${NGAP_DISTRO}"
 #COPY ${NGAP_DISTRO}.tgz /
 COPY ${NGAP_DISTRO}.tgz /${NGAP_DISTRO}.tgz
 RUN tar -tf /${NGAP_DISTRO}.tgz
+
+ARG OPENSSL_VERSION
+ENV OPENSSL_RPM=${OPENSSL_RPM:-"openssl-${OPENSSL_VERSION}.el9.x86_64.rpm"}
+RUN echo "OPENSSL_RPM: ${OPENSSL_RPM}"
+COPY ${OPENSSL_RPM} /
+RUN ls -l /openssl-* >&2
 
 ARG APR_VERSION
 ENV APR_VERSION="1.7.6-1"
@@ -116,13 +122,14 @@ RUN set -e && dnf update  -y
 RUN set -e && dnf install -y python3.11 \
     && python3 --version
 
-RUN set -e && dnf install -y make curl unzip which autoconf automake emacs vim jq \
+#RUN set -e && dnf install -y make curl unzip which autoconf automake emacs vim jq \
+RUN set -e && dnf groupinstall "Development Tools" -y \
     && dnf install -y diffutils \
     && dnf install -y procps \
     && dnf install -y git bc valgrind gdb \
     && dnf install -y java-17-openjdk-devel \
-    && dnf install -y redhat-rpm-config \
-    && dnf install -y openssl-devel
+    && dnf install -y redhat-rpm-config
+#    && dnf install -y openssl-devel
 # Temporary Hack to fix broken OpenJDK-11.0.20.0.8-2
 RUN set -e && dnf install -y tzdata-java
 # Temporary Hack to add missing Apache Portable Runtime library for Tomcat
@@ -154,6 +161,17 @@ RUN set -e \
     && rm -f ./${BES_RPM}
 
 RUN echo "besdaemon is here: "`which besdaemon`
+
+################################################################
+# Install the latest openssl3
+#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
+RUN set -e \
+    && echo "Installing the openssl3 rpm: ${OPENSSL_RPM}" >&2 \
+    && ls -l ./openssl3* \
+    && dnf -y install ./openssl3-*.rpm \
+    && rm -f ./${OPENSSL_RPM}
+
+RUN echo "openssl3 is installed."
 
 ################################################################
 # Install the Apache-Portable-Runtime (Apache APR)
@@ -208,8 +226,8 @@ RUN set -e \
     && echo "JAVA_HOME ${JAVA_HOME}" >&2 \
     && tar -xvf "/${CATALINA_HOME}/bin/tomcat-native.tar.gz" -C ${CATALINA_HOME}/bin >&2 \
     && ls -l ${CATALINA_HOME}/bin >&2 \
-    && ls -l ${CATALINA_HOME}/bin/tomcat-native-2.0.8-src >&2 \
-    && cd ${CATALINA_HOME}/bin/tomcat-native-2.0.8-src/native >&2 \
+    && ls -l ${CATALINA_HOME}/bin/tomcat-native-2.0.9-src >&2 \
+    && cd ${CATALINA_HOME}/bin/tomcat-native-2.0.9-src/native >&2 \
     && echo "SUCCESS: Tomcat Native-APR Library installed"
 #    && ./configure >&2 \
 #    && make >&2 \

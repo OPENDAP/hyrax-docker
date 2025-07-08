@@ -175,6 +175,9 @@ startup_log "OLFS_CONF_DIR: ${OLFS_CONF_DIR}"
 export TOMCAT_CONTEXT_FILE="/usr/share/tomcat/conf/context.xml"
 startup_log "TOMCAT_CONTEXT_FILE: ${TOMCAT_CONTEXT_FILE}"
 
+export TOMCAT_REDISSON_FILE="/usr/share/tomcat/conf/redisson.yaml"
+startup_log "TOMCAT_REDISSON_FILE: ${TOMCAT_REDISSON_FILE}"
+
 export NCWMS_BASE=${NCWMS_BASE:-"https://localhost:8080"}
 startup_log "NCWMS_BASE: ${NCWMS_BASE}"
 
@@ -343,6 +346,19 @@ fi
 ################################################################################
 
 ################################################################################
+# Inject Tomcat's redisson.yaml configuration document to configure the Tomcat to
+# utilize Redisson Session Management in the NGAP environment.
+#
+# Test if the bes.conf env variable is set (by way of not unset) and not empty
+if test -n "${TOMCAT_REDISSON_XML}"; then
+  startup_log "Writing Tomcat redisson.yaml file: ${TOMCAT_REDISSON_FILE}"
+  echo "${TOMCAT_REDISSON_XML}" > ${TOMCAT_REDISSON_FILE}
+  startup_log " "$( ls -l "${TOMCAT_REDISSON_FILE}" )
+  # loggy $(cat "${TOMCAT_REDISSON_FILE}" )
+fi
+################################################################################
+
+################################################################################
 #
 # Process commandline arguments
 #
@@ -462,7 +478,7 @@ status=$?
 startup_log $(cat ./besctl.log)
 if test $status -ne 0; then
   error_log "ERROR: Failed to start BES: $status"
-  exit $status
+  #exit $status
 fi
 besd_pid=$(ps aux | grep /usr/bin/besdaemon | grep -v grep | awk '{print $2;}' -)
 startup_log "The besd is UP! [pid: ${besd_pid}]"
@@ -480,7 +496,7 @@ status=$?
 tomcat_pid=$!
 if test $status -ne 0; then
   error_log "ERROR: Failed to start Tomcat: $status"
-  exit $status
+  #exit $status
 fi
 # When we launch tomcat the initial pid gets "retired" because it spawns a
 # secondary processes.
@@ -536,7 +552,7 @@ while /bin/true; do
   if test $BESD_STATUS -ne 0; then
     error_log "BESD_STATUS: $BESD_STATUS bes_pid:$bes_pid"
     error_log "The BES daemon appears to have died! Exiting. (service_uptime: ${suptime} hours)"
-    exit $BESD_STATUS
+    #exit $BESD_STATUS
   fi
 
   tomcat_ps=$(ps -f "${tomcat_pid}")
@@ -546,7 +562,7 @@ while /bin/true; do
     error_log "TOMCAT_STATUS: $TOMCAT_STATUS tomcat_pid:$tomcat_pid"
     error_log "Tomcat appears to have died! Exiting.  (service_uptime: ${suptime} hours)"
     # write_tomcat_logs 100 5 # [number of log lines to grab from each file] [time to sleep after sending]
-    exit $TOMCAT_STATUS
+    #exit $TOMCAT_STATUS
   fi
 
 done
