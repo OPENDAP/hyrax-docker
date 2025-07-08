@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-source ./build-rh8
+source ./build-rh9
 #
 export DOCKER_NAME="ngap"
 echo "DOCKER_NAME: ${DOCKER_NAME}"
@@ -9,7 +9,6 @@ export NGAP_DIT_IMAGE_TAG="opendap/hyrax:${DOCKER_NAME}-redis-session-manager"
 export SNAPSHOT_IMAGE_TAG="opendap/hyrax:${DOCKER_NAME}-redis-session-manager"
 export BUILD_VERSION_TAG=opendap/hyrax:${DOCKER_NAME}-${HYRAX_VERSION}
 export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
-#export TOMCAT_VERSION="11.0.8"
 #
 export APR_VERSION="1.7.6-1"
 echo "APR_VERSION: ${APR_VERSION}"
