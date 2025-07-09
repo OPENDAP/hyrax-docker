@@ -167,11 +167,11 @@ RUN echo "besdaemon is here: "`which besdaemon`
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 RUN set -e \
     && echo "Installing the openssl3 rpm: ${OPENSSL_RPM}" >&2 \
-    && ls -l ./openssl3* \
-    && dnf -y install ./openssl3-*.rpm \
+    && ls -l ./openssl* \
+    && dnf -y install ./openssl-*.rpm \
     && rm -f ./${OPENSSL_RPM}
 
-RUN echo "openssl3 is installed."
+RUN echo "openssl is installed."
 
 ################################################################
 # Install the Apache-Portable-Runtime (Apache APR)
