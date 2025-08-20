@@ -67,12 +67,12 @@ ENV OLFS_VERSION=${OLFS_VERSION:-"unknown"}
 RUN echo "OLFS_VERSION: ${OLFS_VERSION}"
 
 ARG REDIS_VERSION
-ENV REDIS_VERSION="redisson-3.48.0"
+ENV REDIS_VERSION="redisson-3.50.0"
 RUN echo "REDIS_VERSION: ${REDIS_VERSION}"
 
 ARG NGAP_DISTRO
-#ENV NGAP_DISTRO="ngap-redisson-3.48.0-webapp"
-ENV NGAP_DISTRO=${NGAP_DISTRO:-"${REDIS_VERSION}-webapp"}
+ENV NGAP_DISTRO="ngap-redisson-3.50.0-webapp"
+#ENV NGAP_DISTRO=${NGAP_DISTRO:-"${REDIS_VERSION}-webapp"}
 RUN echo "NGAP_DISTRO: ${NGAP_DISTRO}"
 #COPY ${NGAP_DISTRO}.tgz /
 COPY ${NGAP_DISTRO}.tgz /${NGAP_DISTRO}.tgz
@@ -120,10 +120,16 @@ RUN set -e && \
 # however, to be run, so install them as part of this Dockerfile.
 RUN set -e && dnf update  -y
 RUN set -e && dnf install -y python3.11 \
-    && python3 --version
+    && python3 --version \
+    && curl --version
 
 #RUN set -e && dnf install -y make curl unzip which autoconf automake emacs vim jq \
-RUN set -e && dnf groupinstall "Development Tools" -y \
+RUN set -e && dnf install -y dnf-plugins-core \
+    && dnf config-manager --set-enabled crb \
+    && dnf groupinstall "Development Tools" -y \
+    && dnf install -y libtirpc libtirpc-devel \
+    && dnf install -y libuuid libuuid-devel \
+    && dnf install -y jq \
     && dnf install -y diffutils \
     && dnf install -y procps \
     && dnf install -y git bc valgrind gdb \
@@ -224,15 +230,14 @@ RUN set -e \
 RUN set -e \
     && export JAVA_HOME="$(dirname $(dirname $(readlink -f $(which javac))))" >&2 \
     && echo "JAVA_HOME ${JAVA_HOME}" >&2 \
-    && tar -xvf "/${CATALINA_HOME}/bin/tomcat-native.tar.gz" -C ${CATALINA_HOME}/bin >&2 \
-    && ls -l ${CATALINA_HOME}/bin >&2 \
-    && ls -l ${CATALINA_HOME}/bin/tomcat-native-2.0.9-src >&2 \
+    && tar -xf "/${CATALINA_HOME}/bin/tomcat-native.tar.gz" -C ${CATALINA_HOME}/bin >&2 \
+#    && ls -l ${CATALINA_HOME}/bin >&2 \
+#    && ls -l ${CATALINA_HOME}/bin/tomcat-native-2.0.9-src >&2 \
     && cd ${CATALINA_HOME}/bin/tomcat-native-2.0.9-src/native >&2 \
+    && ./configure --with-apr=/usr/bin >&2 \
+    && make >&2 \
+    && make install >&2 \
     && echo "SUCCESS: Tomcat Native-APR Library installed"
-#    && ./configure >&2 \
-#    && make >&2 \
-#    && make install >&2 \
-#    && echo "SUCCESS: Tomcat Native-APR Library installed"
 
 ENV CATALINA_OPTS "-Djava.library.path=/usr/local/apr/lib"
 
@@ -273,6 +278,13 @@ RUN set -e \
     && mkdir -p /etc/tomcat \
     && mv /tomcat.conf /etc/tomcat/tomcat.conf \
     && chown -R tomcat:tomcat /etc/tomcat
+
+#
+# Request Redisson and Apache Session Level logging in the logging.properties
+RUN set -e \
+    && echo "org.redisson.level = FINE" >> ${CATALINA_HOME}/conf/logging.properties \
+    && echo "org.apache.catalina.core.level = FINE" >> ${CATALINA_HOME}/conf/logging.properties \
+    && echo "org.apache.catalina.session.level = FINE" >> ${CATALINA_HOME}/conf/logging.properties
 #
 # Install Memcached Session Manager jars into the Tomcat: ${CATALINA_HOME}/lib
 RUN set -e \
@@ -284,12 +296,12 @@ RUN set -e \
     && cd .. \
     && echo "Copying elasticache client" \
     && cp olfs/resources/ngap/lib/elasticache-java-cluster-client-1.1.2.jar ${CATALINA_HOME}/lib \
-    && echo "Copying redisson Session Manager" \
-    && cp olfs/resources/ngap/lib/redisson-3.48.0.jar ${CATALINA_HOME}/lib \
     && echo "Copying redisson all" \
-    && cp olfs/resources/ngap/lib/redisson-all-3.48.0.jar ${CATALINA_HOME}/lib \
+    && cp olfs/resources/ngap/lib/redisson-all-3.50.0.jar ${CATALINA_HOME}/lib \
     && echo "Copying redisson Session Manager TC11" \
-    && cp olfs/resources/ngap/lib/redisson-tomcat-11-3.48.0.jar ${CATALINA_HOME}/lib \
+    && cp olfs/resources/ngap/lib/redisson-tomcat-11-3.50.0.jar ${CATALINA_HOME}/lib \
+    && echo "Copying FST (Fast-Serialization) library required for redisson-3.48.0" \
+    && cp olfs/resources/ngap/lib/fst-2.57.jar ${CATALINA_HOME}/lib \
     && chown -R tomcat:tomcat  ${CATALINA_HOME}/lib \
     && rm -rfv olfs
 

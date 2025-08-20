@@ -5,8 +5,8 @@ source ./build-rh9
 export DOCKER_NAME="ngap"
 echo "DOCKER_NAME: ${DOCKER_NAME}"
 #
-export NGAP_DIT_IMAGE_TAG="opendap/hyrax:${DOCKER_NAME}-redis-session-manager"
-export SNAPSHOT_IMAGE_TAG="opendap/hyrax:${DOCKER_NAME}-redis-session-manager"
+export NGAP_DIT_IMAGE_TAG="opendap/hyrax:${DOCKER_NAME}-test-deploy-redis-sm"
+export SNAPSHOT_IMAGE_TAG="opendap/hyrax:${DOCKER_NAME}-test-deploy-redis-sm"
 export BUILD_VERSION_TAG=opendap/hyrax:${DOCKER_NAME}-${HYRAX_VERSION}
 export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
 #
@@ -31,13 +31,14 @@ s3_get_besd_distro \
 s3_get_apache_apr_distro \
     "${S3_BUILD_BUCKET}" \
     "${DOCKER_NAME}" \
-    "${APR_VERSION}" "${ADD_DEBUG_RPMS}"
-#
+    "${APR_VERSION}" \
+    "${ADD_DEBUG_RPMS}"
+
 get_ngap_olfs_distro \
     "${S3_BUILD_BUCKET}" \
     "${DOCKER_NAME}" \
-    "redisson-3.48.0"
-#
+    "ngap-redisson-3.50.0"
+
 s3_get_openssl_distro \
     "${S3_BUILD_BUCKET}" \
     "${DOCKER_NAME}" \

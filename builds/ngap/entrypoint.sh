@@ -175,7 +175,7 @@ startup_log "OLFS_CONF_DIR: ${OLFS_CONF_DIR}"
 export TOMCAT_CONTEXT_FILE="/usr/share/tomcat/conf/context.xml"
 startup_log "TOMCAT_CONTEXT_FILE: ${TOMCAT_CONTEXT_FILE}"
 
-export TOMCAT_REDISSON_FILE="/usr/share/tomcat/conf/redisson.yaml"
+export TOMCAT_REDISSON_FILE="/usr/share/tomcat/conf/redisson.json"
 startup_log "TOMCAT_REDISSON_FILE: ${TOMCAT_REDISSON_FILE}"
 
 export NCWMS_BASE=${NCWMS_BASE:-"https://localhost:8080"}
@@ -254,7 +254,7 @@ if test -n "${OLFS_XML}"; then
   startup_log "Updating OLFS configuration file: ${OLFS_XML_FILE}"
   echo "${OLFS_XML}" > ${OLFS_XML_FILE}
   startup_log " "$( ls -l "${OLFS_XML_FILE}" )
-  # loggy $( cat "${OLFS_XML_FILE}" )
+  ologgy $( cat "${OLFS_XML_FILE}" )
 fi
 ################################################################################
 
@@ -270,7 +270,7 @@ if test -n "${USER_ACCESS_XML}"; then
   startup_log "Updating OLFS user access controls: ${USER_ACCESS_XML_FILE}"
   echo "${USER_ACCESS_XML}" > ${USER_ACCESS_XML_FILE}
   startup_log " "$(ls -l "${USER_ACCESS_XML_FILE}")
-  # loggy ( cat "${USER_ACCESS_XML_FILE}" )
+  # ologgy ( cat "${USER_ACCESS_XML_FILE}" )
 fi
 ################################################################################
 
@@ -285,7 +285,7 @@ if test -n "${BES_SITE_CONF}"; then
   # @TODO THis seems like a crappy hack, we should just change the source file in BitBucket to be correct
   echo "${BES_SITE_CONF}" | sed -e "s+BES.LogName=stdout+BES.LogName=${BES_LOG_FILE}+g" >${BES_SITE_CONF_FILE}
   startup_log " "$( ls -l "${BES_SITE_CONF_FILE}" )
-  # loggy $( cat "${BES_SITE_CONF_FILE}" )
+  # ologgy $( cat "${BES_SITE_CONF_FILE}" )
 fi
 #
 # Update site.conf with the instance-id of this system.
@@ -302,7 +302,7 @@ if test -n "${TOMCAT_CONTEXT_XML}"; then
   startup_log "Writing Tomcat context.xml file: ${TOMCAT_CONTEXT_FILE}"
   echo "${TOMCAT_CONTEXT_XML}" > ${TOMCAT_CONTEXT_FILE}
   startup_log " "$( ls -l "${TOMCAT_CONTEXT_FILE}" )
-  # loggy $(cat "${TOMCAT_CONTEXT_FILE}" )
+  # ologgy $(cat "${TOMCAT_CONTEXT_FILE}" )
 fi
 ################################################################################
 
@@ -315,7 +315,7 @@ if test -n "${NGAP_CERTIFICATE}"; then
   startup_log "Writing certificate file: ${NGAP_CERTIFICATE_FILE}"
   echo "${NGAP_CERTIFICATE}" > "${NGAP_CERTIFICATE_FILE}"
   startup_log " "$( ls -l "${NGAP_CERTIFICATE_FILE}" )
-  # loggy $(cat "${NGAP_CERTIFICATE_FILE}" )
+  # ologgy $(cat "${NGAP_CERTIFICATE_FILE}" )
 fi
 ################################################################################
 
@@ -328,7 +328,7 @@ if test -n "${NGAP_CERTIFICATE_CHAIN}"; then
   startup_log "Writing credentials chain file: ${NGAP_CREDENTIALS_CHAIN_FILE}"
   echo "${NGAP_CERTIFICATE_CHAIN}" > "${NGAP_CERTIFICATE_CHAIN_FILE}"
   startup_log " "$( ls -l "${NGAP_CERTIFICATE_CHAIN_FILE}" )
-  # loggy $(cat "${NGAP_CERTIFICATE_CHAIN_FILE}" )
+  # ologgy $(cat "${NGAP_CERTIFICATE_CHAIN_FILE}" )
 fi
 ################################################################################
 
@@ -341,7 +341,7 @@ if test -n "${NGAP_CERTIFICATE_KEY}"; then
   startup_log "Writing key file: ${NGAP_CERTIFICATE_KEY_FILE}"
   echo "${NGAP_CERTIFICATE_KEY}" > "${NGAP_CERTIFICATE_KEY_FILE}"
   startup_log " "$( ls -l "${NGAP_CERTIFICATE_KEY_FILE}" )
-  # loggy $(cat "${NGAP_CERTIFICATE_KEY_FILE}" )
+  # ologgy $(cat "${NGAP_CERTIFICATE_KEY_FILE}" )
 fi
 ################################################################################
 
@@ -354,7 +354,7 @@ if test -n "${TOMCAT_REDISSON_XML}"; then
   startup_log "Writing Tomcat redisson.yaml file: ${TOMCAT_REDISSON_FILE}"
   echo "${TOMCAT_REDISSON_XML}" > ${TOMCAT_REDISSON_FILE}
   startup_log " "$( ls -l "${TOMCAT_REDISSON_FILE}" )
-  # loggy $(cat "${TOMCAT_REDISSON_FILE}" )
+  ologgy $(cat "${TOMCAT_REDISSON_FILE}" )
 fi
 ################################################################################
 
