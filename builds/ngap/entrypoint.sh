@@ -346,13 +346,14 @@ fi
 ################################################################################
 
 ################################################################################
-# Inject Tomcat's redisson.yaml configuration document to configure the Tomcat to
+# Inject Tomcat's redisson.json configuration document to configure the Tomcat to
 # utilize Redisson Session Management in the NGAP environment.
 #
 # Test if the bes.conf env variable is set (by way of not unset) and not empty
 if test -n "${TOMCAT_REDISSON_XML}"; then
-  startup_log "Writing Tomcat redisson.yaml file: ${TOMCAT_REDISSON_FILE}"
+  startup_log "Writing Tomcat redisson.json file: ${TOMCAT_REDISSON_FILE}"
   echo "${TOMCAT_REDISSON_XML}" > ${TOMCAT_REDISSON_FILE}
+  chown tomcat:tomcat "${TOMCAT_REDISSON_FILE}"
   startup_log " "$( ls -l "${TOMCAT_REDISSON_FILE}" )
   ologgy $(cat "${TOMCAT_REDISSON_FILE}" )
 fi

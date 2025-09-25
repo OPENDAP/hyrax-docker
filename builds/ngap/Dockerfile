@@ -300,8 +300,6 @@ RUN set -e \
     && cp olfs/resources/ngap/lib/redisson-all-3.50.0.jar ${CATALINA_HOME}/lib \
     && echo "Copying redisson Session Manager TC11" \
     && cp olfs/resources/ngap/lib/redisson-tomcat-11-3.50.0.jar ${CATALINA_HOME}/lib \
-    && echo "Copying FST (Fast-Serialization) library required for redisson-3.48.0" \
-    && cp olfs/resources/ngap/lib/fst-2.57.jar ${CATALINA_HOME}/lib \
     && chown -R tomcat:tomcat  ${CATALINA_HOME}/lib \
     && rm -rfv olfs
 
