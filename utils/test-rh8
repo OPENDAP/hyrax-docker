@@ -1,0 +1,26 @@
+#!/bin/bash
+
+export prefix="/Users/ndp/OPeNDAP/hyrax/libdap4"
+echo "prefix: $prefix"
+
+export TRAVIS_BUILD_DIR="$prefix"
+echo "TRAVIS_BUILD_DIR: $TRAVIS_BUILD_DIR"
+
+export LIBDAP_BUILD=rocky8
+echo "LIBDAP_BUILD: $LIBDAP_BUILD"
+
+export LIBDAP_BUILD_NUMBER="666"
+echo "LIBDAP_BUILD_NUMBER: $LIBDAP_BUILD_NUMBER"
+
+mkdir -p $prefix/rpmbuild
+
+docker run --platform linux/amd64 \
+    --volume $prefix/rpmbuild:/root/rpmbuild \
+    --volume $TRAVIS_BUILD_DIR:/root/travis \
+    --env prefix=/root/install \
+    --env AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
+    --env AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
+    --env os=rocky8 \
+    --env LIBDAP_BUILD_NUMBER=$LIBDAP_BUILD_NUMBER \
+    opendap/rocky8_hyrax_builder:latest \
+    /root/travis/travis/build-rpm-8.sh
