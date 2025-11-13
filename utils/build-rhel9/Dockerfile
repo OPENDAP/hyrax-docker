@@ -39,7 +39,7 @@ RUN if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else ec
 RUN set -e && yum update  -y
 
 # The things!
-RUN set -e && yum install -y procps git gcc-c++ flex bison cmake autoconf automake libtool emacs bzip2 vim bc curl \
+RUN set -e && yum install -y procps git gcc-c++ flex bison cmake autoconf automake libtool emacs bzip2 vim bc \
     && yum install -y valgrind gdb unzip which jq diffutils \
     && yum install -y cppunit cppunit-devel openjpeg2-devel jasper-devel  \
     && yum install -y openssl-devel libuuid-devel readline-devel zlib-devel bzip2-devel \
