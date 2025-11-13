@@ -13,7 +13,7 @@ function loggy(){
 export start_dir="$PWD"
 
 export target
-target="$(pwd)/libdap4"
+target="$(pwd)/libdap4
 loggy "Using target: $target"
 
 export BUILD_NUMBER="666"
@@ -23,7 +23,7 @@ loggy "BUILD_NUMBER: $BUILD_NUMBER"
 export image="localhost/opendap/rh9-build-platform:latest"
 loggy "image: $image"
 
-export build_script="/root/libdap4/travis/build-rpm.sh"
+export build_script="$target/travis/build-rpm.sh"
 loggy "build_script: $build_script"
 
 ###########################################################################
