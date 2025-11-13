@@ -26,8 +26,9 @@ MAINTAINER support@opendap.org
 USER root
 
 ARG DEVELOPER_MODE
-ENV DEVELOPER_MODE ${DEVELOPER_MODE:-"false"}
+ENV DEVELOPER_MODE=${DEVELOPER_MODE:-"false"}
 RUN if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else echo "DEVELOPER_MODE: DISABLED"; fi
+
 
 ################################################################
 # Update and install the needful.
