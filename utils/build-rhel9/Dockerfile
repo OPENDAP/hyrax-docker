@@ -51,6 +51,7 @@ RUN set -e \
 #    && yum install -y openjpeg2-devel jasper-devel
 
 #RUN set -e  \
+#    && yum config-manager --set-enabled powertools \
 #    && yum install -y cppunit cppunit-devel
 
 # The libtirpc for 64 bit systems.
@@ -61,7 +62,6 @@ RUN set -e \
 
 RUN set -e \
     && yum install -y dnf-plugins-core epel-release \
-    && yum config-manager --set-enabled powertools \
     && yum install -y awscli2
 
 
