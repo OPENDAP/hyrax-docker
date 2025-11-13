@@ -46,8 +46,7 @@ RUN set -e \
     && yum install -y cppunit cppunit-devel openjpeg2-devel jasper-devel  \
     && yum install -y openssl-devel libuuid-devel readline-devel zlib-devel bzip2-devel \
     && yum install -y libjpeg-devel libxml2-devel curl-devel libicu-devel libtirpc-devel \
-    && yum install -y java-21-openjdk java-21-openjdk-devel ant \
-    && yum install -y cppunit cppunit-devel openjpeg2-devel jasper-devel
+    && yum install -y java-21-openjdk java-21-openjdk-devel ant
 
 RUN set -e  \
     && yum install -y openjpeg2-devel jasper-devel
