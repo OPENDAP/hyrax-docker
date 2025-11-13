@@ -38,7 +38,7 @@ loggy "Cloning $libdap4_repo"
 git clone --depth 2 "$libdap4_repo" "$target"
 cd "$target"
 echo "Checking out target branch in: $PWD"
-git checkout RHEL9
+git checkout origin/RHEL9
 cd "$start_dir"
 echo "pwd: $PWD"
 
