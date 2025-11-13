@@ -41,7 +41,7 @@ mkdir -p "$target/rpmbuild"
 # Build it
 loggy "Starting docker. Image: $image"
 docker run --platform linux/amd64 \
-    --volume "$target":/root/travis \
+    --volume "$target":/root/libdap4 \
     --env prefix=/root/install \
     --env os=rocky8 \
     --env LIBDAP_BUILD_NUMBER=$BUILD_NUMBER \
