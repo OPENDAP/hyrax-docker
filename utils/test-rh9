@@ -1,0 +1,58 @@
+#!/bin/bash
+
+###########################################################################
+# loggy()
+function loggy(){
+    echo  "$@" | awk '{ print "# "$0;}'  >&2
+}
+
+###########################################################################
+# configuration
+export target
+target="$(pwd)/libdap4"
+loggy "Using target: $target"
+
+export BUILD_NUMBER="666"
+loggy "BUILD_NUMBER: $BUILD_NUMBER"
+
+export image="opendap/rocky9_hyrax_builder:latest"
+loggy "image: $image"
+
+export build_script="/root/travis/travis/build-rpm.sh"
+loggy "build_script: $build_script"
+
+###########################################################################
+# cleanup previous
+loggy "Cleaning $target"
+loggy "$(rm -vrf $target)"
+
+###########################################################################
+# Clone freshy
+libdap4_repo="https://github.com/OPENDAP/libdap4"
+loggy "Cloning $libdap4_repo"
+git clone --depth 1 "$libdap4_repo" "$target"
+
+###########################################################################
+# rpm time...
+mkdir -p "$target/rpmbuild"
+
+###########################################################################
+# Build it
+loggy "Starting docker. Image: $image"
+docker run --platform linux/amd64 \
+    --volume "$target":/root/travis \
+    --env prefix=/root/install \
+    --env os=rocky8 \
+    --env LIBDAP_BUILD_NUMBER=$BUILD_NUMBER \
+    --env AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
+    --env AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
+    $image \
+    $build_script
+
+
+    # -c "yum list installed"
+    # /root/travis/travis/build-rpm-8.sh
+    # "ls -l /root"
+
+
+

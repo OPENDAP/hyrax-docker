@@ -36,39 +36,44 @@ RUN if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else ec
 # are installed in the container but not run until a later stage of the
 # Travis build (or at a later time). They need to be part of the container,
 # however, to be run, so install them as part of this Dockerfile.
-RUN set -e && dnf update  -y
-RUN set -e && dnf install -y python3.11 \
-    && python3 --version
+RUN set -e && yum update  -y
 
-RUN set -e && dnf install -y make curl unzip which autoconf automake emacs vim jq \
-    && dnf install -y diffutils \
-    && dnf install -y procps \
-    && dnf install -y git bc valgrind gdb
+# The things!
+RUN set -e && yum install -y procps git gcc-c++ flex bison cmake autoconf automake libtool emacs bzip2 vim bc curl \
+    && yum install -y valgrind gdb unzip which jq diffutils \
+    && yum install -y cppunit cppunit-devel openjpeg2-devel jasper-devel  \
+    && yum install -y openssl-devel libuuid-devel readline-devel zlib-devel bzip2-devel \
+    && yum install -y libjpeg-devel libxml2-devel curl-devel libicu-devel libtirpc-devel \
+    && yum install -y java-21-openjdk java-21-openjdk-devel ant \
+    && yum install -y cppunit cppunit-devel openjpeg2-devel jasper-devel
+
+# The libtirpc for 64 bit systems.
+RUN set -e \
+    && curl -O https://www.rpmfind.net/linux/centos-stream/9-stream/CRB/x86_64/os/Packages/libtirpc-devel-1.3.3-9.el9.i686.rpm \
+    && curl -O https://www.rpmfind.net/linux/centos-stream/9-stream/BaseOS/x86_64/os/Packages/libtirpc-1.3.3-9.el9.i686.rpm \
+    && yum install -y libtirpc-1.3.3-9.el9.i686.rpm  libtirpc-devel-1.3.3-9.el9.i686.rpm
+
+RUN set -e \
+    && yum install -y dnf-plugins-core install epel-release \
+    && yum config-manager --set-enabled powertools \
+    && yum install -y awscli2
+
+
+RUN set -e && yum install -y python3.11 \
+    && python3 --version
 
 RUN set -e && curl -sS https://bootstrap.pypa.io/get-pip.py | python3 \
     && python3 -m pip install --upgrade pip \
     && python3 -m pip install --no-cache-dir awscli
 #
-RUN set -e && dnf clean all
+RUN set -e && yum clean all
 RUN set -e && which diff
 #
 
 RUN ls -l /usr/libexec/
 
+ENTRYPOINT [ "/bin/bash" ]
 
-COPY entrypoint.sh /
-RUN chmod +x /entrypoint.sh
-ENTRYPOINT [ "/entrypoint.sh" ]
-
-EXPOSE 8009
-EXPOSE 8080
-EXPOSE 8443
-EXPOSE 10022
-EXPOSE 11002
-
-# can't use USER with entrypoint that needs root
-# use gosu or, as done, enable bes user write so the entrypoint does not need root
-RUN chown -R bes /etc/bes
 USER root
 
 CMD ["-"]
