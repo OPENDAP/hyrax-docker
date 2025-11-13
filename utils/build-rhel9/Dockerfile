@@ -40,7 +40,8 @@ RUN if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else ec
 RUN set -e && yum update  -y
 
 # The things!
-RUN set -e && yum install -y procps git gcc-c++ flex bison cmake autoconf automake libtool emacs bzip2 vim bc \
+RUN set -e \
+    && yum install -y procps git gcc-c++ flex bison cmake autoconf automake libtool emacs bzip2 vim bc \
     && yum install -y valgrind gdb unzip which jq diffutils \
     && yum install -y cppunit cppunit-devel openjpeg2-devel jasper-devel  \
     && yum install -y openssl-devel libuuid-devel readline-devel zlib-devel bzip2-devel \
@@ -49,7 +50,7 @@ RUN set -e && yum install -y procps git gcc-c++ flex bison cmake autoconf automa
     && yum install -y cppunit cppunit-devel openjpeg2-devel jasper-devel
 
 RUN set -e  \
-    && yum install -y cppunit cppunit-devel openjpeg2-devel jasper-devel  \
+    && yum install -y cppunit cppunit-devel openjpeg2-devel jasper-devel
 
 # The libtirpc for 64 bit systems.
 RUN set -e \
@@ -63,15 +64,19 @@ RUN set -e \
     && yum install -y awscli2
 
 
-RUN set -e && yum install -y python3.11 \
+RUN set -e \
+    && yum install -y python3.11 \
     && python3 --version
 
-RUN set -e && curl -sS https://bootstrap.pypa.io/get-pip.py | python3 \
+RUN set -e \
+    && curl -sS https://bootstrap.pypa.io/get-pip.py | python3 \
     && python3 -m pip install --upgrade pip \
     && python3 -m pip install --no-cache-dir awscli
 #
-RUN set -e && yum clean all
-RUN set -e && which diff
+RUN set -e \
+    && yum clean all
+RUN set -e \
+    && which diff
 #
 
 RUN ls -l /usr/libexec/
