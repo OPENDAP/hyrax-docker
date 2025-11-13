@@ -61,8 +61,7 @@ RUN set -e \
     && yum install -y libtirpc-1.3.3-9.el9.i686.rpm  libtirpc-devel-1.3.3-9.el9.i686.rpm
 
 RUN set -e \
-    && yum install -y dnf-plugins-core epel-release \
-v
+    && yum install -y dnf-plugins-core epel-release
 
 RUN set -e \
     && yum install -y python3.12 \
