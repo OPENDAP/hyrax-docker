@@ -48,6 +48,9 @@ RUN set -e && yum install -y procps git gcc-c++ flex bison cmake autoconf automa
     && yum install -y java-21-openjdk java-21-openjdk-devel ant \
     && yum install -y cppunit cppunit-devel openjpeg2-devel jasper-devel
 
+RUN set -e  \
+    && yum install -y cppunit cppunit-devel openjpeg2-devel jasper-devel  \
+
 # The libtirpc for 64 bit systems.
 RUN set -e \
     && curl -O https://www.rpmfind.net/linux/centos-stream/9-stream/CRB/x86_64/os/Packages/libtirpc-devel-1.3.3-9.el9.i686.rpm \
