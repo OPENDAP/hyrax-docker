@@ -6,8 +6,12 @@ function loggy(){
     echo  "$@" | awk '{ print "# "$0;}'  >&2
 }
 
+
 ###########################################################################
 # configuration
+
+export start_dir="$PWD"
+
 export target
 target="$(pwd)/libdap4"
 loggy "Using target: $target"
@@ -32,6 +36,9 @@ loggy "$(rm -vrf $target)"
 libdap4_repo="https://github.com/OPENDAP/libdap4"
 loggy "Cloning $libdap4_repo"
 git clone --depth 1 "$libdap4_repo" "$target"
+cd "$target"
+git checkout RHEL9
+cd "$start_dir"
 
 ###########################################################################
 # rpm time...
@@ -43,7 +50,7 @@ loggy "Starting docker. Image: $image"
 docker run --platform linux/amd64 \
     --volume "$target":/root/libdap4 \
     --env prefix=/root/install \
-    --env os=rocky8 \
+    --env os=rocky9 \
     --env LIBDAP_BUILD_NUMBER=$BUILD_NUMBER \
     --env AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
     --env AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
