@@ -35,10 +35,12 @@ loggy "$(rm -vrf $target)"
 # Clone freshy
 libdap4_repo="https://github.com/OPENDAP/libdap4"
 loggy "Cloning $libdap4_repo"
-git clone --depth 2 "$libdap4_repo" "$target"
+git clone --depth 1 "$libdap4_repo" "$target"
+# git clone "$libdap4_repo" "$target"
 cd "$target"
 echo "Fetching and checking out target branch in: $PWD"
-git fetch origin
+git remote set-branches origin '*'
+git fetch -v --depth=1
 git checkout RHEL9
 cd "$start_dir"
 echo "pwd: $PWD"
