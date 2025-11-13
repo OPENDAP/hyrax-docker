@@ -39,7 +39,7 @@ git clone --depth 2 "$libdap4_repo" "$target"
 cd "$target"
 echo "Fetching and checking out target branch in: $PWD"
 git fetch origin
-git checkout -b RHEL9 origin/RHEL9
+git checkout RHEL9
 cd "$start_dir"
 echo "pwd: $PWD"
 
