@@ -21,7 +21,7 @@ RUN echo "BUILD_DATE: ${BUILD_DATE}"
 
 LABEL vendor="OPeNDAP"
 
-MAINTAINER support@opendap.org
+LABEL maintainer="support@opendap.org"
 
 USER root
 
