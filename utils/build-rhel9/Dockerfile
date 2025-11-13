@@ -50,7 +50,10 @@ RUN set -e \
     && yum install -y cppunit cppunit-devel openjpeg2-devel jasper-devel
 
 RUN set -e  \
-    && yum install -y cppunit cppunit-devel openjpeg2-devel jasper-devel
+    && yum install -y openjpeg2-devel jasper-devel
+
+RUN set -e  \
+    && yum install -y cppunit cppunit-devel
 
 # The libtirpc for 64 bit systems.
 RUN set -e \
@@ -65,7 +68,7 @@ RUN set -e \
 
 
 RUN set -e \
-    && yum install -y python3.11 \
+    && yum install -y python3.12 \
     && python3 --version
 
 RUN set -e \
