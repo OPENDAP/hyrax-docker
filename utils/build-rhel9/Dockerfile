@@ -61,17 +61,19 @@ RUN set -e \
     && yum install -y libtirpc-1.3.3-9.el9.i686.rpm  libtirpc-devel-1.3.3-9.el9.i686.rpm
 
 RUN set -e \
-    && yum install -y dnf-plugins-core epel-release
-
+    && yum install -y dnf-plugins-core epel-release \
+v
 
 RUN set -e \
     && yum install -y python3.12 \
-    && python3 --version
+    && python3 --version \
+    && yum install -y awscli2
 
-RUN set -e \
-    && curl -sS https://bootstrap.pypa.io/get-pip.py | python3 \
-    && python3 -m pip install --upgrade pip \
-    && python3 -m pip install --no-cache-dir awscli2
+# Not needed??
+#RUN set -e \
+#    && curl -sS https://bootstrap.pypa.io/get-pip.py | python3 \
+#    && python3 -m pip install --upgrade pip \
+#    && python3 -m pip install --no-cache-dir \
 #
 RUN set -e \
     && yum clean all
