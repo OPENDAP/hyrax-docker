@@ -60,7 +60,7 @@ RUN set -e \
     && yum install -y libtirpc-1.3.3-9.el9.i686.rpm  libtirpc-devel-1.3.3-9.el9.i686.rpm
 
 RUN set -e \
-    && yum install -y dnf-plugins-core install epel-release \
+    && yum install -y dnf-plugins-core epel-release \
     && yum config-manager --set-enabled powertools \
     && yum install -y awscli2
 
