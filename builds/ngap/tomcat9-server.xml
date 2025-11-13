@@ -114,7 +114,7 @@
     -->
 
     <Connector port="8443" protocol="org.apache.coyote.http11.Http11AprProtocol"
-               maxThreads="150" SSLEnabled="true" >
+               maxThreads="150" SSLEnabled="true" secure="true" >
         <UpgradeProtocol className="org.apache.coyote.http2.Http2Protocol" />
         <SSLHostConfig>
             <Certificate certificateKeyFile="/usr/share/tomcat/conf/NGAP-CA-certificate.key"
