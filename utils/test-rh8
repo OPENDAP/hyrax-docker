@@ -1,26 +1,58 @@
 #!/bin/bash
 
-export prefix="/Users/ndp/OPeNDAP/hyrax/libdap4"
-echo "prefix: $prefix"
+###########################################################################
+# loggy()
+function loggy(){
+    echo  "$@" | awk '{ print "# "$0;}'  >&2
+}
 
-export TRAVIS_BUILD_DIR="$prefix"
-echo "TRAVIS_BUILD_DIR: $TRAVIS_BUILD_DIR"
+###########################################################################
+# configuration
+export target
+target="$(pwd)/libdap4"
+loggy "Using target: $target"
 
-export LIBDAP_BUILD=rocky8
-echo "LIBDAP_BUILD: $LIBDAP_BUILD"
+export BUILD_NUMBER="666"
+loggy "BUILD_NUMBER: $BUILD_NUMBER"
 
-export LIBDAP_BUILD_NUMBER="666"
-echo "LIBDAP_BUILD_NUMBER: $LIBDAP_BUILD_NUMBER"
+export image="opendap/rocky8_hyrax_builder:latest"
+loggy "image: $image"
 
-mkdir -p $prefix/rpmbuild
+export build_script="/root/travis/travis/build-rpm.sh"
+loggy "build_script: $build_script"
 
+###########################################################################
+# cleanup previous
+loggy "Cleaning $target"
+loggy "$(rm -vrf $target)"
+
+###########################################################################
+# Clone freshy
+libdap4_repo="https://github.com/OPENDAP/libdap4"
+loggy "Cloning $libdap4_repo"
+git clone --depth 1 "$libdap4_repo" "$target"
+
+###########################################################################
+# rpm time...
+mkdir -p "$target/rpmbuild"
+
+###########################################################################
+# Build it
+loggy "Starting docker. Image: $image"
 docker run --platform linux/amd64 \
-    --volume $prefix/rpmbuild:/root/rpmbuild \
-    --volume $TRAVIS_BUILD_DIR:/root/travis \
+    --volume "$target":/root/travis \
     --env prefix=/root/install \
+    --env os=rocky8 \
+    --env LIBDAP_BUILD_NUMBER=$BUILD_NUMBER \
     --env AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
     --env AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
-    --env os=rocky8 \
-    --env LIBDAP_BUILD_NUMBER=$LIBDAP_BUILD_NUMBER \
-    opendap/rocky8_hyrax_builder:latest \
-    /root/travis/travis/build-rpm-8.sh
+    $image \
+    $build_script
+
+
+    # -c "yum list installed"
+    # /root/travis/travis/build-rpm-8.sh
+    # "ls -l /root"
+
+
+
