@@ -50,8 +50,8 @@ RUN set -e \
 #RUN set -e  \
 #    && yum install -y openjpeg2-devel jasper-devel
 
-RUN set -e  \
-    && yum install -y cppunit cppunit-devel
+#RUN set -e  \
+#    && yum install -y cppunit cppunit-devel
 
 # The libtirpc for 64 bit systems.
 RUN set -e \
