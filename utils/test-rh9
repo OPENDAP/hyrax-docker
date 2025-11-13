@@ -23,7 +23,7 @@ loggy "BUILD_NUMBER: $BUILD_NUMBER"
 export image="localhost/opendap/rh9-build-platform:latest"
 loggy "image: $image"
 
-export build_script="$target/travis/build-rpm.sh"
+export build_script="$target/travis/build-rpm-9.sh"
 loggy "build_script: $build_script"
 
 ###########################################################################
