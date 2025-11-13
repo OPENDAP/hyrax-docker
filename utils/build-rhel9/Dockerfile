@@ -47,8 +47,8 @@ RUN set -e \
     && yum install -y libjpeg-devel libxml2-devel curl-devel libicu-devel \
     && yum install -y java-21-openjdk java-21-openjdk-devel ant
 
-RUN set -e  \
-    && yum install -y openjpeg2-devel jasper-devel
+#RUN set -e  \
+#    && yum install -y openjpeg2-devel jasper-devel
 
 RUN set -e  \
     && yum install -y cppunit cppunit-devel
