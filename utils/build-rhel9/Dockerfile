@@ -52,6 +52,8 @@ RUN set -e \
 
 #RUN set -e  \
 #    && yum config-manager --set-enabled powertools \
+
+#RUN set -e  \
 #    && yum install -y cppunit cppunit-devel
 
 # The libtirpc for 64 bit systems.
@@ -68,12 +70,6 @@ RUN set -e \
     && python3 --version \
     && yum install -y awscli2
 
-# Not needed??
-#RUN set -e \
-#    && curl -sS https://bootstrap.pypa.io/get-pip.py | python3 \
-#    && python3 -m pip install --upgrade pip \
-#    && python3 -m pip install --no-cache-dir \
-#
 RUN set -e \
     && yum clean all
 RUN set -e \

@@ -15,7 +15,8 @@ loggy "Using target: $target"
 export BUILD_NUMBER="666"
 loggy "BUILD_NUMBER: $BUILD_NUMBER"
 
-export image="opendap/rocky9_hyrax_builder:latest"
+# export image="opendap/rocky9_hyrax_builder:latest"
+export image="localhost/opendap/rh9-build-platform:latest"
 loggy "image: $image"
 
 export build_script="/root/travis/travis/build-rpm.sh"
