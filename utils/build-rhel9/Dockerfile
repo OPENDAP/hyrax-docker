@@ -62,8 +62,7 @@ RUN set -e \
 
 RUN set -e \
     && yum install -y dnf-plugins-core epel-release \
-    && yum install -y awscli2
-
+v
 
 RUN set -e \
     && yum install -y python3.12 \
@@ -72,7 +71,7 @@ RUN set -e \
 RUN set -e \
     && curl -sS https://bootstrap.pypa.io/get-pip.py | python3 \
     && python3 -m pip install --upgrade pip \
-    && python3 -m pip install --no-cache-dir awscli
+    && python3 -m pip install --no-cache-dir awscli2
 #
 RUN set -e \
     && yum clean all
