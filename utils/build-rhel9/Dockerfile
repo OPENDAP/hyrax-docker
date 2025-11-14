@@ -29,6 +29,8 @@ USER root
 ENV DEVELOPER_MODE=${DEVELOPER_MODE:-"false"}
 RUN if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else echo "DEVELOPER_MODE: DISABLED"; fi
 
+ENV ARCH="$(uname -m)"
+RUN echo "ARCH: $ARCH"
 
 ################################################################
 # Update and install the needful.
@@ -38,6 +40,17 @@ RUN if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else ec
 # Travis build (or at a later time). They need to be part of the container,
 # however, to be run, so install them as part of this Dockerfile.
 RUN set -e && yum update  -y
+
+# Set up our friends plugins-code, epel, and codeready-builder-for-rhel-9
+RUN set -e \
+    && yum install -y dnf-plugins-core epel-release \
+    && dnf config-manager --set-enabled codeready-builder-for-rhel-9-$(ARCH)-rpms
+
+    # The libtirpc for 64 bit systems.
+RUN set -e \
+    && yum install -y libtirpc  libtirpc-devel
+#    && curl -O https://www.rpmfind.net/linux/centos-stream/9-stream/CRB/x86_64/os/Packages/libtirpc-devel-1.3.3-9.el9.x86_64.rpm \
+#    && curl -O https://www.rpmfind.net/linux/centos-stream/9-stream/BaseOS/x86_64/os/Packages/libtirpc-1.3.3-9.el9.x86_64.rpm \
 
 # The things!
 RUN set -e \
@@ -56,14 +69,7 @@ RUN set -e \
 #RUN set -e  \
 #    && yum install -y cppunit cppunit-devel
 
-# The libtirpc for 64 bit systems.
-RUN set -e \
-    && curl -O https://www.rpmfind.net/linux/centos-stream/9-stream/CRB/x86_64/os/Packages/libtirpc-devel-1.3.3-9.el9.i686.rpm \
-    && curl -O https://www.rpmfind.net/linux/centos-stream/9-stream/BaseOS/x86_64/os/Packages/libtirpc-1.3.3-9.el9.i686.rpm \
-    && yum install -y libtirpc-1.3.3-9.el9.i686.rpm  libtirpc-devel-1.3.3-9.el9.i686.rpm
 
-RUN set -e \
-    && yum install -y dnf-plugins-core epel-release
 
 RUN set -e \
     && yum install -y python3.12 \
