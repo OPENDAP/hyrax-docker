@@ -23,8 +23,8 @@ loggy "BUILD_NUMBER: $BUILD_NUMBER"
 export image="localhost/opendap/rh9-build-platform:latest"
 loggy "image: $image"
 
-export build_script="/root/libdap4/travis/build-rpm-9.sh"
-loggy "build_script: $build_script"
+export libdap_build_script="/root/libdap4/travis/build-rpm-9.sh"
+loggy "libdap_build_script (inside docker image): $libdap_build_script"
 
 ###########################################################################
 # cleanup previous
@@ -60,12 +60,7 @@ docker run --platform linux/amd64 \
     --env AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
     --env AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
     $image \
-    $build_script
-
-
-    # -c "yum list installed"
-    # /root/travis/travis/build-rpm-8.sh
-    # "ls -l /root"
+    $libdap_build_script
 
 
 
