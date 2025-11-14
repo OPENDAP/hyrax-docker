@@ -29,7 +29,6 @@ USER root
 ENV DEVELOPER_MODE=${DEVELOPER_MODE:-"false"}
 RUN if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else echo "DEVELOPER_MODE: DISABLED"; fi
 
-RUN export ARCH=$(uname -m) && echo "ARCH: $ARCH"
 
 ################################################################
 # Update and install the needful.
@@ -42,8 +41,10 @@ RUN set -e && yum update  -y
 
 # Set up our friends plugins-code, epel, and codeready-builder-for-rhel-9
 RUN set -e \
+    && ARCH="$(uname -m)" \
+    && echo "ARCH: $ARCH" \
     && yum install -y dnf-plugins-core epel-release \
-    && dnf config-manager --set-enabled codeready-builder-for-rhel-9-$(ARCH)-rpms
+    && dnf config-manager --set-enabled codeready-builder-for-rhel-9-${ARCH}-rpms
 
     # The libtirpc for 64 bit systems.
 RUN set -e \
