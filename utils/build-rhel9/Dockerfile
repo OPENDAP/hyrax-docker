@@ -42,7 +42,8 @@ RUN set -e && yum update  -y
 RUN set -e \
     && dnf install -y 'dnf-command(config-manager)'
 
-RUN  dnf repolist --all | grep codeready-builder
+RUN set -e \
+    && dnf repolist --all
 
 RUN set -e \
     &&     ls /etc/yum.repos.d/ | grep codeready-builder
