@@ -46,33 +46,34 @@ RUN set -e \
     && dnf config-manager --set-enabled "crb"
 
 
-RUN set -e \
-    && dnf repolist --all
-
 #RUN set -e \
 #    &&     ls /etc/yum.repos.d/ | grep codeready-builder
 
 
-RUN set -e \
-    && export ARCH="$(uname -m)" \
-    && echo "Found ARCH: $ARCH" \
-    && dnf config-manager --set-enabled "codeready-builder-for-rhel-9-$ARCH-rpms"
+#RUN set -e \
+#    && export ARCH="$(uname -m)" \
+#    && echo "Found ARCH: $ARCH" \
+#    && dnf config-manager --set-enabled "codeready-builder-for-rhel-9-$ARCH-rpms"
 
-RUN set -e \
-    && export ARCH="$(uname -m)" \
-    && echo "Found ARCH: $ARCH" \
-    && dnf config-manager --set-enabled "crb" \
-    && dnf config-manager --set-enabled "crb-devel"
+#RUN set -e \
+#    && export ARCH="$(uname -m)" \
+#    && echo "Found ARCH: $ARCH" \
+#    && dnf config-manager --set-enabled "crb" \
+#    && dnf config-manager --set-enabled "crb-devel"
 
 
 # Set up our friends plugins-code, epel, and codeready-builder-for-rhel-9
 RUN set -e \
-    && yum install -y dnf-plugins-core epel-release
+    && dnf install -y dnf-plugins-core epel-release
+
+RUN set -e \
+    && dnf repolist --all
+
 
 
     # The libtirpc for 64 bit systems.
 RUN set -e \
-    && yum install -y libtirpc  libtirpc-devel
+    && dnf install -y libtirpc  libtirpc-devel
 #    && curl -O https://www.rpmfind.net/linux/centos-stream/9-stream/CRB/x86_64/os/Packages/libtirpc-devel-1.3.3-9.el9.x86_64.rpm \
 #    && curl -O https://www.rpmfind.net/linux/centos-stream/9-stream/BaseOS/x86_64/os/Packages/libtirpc-1.3.3-9.el9.x86_64.rpm \
 
