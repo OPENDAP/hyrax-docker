@@ -43,9 +43,20 @@ RUN set -e \
     && dnf install -y 'dnf-command(config-manager)'
 
 RUN set -e \
+    && dnf repolist --all | grep codeready-builder
+
+RUN set -e \
+    &&     ls /etc/yum.repos.d/ | grep codeready-builder
+
+
+RUN set -e \
     && export ARCH="$(uname -m)" \
     && echo "Found ARCH: $ARCH" \
     && dnf config-manager --set-enabled "codeready-builder-for-rhel-9-$ARCH-rpms"
+
+
+
+
 
 # Set up our friends plugins-code, epel, and codeready-builder-for-rhel-9
 RUN set -e \
