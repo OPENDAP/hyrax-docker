@@ -52,10 +52,13 @@ RUN set -e \
 #RUN set -e \
 #    && export ARCH="$(uname -m)" \
 #    && echo "Found ARCH: $ARCH" \
-#    && dnf config-manager --set-enabled "codeready-builder-for-rhel-9-$ARCH-rpms"
+#    && dnf config-manager --set-enabled "crb"
 
-
-
+RUN set -e \
+    && export ARCH="$(uname -m)" \
+    && echo "Found ARCH: $ARCH" \
+    && dnf config-manager --set-enabled "crb" \
+    && dnf config-manager --set-enabled "crb-devel"
 
 
 # Set up our friends plugins-code, epel, and codeready-builder-for-rhel-9
