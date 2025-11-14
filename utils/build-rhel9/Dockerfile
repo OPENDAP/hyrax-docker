@@ -45,8 +45,7 @@ RUN set -e \
 RUN set -e \
     && dnf repolist --all | grep codeready-builder
 
-RUN set -e \
-    &&     ls /etc/yum.repos.d/ | grep codeready-builder
+RUN  ls /etc/yum.repos.d/ | grep codeready-builder
 
 
 RUN set -e \
