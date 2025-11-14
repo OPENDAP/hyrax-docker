@@ -39,12 +39,15 @@ RUN if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else ec
 # however, to be run, so install them as part of this Dockerfile.
 RUN set -e && yum update  -y
 
-# Set up our friends plugins-code, epel, and codeready-builder-for-rhel-9
 RUN set -e \
     && ARCH="$(uname -m)" \
     && echo "ARCH: $ARCH" \
-    && yum install -y dnf-plugins-core epel-release \
     && dnf config-manager --set-enabled codeready-builder-for-rhel-9-${ARCH}-rpms
+
+# Set up our friends plugins-code, epel, and codeready-builder-for-rhel-9
+RUN set -e \
+    && yum install -y dnf-plugins-core epel-release
+
 
     # The libtirpc for 64 bit systems.
 RUN set -e \
