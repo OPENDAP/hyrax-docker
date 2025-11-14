@@ -42,7 +42,7 @@ RUN set -e && yum update  -y
 RUN set -e \
     && ARCH="$(uname -m)" \
     && echo "ARCH: $ARCH" \
-    && dnf install 'dnf-command(config-manager)' \
+    && dnf install -y 'dnf-command(config-manager)' \
     && dnf config-manager --set-enabled "codeready-builder-for-rhel-9-$ARCH-rpms"
 
 # Set up our friends plugins-code, epel, and codeready-builder-for-rhel-9
