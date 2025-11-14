@@ -26,3 +26,5 @@ The script `hyrax-docker/utils/test-rh9` will:
 ```
 sudo ./test-rh9
 ``` 
+**NOTE**: The list of things that are 'yum' installed on the Rocky9 machine in `us-west-2` (named `rocky9`) that Dan used to build the stuff for our RH9 assessment is located in 
+`hyrax-docker/utils/build-rhel9/aws-ecs-rocky9-yum-inventory.txt`
