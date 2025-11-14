@@ -29,8 +29,7 @@ USER root
 ENV DEVELOPER_MODE=${DEVELOPER_MODE:-"false"}
 RUN if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else echo "DEVELOPER_MODE: DISABLED"; fi
 
-ENV ARCH="$(uname -m)"
-RUN echo "ARCH: $ARCH"
+RUN export ARCH=$(uname -m) && echo "ARCH: $ARCH"
 
 ################################################################
 # Update and install the needful.
