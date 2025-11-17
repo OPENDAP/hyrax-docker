@@ -5,7 +5,7 @@ pwrd="${2:-""}"
 
 sudo docker build \
     --no-cache \
-    --platform "amd64" \
+    --platform "linux/amd64,linux/arm64" \
     --tag "opendap/rocky9_hyrax_builder:latest" \
     build-rhel9
 
