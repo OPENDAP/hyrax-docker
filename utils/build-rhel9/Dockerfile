@@ -1,6 +1,7 @@
 ###############################################################################################
 # 
-# Dockerfile for single container Hyrax
+# Dockerfile to construct an HEL9 (aka rocky9) host which is primed to which to build
+# and package the Hyrax C++ compnents: libdap4 and bes.
 #
 #
 # Some shell state reference:
