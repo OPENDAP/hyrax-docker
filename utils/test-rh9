@@ -46,10 +46,6 @@ cd "$start_dir"
 echo "pwd: $PWD"
 
 ###########################################################################
-# rpm time...
-mkdir -p "$target/rpmbuild"
-
-###########################################################################
 # Build it
 loggy "Starting docker. Image: $image"
 docker run -it \
@@ -60,9 +56,8 @@ docker run -it \
     --env LIBDAP_BUILD_NUMBER=$BUILD_NUMBER \
     --env AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
     --env AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
-    $image
-
-    #$libdap_build_script
+    $image \
+    $libdap_build_script
 
 
 
