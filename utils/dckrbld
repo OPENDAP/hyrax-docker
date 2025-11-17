@@ -1,3 +1,9 @@
 #!/bin/bash
 
-sudo docker build  --no-cache -t opendap/rh9-build-platform:latest build-rhel9
+sudo docker build  \
+    --no-cache \
+    --tag "opendap/rocky9_hyrax_builder:latest" \
+    build-rhel9
+
+
+
