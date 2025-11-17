@@ -64,6 +64,7 @@ RUN set -e \
     && yum install -y valgrind gdb unzip which jq diffutils \
     && yum install -y openssl-devel libuuid-devel readline-devel zlib-devel bzip2-devel \
     && yum install -y libjpeg-devel libxml2-devel curl-devel libicu-devel \
+    && yum install -y rpmdevtools rpmlint \
     && yum install -y java-21-openjdk java-21-openjdk-devel ant
 
 #RUN set -e  \
