@@ -16,6 +16,10 @@ export target
 target="$(pwd)/libdap4"
 loggy "Using target: $target"
 
+export rpmdir
+rpmdir="$(pwd)/rpmdir"
+loggy "Using rpmdir: $rpmdir"
+
 export BUILD_NUMBER="666"
 loggy "BUILD_NUMBER: $BUILD_NUMBER"
 
@@ -50,6 +54,7 @@ echo "pwd: $PWD"
 loggy "Starting docker. Image: $image"
 docker run -it \
     --volume "$target":/root/libdap4 \
+    --volume "$rpmdir":/root/rpmbuild \
     --env PREFIX="/root/install" \
     --env prefix="/root/install" \
     --env os=rocky9 \
