@@ -52,7 +52,7 @@ mkdir -p "$target/rpmbuild"
 ###########################################################################
 # Build it
 loggy "Starting docker. Image: $image"
-docker run \
+docker run -it \
     --volume "$target":/root/libdap4 \
     --env prefix=/root/install \
     --env os=rocky9 \
@@ -60,7 +60,9 @@ docker run \
     --env AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
     --env AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
     $image \
-    $libdap_build_script
+    /bin/bash
+
+    #$libdap_build_script
 
 
 
