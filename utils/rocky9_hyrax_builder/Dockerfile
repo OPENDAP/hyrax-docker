@@ -71,16 +71,16 @@ RUN set -e \
     && python3 --version \
     && yum install -y awscli2
 
-RUN  echo "# diff is here: $(which diff)" \
+RUN  set -e \
+    && echo "# diff is here: $(which diff)" \
     && echo "################################################################"
 
 # We need to make sure there is a directory/mount_point for the calling process
 # to mount a volume that will receieve the RPM files.
 RUN set -e \
     && echo "I AM THE USER $(whoami)" \
-    && mkdir -vp "/root/rpmbuild" \
+    && mkdir -vp "$HOME/rpmbuild" \
     && echo "HOME: $HOME" \
-    && echo "~: "~
 
 # RUN ls -l /usr/libexec/
 
