@@ -13,7 +13,7 @@ echo "no_cache: $no_cache"
 sudo docker build $no_cache \
     --platform "linux/amd64,linux/arm64" \
     --tag "opendap/rocky9_hyrax_builder:latest" \
-    build-rhel9
+    rocky9_hyrax_builder
 
 docker login -u "$uid" -p "$pwrd" docker.io
 docker push opendap/rocky9_hyrax_builder:latest

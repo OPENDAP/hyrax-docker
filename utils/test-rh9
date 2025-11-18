@@ -21,7 +21,6 @@ rpmdir="$(pwd)/rpmdir"
 loggy "Using rpmdir: $rpmdir"
 mkdir -p "$rpmdir"
 
-
 export BUILD_NUMBER="666"
 loggy "BUILD_NUMBER: $BUILD_NUMBER"
 
