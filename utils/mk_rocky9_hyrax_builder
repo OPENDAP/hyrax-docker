@@ -3,6 +3,9 @@
 uid="${1:-""}"
 pwrd="${2:-""}"
 
+image_tag="opendap/rocky9_hyrax_builder:latest"
+docker_repo="docker.io"
+
 no_cache=
 if test -n "$3"
 then
@@ -12,13 +15,12 @@ echo "no_cache: $no_cache"
 
 sudo docker build $no_cache \
     --platform "linux/amd64,linux/arm64" \
-    --tag "opendap/rocky9_hyrax_builder:latest" \
+    --tag "$image_tag" \
     rocky9_hyrax_builder
 
 if test -n "$uid" && test -n "$pwrd"
 then
-    repo="docker.io"
-    echo "Pushing image to: $repo"
-    docker login -u "$uid" -p "$pwrd" "$repo"
+    echo "Pushing image to: $docker_repo"
+    docker login -u "$uid" -p "$pwrd" "$docker_repo"
     docker push opendap/rocky9_hyrax_builder:latest
 fi
