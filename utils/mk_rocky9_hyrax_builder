@@ -15,5 +15,10 @@ sudo docker build $no_cache \
     --tag "opendap/rocky9_hyrax_builder:latest" \
     rocky9_hyrax_builder
 
-docker login -u "$uid" -p "$pwrd" docker.io
-docker push opendap/rocky9_hyrax_builder:latest
+if test -n "$uid" && test -n "$pwrd"
+then
+    repo="docker.io"
+    echo "Pushing image to: $repo"
+    docker login -u "$uid" -p "$pwrd" "$repo"
+    docker push opendap/rocky9_hyrax_builder:latest
+fi
