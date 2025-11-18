@@ -22,7 +22,6 @@ LABEL maintainer="support@opendap.org"
 USER root
 
 RUN set -e \
-    && echo "_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ " \
     && echo "# Update and install packages..."
 
 ################################################################
@@ -74,19 +73,18 @@ RUN set -e \
 
 RUN  set -e \
     && echo "# diff is here: $(which diff)" \
-    && echo "_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ "
 
 # We need to make sure there is a directory/mount_point for the calling process
 # to mount a volume that will receieve the RPM files.
 RUN set -e \
-    && echo "I AM THE USER $(whoami)" \
+    && echo "# I AM THE USER $(whoami)" \
     && mkdir -vp "$HOME/rpmbuild" \
-    && echo "HOME: $HOME" \
+    && echo "# HOME: $HOME" \
 
 # RUN ls -l /usr/libexec/
 
 RUN export BUILD_DATE=`date +%s`
-RUN echo "BUILD_DATE: ${BUILD_DATE}"
+RUN echo "# BUILD_DATE: ${BUILD_DATE}"
 
 ENTRYPOINT [ "/bin/bash" ]
 
