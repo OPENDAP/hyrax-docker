@@ -16,10 +16,6 @@
 # Set one or more individual labels
 FROM rockylinux:9
 
-RUN export BUILD_DATE=`date +%s`
-RUN echo "BUILD_DATE: ${BUILD_DATE}"
-
-
 LABEL vendor="OPeNDAP"
 
 LABEL maintainer="support@opendap.org"
@@ -51,9 +47,9 @@ RUN set -e \
 RUN set -e \
     && dnf install -y dnf-plugins-core epel-release
 
-    # Show us the many things...
-RUN set -e \
-    && dnf repolist --all
+# Show us the many things...
+#RUN set -e \
+#    && dnf repolist --all
 
 # The libtirpc for 64 bit systems.
 RUN set -e \
@@ -67,14 +63,6 @@ RUN set -e \
     && yum install -y libjpeg-devel libxml2-devel curl-devel libicu-devel \
     && yum install -y rpmdevtools rpmlint \
     && yum install -y java-21-openjdk java-21-openjdk-devel ant
-
-# We need to make sure there is a directory/mount_point for the calling process
-# to mount a volume that will receieve the RPM files.
-RUN set -e \
-    && echo "I AM THE USER $(whoami)" \
-    && mkdir -vp "/root/rpmbuild" \
-    && echo "HOME: $HOME" \
-    && echo "~: "~
 
 #RUN set -e  \
 #    && yum install -y openjpeg2-devel jasper-devel
@@ -98,7 +86,18 @@ RUN set -e \
     && which diff
 #
 
-RUN ls -l /usr/libexec/
+# We need to make sure there is a directory/mount_point for the calling process
+# to mount a volume that will receieve the RPM files.
+RUN set -e \
+    && echo "I AM THE USER $(whoami)" \
+    && mkdir -vp "/root/rpmbuild" \
+    && echo "HOME: $HOME" \
+    && echo "~: "~
+
+# RUN ls -l /usr/libexec/
+
+RUN export BUILD_DATE=`date +%s`
+RUN echo "BUILD_DATE: ${BUILD_DATE}"
 
 ENTRYPOINT [ "/bin/bash" ]
 
