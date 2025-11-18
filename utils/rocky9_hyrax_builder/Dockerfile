@@ -21,6 +21,10 @@ LABEL maintainer="support@opendap.org"
 
 USER root
 
+RUN set -e \
+    && echo "= - = - = - = - = - = - = - = - = - = - = - = - = - = - = - = - ="\
+    && echo "# Update and install packages..."
+
 ################################################################
 # Update and install the needful.
 #
