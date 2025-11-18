@@ -31,6 +31,11 @@ sudo docker build $no_cache \
     --platform "linux/amd64" \
     --tag "$image_tag" \
     rocky9_hyrax_builder
+status=$?
+if test $status -ne 0
+then
+    echo "docker nuild command exited with status: $status"
+fi
 
 if test -n "$uid" && test -n "$pwrd"
 then
