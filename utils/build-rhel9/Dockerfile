@@ -21,6 +21,9 @@ LABEL maintainer="support@opendap.org"
 
 USER root
 
+ENV HR="################################################################"
+RUN echo "$HR" && echo "# Update and install packages..."
+
 ################################################################
 # Update and install the needful.
 #
@@ -41,22 +44,16 @@ RUN set -e \
 RUN set -e \
     && dnf install -y dnf-plugins-core epel-release
 
-# Show us the many things...
-#RUN set -e \
-#    && dnf repolist --all
-
-# The libtirpc for 64 bit systems.
-RUN set -e \
-    && dnf install -y libtirpc  libtirpc-devel
-
 # The things!
 RUN set -e \
+    && yum install -y libtirpc  libtirpc-devel \
     && yum install -y procps git gcc-c++ flex bison cmake autoconf271 automake libtool emacs bzip2 vim bc \
     && yum install -y valgrind gdb unzip which jq diffutils \
     && yum install -y openssl-devel libuuid-devel readline-devel zlib-devel bzip2-devel \
     && yum install -y libjpeg-devel libxml2-devel curl-devel libicu-devel \
     && yum install -y rpmdevtools rpmlint \
-    && yum install -y java-21-openjdk java-21-openjdk-devel ant
+    && yum install -y java-21-openjdk java-21-openjdk-devel ant \
+    && yum clean all
 
 #RUN set -e  \
 #    && yum install -y openjpeg2-devel jasper-devel
@@ -74,11 +71,8 @@ RUN set -e \
     && python3 --version \
     && yum install -y awscli2
 
-RUN set -e \
-    && yum clean all
-RUN set -e \
-    && which diff
-#
+RUN  echo "# diff is here: $(which diff)" \
+    && echo "$HR"
 
 # We need to make sure there is a directory/mount_point for the calling process
 # to mount a volume that will receieve the RPM files.
