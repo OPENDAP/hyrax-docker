@@ -21,8 +21,7 @@ LABEL maintainer="support@opendap.org"
 
 USER root
 
-ENV HR="################################################################"
-RUN set -e && echo "${HR}"
+RUN set -e && echo "################################################################"
 RUN set -e && echo "# Update and install packages..."
 
 ################################################################
@@ -73,7 +72,7 @@ RUN set -e \
     && yum install -y awscli2
 
 RUN  echo "# diff is here: $(which diff)" \
-    && echo "$HR"
+    && echo "################################################################"
 
 # We need to make sure there is a directory/mount_point for the calling process
 # to mount a volume that will receieve the RPM files.
