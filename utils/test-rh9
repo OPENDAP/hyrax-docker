@@ -26,7 +26,7 @@ export BUILD_NUMBER="666"
 loggy "BUILD_NUMBER: $BUILD_NUMBER"
 
 # export image="opendap/rocky9_hyrax_builder:latest"
-export image="opendap/rh9-build-platform:latest"
+export image="opendap/rocky9_hyrax_builder:latest"
 loggy "image: $image"
 
 export libdap_build_script="/root/libdap4/travis/build-rpm-9.sh"
