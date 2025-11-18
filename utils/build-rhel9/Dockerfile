@@ -73,7 +73,7 @@ RUN set -e \
 RUN set -e \
     && echo "I am $(whoami)" \
     && mkdir -vp "/root/rpmbuild" \
-    && mkdir -vp "~/rpmbuild"
+    && mkdir -vp ~/rpmbuild
 
 #RUN set -e  \
 #    && yum install -y openjpeg2-devel jasper-devel
