@@ -22,7 +22,7 @@ LABEL maintainer="support@opendap.org"
 USER root
 
 ENV HR="################################################################"
-RUN echo "$HR" && echo "# Update and install packages..."
+RUN set -e && echo "$HR" && echo "# Update and install packages..."
 
 ################################################################
 # Update and install the needful.
