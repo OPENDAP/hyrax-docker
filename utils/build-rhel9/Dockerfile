@@ -71,9 +71,10 @@ RUN set -e \
 # We need to make sure there is a directory/mount_point for the calling process
 # to mount a volume that will receieve the RPM files.
 RUN set -e \
-    && echo "I am $(whoami)" \
+    && echo "I AM THE USER $(whoami)" \
     && mkdir -vp "/root/rpmbuild" \
-    && mkdir -vp ~/rpmbuild
+    && echo "HOME: $HOME" \
+    && echo "~: "~
 
 #RUN set -e  \
 #    && yum install -y openjpeg2-devel jasper-devel
