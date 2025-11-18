@@ -27,7 +27,7 @@ then
 fi
 loggy "   no_cache: $no_cache"
 
-sudo podman buildx build  $no_cache \
+sudo docker build $no_cache \
     --platform "linux/amd64,linux/arm64" \
     --tag "$image_tag" \
     rocky9_hyrax_builder
