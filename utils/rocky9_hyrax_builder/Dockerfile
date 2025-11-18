@@ -21,7 +21,7 @@ LABEL maintainer="support@opendap.org"
 
 USER root
 
-RUN set -e && echo "################################################################"
+RUN set -e && echo "=========================================================================="
 RUN set -e && echo "# Update and install packages..."
 
 ################################################################
@@ -73,7 +73,7 @@ RUN set -e \
 
 RUN  set -e \
     && echo "# diff is here: $(which diff)" \
-    && echo "################################################################"
+    && echo "=========================================================================="
 
 # We need to make sure there is a directory/mount_point for the calling process
 # to mount a volume that will receieve the RPM files.
