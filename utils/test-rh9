@@ -29,7 +29,7 @@ loggy "BUILD_NUMBER: $BUILD_NUMBER"
 export image="opendap/rocky9_hyrax_builder:latest"
 loggy "image: $image"
 
-export libdap_build_script="/root/libdap4/travis/build-rpm-9.sh"
+export libdap_build_script="/root/libdap4/travis/build-rh9-rpm.sh"
 loggy "libdap_build_script (inside docker image): $libdap_build_script"
 
 ###########################################################################
