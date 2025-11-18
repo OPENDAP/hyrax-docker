@@ -2,7 +2,7 @@
 # 
 # Dockerfile to construct an HEL9 (aka rocky9) host which is primed to which to build
 # and package the Hyrax C++ compnents: libdap4 and bes.
-#
+# The rpm production software is installed and a mount point for rpm retrievalis created.
 #
 # Some shell state reference:
 # set -f # "set -o noglob"  Disable file name generation using metacharacters (globbing).
@@ -67,6 +67,13 @@ RUN set -e \
     && yum install -y libjpeg-devel libxml2-devel curl-devel libicu-devel \
     && yum install -y rpmdevtools rpmlint \
     && yum install -y java-21-openjdk java-21-openjdk-devel ant
+
+# We need to make sure there is a directory/mount_point for the calling process
+# to mount a volume that will receieve the RPM files.
+RUN set -e \
+    && echo "I am $(whoami)" \
+    && mkdir -vp "/root/rpmbuild" \
+    && mkdir -vp "~/rpmbuild"
 
 #RUN set -e  \
 #    && yum install -y openjpeg2-devel jasper-devel
