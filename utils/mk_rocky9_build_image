@@ -4,7 +4,7 @@ uid="${1:-""}"
 pwrd="${2:-""}"
 
 no_cache=${3:-"--no-cache"}
-eco "no_cache: $no_cache"
+echo "no_cache: $no_cache"
 
 sudo docker build $no_cache \
     --platform "linux/amd64,linux/arm64" \
