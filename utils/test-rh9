@@ -82,9 +82,35 @@ function build_libdap_for_rh9() {
 
 }
 
+function clean_and_get_repo() {
+    local repo_name="$1"
+    local branch_name="$2"
+    local host_target="$3"
+
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # cleanup repo from previous efforts
+    loggy "Cleaning $host_target"
+    loggy "$(rm -vrf $host_target)"
+
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # Clone fresh repo
+    local repo_url
+    repo_url="https://github.com/OPENDAP/$repo_name"
+    loggy "Cloning $repo_url"
+    git clone --depth 1 "$repo_url" "$host_target"
+
+    if test -n "$branch_name"
+    then
+        use_branch "$host_target" "$branch_name"
+    fi
+}
+
+
 ###########################################################################
 # build_hyrax_dependencies_for_rh9
 function build_hyrax_dependencies_for_rh9() {
+    local branch_name="$1"
+    local clean="$2"
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # configuration
 
@@ -113,18 +139,10 @@ function build_hyrax_dependencies_for_rh9() {
     local build_script="$docker_target/build-for-rocky9.sh"
     loggy "build_script (inside docker image): $build_script"
 
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    # cleanup repo from previous efforts
-    loggy "Cleaning $host_target"
-    loggy "$(rm -vrf $host_target)"
-
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    # Clone fresh repo
-    repo_url="https://github.com/OPENDAP/$repo_name"
-    loggy "Cloning $repo_url"
-    git clone --depth 1 "$repo_url" "$host_target"
-
-    use_branch "$host_target" "RHEL9"
+    if test -n "$clean"
+    then
+        clean_and_get_repo "$repo_name" "$branch_name" "$host_target"
+    fi
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # Build it
@@ -134,8 +152,7 @@ function build_hyrax_dependencies_for_rh9() {
         --volume "$host_result_dir":"$docker_result_dir" \
         --env prefix="$docker_result_dir" \
         --env BUILD_NUMBER=666 \
-        $image \
-        $build_script
-
+        $image #\
+        #$build_script
 }
 
