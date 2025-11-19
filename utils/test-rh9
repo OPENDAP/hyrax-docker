@@ -154,5 +154,10 @@ function build_hyrax_dependencies_for_rh9() {
         --env BUILD_NUMBER=666 \
         $image \
         $build_script
+
+        export ARTIFACT=rocky9
+        mkdir -p $host_target/package
+        tar -C $HOME/rocky9/ -czvf $host_target/package/hyrax-dependencies-rocky9-static.tar.gz install
+
 }
 
