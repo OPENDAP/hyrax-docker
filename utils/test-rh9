@@ -80,9 +80,6 @@ function build_libdap_for_rh9() {
         $image \
         $libdap_build_script
 
-#        --env AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
-#        --env AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
-
 }
 
 ###########################################################################
@@ -133,15 +130,12 @@ function build_hyrax_dependencies_for_rh9() {
     # Build it
     loggy "Starting docker. Image: $image"
     docker run -it \
-        --volume "$host_target":/root/$repo_name \
-        --volume "$host_result_dir":$docker_result_dir \
+        --volume "$host_target":"$docker_target" \
+        --volume "$host_result_dir":"$docker_result_dir" \
         --env prefix="$docker_result_dir" \
-        --env LIBDAP_BUILD_NUMBER=$BUILD_NUMBER \
+        --env BUILD_NUMBER=666 \
         $image \
         $build_script
-
-#        --env AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
-#        --env AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
 
 }
 
