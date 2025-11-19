@@ -50,7 +50,7 @@ RUN set -e \
 RUN set -e \
     && yum install -y libtirpc  libtirpc-devel \
     && yum install -y procps git gcc-c++ flex bison cmake autoconf271 automake libtool emacs bzip2 vim bc \
-    && yum install -y valgrind gdb unzip which jq diffutils \
+    && yum install -y valgrind gdb unzip which jq diffutils sqlite sqlite-devel \
     && yum install -y openssl-devel libuuid-devel readline-devel zlib-devel bzip2-devel \
     && yum install -y libjpeg-devel libxml2-devel curl-devel libicu-devel \
     && yum install -y rpmdevtools rpmlint \
