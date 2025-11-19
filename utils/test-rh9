@@ -160,6 +160,6 @@ function build_hyrax_dependencies_for_rh9() {
 
     mkdir -p $host_target/package
     tar -C $top_dir -czvf $host_target/package/hyrax-dependencies-rocky9-static.tar.gz install
-    ls -l $host_target/package/hyrax-dependencies-rocky9-static.tar.gz
+    loggy "$(ls -l $host_target/package/hyrax-dependencies-rocky9-static.tar.gz)"
 }
 
