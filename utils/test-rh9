@@ -117,12 +117,15 @@ function build_hyrax_dependencies_for_rh9() {
     local repo_name="hyrax-dependencies"
     loggy "Using repo_name: $repo_name"
 
+    local top_dir
+    top_dir="$PWD"
+
     local host_target
-    host_target="$(pwd)/$repo_name"
+    host_target="$top_dir/$repo_name"
     loggy "Using host_target: $host_target"
 
     local host_result_dir
-    host_result_dir="$(pwd)/install"
+    host_result_dir="$top_dir/install"
     loggy "Using host_result_dir: $host_result_dir"
     mkdir -vp "$host_result_dir"
 
@@ -155,9 +158,9 @@ function build_hyrax_dependencies_for_rh9() {
         $image \
         $build_script
 
-        export ARTIFACT=rocky9
-        mkdir -p $host_target/package
-        tar -C $HOME/rocky9/ -czvf $host_target/package/hyrax-dependencies-rocky9-static.tar.gz install
+    export ARTIFACT=rocky9
+    mkdir -p $host_target/package
+    tar -C $top_dir -czvf $host_target/package/hyrax-dependencies-rocky9-static.tar.gz install
 
 }
 
