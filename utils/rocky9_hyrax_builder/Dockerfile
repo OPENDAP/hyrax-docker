@@ -46,6 +46,9 @@ RUN set -e \
 RUN set -e \
     && dnf install -y dnf-plugins-core epel-release
 
+RUN set -e \
+    && yum install -y sqlite sqlite-devel
+
 # The things!
 RUN set -e \
     && yum install -y libtirpc  libtirpc-devel \
