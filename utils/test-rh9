@@ -6,64 +6,142 @@ function loggy(){
     echo  "$@" | awk '{ print "# "$0;}'  >&2
 }
 
+###########################################################################
+# use_branch()
+function use_branch() {
+    local prolog="use_branch() -"
+    loggy "$prolog BEGIN"
+
+    local repo="${1}"
+    loggy "$prolog repo: $repo"
+
+    local branch="${2}"
+    loggy "$prolog branch: $branch"
+
+    local start_dir
+    start_dir="$PWD"
+
+    cd "$repo"
+    loggy "$prolog Fetching and checking out target branch $branch in: $PWD"
+    git remote set-branches origin '*'
+    git fetch -v --depth=1
+    git checkout "$branch"
+    cd "$start_dir"
+    loggy "$prolog END (pwd: $PWD)"
+}
+
 
 ###########################################################################
-# configuration
+# build_libdap_for_rh9
+function build_libdap_for_rh9() {
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # configuration
+    local target
+    target="$(pwd)/libdap4"
+    loggy "Using target: $target"
 
-export start_dir="$PWD"
+    local rpmdir
+    rpmdir="$(pwd)/rpmdir"
+    loggy "Using rpmdir: $rpmdir"
+    mkdir -p "$rpmdir"
 
-export target
-target="$(pwd)/libdap4"
-loggy "Using target: $target"
+    local BUILD_NUMBER="666"
+    loggy "BUILD_NUMBER: $BUILD_NUMBER"
 
-export rpmdir
-rpmdir="$(pwd)/rpmdir"
-loggy "Using rpmdir: $rpmdir"
-mkdir -p "$rpmdir"
+    # export image="opendap/rocky9_hyrax_builder:latest"
+    local image="opendap/rocky9_hyrax_builder:latest"
+    loggy "image: $image"
 
-export BUILD_NUMBER="666"
-loggy "BUILD_NUMBER: $BUILD_NUMBER"
+    local libdap_build_script="/root/libdap4/travis/build-rh9-rpm.sh"
+    loggy "libdap_build_script (inside docker image): $libdap_build_script"
 
-# export image="opendap/rocky9_hyrax_builder:latest"
-export image="opendap/rocky9_hyrax_builder:latest"
-loggy "image: $image"
 
-export libdap_build_script="/root/libdap4/travis/build-rh9-rpm.sh"
-loggy "libdap_build_script (inside docker image): $libdap_build_script"
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # cleanup repo from previous efforts
+    loggy "Cleaning $target"
+    loggy "$(rm -vrf $target)"
+
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # Clone fresh repo
+    libdap4_repo="https://github.com/OPENDAP/libdap4"
+    loggy "Cloning $libdap4_repo"
+    git clone --depth 1 "$libdap4_repo" "$target"
+
+    #use_branch "$target" "RHEL9"
+
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # Build it
+    loggy "Starting docker. Image: $image"
+    docker run -it \
+        --volume "$target":/root/libdap4 \
+        --volume "$rpmdir":/root/rpmbuild \
+        --env prefix="/root/install" \
+        --env LIBDAP_BUILD_NUMBER=$BUILD_NUMBER \
+        $image \
+        $libdap_build_script
+
+#        --env AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
+#        --env AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
+
+}
 
 ###########################################################################
-# cleanup previous
-loggy "Cleaning $target"
-loggy "$(rm -vrf $target)"
+# build_hyrax_dependencies_for_rh9
+function build_hyrax_dependencies_for_rh9() {
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # configuration
 
-###########################################################################
-# Clone freshy
-libdap4_repo="https://github.com/OPENDAP/libdap4"
-loggy "Cloning $libdap4_repo"
-git clone --depth 1 "$libdap4_repo" "$target"
+    local repo_name="hyrax-dependencies"
+    loggy "Using repo_name: $repo_name"
 
-#cd "$target"
-#echo "Fetching and checking out target branch in: $PWD"
-#git remote set-branches origin '*'
-#git fetch -v --depth=1
-#git checkout RHEL9
-#cd "$start_dir"
-#echo "pwd: $PWD"
+    local host_target
+    host_target="$(pwd)/$repo_name"
+    loggy "Using host_target: $host_target"
 
-###########################################################################
-# Build it
-loggy "Starting docker. Image: $image"
-docker run -it \
-    --volume "$target":/root/libdap4 \
-    --volume "$rpmdir":/root/rpmbuild \
-    --env PREFIX="/root/install" \
-    --env prefix="/root/install" \
-    --env os=rocky9 \
-    --env LIBDAP_BUILD_NUMBER=$BUILD_NUMBER \
-    --env AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
-    --env AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
-    $image \
-    $libdap_build_script
+    local host_result_dir
+    host_result_dir="$(pwd)/install"
+    loggy "Using host_result_dir: $host_result_dir"
+    mkdir -vp "$host_result_dir"
 
+    local docker_target="/root/$repo_name"
+    loggy "Using docker_target: $docker_target"
 
+    local docker_result_dir="/root/install"
+    loggy "Using docker_result_dir: $docker_result_dir"
+
+    # export image="opendap/rocky9_hyrax_builder:latest"
+    local image="opendap/rocky9_hyrax_builder:latest"
+    loggy "image: $image"
+
+    local build_script="/$docker_target/build-for-rocky9.sh"
+    loggy "build_script (inside docker image): $build_script"
+
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # cleanup repo from previous efforts
+    loggy "Cleaning $host_target"
+    loggy "$(rm -vrf $host_target)"
+
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # Clone fresh repo
+    repo_url="https://github.com/OPENDAP/$repo_name"
+    loggy "Cloning $repo_url"
+    git clone --depth 1 "$repo_url" "$host_target"
+
+    #use_branch "$target" "RHEL9"
+
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # Build it
+    loggy "Starting docker. Image: $image"
+    docker run -it \
+        --volume "$host_target":/root/$repo_name \
+        --volume "$host_result_dir":$docker_result_dir \
+        --env prefix="$docker_result_dir" \
+        --env LIBDAP_BUILD_NUMBER=$BUILD_NUMBER \
+        $image \
+        $build_script
+
+#        --env AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
+#        --env AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
+
+}
 
