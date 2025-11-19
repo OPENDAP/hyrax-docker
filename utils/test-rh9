@@ -127,7 +127,7 @@ function build_hyrax_dependencies_for_rh9() {
     loggy "Cloning $repo_url"
     git clone --depth 1 "$repo_url" "$host_target"
 
-    #use_branch "$target" "RHEL9"
+    use_branch "$host_target" "RHEL9"
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # Build it
