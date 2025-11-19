@@ -110,7 +110,7 @@ function build_hyrax_dependencies_for_rh9() {
     local image="opendap/rocky9_hyrax_builder:latest"
     loggy "image: $image"
 
-    local build_script="/$docker_target/build-for-rocky9.sh"
+    local build_script="$docker_target/build-for-rocky9.sh"
     loggy "build_script (inside docker image): $build_script"
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
