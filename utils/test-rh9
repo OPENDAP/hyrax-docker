@@ -7,6 +7,20 @@ function loggy(){
 }
 
 ###########################################################################
+# Remove all containers
+function drmac(){
+    docker rm -f $(docker ps -aq);
+}
+
+###########################################################################
+# Remove all images
+function drmai(){
+    docker rmi -f $(docker images -q);
+}
+
+
+
+###########################################################################
 # use_branch()
 function use_branch() {
     local prolog="use_branch() -"
