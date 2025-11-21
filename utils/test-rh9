@@ -125,6 +125,7 @@ function build_libdap_for_rh9() {
 function build_hyrax_dependencies_for_rh9() {
     local branch_name="$1"
     local clean="$2"
+    local interactive="$3"
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # configuration
 
@@ -153,7 +154,11 @@ function build_hyrax_dependencies_for_rh9() {
     local image="opendap/rocky9_hyrax_builder:latest"
     loggy "image: $image"
 
-    local build_script="$docker_target/build-for-rocky9.sh"
+    local build_script=""
+    if test -z "$interactive"
+    then
+        build_script="$docker_target/build-for-rocky9.sh"
+    fi
     loggy "build_script (inside docker image): $build_script"
 
     if test -n "$clean"
@@ -169,8 +174,7 @@ function build_hyrax_dependencies_for_rh9() {
         --volume "$host_result_dir":"$docker_result_dir" \
         --env prefix="$docker_result_dir" \
         --env BUILD_NUMBER=666 \
-        $image \
-        $build_script
+        $image $build_script
 
     mkdir -p $host_target/package
     tar -C $top_dir -czvf $host_target/package/hyrax-dependencies-rocky9-static.tar.gz install
