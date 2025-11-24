@@ -110,7 +110,7 @@ function build_libdap_for_rh8() {
     # Build it
     loggy "Starting docker. Image: $image"
     docker run -it \
-        --volume "$host_target":/root/libdap4 \
+        --volume "$host_target":/root/travis \
         --volume "$rpmdir":/root/rpmbuild \
         --env os=rocky8 \
         --env prefix="/root/install" \
