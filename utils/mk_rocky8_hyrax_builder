@@ -1,0 +1,47 @@
+#!/bin/bash
+
+HR="#######################################################################"
+
+
+###########################################################################
+# loggy()
+function loggy(){
+    echo  "$@" | awk '{ print "# "$0;}'  >&2
+}
+
+loggy "$HR"
+
+uid="${1:-""}"
+pwrd="${2:-""}"
+
+image_tag="opendap/rocky8_hyrax_builder_new:latest"
+loggy "  image_tag: $image_tag"
+
+docker_repo="docker.io"
+loggy "docker_repo: $docker_repo"
+
+no_cache=
+if test -n "$3"
+then
+    no_cache="--no-cache"
+fi
+loggy "   no_cache: $no_cache"
+
+sudo docker build $no_cache \
+    --platform "linux/amd64" \
+    --tag "$image_tag" \
+    rocky8_hyrax_builder
+status=$?
+if test $status -ne 0
+then
+    echo "docker build command exited with status: $status"
+fi
+
+if test -n "$uid" && test -n "$pwrd"
+then
+    loggy "Pushing image to: $docker_repo"
+    docker login -u "$uid" -p "$pwrd" "$docker_repo"
+    docker push opendap/rocky9_hyrax_builder:latest
+fi
+
+loggy "$HR"
