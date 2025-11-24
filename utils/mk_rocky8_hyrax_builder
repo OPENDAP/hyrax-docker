@@ -30,7 +30,7 @@ loggy "   no_cache: $no_cache"
 sudo docker build $no_cache \
     --platform "linux/amd64" \
     --tag "$image_tag" \
-    rocky8_hyrax_builder
+    rocky8-hyrax-builder
 status=$?
 if test $status -ne 0
 then
@@ -41,7 +41,7 @@ if test -n "$uid" && test -n "$pwrd"
 then
     loggy "Pushing image to: $docker_repo"
     docker login -u "$uid" -p "$pwrd" "$docker_repo"
-    docker push opendap/rocky9_hyrax_builder:latest
+    docker push "$image_tag"
 fi
 
 loggy "$HR"
