@@ -55,7 +55,7 @@ function clean_and_get_repo() {
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # cleanup repo from previous efforts
     loggy "$prolog Cleaning $host_target"
-    loggy "Removed $( rm -vrf $host_target | wc -l ) files."
+    loggy "$prolog Removed $( rm -vrf $host_target | wc -l ) files."
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # Clone fresh repo
