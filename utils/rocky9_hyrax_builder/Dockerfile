@@ -47,7 +47,7 @@ RUN set -e \
     && dnf install -y dnf-plugins-core epel-release
 
 RUN set -e \
-    && yum install -y curl-devel \
+    && yum install -y curl curl-devel --allowerasing \
     && curl --version
 
 # The things!
