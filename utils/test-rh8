@@ -118,58 +118,74 @@ function build_libdap_for_rh8() {
         $image \
         $build_script
 }
-
-build_libdap_for_rh8 "" ""
-
-exit $?
-
 ###########################################################################
-# configuration
-export target
-target="$(pwd)/libdap4"
-loggy "Using target: $target"
+# build_hyrax_dependencies_for_rh8
+function build_hyrax_dependencies_for_rh8() {
+    local branch_name="$1"
+    local clean="$2"
+    local interactive="$3"
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # configuration
 
-export BUILD_NUMBER="666"
-loggy "BUILD_NUMBER: $BUILD_NUMBER"
+    local repo_name="hyrax-dependencies"
+    loggy "Using repo_name: $repo_name"
 
-export image="opendap/rocky8_hyrax_builder_new:latest"
-loggy "image: $image"
+    local top_dir
+    top_dir="$PWD"
 
-export build_script="/root/travis/travis/build-rh8-rpm.sh"
-loggy "build_script: $build_script"
+    local host_target
+    host_target="$top_dir/$repo_name"
+    loggy "Using host_target: $host_target"
 
-###########################################################################
-# cleanup previous
-loggy "Cleaning $target"
-loggy "$(rm -vrf $target)"
+    local host_result_dir
+    host_result_dir="$top_dir/install"
+    loggy "Using host_result_dir: $host_result_dir"
+    mkdir -vp "$host_result_dir"
 
-###########################################################################
-# Clone freshy
-libdap4_repo="https://github.com/OPENDAP/libdap4"
-loggy "Cloning $libdap4_repo"
-git clone --depth 1 "$libdap4_repo" "$target"
+    local docker_target="/root/$repo_name"
+    loggy "Using docker_target: $docker_target"
 
-###########################################################################
-# rpm time...
-mkdir -p "$target/rpmbuild"
+    local docker_result_dir="/root/install"
+    loggy "Using docker_result_dir: $docker_result_dir"
 
-###########################################################################
-# Build it
-loggy "Starting docker. Image: $image"
-docker run --platform linux/amd64 \
-    --volume "$target":/root/travis \
-    --env prefix=/root/install \
-    --env os=rocky8 \
-    --env LIBDAP_BUILD_NUMBER=$BUILD_NUMBER \
-    --env AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
-    --env AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
-    $image \
-    $build_script
+    # export image="opendap/rocky9_hyrax_builder:latest"
+    local image="opendap/rocky8_hyrax_builder_new:latest"
+    loggy "image: $image"
+
+    local build_script=""
+    if test -z "$interactive"
+    then
+        build_script="$docker_target/build-for-rocky8.sh"
+    fi
+    loggy "build_script (inside docker image): $build_script"
+
+    if test -n "$clean"
+    then
+        clean_and_get_repo "$repo_name" "$branch_name" "$host_target"
+    fi
+
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # Build it
+    loggy "Starting docker. Image: $image"
+    docker run -it \
+        --volume "$host_target":"$docker_target" \
+        --volume "$host_result_dir":"$docker_result_dir" \
+        --env prefix="$docker_result_dir" \
+        --env BUILD_NUMBER=666 \
+        $image $build_script
+
+    mkdir -p $host_target/package
+    tar -C $top_dir -czvf $host_target/package/hyrax-dependencies-rocky9-static.tar.gz install
+    logyy ""
+    loggy "Produced dependencies tar file: "
+    loggy "$(ls -l $host_target/package/hyrax-dependencies-rocky9-static.tar.gz)"
+    logyy ""
+    loggy "Inventory: "
+    loggy "$(tar -tf $host_target/package/hyrax-dependencies-rocky9-static.tar.gz)"
+}
 
 
-    # -c "yum list installed"
-    # /root/travis/travis/build-rpm-8.sh
-    # "ls -l /root"
+# build_libdap_for_rh8 "" ""
 
-
+# build_hyrax_dependencies_for_rh8 RHEL9 c
 
