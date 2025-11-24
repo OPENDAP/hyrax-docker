@@ -98,7 +98,7 @@ function build_libdap_for_rh8() {
     local image="opendap/rocky8_hyrax_builder_new:latest"
     loggy "image: $image"
 
-    local build_script="/root/libdap4/travis/build-rh8-rpm.sh"
+    local build_script="/root/travis/travis/build-rh8-rpm.sh"
     loggy "build_script (inside docker image): $build_script"
 
     if test -n "$clean"
