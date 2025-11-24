@@ -47,15 +47,15 @@ RUN set -e \
     && dnf install -y dnf-plugins-core epel-release
 
 RUN set -e \
-    && yum install -y sqlite sqlite-devel
+    && yum install -y curl curl-devel
 
 # The things!
 RUN set -e \
-    && yum install -y libtirpc  libtirpc-devel \
+    && yum install -y sqlite sqlite-devel libtirpc  libtirpc-devel \
     && yum install -y procps git gcc-c++ flex bison cmake autoconf271 automake libtool emacs bzip2 vim bc \
     && yum install -y valgrind gdb unzip which jq diffutils sqlite sqlite-devel \
     && yum install -y openssl-devel libuuid-devel readline-devel zlib-devel bzip2-devel \
-    && yum install -y libjpeg-devel libxml2-devel curl-devel libicu-devel \
+    && yum install -y libjpeg-devel libxml2-devel libicu-devel \
     && yum install -y rpmdevtools rpmlint \
     && yum install -y java-21-openjdk java-21-openjdk-devel ant \
     && yum clean all
