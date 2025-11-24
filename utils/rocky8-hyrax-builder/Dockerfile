@@ -53,7 +53,7 @@ RUN set -e \
 # The things!
 RUN set -e \
     && yum install -y sqlite sqlite-devel libtirpc  libtirpc-devel \
-    && yum install -y procps git gcc-c++ flex bison cmake autoconf271 automake libtool emacs bzip2 vim bc \
+    && yum install -y procps git gcc-c++ flex bison cmake autoconf automake libtool emacs bzip2 vim bc \
     && yum install -y valgrind gdb unzip which jq diffutils sqlite sqlite-devel \
     && yum install -y openssl-devel libuuid-devel readline-devel zlib-devel bzip2-devel \
     && yum install -y libjpeg-devel libxml2-devel libicu-devel \
