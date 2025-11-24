@@ -39,8 +39,7 @@ RUN set -e \
     && dnf install -y 'dnf-command(config-manager)'
 
 # Enable crb so we can get the libtirpc and libtirpc-devel
-RUN set -e \
-    && dnf config-manager --set-enabled "crb"
+# RUN set -e && dnf config-manager --set-enabled "crb"
 
 # Set up our friends dnf-plugins-code, epel, and codeready-builder-for-rhel-9
 RUN set -e \
