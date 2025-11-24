@@ -75,7 +75,7 @@ RUN set -e \
 RUN set -e \
     && yum install -y python3.12 \
     && python3 --version \
-    && yum install -y awscli2
+    && yum install -y awscli
 
 RUN  set -e \
     && echo "# diff is here: $(which diff)" \
