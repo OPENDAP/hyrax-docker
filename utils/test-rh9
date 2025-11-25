@@ -40,6 +40,13 @@ function use_branch() {
     git remote set-branches origin '*'
     git fetch -v --depth=1
     git checkout "$branch"
+    status=$?
+    if test $status -ne 0
+    then
+        loggy "ERROR! Failed to checkout branch '$branch' for repository: '$repo'"
+        cd "$start_dir"
+        exit $status
+    fi
     cd "$start_dir"
     loggy "$prolog END (pwd: $PWD)"
 }
