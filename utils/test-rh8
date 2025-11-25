@@ -81,6 +81,7 @@ function clean_and_get_repo() {
 ###########################################################################
 # build_libdap_for_rh8
 function build_libdap_for_rh8() {
+    prolog="build_libdap_for_rh8() -"
     local branch_name="$1"
     local clean="$2"
 
@@ -88,26 +89,26 @@ function build_libdap_for_rh8() {
     # configuration
 
     local repo_name="libdap4"
-    loggy "Using repo_name: $repo_name"
+    loggy "$prolog Using repo_name: $repo_name"
 
     local host_target
     host_target="$(pwd)/libdap4"
-    loggy "Using host_target: $host_target"
+    loggy "$prolog Using host_target: $host_target"
 
     local rpmdir
     rpmdir="$(pwd)/rpmdir"
-    loggy "Using rpmdir: $rpmdir"
+    loggy "$prolog Using rpmdir: $rpmdir"
     mkdir -p "$rpmdir"
 
     local BUILD_NUMBER="666"
-    loggy "BUILD_NUMBER: $BUILD_NUMBER"
+    loggy "$prolog BUILD_NUMBER: $BUILD_NUMBER"
 
     # export image="opendap/rocky9_hyrax_builder:latest"
     local image="opendap/rocky8_hyrax_builder:latest"
-    loggy "image: $image"
+    loggy "$prolog Using Docker Image: $image"
 
     local build_script="/root/travis/travis/build-rh8-rpm.sh"
-    loggy "build_script (inside docker image): $build_script"
+    loggy "$prolog build_script (inside docker image): $build_script"
 
     if test -n "$clean"
     then
@@ -116,7 +117,7 @@ function build_libdap_for_rh8() {
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # Build it
-    loggy "Starting docker. Image: $image"
+    loggy "$prolog Starting docker. Image: $image"
     docker run -it \
         --volume "$host_target":/root/travis \
         --volume "$rpmdir":/root/rpmbuild \
@@ -165,8 +166,8 @@ function build_hyrax_dependencies_for_rh8() {
     loggy "$prolog Using docker_result_dir: $docker_result_dir"
 
     # export image="opendap/rocky9_hyrax_builder:latest"
-    local image="opendap/rocky8_hyrax_builder_new:latest"
-    loggy "$prolog image: $image"
+    local image="opendap/rocky8_hyrax_builder:latest"
+    loggy "$prolog Using Docker Image: $image"
 
     local build_script=""
     if test -z "$interactive"
