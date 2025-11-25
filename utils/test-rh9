@@ -181,7 +181,7 @@ function build_hyrax_dependencies_for_rh9() {
     logyy ""
     loggy "Produced dependencies tar file: "
     loggy "$(ls -l $host_target/package/hyrax-dependencies-rocky9-static.tar.gz)"
-    logyy ""
+    loggy ""
     loggy "Inventory: "
     loggy "$(tar -tf $host_target/package/hyrax-dependencies-rocky9-static.tar.gz)"
 }

@@ -10,9 +10,15 @@ function loggy(){
 }
 
 loggy "$HR"
+loggy "$0 - BEGIN"
 
 uid="${1:-""}"
 pwrd="${2:-""}"
+if test -n "$uid" && test -n "$pwrd"
+then
+    loggy "Found uid and password values."
+    loggy "Will use to authenticate with docker.io and upload image."
+fi
 
 image_tag="opendap/rocky8_hyrax_builder_new:latest"
 loggy "  image_tag: $image_tag"
@@ -25,7 +31,7 @@ if test -n "$3"
 then
     no_cache="--no-cache"
 fi
-loggy "   no_cache: $no_cache"
+loggy "   no_cache: '$no_cache'"
 
 sudo docker build $no_cache \
     --platform "linux/amd64" \
@@ -34,7 +40,8 @@ sudo docker build $no_cache \
 status=$?
 if test $status -ne 0
 then
-    echo "docker build command exited with status: $status"
+    echo "ERROR: docker build command exited with status: $status" >&2
+    exit $status
 fi
 
 if test -n "$uid" && test -n "$pwrd"
@@ -44,4 +51,5 @@ then
     docker push "$image_tag"
 fi
 
+loggy "$0 - END"
 loggy "$HR"
