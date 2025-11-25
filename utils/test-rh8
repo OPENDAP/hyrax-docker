@@ -103,7 +103,7 @@ function build_libdap_for_rh8() {
     loggy "BUILD_NUMBER: $BUILD_NUMBER"
 
     # export image="opendap/rocky9_hyrax_builder:latest"
-    local image="opendap/rocky8_hyrax_builder_new:latest"
+    local image="opendap/rocky8_hyrax_builder:latest"
     loggy "image: $image"
 
     local build_script="/root/travis/travis/build-rh8-rpm.sh"
