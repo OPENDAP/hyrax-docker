@@ -1,5 +1,5 @@
 #!/bin/bash
-
+HR="#######################################################################"
 ###########################################################################
 # loggy()
 function loggy(){
@@ -123,43 +123,52 @@ function build_libdap_for_rh9() {
 ###########################################################################
 # build_hyrax_dependencies_for_rh9
 function build_hyrax_dependencies_for_rh9() {
+    local prolog="build_hyrax_dependencies_for_rh9() -"
+    loggy "$HR"
+    loggy "$prolog BEGIN"
     local branch_name="$1"
+    loggy "$prolog branch_name: $branch_name"
+
     local clean="$2"
+    loggy "$prolog clean=$clean"
+
     local interactive="$3"
+    loggy "$prolog interactive: $interactive"
+
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # configuration
 
     local repo_name="hyrax-dependencies"
-    loggy "Using repo_name: $repo_name"
+    loggy "$prolog Using repo_name: $repo_name"
 
     local top_dir
     top_dir="$PWD"
 
     local host_target
     host_target="$top_dir/$repo_name"
-    loggy "Using host_target: $host_target"
+    loggy "$prolog Using host_target: $host_target"
 
     local host_result_dir
     host_result_dir="$top_dir/install"
-    loggy "Using host_result_dir: $host_result_dir"
+    loggy "$prolog Using host_result_dir: $host_result_dir"
     mkdir -vp "$host_result_dir"
 
     local docker_target="/root/$repo_name"
-    loggy "Using docker_target: $docker_target"
+    loggy "$prolog Using docker_target: $docker_target"
 
     local docker_result_dir="/root/install"
-    loggy "Using docker_result_dir: $docker_result_dir"
+    loggy "$prolog Using docker_result_dir: $docker_result_dir"
 
     # export image="opendap/rocky9_hyrax_builder:latest"
     local image="opendap/rocky9_hyrax_builder:latest"
-    loggy "image: $image"
+    loggy "$prolog image: $image"
 
     local build_script=""
     if test -z "$interactive"
     then
         build_script="$docker_target/build-for-rocky9.sh"
     fi
-    loggy "build_script (inside docker image): $build_script"
+    loggy "$prolog build_script (inside docker image): $build_script"
 
     if test -n "$clean"
     then
@@ -168,7 +177,7 @@ function build_hyrax_dependencies_for_rh9() {
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # Build it
-    loggy "Starting docker. Image: $image"
+    loggy "$prolog Starting docker. Image: $image"
     docker run -it \
         --volume "$host_target":"$docker_target" \
         --volume "$host_result_dir":"$docker_result_dir" \
@@ -178,11 +187,13 @@ function build_hyrax_dependencies_for_rh9() {
 
     mkdir -p $host_target/package
     tar -C $top_dir -czvf $host_target/package/hyrax-dependencies-rocky9-static.tar.gz install
-    logyy ""
-    loggy "Produced dependencies tar file: "
+    logyy "$prolog "
+    loggy "$prolog Produced dependencies tar file: "
     loggy "$(ls -l $host_target/package/hyrax-dependencies-rocky9-static.tar.gz)"
-    loggy ""
-    loggy "Inventory: "
+    loggy "$prolog "
+    loggy "$prolog Inventory: "
     loggy "$(tar -tf $host_target/package/hyrax-dependencies-rocky9-static.tar.gz)"
+    loggy "$prolog"
+    loggy "$prolog END"
 }
 
