@@ -190,7 +190,14 @@ function build_hyrax_dependencies_for_rh8() {
         --env prefix="$docker_result_dir" \
         --env BUILD_NUMBER=666 \
         $image $build_script
+    status=$?
+    if test $status -ne 0
+    then
+        loggy "$prolog ERROR! Docker run command failed! status: $status"
+        return $status;
+    fi
 
+    loggy "$prolog Packaging results..."
     mkdir -p $host_target/package
     tar -C $top_dir -czvf $host_target/package/hyrax-dependencies-rocky9-static.tar.gz install
     loggy "$prolog "
