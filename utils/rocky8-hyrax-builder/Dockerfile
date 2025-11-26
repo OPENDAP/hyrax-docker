@@ -51,9 +51,9 @@ RUN set -e \
     && curl --version
 
 RUN set -e \
-    && echo "Installing sqlite and sqlite-devel via yum packages" \
+    && echo "########### Installing sqlite and sqlite-devel via yum packages" \
     && yum install -y sqlite sqlite-devel \
-    && pkg-config --exists sqlite
+    && pkg-config --list-all
 
 # The things!
 RUN set -e \
