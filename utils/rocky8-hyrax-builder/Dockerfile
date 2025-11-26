@@ -50,9 +50,14 @@ RUN set -e \
     && yum install -y curl-devel  \
     && curl --version
 
+RUN set -e \
+    && echo "Installing sqlite and sqlite-devel via yum packages" \
+    && yum install -y sqlite sqlite-devel \
+    && pkg-config --exists sqlite
+
 # The things!
 RUN set -e \
-    && yum install -y sqlite sqlite-devel libtirpc  libtirpc-devel \
+    && yum install -y libtirpc  libtirpc-devel \
     && yum install -y procps git gcc-c++ flex bison cmake autoconf automake libtool emacs bzip2 vim bc \
     && yum install -y valgrind gdb unzip which jq diffutils sqlite sqlite-devel \
     && yum install -y openssl-devel libuuid-devel readline-devel zlib-devel bzip2-devel \
