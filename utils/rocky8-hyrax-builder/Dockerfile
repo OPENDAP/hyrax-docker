@@ -51,9 +51,12 @@ RUN set -e \
     && curl --version
 
 RUN set -e \
-    && echo "########### Installing sqlite and sqlite-devel via yum packages" \
+    && echo "$HR" \
+    && echo "# Installing sqlite and sqlite-devel via yum packages" \
+    && echo "#" \
     && yum install -y sqlite sqlite-devel \
-    && pkg-config --list-all
+    && pkg-config --exists sqlite3 \
+    && echo "# sqlite and sqlite-devel installed via yum packages"
 
 # The things!
 RUN set -e \
