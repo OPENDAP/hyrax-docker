@@ -60,6 +60,9 @@ RUN set -e \
     && echo "# sqlite and sqlite-devel installed via yum packages" \
     && echo "$HR"
 
+RUN set -e \
+    && yum install -y zstd
+
 # The things!
 RUN set -e \
     && yum install -y libtirpc  libtirpc-devel \
