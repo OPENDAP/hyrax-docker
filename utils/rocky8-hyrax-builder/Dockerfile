@@ -65,6 +65,7 @@ RUN set -e \
     && echo "# Installing zstd, libzstd, libzstd-devel via yum packages" \
     && echo "#" \
     && yum install -y zstd libzstd-devel \
+    && pkg-config --list-all \
     && pkg-config --exists zstd \
     && echo "#" \
     && echo "# zstd, libzstd, libzstd-devel installed via yum packages" \
