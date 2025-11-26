@@ -66,7 +66,7 @@ RUN set -e \
     && echo "#" \
     && yum install -y zstd libzstd-devel \
     && pkg-config --list-all \
-    && pkg-config --exists zstd \
+    && pkg-config --exists libzstd \
     && echo "#" \
     && echo "# zstd, libzstd, libzstd-devel installed via yum packages" \
     && echo "$HR"
