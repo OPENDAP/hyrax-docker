@@ -56,7 +56,9 @@ RUN set -e \
     && echo "#" \
     && yum install -y sqlite sqlite-devel \
     && pkg-config --exists sqlite3 \
-    && echo "# sqlite and sqlite-devel installed via yum packages"
+    && echo "#" \
+    && echo "# sqlite and sqlite-devel installed via yum packages" \
+    && echo "$HR"
 
 # The things!
 RUN set -e \
