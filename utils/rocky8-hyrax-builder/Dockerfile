@@ -61,7 +61,14 @@ RUN set -e \
     && echo "$HR"
 
 RUN set -e \
-    && yum install -y zstd
+    && echo "$HR" \
+    && echo "# Installing zstd, libzstd, libzstd-devel via yum packages" \
+    && echo "#" \
+    && yum install -y zstd libzstd libzstd-devel \
+    && pkg-config --exists zstd \
+    && echo "#" \
+    && echo "# zstd, libzstd, libzstd-devel installed via yum packages" \
+    && echo "$HR"
 
 # The things!
 RUN set -e \
