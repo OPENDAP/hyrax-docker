@@ -14,7 +14,7 @@
 # it for debugging stuff.
 #
 # Set one or more individual labels
-FROM rockylinux:9
+FROM ubuntu:focal
 
 LABEL vendor="OPeNDAP"
 LABEL maintainer="support@opendap.org"
@@ -33,55 +33,48 @@ RUN set -e \
 # are installed in the container but not run until a later stage of the
 # Travis build (or at a later time). They need to be part of the container,
 # however, to be run, so install them as part of this Dockerfile.
-RUN set -e && yum update  -y
+RUN set -e && apt-get update  -y && apt-get -y upgrade
 
 RUN set -e \
-    && dnf install -y 'dnf-command(config-manager)'
-
-# Enable crb so we can get the libtirpc and libtirpc-devel
+    && apt-get install -y  build-essential
 RUN set -e \
-    && dnf config-manager --set-enabled "crb"
-
-# Set up our friends dnf-plugins-code, epel, and codeready-builder-for-rhel-9
+    && apt-get install -y  uuid-dev  libxml2-dev  libcurl4-openssl-dev  libcppunit-dev
 RUN set -e \
-    && dnf install -y dnf-plugins-core epel-release
-
+    && apt-get install -y  libicu-dev  gcovr  libfl-dev openjdk-17-jdk-headless
 RUN set -e \
-    && yum install -y curl --allowerasing \
-    && yum install -y curl-devel  \
-    && curl --version
+    && apt-get install -y  grep emacs vim
+RUN set -e \
+    && apt-get install -y curl
+
+
 
 RUN set -e \
     && echo "$HR" \
     && echo "# Installing sqlite and sqlite-devel via yum packages" \
     && echo "#" \
-    && yum install -y sqlite sqlite-devel \
-    && pkg-config --exists sqlite3 \
+    && apt-get install -y sqlite3 \
     && echo "#" \
-    && echo "# sqlite and sqlite-devel installed via yum packages" \
+    && echo "# sqlite3  installed via apt-get packages" \
     && echo "$HR"
 
 RUN set -e \
     && echo "$HR" \
-    && echo "# Installing zstd, libzstd, libzstd-devel via yum packages" \
+    && echo "# Installing zstd, via yum packages" \
     && echo "#" \
-    && yum install -y zstd libzstd-devel \
-    && pkg-config --list-all \
-    && pkg-config --exists libzstd \
+    && apt-get install -y zstd  \
     && echo "#" \
-    && echo "# zstd, libzstd, libzstd-devel installed via yum packages" \
+    && echo "# zstd installed via apt-get packages" \
     && echo "$HR"
 
 # The things!
 RUN set -e \
-    && yum install -y libtirpc  libtirpc-devel \
-    && yum install -y procps git gcc-c++ flex bison cmake autoconf271 automake libtool emacs bzip2 vim bc \
-    && yum install -y valgrind gdb unzip which jq diffutils sqlite sqlite-devel \
-    && yum install -y openssl-devel libuuid-devel readline-devel zlib-devel bzip2-devel \
-    && yum install -y libjpeg-devel libxml2-devel libicu-devel \
-    && yum install -y rpmdevtools rpmlint \
-    && yum install -y java-21-openjdk java-21-openjdk-devel ant \
-    && yum clean all
+    && apt-get install -y procps git gcc flex bison cmake autoconf automake libtool emacs bzip2 vim bc \
+    && apt-get install -y valgrind gdb unzip which jq diffutils sqlite sqlite-devel \
+    && apt-get install -y openssl-devel libuuid-devel readline-devel zlib-devel bzip2-devel \
+    && apt-get install -y libjpeg-devel libxml2-devel libicu-devel \
+    && apt-get install -y rpmdevtools rpmlint \
+    && apt-get install -y java-21-openjdk java-21-openjdk-devel ant \
+    && apt-get clean all
 
 #RUN set -e  \
 #    && yum install -y openjpeg2-devel jasper-devel
@@ -95,9 +88,9 @@ RUN set -e \
 
 
 RUN set -e \
-    && yum install -y python3.12 \
+    && apt-get install -y python3.12 \
     && python3 --version \
-    && yum install -y awscli2
+    && apt-get install -y awscli
 
 RUN  set -e \
     && echo "# diff is here: $(which diff)" \

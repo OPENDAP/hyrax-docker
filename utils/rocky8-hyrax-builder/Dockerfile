@@ -107,7 +107,7 @@ RUN  set -e \
 RUN set -e \
     && echo "# I AM THE USER $(whoami)" \
     && mkdir -vp "$HOME/rpmbuild" \
-    && echo "# HOME: $HOME" \
+    && echo "# HOME: $HOME"
 
 # RUN ls -l /usr/libexec/
 
