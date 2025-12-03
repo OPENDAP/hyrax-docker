@@ -166,10 +166,12 @@ function build_hyrax_dependencies_for_ubuntu() {
     local image="opendap/ubuntu_hyrax_builder:latest"
     loggy "$prolog Using Docker Image: $image"
 
-    local build_script=""
+    local build_script_name=""
+    local docker_run_script=""
     if test -z "$interactive"; then
-        build_script="build-deps-for-ubuntu.sh"
-        loggy "$prolog build_script (used inside docker image): '$build_script'"
+        build_script_name="build-deps-for-ubuntu.sh"
+        docker_run_script="/root/$build_script_name"
+        loggy "$prolog build_script (used inside docker image): '$build_script_name'"
     else
         loggy "$prolog This is an interactive deployment, no build script used."
     fi
@@ -184,11 +186,11 @@ function build_hyrax_dependencies_for_ubuntu() {
     docker run -it \
         --volume "$host_target":"$docker_target" \
         --volume "$host_result_dir":"$docker_result_dir" \
-        --volume "$top_dir/$build_script":"/root/$build_script" \
+        --volume "$top_dir/$build_script_name":"$docker_run_script" \
         --env extra_targets="aws_s2n_tls" \
         --env prefix="$docker_result_dir" \
         --env BUILD_NUMBER=666 \
-        $image /root/$build_script
+        $image $docker_run_script
     status=$?
     if test $status -ne 0; then
         loggy "$prolog ERROR! Docker run command failed! status: $status"
