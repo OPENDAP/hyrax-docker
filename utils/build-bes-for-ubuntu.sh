@@ -25,7 +25,7 @@ loggy "$0 - BEGIN"
 loggy ""
 loggy " prefix: $prefix"
 loggy "    PWD: $PWD"
-export LD_LIBRARY_PATH="/home/travis/install/deps/lib:$LD_LIBRARY_PATH"
+export LD_LIBRARY_PATH="$prefix/deps/lib:$prefix/deps/proj/lib:$LD_LIBRARY_PATH"
 loggy "LD_LIBRARY_PATH:$LD_LIBRARY_PATH"
 
 repo_dir="/root/bes"
