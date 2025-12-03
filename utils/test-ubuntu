@@ -257,10 +257,17 @@ function build_bes_for_ubuntu() {
 
     # ubuntu_dependencies_bundle="s3://opendap.travis.build/hyrax-dependencies-ubuntu.tar.gz"
     local ubuntu_dependencies_bundle="s3://opendap.travis.build/hyrax-dependencies-build.tar.gz"
-    loggy "$prolog ubuntu_dependencies_bundle: $ubuntu_dependencies_bundle"
+    loggy "$prolog Using ubuntu_dependencies_bundle: $ubuntu_dependencies_bundle"
 
+    loggy "$prolog Retrieving ubuntu_dependencies_bundle: $ubuntu_dependencies_bundle"
     aws s3 cp $ubuntu_dependencies_bundle ./dependencies.tgz
-
+    status=$?
+    if test $status -ne 0
+    then
+        loggy "ERROR! Failed to acquire: '$ubuntu_dependencies_bundle' status: $status"
+        return $status
+    fi
+    ls -l ./dependencies.tgz
 return 0
 
 
