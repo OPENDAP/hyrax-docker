@@ -148,6 +148,7 @@ function build_hyrax_dependencies_for_ubuntu() {
 
     local top_dir
     top_dir="$PWD"
+    loggy "$prolog top_dir: $top_dir"
 
     local host_target
     host_target="$top_dir/$repo_name"
@@ -160,7 +161,6 @@ function build_hyrax_dependencies_for_ubuntu() {
 
     local result_bundle="$host_target/package/hyrax-dependencies-ubuntu.tar.gz"
     loggy "$prolog Using result_bundle: $result_bundle"
-
 
     local docker_target="/root/$repo_name"
     loggy "$prolog Using docker_target: $docker_target"
@@ -196,7 +196,7 @@ function build_hyrax_dependencies_for_ubuntu() {
         --env extra_targets="aws_s2n_tls" \
         --env prefix="$docker_result_dir" \
         --env BUILD_NUMBER=666 \
-        $image $build_script
+        $image /root/$build_script
     status=$?
     if test $status -ne 0
     then
