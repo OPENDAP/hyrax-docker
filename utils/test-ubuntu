@@ -79,7 +79,7 @@ function clean_and_get_repo() {
 }
 
 ###########################################################################
-# build_libdap_for_rh8
+# build_libdap_for_ubuntu
 function build_libdap_for_ubuntu() {
     prolog="build_libdap_for_ubuntu() -"
     local branch_name="$1"
@@ -127,7 +127,7 @@ function build_libdap_for_ubuntu() {
         $build_script
 }
 ###########################################################################
-# build_hyrax_dependencies_for_rh8
+# build_hyrax_dependencies_for_ubuntu
 function build_hyrax_dependencies_for_ubuntu() {
     local prolog="build_hyrax_dependencies_for_ubuntu() -"
     loggy "$HR"
@@ -192,7 +192,7 @@ function build_hyrax_dependencies_for_ubuntu() {
     docker run -it \
         --volume "$host_target":"$docker_target" \
         --volume "$host_result_dir":"$docker_result_dir" \
-        --volume "$top_dir/build-for-ubuntu.sh":"/root/build-for-ubuntu.sh" \
+        --volume "$top_dir/build-for-ubuntu.sh":"/root/build-deps-for-ubuntu.sh" \
         --env extra_targets="aws_s2n_tls" \
         --env prefix="$docker_result_dir" \
         --env BUILD_NUMBER=666 \
@@ -217,3 +217,98 @@ function build_hyrax_dependencies_for_ubuntu() {
     loggy "$prolog END"
 }
 
+function test_inject(){
+    local prolog="test_inject()"
+    local branch_name="${1:-"master"}"
+    loggy "$prolog branch_name: $branch_name"
+}
+
+###########################################################################
+# build_hyrax_dependencies_for_ubuntu
+function build_bes_for_ubuntu() {
+    local prolog="build_bes_for_ubuntu() -"
+    loggy "$HR"
+    loggy "$prolog BEGIN"
+    local branch_name="${1:-"master"}"
+    loggy "$prolog branch_name: $branch_name"
+
+    local clean="$2"
+    loggy "$prolog clean: '$clean'"
+
+    local interactive="$3"
+    loggy "$prolog interactive: '$interactive'"
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # configuration
+
+    local repo_name="bes"
+    loggy "$prolog Using repo_name: $repo_name"
+
+    local top_dir
+    top_dir="$PWD"
+
+    local host_target
+    host_target="$top_dir/$repo_name"
+    loggy "$prolog Using host_target: $host_target"
+
+    local host_result_dir
+    host_result_dir="$top_dir/install"
+    loggy "$prolog Using host_result_dir: $host_result_dir"
+    mkdir -vp "$host_result_dir"
+
+    local result_bundle="$host_target/package/hyrax-dependencies-ubuntu.tar.gz"
+    loggy "$prolog Using result_bundle: $result_bundle"
+
+    local docker_target="/root/$repo_name"
+    loggy "$prolog Using docker_target: $docker_target"
+
+    local docker_result_dir="/root/install"
+    loggy "$prolog Using docker_result_dir: $docker_result_dir"
+
+    local image="opendap/ubuntu_hyrax_builder:latest"
+    loggy "$prolog Using Docker Image: $image"
+
+    local build_script=""
+    if test -z "$interactive"
+    then
+        build_script="/root/build-for-ubuntu.sh"
+        loggy "$prolog build_script (used inside docker image): '$build_script'"
+    else
+        loggy "$prolog This is an interactive deployment, no build script used."
+    fi
+
+
+    if test -n "$clean"
+    then
+        clean_and_get_repo "$repo_name" "$branch_name" "$host_target"
+    fi
+
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # Build it
+    loggy "$prolog Starting docker. Image: $image"
+    docker run -it \
+        --volume "$host_target":"$docker_target" \
+        --volume "$host_result_dir":"$docker_result_dir" \
+        --volume "$top_dir/build-for-ubuntu.sh":"/root/build-for-deps-ubuntu.sh" \
+        --env extra_targets="aws_s2n_tls" \
+        --env prefix="$docker_result_dir" \
+        --env BUILD_NUMBER=666 \
+        $image $build_script
+    status=$?
+    if test $status -ne 0
+    then
+        loggy "$prolog ERROR! Docker run command failed! status: $status"
+        return $status;
+    fi
+
+    loggy "$prolog Packaging results. result_bundle: $result_bundle"
+    mkdir -p $host_target/package
+    tar -C $top_dir -czvf $result_bundle install
+    loggy "$prolog "
+    loggy "$prolog Produced dependencies tar file: "
+    loggy "$(ls -l $result_bundle)"
+    loggy "$prolog "
+    loggy "$prolog Inventory: "
+    loggy "$(tar -tf $result_bundle)"
+    loggy "$prolog"
+    loggy "$prolog END"
+}
