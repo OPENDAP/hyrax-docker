@@ -174,7 +174,7 @@ function build_hyrax_dependencies_for_ubuntu() {
     local build_script=""
     if test -z "$interactive"
     then
-        build_script="-c \"cd /root/hyrax-dependencies; make -j16 for-travis 2>&1 | tee ../install/build.log;\" "
+        build_script=" \"cd /root/hyrax-dependencies; make -j16 for-travis 2>&1 | tee ../install/build.log;\" "
         loggy "$prolog build_script (inside docker image): '$build_script'"
     else
         loggy "$prolog This is an interactive deployment, no build script used."
