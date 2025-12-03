@@ -266,8 +266,9 @@ function build_bes_for_ubuntu() {
     then
         loggy "ERROR! Failed to acquire: '$ubuntu_dependencies_bundle' status: $status"
         return $status
+    else
+        loggy "Dependencies acquired: $(ls -l ./dependencies.tgz)"
     fi
-    ls -l ./dependencies.tgz
 return 0
 
 
