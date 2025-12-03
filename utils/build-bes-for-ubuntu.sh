@@ -43,20 +43,16 @@ export proj_libdir="$proj_prefix/lib64" ;
 export deps_libdir="$prefix/deps/lib64";
 if ! test -d "$proj_libdir"
 then
-    proj_libdir="$(proj_prefix)/lib"
-    LDFLAGS="${LDFLAGS:-""} -L$proj_libdir"
+    proj_libdir="$proj_prefix/lib"
 fi
+LDFLAGS="${LDFLAGS:-""} -L$proj_libdir "
 
 if ! test -d "$deps_libdir"
 then
     export deps_libdir="$prefix/deps/lib"
-    LDFLAGS="${LDFLAGS:-""} -L$deps_libdir"
 fi
-
-
-
-
-
+LDFLAGS="${LDFLAGS:-""} -L$deps_libdir "
+loggy "LDFLAGS: $LDFLAGS"
 
 repo_dir="/root/bes"
 loggy "     repo_dir: $repo_dir"
