@@ -298,7 +298,7 @@ function build_bes_for_ubuntu() {
     loggy "$prolog Using host_result_dir: $host_result_dir"
     mkdir -vp "$host_result_dir"
 
-    get_bes_dependencies
+    get_bes_dependencies "" "" ""
 
     local docker_target="/root/$repo_name"
     loggy "$prolog Using docker_target: $docker_target"
@@ -306,24 +306,15 @@ function build_bes_for_ubuntu() {
     local docker_result_dir="/root/install"
     loggy "$prolog Using docker_result_dir: $docker_result_dir"
 
-    local build_rpm_script=""
-    if test -z "$interactive"
-    then
-        build_rpm_script="$docker_target/travis/build-rh8-rpm.sh"
-        loggy "$prolog Using build_rpm_script: $build_rpm_script"
-    else
-        loggy "Interactive Mode Engaged: No build script will be used."
-
-    fi
     local image="opendap/ubuntu_hyrax_builder:latest"
     loggy "$prolog Using Docker Image: $image"
 
     local build_script=""
     if test -z "$interactive"; then
-        build_script="build-bes-for-ubuntu.sh"
+        build_script="$docker_target/travis/build-rh8-rpm.sh"
         loggy "$prolog build_script (used inside docker image): '$build_script'"
     else
-        loggy "$prolog This is an interactive deployment, no build script used."
+        loggy "Interactive Mode Engaged: No build script will be used."
     fi
 
     if test -n "$clean"; then
@@ -339,7 +330,7 @@ function build_bes_for_ubuntu() {
         --volume "$host_result_dir":"$docker_result_dir" \
         --env prefix="$docker_result_dir" \
         --env BUILD_NUMBER=666 \
-        $image "$build_rpm_script"
+        "$image" $build_script
 
     status=$?
     if test $status -ne 0; then
