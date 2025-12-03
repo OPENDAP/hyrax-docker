@@ -311,11 +311,13 @@ function build_bes_for_ubuntu() {
 
     local build_script=""
     if test -z "$interactive"; then
-        build_script="$docker_target/travis/build-rh8-rpm.sh"
+        build_script="build-bes-for-ubuntu.sh"
         loggy "$prolog build_script (used inside docker image): '$build_script'"
     else
-        loggy "Interactive Mode Engaged: No build script will be used."
+        loggy "$prolog This is an interactive deployment, no build script used."
     fi
+
+
 
     if test -n "$clean"; then
         clean_and_get_repo "$repo_name" "$branch_name" "$host_target"
@@ -328,9 +330,10 @@ function build_bes_for_ubuntu() {
     docker run -it \
         --volume "$host_target":"$docker_target" \
         --volume "$host_result_dir":"$docker_result_dir" \
+        --volume "$top_dir/$build_script":"/root/$build_script" \
         --env prefix="$docker_result_dir" \
         --env BUILD_NUMBER=666 \
-        "$image" $build_script
+        "$image" "/root/$build_script"
 
     status=$?
     if test $status -ne 0; then
