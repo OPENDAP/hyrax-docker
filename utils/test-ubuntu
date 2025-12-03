@@ -289,6 +289,10 @@ function build_bes_for_ubuntu() {
     host_target="$top_dir/$repo_name"
     loggy "$prolog Using host_target: $host_target"
 
+    if test -n "$clean" || ! test -d "$host_target"; then
+        clean_and_get_repo "$repo_name" "$branch_name" "$host_target"
+    fi
+
     local host_result_dir
     host_result_dir="$top_dir/install"
     loggy "$prolog Using host_result_dir: $host_result_dir"
