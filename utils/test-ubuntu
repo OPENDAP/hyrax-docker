@@ -2,23 +2,21 @@
 HR="#######################################################################"
 ###########################################################################
 # loggy()
-function loggy(){
-    echo  "$@" | awk '{ print "# "$0;}'  >&2
+function loggy() {
+    echo "$@" | awk '{ print "# "$0;}' >&2
 }
 
 ###########################################################################
 # Remove all containers
-function drmac(){
-    docker rm -f $(docker ps -aq);
+function drmac() {
+    docker rm -f $(docker ps -aq)
 }
 
 ###########################################################################
 # Remove all images
-function drmai(){
-    docker rmi -f $(docker images -q);
+function drmai() {
+    docker rmi -f $(docker images -q)
 }
-
-
 
 ###########################################################################
 # use_branch()
@@ -41,8 +39,7 @@ function use_branch() {
     git fetch -v --depth=1
     git checkout "$branch"
     status=$?
-    if test $status -ne 0
-    then
+    if test $status -ne 0; then
         loggy "ERROR! Failed to checkout branch '$branch' for repository: '$repo'"
         cd "$start_dir"
         return $status
@@ -63,7 +60,7 @@ function clean_and_get_repo() {
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # cleanup repo from previous efforts
     loggy "$prolog Cleaning $host_target"
-    loggy "$prolog Removed $( rm -vrf $host_target | wc -l ) files."
+    loggy "$prolog Removed $(rm -vrf $host_target | wc -l) files."
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # Clone fresh repo
@@ -72,8 +69,7 @@ function clean_and_get_repo() {
     loggy "$prolog Cloning $repo_url"
     git clone --depth 1 "$repo_url" "$host_target"
 
-    if test -n "$branch_name"
-    then
+    if test -n "$branch_name"; then
         use_branch "$host_target" "$branch_name"
     fi
 }
@@ -109,8 +105,7 @@ function build_libdap_for_ubuntu() {
     local build_script="/root/libdap4/travis/build-rh8-rpm.sh"
     loggy "$prolog build_script (inside docker image): $build_script"
 
-    if test -n "$clean"
-    then
+    if test -n "$clean"; then
         clean_and_get_repo "$repo_name" "$branch_name" "$host_target"
     fi
 
@@ -172,17 +167,14 @@ function build_hyrax_dependencies_for_ubuntu() {
     loggy "$prolog Using Docker Image: $image"
 
     local build_script=""
-    if test -z "$interactive"
-    then
+    if test -z "$interactive"; then
         build_script="build-deps-for-ubuntu.sh"
         loggy "$prolog build_script (used inside docker image): '$build_script'"
     else
         loggy "$prolog This is an interactive deployment, no build script used."
     fi
 
-
-    if test -n "$clean"
-    then
+    if test -n "$clean"; then
         clean_and_get_repo "$repo_name" "$branch_name" "$host_target"
     fi
 
@@ -198,10 +190,9 @@ function build_hyrax_dependencies_for_ubuntu() {
         --env BUILD_NUMBER=666 \
         $image /root/$build_script
     status=$?
-    if test $status -ne 0
-    then
+    if test $status -ne 0; then
         loggy "$prolog ERROR! Docker run command failed! status: $status"
-        return $status;
+        return $status
     fi
 
     loggy "$prolog Packaging results. result_bundle: $result_bundle"
@@ -217,14 +208,23 @@ function build_hyrax_dependencies_for_ubuntu() {
     loggy "$prolog END"
 }
 
-function test_inject(){
+function test_inject() {
     local prolog="test_inject()"
     local branch_name="${1:-"master"}"
     loggy "$prolog branch_name: $branch_name"
 }
 
 ###########################################################################
-# build_hyrax_dependencies_for_ubuntu
+# build_bes_for_ubuntu()
+#
+# From .travis.yml
+# - autoreconf --force --install --verbose
+# - ./configure --disable-dependency-tracking --prefix=$prefix --with-dependencies=$prefix/deps --enable-developer
+# - export LD_LIBRARY_PATH="/home/travis/install/deps/lib:$LD_LIBRARY_PATH"
+# - echo "LD_LIBRARY_PATH - $LD_LIBRARY_PATH" >&2
+# - make -j16 && make install && besctl start && make check -j16 && besctl stop
+# - echo "LD_LIBRARY_PATH - $LD_LIBRARY_PATH" >&2
+#
 function build_bes_for_ubuntu() {
     local prolog="build_bes_for_ubuntu() -"
     loggy "$HR"
@@ -255,8 +255,14 @@ function build_bes_for_ubuntu() {
     loggy "$prolog Using host_result_dir: $host_result_dir"
     mkdir -vp "$host_result_dir"
 
-    local result_bundle="$host_target/package/hyrax-dependencies-ubuntu.tar.gz"
-    loggy "$prolog Using result_bundle: $result_bundle"
+    # ubuntu_dependencies_bundle="s3://opendap.travis.build/hyrax-dependencies-ubuntu.tar.gz"
+    local ubuntu_dependencies_bundle="s3://opendap.travis.build/hyrax-dependencies-build.tar.gz"
+    loggy "$prolog ubuntu_dependencies_bundle: $ubuntu_dependencies_bundle"
+
+    aws s3 cp $ubuntu_dependencies_bundle ./dependencies.tgz
+
+return 0
+
 
     local docker_target="/root/$repo_name"
     loggy "$prolog Using docker_target: $docker_target"
@@ -268,19 +274,17 @@ function build_bes_for_ubuntu() {
     loggy "$prolog Using Docker Image: $image"
 
     local build_script=""
-    if test -z "$interactive"
-    then
+    if test -z "$interactive"; then
         build_script="build-bes-for-ubuntu.sh"
         loggy "$prolog build_script (used inside docker image): '$build_script'"
     else
         loggy "$prolog This is an interactive deployment, no build script used."
     fi
 
-
-    if test -n "$clean"
-    then
+    if test -n "$clean"; then
         clean_and_get_repo "$repo_name" "$branch_name" "$host_target"
     fi
+
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # Build it
@@ -294,10 +298,9 @@ function build_bes_for_ubuntu() {
         --env BUILD_NUMBER=666 \
         $image $build_script
     status=$?
-    if test $status -ne 0
-    then
+    if test $status -ne 0; then
         loggy "$prolog ERROR! Docker run command failed! status: $status"
-        return $status;
+        return $status
     fi
 
     loggy "$prolog Packaging results. result_bundle: $result_bundle"
