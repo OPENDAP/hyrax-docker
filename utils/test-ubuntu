@@ -334,7 +334,6 @@ function build_bes_for_ubuntu() {
     docker run -it \
         --volume "$host_target":"$docker_target" \
         --volume "$host_result_dir":"$docker_result_dir" \
-        --volume "$top_dir/$build_script_name":"$docker_run_script" \
         --env prefix="$docker_result_dir" \
         --env BUILD_NUMBER=666 \
         "$image" $docker_run_script
