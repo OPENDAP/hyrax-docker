@@ -136,10 +136,10 @@ function build_hyrax_dependencies_for_ubuntu() {
     loggy "$prolog branch_name: $branch_name"
 
     local clean="$2"
-    loggy "$prolog clean=$clean"
+    loggy "$prolog clean: '$clean'"
 
     local interactive="$3"
-    loggy "$prolog interactive: $interactive"
+    loggy "$prolog interactive: '$interactive'"
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # configuration
 
