@@ -48,7 +48,7 @@ RUN set -e \
 RUN set -e \
     && apt-get install -y  grep emacs vim
 RUN set -e \
-    && apt-get install -y curl
+    && apt-get install -y curl readline
 
 
 RUN set -e \
