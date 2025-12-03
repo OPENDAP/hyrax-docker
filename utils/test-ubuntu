@@ -294,7 +294,7 @@ function build_bes_for_ubuntu() {
     loggy "$prolog Using host_result_dir: $host_result_dir"
     mkdir -vp "$host_result_dir"
 
-    get_bes_dependencies "" "$top_dir"
+    get_bes_dependencies
 
     local docker_target="/root/$repo_name"
     loggy "$prolog Using docker_target: $docker_target"
