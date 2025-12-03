@@ -221,6 +221,7 @@ function get_bes_dependencies() {
     loggy "$prolog Using libdap_bundle: $libdap_bundle"
 
     local unpack_in_dir="${3:-"."}"
+    loggy "$prolog Using unpack_in_dir: $unpack_in_dir"
 
     local deps_tarball="./dependencies.tgz"
     loggy "$prolog deps_tarball: $deps_tarball"
@@ -235,7 +236,9 @@ function get_bes_dependencies() {
         loggy "Dependencies acquired: $(ls -l "$deps_tarball")"
     fi
     loggy "Unpacking $deps_tarball"
-    tar -C "$unpack_in_dir" -xzvf  $deps_tarball
+    local fcount=
+    fcount="$(tar -C "$unpack_in_dir" -xzvf  $deps_tarball | wc -l)"
+    loggy "Unpacked $fcount files from $deps_tarball"
 
     loggy "$prolog Using libdap_bundle: $libdap_bundle"
     local libdap_tarball="./libdap.tgz"
@@ -251,7 +254,8 @@ function get_bes_dependencies() {
         loggy "Acquired libdap bundle: $(ls -l "$libdap_tarball")"
     fi
     loggy "Unpacking $libdap_tarball"
-    tar -C "$unpack_in_dir" -xzvf  $libdap_tarball
+    fcount="$(tar -C "$unpack_in_dir" -xzvf  $libdap_tarball | wc -l)"
+    loggy "Unpacked $fcount files from $libdap_tarball"
 
 }
 
