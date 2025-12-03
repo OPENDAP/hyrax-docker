@@ -306,9 +306,15 @@ function build_bes_for_ubuntu() {
     local docker_result_dir="/root/install"
     loggy "$prolog Using docker_result_dir: $docker_result_dir"
 
-    local build_rpm_script="$docker_target/travis/build-rh8-rpm.sh"
-    loggy "$prolog Using build_rpm_script: $build_rpm_script"
+    local build_rpm_script=""
+    if test -z "$interactive"
+    then
+        build_rpm_script="$docker_target/travis/build-rh8-rpm.sh"
+        loggy "$prolog Using build_rpm_script: $build_rpm_script"
+    else
+        loggy "Interactive Mode Engaged: No build script will be used."
 
+    fi
     local image="opendap/ubuntu_hyrax_builder:latest"
     loggy "$prolog Using Docker Image: $image"
 
@@ -334,6 +340,7 @@ function build_bes_for_ubuntu() {
         --env prefix="$docker_result_dir" \
         --env BUILD_NUMBER=666 \
         $image "$build_rpm_script"
+
     status=$?
     if test $status -ne 0; then
         loggy "$prolog ERROR! Docker run command failed! status: $status"
