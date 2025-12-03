@@ -37,6 +37,27 @@ loggy "PATH:$PATH"
 export CPPFLAGS="${CPPFLAGS:-""} -I$prefix/include ";
 loggy "CPPFLAGS:$CPPFLAGS"
 
+proj_prefix="$prefix/deps/proj/"
+export LDFLAGS="${LDFLAGS:-""} -L$prefix/lib -lpthread -lm ";
+export proj_libdir="$proj_prefix/lib64" ;
+export deps_libdir="$prefix/deps/lib64";
+if ! test -d "$proj_libdir"
+then
+    proj_libdir="$(proj_prefix)/lib"
+    LDFLAGS="${LDFLAGS:-""} -L$proj_libdir"
+fi
+
+if ! test -d "$deps_libdir"
+then
+    export deps_libdir="$prefix/deps/lib"
+    LDFLAGS="${LDFLAGS:-""} -L$deps_libdir"
+fi
+
+
+
+
+
+
 repo_dir="/root/bes"
 loggy "     repo_dir: $repo_dir"
 loggy "Changing to repo_dir: $repo_dir"
