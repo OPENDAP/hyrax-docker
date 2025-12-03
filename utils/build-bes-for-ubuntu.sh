@@ -65,11 +65,11 @@ loggy ""
 autoreconf  --force --install --verbose
 ./configure --disable-dependency-tracking --prefix=$prefix --with-dependencies=$prefix/deps --enable-developer
 
-make -j16
-make install
-besctl start
-make check -j16
-besctl stop
+make -j16  \
+    && make install \
+    && besctl start \
+    && make check -j16 \
+    && besctl stop
 
 loggy "$0 - END"
 loggy "$HR"
