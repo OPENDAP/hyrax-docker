@@ -34,7 +34,7 @@ loggy "PKG_CONFIG_PATH:$PKG_CONFIG_PATH"
 export PATH="$prefix/bin:$prefix/deps/bin:$PATH";
 loggy "PATH:$PATH"
 
-export CPPFLAGS="${CPPFLAGS:-""} -I$(prefix)/include ";
+export CPPFLAGS="${CPPFLAGS:-""} -I$prefix/include ";
 loggy "CPPFLAGS:$CPPFLAGS"
 
 repo_dir="/root/bes"
