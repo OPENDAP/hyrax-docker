@@ -208,10 +208,48 @@ function build_hyrax_dependencies_for_ubuntu() {
     loggy "$prolog END"
 }
 
-function test_inject() {
-    local prolog="test_inject()"
-    local branch_name="${1:-"master"}"
-    loggy "$prolog branch_name: $branch_name"
+function get_bes_dependencies() {
+    local prolog="get_bes_dependencies() -"
+
+    # ubuntu_dependencies_bundle="s3://opendap.travis.build/hyrax-dependencies-ubuntu.tar.gz"
+    local dependencies_bundle="${1:-"s3://opendap.travis.build/hyrax-dependencies-build.tar.gz"}"
+    loggy "$prolog Using ubuntu_dependencies_bundle: $dependencies_bundle"
+
+    local libdap_bundle="${2:-"s3://opendap.travis.build/libdap-build.tar.gz"}"
+    loggy "$prolog Using libdap_bundle: $dependencies_bundle"
+
+    local unpack_in_dir="${2:-"."}"
+
+    local deps_tarball="./dependencies.tgz"
+    loggy "$prolog deps_tarball: $deps_tarball"
+    loggy "$prolog Retrieving dependencies_bundle: $dependencies_bundle"
+    aws s3 cp "$dependencies_bundle" "$deps_tarball"
+    status=$?
+    if test $status -ne 0
+    then
+        loggy "ERROR! Failed to acquire: '$dependencies_bundle' status: $status"
+        return $status
+    else
+        loggy "Dependencies acquired: $(ls -l "$deps_tarball")"
+    fi
+    loggy "Unpacking $deps_tarball"
+    tar -C "$unpack_in_dir" -xzvf  $deps_tarball
+
+    local libdap_tarball="./libdap.tgz"
+    loggy "$prolog libdap_tarball: $libdap_tarball"
+    loggy "$prolog Retrieving libdap_tarball: $libdap_tarball"
+    aws s3 cp "$libdap_bundle" "$libdap_tarball"
+    status=$?
+    if test $status -ne 0
+    then
+        loggy "ERROR! Failed to acquire: '$libdap_bundle' status: $status"
+        return $status
+    else
+        loggy "Acquired libdap bundle: $(ls -l "$libdap_tarball")"
+    fi
+    loggy "Unpacking $libdap_tarball"
+    tar -C "$unpack_in_dir" -xzvf  $libdap_tarball
+
 }
 
 ###########################################################################
@@ -255,28 +293,16 @@ function build_bes_for_ubuntu() {
     loggy "$prolog Using host_result_dir: $host_result_dir"
     mkdir -vp "$host_result_dir"
 
-    # ubuntu_dependencies_bundle="s3://opendap.travis.build/hyrax-dependencies-ubuntu.tar.gz"
-    local ubuntu_dependencies_bundle="s3://opendap.travis.build/hyrax-dependencies-build.tar.gz"
-    loggy "$prolog Using ubuntu_dependencies_bundle: $ubuntu_dependencies_bundle"
-
-    loggy "$prolog Retrieving ubuntu_dependencies_bundle: $ubuntu_dependencies_bundle"
-    aws s3 cp $ubuntu_dependencies_bundle ./dependencies.tgz
-    status=$?
-    if test $status -ne 0
-    then
-        loggy "ERROR! Failed to acquire: '$ubuntu_dependencies_bundle' status: $status"
-        return $status
-    else
-        loggy "Dependencies acquired: $(ls -l ./dependencies.tgz)"
-    fi
-return 0
-
+    get_bes_dependencies "" "$top_dir"
 
     local docker_target="/root/$repo_name"
     loggy "$prolog Using docker_target: $docker_target"
 
     local docker_result_dir="/root/install"
     loggy "$prolog Using docker_result_dir: $docker_result_dir"
+
+    local build_rpm_script="$docker_target/travis/build-rh8-rpm.sh"
+    loggy "$prolog Using build_rpm_script: $build_rpm_script"
 
     local image="opendap/ubuntu_hyrax_builder:latest"
     loggy "$prolog Using Docker Image: $image"
@@ -300,11 +326,9 @@ return 0
     docker run -it \
         --volume "$host_target":"$docker_target" \
         --volume "$host_result_dir":"$docker_result_dir" \
-        --volume "$top_dir/$build_script":"/root/$build_script" \
-        --env extra_targets="aws_s2n_tls" \
         --env prefix="$docker_result_dir" \
         --env BUILD_NUMBER=666 \
-        $image $build_script
+        $image "$build_rpm_script"
     status=$?
     if test $status -ne 0; then
         loggy "$prolog ERROR! Docker run command failed! status: $status"
