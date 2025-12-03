@@ -31,7 +31,7 @@ loggy "LD_LIBRARY_PATH:$LD_LIBRARY_PATH"
 export PKG_CONFIG_PATH="$prefix/deps/lib/pkgconfig";
 loggy "PKG_CONFIG_PATH:$PKG_CONFIG_PATH"
 
-export PATH="$prefix/deps/bin:$PATH";
+export PATH="$prefix/bin:$prefix/deps/bin:$PATH";
 loggy "PATH:$PATH"
 
 repo_dir="/root/bes"
