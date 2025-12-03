@@ -48,7 +48,7 @@ RUN set -e \
 RUN set -e \
     && apt-get install -y  grep emacs vim
 RUN set -e \
-    && apt-get install -y curl readline
+    && apt-get install -y curl libreadline-dev
 
 
 RUN set -e \
