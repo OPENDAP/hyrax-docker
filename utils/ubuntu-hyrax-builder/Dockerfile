@@ -37,8 +37,12 @@ RUN set -e && apt-get update  -y && apt-get -y upgrade
 
 RUN set -e \
     && apt-get install -y  build-essential
-RUN set -e \
-    && apt-get install -y  uuid-dev  libxml2-dev  libcurl4-openssl-dev  libcppunit-dev
+RUN set -e && DEBIAN_FRONTEND=noninteractive apt-get install -y  uuid-dev pkg-config
+
+RUN set -e && DEBIAN_FRONTEND=noninteractive apt-get install -y  libxml2 libxml2-dev
+
+RUN set -e && apt-get install -y  libcurl4-openssl-dev libcurl4 libcppunit-dev libicu-dev sqlite3 libsqlite3-dev
+
 RUN set -e \
     && apt-get install -y  libicu-dev  gcovr  libfl-dev openjdk-17-jdk-headless
 RUN set -e \
@@ -47,34 +51,30 @@ RUN set -e \
     && apt-get install -y curl
 
 
-
-RUN set -e \
-    && echo "$HR" \
-    && echo "# Installing sqlite and sqlite-devel via yum packages" \
-    && echo "#" \
-    && apt-get install -y sqlite3 \
-    && echo "#" \
-    && echo "# sqlite3  installed via apt-get packages" \
-    && echo "$HR"
-
 RUN set -e \
     && echo "$HR" \
     && echo "# Installing zstd, via yum packages" \
     && echo "#" \
-    && apt-get install -y zstd  \
+    && apt-get install -y zstd  zlib1g zlib1g-dev \
     && echo "#" \
     && echo "# zstd installed via apt-get packages" \
     && echo "$HR"
 
 # The things!
 RUN set -e \
-    && apt-get install -y procps git gcc flex bison cmake autoconf automake libtool emacs bzip2 vim bc \
-    && apt-get install -y valgrind gdb unzip which jq diffutils sqlite sqlite-devel \
-    && apt-get install -y openssl-devel libuuid-devel readline-devel zlib-devel bzip2-devel \
-    && apt-get install -y libjpeg-devel libxml2-devel libicu-devel \
-    && apt-get install -y rpmdevtools rpmlint \
-    && apt-get install -y java-21-openjdk java-21-openjdk-devel ant \
-    && apt-get clean all
+RUN set -e    && apt-get install -y procps git gcc flex bison cmake autoconf automake libtool emacs bzip2 vim bc
+RUN set -e    && apt-get install -y valgrind gdb unzip jq diffutils
+
+RUN set -e    && apt-get install -y openssl libssl-dev
+# RUN set -e    && apt-get install -y openssl-devel libuuid-devel readline-devel zlib-devel bzip2-devel
+
+# RUN set -e    && apt-get install -y libjpeg-devel libxml2-devel libicu-devel
+#
+# RUN set -e    && apt-get install -y crypto
+
+# RUN set -e    && apt-get install -y rpmdevtools rpmlint
+# RUN set -e    && apt-get install -y java-21-openjdk java-21-openjdk-devel ant
+RUN set -e    && apt-get clean all
 
 #RUN set -e  \
 #    && yum install -y openjpeg2-devel jasper-devel
