@@ -192,7 +192,7 @@ function build_hyrax_dependencies_for_ubuntu() {
     docker run -it \
         --volume "$host_target":"$docker_target" \
         --volume "$host_result_dir":"$docker_result_dir" \
-        --volume "$top_dir/build-for-ubuntu.sh:"/root/build-for-ubuntu.sh"
+        --volume "$top_dir/build-for-ubuntu.sh":"/root/build-for-ubuntu.sh"
         --env extra_targets="aws_s2n_tls" \
         --env prefix="$docker_result_dir" \
         --env BUILD_NUMBER=666 \
