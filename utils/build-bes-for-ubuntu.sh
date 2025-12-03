@@ -25,8 +25,11 @@ loggy "$0 - BEGIN"
 loggy ""
 loggy " prefix: $prefix"
 loggy "    PWD: $PWD"
-export LD_LIBRARY_PATH="$prefix/deps/lib:$prefix/deps/proj/lib:$LD_LIBRARY_PATH"
+export LD_LIBRARY_PATH="$prefix/deps/lib:$LD_LIBRARY_PATH"
 loggy "LD_LIBRARY_PATH:$LD_LIBRARY_PATH"
+
+export PKG_CONFIG_PATH="$prefix/deps/lib/pkgconfig";
+loggy "PKG_CONFIG_PATH:$PKG_CONFIG_PATH"
 
 repo_dir="/root/bes"
 loggy "     repo_dir: $repo_dir"
