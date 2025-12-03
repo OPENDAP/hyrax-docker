@@ -311,7 +311,7 @@ function build_bes_for_ubuntu() {
     local image="opendap/ubuntu_hyrax_builder:latest"
     loggy "$prolog Using Docker Image: $image"
 
-    local build_script_name="build-deps-for-ubuntu.sh"
+    local build_script_name="build-bes-for-ubuntu.sh"
     local docker_run_script="/root/$build_script_name"
     loggy "$prolog build_script (used inside docker image): '$build_script_name'"
     if test -n "$interactive"
