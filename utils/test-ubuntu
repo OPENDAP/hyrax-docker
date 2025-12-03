@@ -218,7 +218,7 @@ function get_bes_dependencies() {
     local libdap_bundle="${2:-"s3://opendap.travis.build/libdap-build.tar.gz"}"
     loggy "$prolog Using libdap_bundle: $libdap_bundle"
 
-    local unpack_in_dir="${2:-"."}"
+    local unpack_in_dir="${3:-"."}"
 
     local deps_tarball="./dependencies.tgz"
     loggy "$prolog deps_tarball: $deps_tarball"
@@ -235,8 +235,10 @@ function get_bes_dependencies() {
     loggy "Unpacking $deps_tarball"
     tar -C "$unpack_in_dir" -xzvf  $deps_tarball
 
+    loggy "$prolog Using libdap_bundle: $libdap_bundle"
     local libdap_tarball="./libdap.tgz"
     loggy "$prolog Retrieving libdap_tarball: $libdap_tarball"
+
     aws s3 cp "$libdap_bundle" "$libdap_tarball"
     status=$?
     if test $status -ne 0
