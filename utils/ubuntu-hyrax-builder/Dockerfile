@@ -96,6 +96,10 @@ RUN  set -e \
     && echo "# diff is here: $(which diff)" \
     && echo "$HR"
 
+RUN  set -e \
+    && mkdir -vp "/home/travis" \
+    && mkdir -vp "/root/install" \
+    && ln -s "/root/install /home/travis/install"
 # We need to make sure there is a directory/mount_point for the calling process
 # to mount a volume that will receieve the RPM files.
 RUN set -e \

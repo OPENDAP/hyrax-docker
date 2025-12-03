@@ -54,6 +54,8 @@ fi
 LDFLAGS="${LDFLAGS:-""} -L$deps_libdir "
 loggy "LDFLAGS: $LDFLAGS"
 
+ln -s /root/bes /root/travis
+
 repo_dir="/root/bes"
 loggy "     repo_dir: $repo_dir"
 loggy "Changing to repo_dir: $repo_dir"
