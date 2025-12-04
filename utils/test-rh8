@@ -319,6 +319,7 @@ function build_bes_rpms_for_rhel8() {
         --env prefix="$docker_result_dir" \
         --env OS="$OS" \
         --env BUILD_NUMBER=666 \
+        --env LIBDAP_RPM_VERSION="$LIBDAP_RPM_VERSION"
         "$image" $docker_run_script
 
     status=$?
