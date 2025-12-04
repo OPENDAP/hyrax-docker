@@ -209,6 +209,15 @@ function build_hyrax_dependencies_for_rh8() {
 # build_bes_rpms_for_rhel8()
 #
 # From the bes/.travis.yml
+#
+# before_script:
+#  - source travis/travis_bes_build_offset.sh
+#  - export BES_BUILD_NUMBER=$(expr $TRAVIS_BUILD_NUMBER - $BES_TRAVIS_BUILD_OFFSET)
+#  - echo "BES_BUILD_NUMBER is ${BES_BUILD_NUMBER} = ${TRAVIS_BUILD_NUMBER} - ${BES_TRAVIS_BUILD_OFFSET}"
+#  - export LIBDAP_RPM_VERSION=$(grep "libdap4-" libdap4-snapshot | awk '{print $1;}' - | sed "s/libdap4-//g")
+#  - echo "Travis default env:"
+#  - printenv
+#
 #- stage: build-and-package
 #  name: "Enterprise Linux 8 RPMs (via Rocky8)"
 #  script:
@@ -247,6 +256,7 @@ function build_bes_rpms_for_rhel8() {
     local DIST="el8"
 
 
+
     local repo_name="bes"
     loggy "$prolog Using repo_name: $repo_name"
 
@@ -265,6 +275,16 @@ function build_bes_rpms_for_rhel8() {
     host_result_dir="$top_dir/install"
     loggy "$prolog Using host_result_dir: $host_result_dir"
     mkdir -vp "$host_result_dir"
+
+    export TRAVIS_BUILD_NUMBER=1000
+    export BES_TRAVIS_BUILD_OFFSET=334
+    export BES_BUILD_NUMBER=$(expr $TRAVIS_BUILD_NUMBER - $BES_TRAVIS_BUILD_OFFSET)
+    loggy "BES_BUILD_NUMBER is ${BES_BUILD_NUMBER} = ${TRAVIS_BUILD_NUMBER} - ${BES_TRAVIS_BUILD_OFFSET}"
+    export LIBDAP_RPM_VERSION=$(grep "libdap4-" $host_target/libdap4-snapshot | awk '{print $1;}' - | sed "s/libdap4-//g")
+    loggy "LIBDAP_RPM_VERSION is ${LIBDAP_RPM_VERSION}"
+
+
+
 
     get_bes_dependencies "" "" ""
 
