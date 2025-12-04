@@ -330,14 +330,6 @@ function build_bes_for_ubuntu() {
         clean_and_get_repo "$repo_name" "$branch_name" "$host_target"
     fi
 
-#libtool: warning: library '/root/install/lib/libdap.la' was moved.
-#libtool: warning: library '/root/install/lib/libdapserver.la' was moved.
-#libtool: warning: library '/root/install/lib/libdapclient.la' was moved.
-#libtool: warning: library '/root/install/lib/libdap.la' was moved.
-#libtool: warning: library '/root/install/lib/libdapserver.la' was moved.
-#libtool: warning: library '/root/install/lib/libdapclient.la' was moved.
-#libtool:   error: '/home/travis/install/lib/libdap.la' is not a valid libtool archive
-
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # Build it
     loggy "$prolog Starting docker. Image: $image"
