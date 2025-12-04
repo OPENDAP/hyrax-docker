@@ -50,6 +50,24 @@ RUN set -e \
 RUN set -e \
     && apt-get install -y curl libreadline-dev
 
+# These GDAL Things
+#/usr/bin/ld: cannot find -lIlmImf --> libopenexr-dev
+#/usr/bin/ld: cannot find -lImath --> libimath-dev
+#/usr/bin/ld: cannot find -lHalf
+#/usr/bin/ld: cannot find -lIex --> elixir
+#/usr/bin/ld: cannot find -lIexMath
+#/usr/bin/ld: cannot find -lIlmThread -> libopenexr-dev
+#/usr/bin/ld: cannot find -lodbc
+#/usr/bin/ld: cannot find -lodbcinst
+#/usr/bin/ld: cannot find -lexpat
+#/usr/bin/ld: cannot find -lpng
+#/usr/bin/ld: cannot find -ltiff
+#/usr/bin/ld: cannot find -lpcre
+RUN set -e \
+    && apt-get install -y libopenexr-dev libimath-dev elixir
+
+
+
 
 RUN set -e \
     && echo "$HR" \

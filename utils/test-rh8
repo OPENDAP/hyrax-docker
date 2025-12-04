@@ -82,8 +82,11 @@ function clean_and_get_repo() {
 # build_libdap_for_rh8
 function build_libdap_for_rh8() {
     prolog="build_libdap_for_rh8() -"
-    local branch_name="$1"
-    local clean="$2"
+    local branch_name="${1:-"master"}"
+    loggy "$prolog branch_name: '$branch_name'"
+
+    local clean="${2:-""}"
+    loggy "$prolog clean: '$clean'"
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # configuration
@@ -133,14 +136,14 @@ function build_hyrax_dependencies_for_rh8() {
     local prolog="build_hyrax_dependencies_for_rh8() -"
     loggy "$HR"
     loggy "$prolog BEGIN"
-    local branch_name="$1"
-    loggy "$prolog branch_name: $branch_name"
+    local branch_name="${1:-"master"}"
+    loggy "$prolog branch_name: '$branch_name'"
 
-    local clean="$2"
-    loggy "$prolog clean=$clean"
+    local clean="${2:-""}"
+    loggy "$prolog clean: '$clean'"
 
-    local interactive="$3"
-    loggy "$prolog interactive: $interactive"
+    local interactive="${3:-""}"
+    loggy "$prolog interactive: '$interactive'"
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # configuration
 

@@ -277,10 +277,10 @@ function build_bes_for_ubuntu() {
     local branch_name="${1:-"master"}"
     loggy "$prolog branch_name: $branch_name"
 
-    local clean="$2"
+    local clean="${2:-""}"
     loggy "$prolog clean: '$clean'"
 
-    local interactive="$3"
+    local interactive="${3:-""}"
     loggy "$prolog interactive: '$interactive'"
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # configuration
