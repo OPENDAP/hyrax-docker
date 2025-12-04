@@ -67,6 +67,8 @@ autoreconf  --force --install --verbose
 
 make -j16  \
     && make install \
+    && echo "BES.User=root" > $prefix/etc/bes/site.conf \
+    && echo "BES.Group=root" > $prefix/etc/bes/site.conf \
     && besctl start \
     && make check -j16 \
     && besctl stop
