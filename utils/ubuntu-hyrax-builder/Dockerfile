@@ -98,8 +98,10 @@ RUN  set -e \
 
 RUN  set -e \
     && mkdir -vp "/home/travis" \
+    && ls -l "/home" \
     && mkdir -vp "/root/install" \
-    && ln -s "/root/install /home/travis/install" \
+    && ls -l "/root" \
+    && ln -s "/root/install" "/home/travis/install" \
     && ls -l "/home/travis/"
 
 # We need to make sure there is a directory/mount_point for the calling process
