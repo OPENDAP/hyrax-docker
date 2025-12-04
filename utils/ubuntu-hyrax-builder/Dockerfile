@@ -46,7 +46,7 @@ RUN set -e && apt-get install -y  libcurl4-openssl-dev libcurl4 libcppunit-dev l
 RUN set -e \
     && apt-get install -y  libicu-dev  gcovr  libfl-dev openjdk-17-jdk-headless
 RUN set -e \
-    && apt-get install -y  grep emacs vim
+    && apt-get install -y  grep emacs vim bzip2 libbz2-dev
 RUN set -e \
     && apt-get install -y curl libreadline-dev
 
