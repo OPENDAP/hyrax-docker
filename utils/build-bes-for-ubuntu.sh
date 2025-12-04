@@ -63,12 +63,17 @@ cd "$repo_dir" || exit $?
 loggy ""
 
 autoreconf  --force --install --verbose
-./configure --disable-dependency-tracking --prefix=$prefix --with-dependencies=$prefix/deps --without-gdal --enable-developer
+./configure \
+    --disable-dependency-tracking \
+    --prefix=$prefix \
+    --with-dependencies=$prefix/deps \
+    --without-gdal #\
+#    --enable-developer
 
 make -j16  \
     && make install \
     && echo "BES.User=root" > $prefix/etc/bes/site.conf \
-    && echo "BES.Group=root" > $prefix/etc/bes/site.conf \
+    && echo "BES.Group=staff" >> $prefix/etc/bes/site.conf \
     && besctl start \
     && make check -j16 \
     && besctl stop
