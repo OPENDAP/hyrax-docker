@@ -63,7 +63,7 @@ cd "$repo_dir" || exit $?
 loggy ""
 
 autoreconf  --force --install --verbose
-./configure --disable-dependency-tracking --prefix=$prefix --with-dependencies=$prefix/deps --enable-developer
+./configure --disable-dependency-tracking --prefix=$prefix --with-dependencies=$prefix/deps --without-gdal --enable-developer
 
 make -j16  \
     && make install \
