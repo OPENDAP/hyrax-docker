@@ -254,7 +254,7 @@ function build_bes_rpms_for_rhel8() {
 
     local OS="rocky8"
     local DIST="el8"
-
+    local GDAL_OPTION="--without-gdal"
 
 
     local repo_name="bes"
@@ -317,6 +317,7 @@ function build_bes_rpms_for_rhel8() {
         --volume "$host_target":"$docker_target" \
         --volume "$host_result_dir":"$docker_result_dir" \
         --env prefix="$docker_result_dir" \
+        --env GDAL_OPTION="$GDAL_OPTION" \
         --env OS="$OS" \
         --env DIST="$DIST" \
         --env BUILD_NUMBER=666 \
