@@ -320,7 +320,7 @@ function build_bes_rpms_for_rhel8() {
         --env GDAL_OPTION="$GDAL_OPTION" \
         --env OS="$OS" \
         --env DIST="$DIST" \
-        --env BUILD_NUMBER=666 \
+        --env BES_BUILD_NUMBER=666 \
         --env LIBDAP_RPM_VERSION="$LIBDAP_RPM_VERSION" \
         "$image" $docker_run_script
 
