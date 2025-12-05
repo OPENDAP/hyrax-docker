@@ -194,13 +194,13 @@ function build_hyrax_dependencies_for_rh8() {
 
     loggy "$prolog Packaging results..."
     mkdir -p $host_target/package
-    tar -C $top_dir -czvf $host_target/package/hyrax-dependencies-rocky9-static.tar.gz install
+    tar -C $top_dir -czvf $host_target/package/hyrax-dependencies-rocky8-static.tar.gz install
     loggy "$prolog "
     loggy "$prolog Produced dependencies tar file: "
-    loggy "$(ls -l $host_target/package/hyrax-dependencies-rocky9-static.tar.gz)"
+    loggy "$(ls -l $host_target/package/hyrax-dependencies-rocky8-static.tar.gz)"
     loggy "$prolog "
     loggy "$prolog Inventory: "
-    loggy "$(tar -tf $host_target/package/hyrax-dependencies-rocky9-static.tar.gz)"
+    loggy "$(tar -tf $host_target/package/hyrax-dependencies-rocky8-static.tar.gz)"
     loggy "$prolog"
     loggy "$prolog END"
 }
@@ -283,10 +283,6 @@ function build_bes_rpms_for_rhel8() {
     export LIBDAP_RPM_VERSION=$(grep "libdap4-" $host_target/libdap4-snapshot | awk '{print $1;}' - | sed "s/libdap4-//g")
     loggy "LIBDAP_RPM_VERSION is ${LIBDAP_RPM_VERSION}"
 
-
-
-
-    get_bes_dependencies "" "" ""
 
     local docker_target="/root/travis"
     loggy "$prolog Using docker_target: $docker_target"
