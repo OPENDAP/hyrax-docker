@@ -288,7 +288,7 @@ function build_bes_rpms_for_rhel8() {
 
     get_bes_dependencies "" "" ""
 
-    local docker_target="/root/$repo_name"
+    local docker_target="/root/travis"
     loggy "$prolog Using docker_target: $docker_target"
 
     local docker_result_dir="/root/install"
