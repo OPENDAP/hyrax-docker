@@ -6,11 +6,11 @@
 The script `hyrax-docker/utils/dckrbld` will build the Docker image using the Dockerfile  in `hyrax-docker/utils/build-rhel9`
 
 The directory `hyrax-docker/utils/build-rhel9` has the Dockerfile used 
-by `dckrbld` to create the docker image for build libdap4 on rh9
+by `mk_rocky9_hyrax_builder` to create the docker image for build libdap4 on rh9
 
 ```
 cd hyrax-docker/utils
-sudo ./dckrbld
+sudo ./mk_rocky9_hyrax_builder
 ```
 ## Build Libdap4 RPMs using the Docker image
 
