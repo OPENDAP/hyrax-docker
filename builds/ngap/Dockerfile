@@ -171,6 +171,11 @@ RUN set -e \
     && mv /tomcat9-server.xml ${CATALINA_HOME}/conf/server.xml \
     && chown -R tomcat:tomcat ${CATALINA_HOME}/conf/server.xml
 
+# Tweak the mime-type for javascript. (@TODO Will this satisfy X-Content-Type-Options=nosniff issues?)
+Run set -e \
+    && sed -i 's+text/javascript+application/javascript+g' ${CATALINA_HOME}/conf/web.xml
+
+
 RUN set -e \
     && echo "Cleaning up Tomcat distribution files..." >&2 \
     && rm -fv "/${TOMCAT_DISTRO}.tar.gz"  >&2
