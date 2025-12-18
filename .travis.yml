@@ -111,8 +111,8 @@ jobs:
         - cd builds
         - export DOCKER_NAME="hyrax"
         - source ./build-rh8
-        - export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}:snapshot"
-        - export BUILD_VERSION_TAG="opendap/${DOCKER_NAME}:${HYRAX_VERSION}"
+        - export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}:snapshot$TEST_DEPLOYMENT"
+        - export BUILD_VERSION_TAG="opendap/${DOCKER_NAME}:${HYRAX_VERSION}$TEST_DEPLOYMENT"
         - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
         - show_version
         - get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_VERSION}"
@@ -147,8 +147,8 @@ jobs:
         - cd builds
         - export DOCKER_NAME="besd"
         - source ./build-rh8
-        - export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}:snapshot"
-        - export BUILD_VERSION_TAG="opendap/${DOCKER_NAME}:${BES_VERSION}"
+        - export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}:snapshot$TEST_DEPLOYMENT"
+        - export BUILD_VERSION_TAG="opendap/${DOCKER_NAME}:${BES_VERSION}$TEST_DEPLOYMENT"
         - show_version
         - s3_get_besd_distro
           "${S3_BUILD_BUCKET}"
@@ -172,8 +172,8 @@ jobs:
         - cd builds
         - export DOCKER_NAME="hyrax"
         - source ./build-rh8
-        - export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}_ncwms:snapshot"
-        - export BUILD_VERSION_TAG="opendap/${DOCKER_NAME}_ncwms:${HYRAX_VERSION}"
+        - export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}_ncwms:snapshot$TEST_DEPLOYMENT"
+        - export BUILD_VERSION_TAG="opendap/${DOCKER_NAME}_ncwms:${HYRAX_VERSION}$TEST_DEPLOYMENT"
         - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
         - show_version
         - get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_VERSION}"
@@ -206,8 +206,8 @@ jobs:
         - cd builds
         - export DOCKER_NAME="ngap"
         - source ./build-rh8
-        - export SNAPSHOT_IMAGE_TAG="opendap/hyrax:${DOCKER_NAME}-snapshot"
-        - export BUILD_VERSION_TAG=opendap/hyrax:${DOCKER_NAME}-${HYRAX_VERSION}
+        - export SNAPSHOT_IMAGE_TAG="opendap/hyrax:${DOCKER_NAME}-snapshot$TEST_DEPLOYMENT"
+        - export BUILD_VERSION_TAG="opendap/hyrax:${DOCKER_NAME}-${HYRAX_VERSION}$TEST_DEPLOYMENT"
         - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
         - show_version
         - get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_VERSION}"
@@ -239,8 +239,8 @@ jobs:
         - cd builds
         - export DOCKER_NAME="olfs"
         - source ./build-rh8
-        - export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}:snapshot"
-        - export BUILD_VERSION_TAG="opendap/${DOCKER_NAME}:${OLFS_VERSION}"
+        - export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}:snapshot$TEST_DEPLOYMENT"
+        - export BUILD_VERSION_TAG="opendap/${DOCKER_NAME}:${OLFS_VERSION}$TEST_DEPLOYMENT"
         - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
         - show_version
         - get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_VERSION}"
@@ -260,7 +260,7 @@ jobs:
     - stage: TEST_DEPLOYED_IMAGE
       name: "Test Deployed Image (RH8)"
       script:
-        - export TEST_IMAGE=opendap/hyrax:${HYRAX_VERSION}
+        - export TEST_IMAGE="opendap/hyrax:${HYRAX_VERSION}$TEST_DEPLOYMENT"
         - echo "Running Hyrax Regression Test Script on ${TEST_IMAGE}"
         - ./regression_test_script -i "${TEST_IMAGE}"
         - export DEPLOY_ME="false"
