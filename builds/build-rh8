@@ -54,6 +54,7 @@ function show_version(){
     loggy "       HYRAX_VERSION: ${HYRAX_VERSION}"
     loggy "        OLFS_VERSION: ${OLFS_VERSION}"
     loggy "         BES_VERSION: ${BES_VERSION}"
+    loggy "       BES_IMAGE_TAG: ${BES_IMAGE_TAG}"
     loggy " BUILD_DMRPP_VERSION: ${BUILD_DMRPP_VERSION}"
     loggy "      LIBDAP_VERSION: ${LIBDAP_VERSION}"
     loggy "         DOCKER_NAME: ${DOCKER_NAME}"
