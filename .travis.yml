@@ -106,6 +106,7 @@ jobs:
     - stage: BUILD_AND_TEST
       name: "Build and Test opendap/hyrax:snapshot (RH8)"
       script:
+        - set -e
         - cd builds
         - export DOCKER_NAME="hyrax"
         - source ./build-rh8
