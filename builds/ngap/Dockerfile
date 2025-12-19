@@ -114,9 +114,6 @@ RUN set -e && dnf install -y tzdata-java
 #
 RUN set -e && dnf clean all
 #
-RUN set -e && curl -sS https://bootstrap.pypa.io/get-pip.py | python3 \
-    && python3 -m pip install --upgrade pip \
-    && python3 -m pip install awscli
 
 ################################################################
 # Install the latest libdap snapshot
