@@ -115,6 +115,8 @@ jobs:
         - show_version
         - get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_VERSION}"
         - BES_IMAGE_BUILD_NUMBER="$(echo ${BES_VERSION} | cut -d- -f2)"
+        # TODO: use versioned image! For testing, use the snapshot.
+        - BES_IMAGE_TAG="opendap/bes_rhel8:$snapshot"
         - BES_IMAGE_TAG="opendap/bes_rhel8:${BES_IMAGE_BUILD_NUMBER}"
         - docker image pull ${BES_IMAGE_TAG}
         - s3_get_olfs_distro
