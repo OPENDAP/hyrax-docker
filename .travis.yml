@@ -116,7 +116,6 @@ jobs:
         - export BES_IMAGE_TAG="opendap/bes_rhel8:snapshot"
         # - export BES_IMAGE_TAG="opendap/bes_rhel8:${BES_VERSION}"
         - show_version
-        - docker image pull ${BES_IMAGE_TAG}
         # - get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_VERSION}"
         # - s3_get_olfs_distro
         #   "${S3_BUILD_BUCKET}"
