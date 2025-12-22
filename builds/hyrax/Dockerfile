@@ -118,7 +118,23 @@ RUN set -e && dnf install -y tzdata-java
 RUN set -e && dnf clean all
 RUN set -e && which diff
 
+
+################################################################
+# Set up BES
+#
+# BES is already installed by definition on the base image, but 
+# we need to do some final installation steps that would otherwise
+# be handled by RPM installation
+
 RUN echo "besdaemon is here: "`which besdaemon`
+
+# Instead of rpm pre:
+RUN getent group bes >/dev/null || groupadd -r bes
+RUN getent passwd bes >/dev/null || \
+    useradd -r -g bes -d /var/log/bes -s /sbin/nologin -c "BES daemon" bes
+
+# Instead of rpm post:
+RUN cd bes && chkconfig --add besd
 
 ################################################################
 # Install and Setup Tomcat
