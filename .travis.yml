@@ -117,11 +117,11 @@ jobs:
         # - export BES_IMAGE_TAG="opendap/bes_rhel8:${BES_VERSION}"
         - show_version
         - docker image pull ${BES_IMAGE_TAG}
-        - get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_VERSION}"
-        - s3_get_olfs_distro
-          "${S3_BUILD_BUCKET}"
-          "${DOCKER_NAME}"
-          "${OLFS_VERSION}" 2>&1
+        # - get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_VERSION}"
+        # - s3_get_olfs_distro
+        #   "${S3_BUILD_BUCKET}"
+        #   "${DOCKER_NAME}"
+        #   "${OLFS_VERSION}" 2>&1
         - set -e # Don't keep going if the docker build fails....
         - docker build
           --build-arg TOMCAT_VERSION
