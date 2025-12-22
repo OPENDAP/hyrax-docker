@@ -25,8 +25,8 @@ ARG TOMCAT_VERSION
 ENV TOMCAT_VERSION=${TOMCAT_VERSION:-"9.0.64"}
 RUN echo "TOMCAT_VERSION: ${TOMCAT_VERSION}"
 ENV TOMCAT_DISTRO="apache-tomcat-${TOMCAT_VERSION}"
-COPY "${TOMCAT_DISTRO}.tar.gz" /
-RUN ls -l /apache-tomcat-*  >&2
+# COPY "${TOMCAT_DISTRO}.tar.gz" /
+# RUN ls -l /apache-tomcat-*  >&2
 
 ARG HYRAX_VERSION
 ENV HYRAX_VERSION=${HYRAX_VERSION:-"snapshot"}
