@@ -260,7 +260,7 @@ jobs:
     - stage: TEST_DEPLOYED_IMAGE
       name: "Test Deployed Image (RH8)"
       script:
-        - source ./build-rh8 ./snapshot.time
+        - source ./builds/build-rh8 ./snapshot.time
         - export TEST_IMAGE="opendap/hyrax:${HYRAX_VERSION}$TEST_DEPLOYMENT"
         - echo "Running Hyrax Regression Test Script on ${TEST_IMAGE}"
         - ./regression_test_script -i "${TEST_IMAGE}"
