@@ -38,6 +38,22 @@ function read_build_recipe() {
     BES_VERSION=${BES_VERSION:-$(echo "${build_recipe}" | grep bes | sed "s/bes-//g" | awk '{print $1;}')}
     BUILD_DMRPP_VERSION=${BUILD_DMRPP_VERSION:-$(echo "${build_recipe}" | grep "build_dmrpp-" | sed "s/build_dmrpp-//g" | awk '{print $1;}')}
     LIBDAP_VERSION=${LIBDAP_VERSION:-$(echo "${build_recipe}" | grep libdap4 | sed "s/libdap4-//g"| awk '{print $1;}')}
+
+    local td_value="-test-deploy"
+    export TEST_DEPLOYMENT=""
+    if [[ "$TRAVIS_BRANCH" == *"-test-deploy" ]]
+    then
+        TEST_DEPLOYMENT="$td_value"
+    fi
+
+    if test -z "$TEST_DEPLOYMENT"
+    then
+        grep "test-deploy" "$build_recipe_file"
+        if test $? -eq 0
+        then
+            TEST_DEPLOYMENT="$td_value"
+        fi
+    fi
 }
 read_build_recipe "${BUILD_RECIPE_FILE}"
 
@@ -68,6 +84,7 @@ function show_version(){
     loggy ""
     loggy "            NO_CACHE: ${NO_CACHE}"
     loggy ""
+    loggy "     TEST_DEPLOYMENT: '$TEST_DEPLOYMENT'"
     loggy ""
 }
 
@@ -1177,5 +1194,5 @@ function travis_hyrax() {
         "${DOCKER_NAME}"
 
     docker image ls -a
-
 }
+
