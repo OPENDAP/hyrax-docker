@@ -91,7 +91,7 @@ function waitForHyrax() {
     # Now we can fail on errors again.
     set -e
     echo "Hyrax has arrived!"
-    exit
+    return 0
 }
 
 
