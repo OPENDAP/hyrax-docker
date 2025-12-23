@@ -6,3 +6,13 @@ logs
 *.iml
 *.log
 /.project
+
+# Intermediate build artifacts
+*.tgz
+*.rpm
+*.gz
+*tar.gz.asc
+builds/cookies
+builds/bes.json
+builds/beslog2json.py
+apache_tomcat_keys
