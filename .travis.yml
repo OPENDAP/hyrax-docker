@@ -136,7 +136,7 @@ jobs:
         - docker image ls -a
         - cd ..
         - echo "Running Test Script"
-        - ./regression_test_script -i ${SNAPSHOT_IMAGE_TAG}
+        - ./travis/regression_test_script -i ${SNAPSHOT_IMAGE_TAG}
 
     # - stage: BUILD
     #   name: "Build opendap/besd:snapshot (RH8)"
@@ -257,9 +257,10 @@ jobs:
     # - stage: TEST_DEPLOYED_IMAGE
     #   name: "Test Deployed Image (RH8)"
     #   script:
+    #     - source ./builds/build-rh8 ./snapshot.time
     #     - export TEST_IMAGE="opendap/hyrax:${HYRAX_VERSION}$TEST_DEPLOYMENT"
     #     - echo "Running Hyrax Regression Test Script on ${TEST_IMAGE}"
-    #     - ./regression_test_script -i "${TEST_IMAGE}"
+    #     - ./travis/regression_test_script -i "${TEST_IMAGE}"
     #     - export DEPLOY_ME="false"
 
 # before_deploy:
