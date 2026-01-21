@@ -13,15 +13,20 @@
 # it for debugging stuff.
 #
 # Set one or more individual labels
-FROM rockylinux:8
 
-RUN export NOW=`date +%s`
+# Add a default base image to keep docker from complaining,
+# which is fine because if this ISN'T based on a given image tag,
+# everything downstream will fail due to lack of bes, libdap, etc.
+ARG BES_IMAGE_TAG
+FROM ${BES_IMAGE_TAG:-"rockylinux:8"}
+
+ENV NOW="$(`date +%s`)"
 ARG RELEASE_DATE
-ENV RELEASE_DATE ${RELEASE_DATE:-"${NOW}"}
+ENV RELEASE_DATE=${RELEASE_DATE:-"${NOW}"}
 RUN echo "RELEASE_DATE: ${RELEASE_DATE}"
 
 ARG TOMCAT_VERSION
-ENV TOMCAT_VERSION ${TOMCAT_VERSION:-"9.0.64"}
+ENV TOMCAT_VERSION=${TOMCAT_VERSION:-"9.0.64"}
 RUN echo "TOMCAT_VERSION: ${TOMCAT_VERSION}"
 ENV TOMCAT_DISTRO="apache-tomcat-${TOMCAT_VERSION}"
 COPY "${TOMCAT_DISTRO}.tar.gz" /
@@ -31,25 +36,16 @@ ARG HYRAX_VERSION
 ENV HYRAX_VERSION=${HYRAX_VERSION:-"snapshot"}
 RUN echo "HYRAX_VERSION: ${HYRAX_VERSION}"
 
+# TODO: confirm that LIBDAP_VERSION and BES_VERSION match 
+# versions previously installed in base image, fail if not
+
 ARG LIBDAP_VERSION
 ENV LIBDAP_VERSION=${LIBDAP_VERSION:-"snapshot"}
 RUN echo "LIBDAP_VERSION: ${LIBDAP_VERSION}"
 
-ARG LIBDAP_RPM
-ENV LIBDAP_RPM=${LIBDAP_RPM:-"libdap-${LIBDAP_VERSION}.el8.x86_64.rpm"}
-RUN echo "LIBDAP_RPM: ${LIBDAP_RPM}"
-COPY ${LIBDAP_RPM} libdap-devel-* libdap-debuginfo-* /
-RUN ls -l /libdap-*  >&2
-
 ARG BES_VERSION
 ENV BES_VERSION=${BES_VERSION:-"snapshot"}
 RUN echo "BES_VERSION: ${BES_VERSION}"
-
-ARG BES_RPM
-ENV BES_RPM=${BES_RPM:-"bes-${BES_VERSION}.static.el8.x86_64.rpm"}
-RUN echo "BES_RPM: ${BES_RPM}"
-COPY ${BES_RPM} bes-devel-* bes-debuginfo-* /
-RUN ls -l /bes-* >&2
 
 ARG OLFS_VERSION
 ENV OLFS_VERSION=${OLFS_VERSION:-"snapshot"}
@@ -74,7 +70,7 @@ LABEL org.opendap.hyrax.version=${HYRAX_VERSION}
 LABEL org.opendap.hyrax.release-date=${RELEASE_DATE}
 LABEL org.opendap.hyrax.version.is-production="false"
 
-MAINTAINER support@opendap.org
+LABEL maintainer=support@opendap.org
 
 USER root
 
@@ -82,7 +78,7 @@ USER root
 # The --build-arg USE_NCWMS can be set to "true" in order to 
 # add the ncWMS application to the build.
 ARG USE_NCWMS
-ENV USE_NCWMS ${USE_NCWMS:-"false"}
+ENV USE_NCWMS=${USE_NCWMS:-"false"}
 RUN if [ $USE_NCWMS = "true" ];then echo "NCWMS: ENABLED"; else echo "NCWMS: DISABLED"; fi
 
 #
@@ -91,12 +87,12 @@ RUN if [ $USE_NCWMS = "true" ];then echo "NCWMS: ENABLED"; else echo "NCWMS: DIS
 # the URL: https://localhost:8080 if the environment variable NCWMS_BASE
 # is not in the shell from which the entrypoint.sh script is called.
 ARG NCWMS_BASE
-ENV NCWMS_BASE ${NCWMS_BASE:-"https://localhost:8080"}
+ENV NCWMS_BASE=${NCWMS_BASE:-"https://localhost:8080"}
 RUN if [ $USE_NCWMS = "true" ];then echo "NCWMS_BASE: {$NCWMS_BASE}"; fi
 
 
 ARG DEVELOPER_MODE
-ENV DEVELOPER_MODE ${DEVELOPER_MODE:-"false"}
+ENV DEVELOPER_MODE=${DEVELOPER_MODE:-"false"}
 RUN if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else echo "DEVELOPER_MODE: DISABLED"; fi
 
 #Get mirrorlist before running yum
@@ -111,7 +107,7 @@ RUN if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else ec
 # are installed in the container but not run until a later stage of the
 # Travis build (or at a later time). They need to be part of the container,
 # however, to be run, so install them as part of this Dockerfile.
-RUN set -e && dnf update  -y
+# RUN set -e && dnf update  -y
 RUN set -e && dnf install -y python3.11 \
     && python3 --version
 
@@ -122,39 +118,51 @@ RUN set -e && dnf install -y make curl unzip which autoconf automake emacs vim j
     && dnf install -y java-11-openjdk-devel
 # Temporary Hack to fix broken OpenJDK-11.0.20.0.8-2
 RUN set -e && dnf install -y tzdata-java
-#
 
-RUN set -e && curl -sS https://bootstrap.pypa.io/get-pip.py | python3 \
-    && python3 -m pip install --upgrade pip \
-    && python3 -m pip install --no-cache-dir awscli
-#
 RUN set -e && dnf clean all
 RUN set -e && which diff
+
+
+################################################################
+# Set up BES
 #
-
-
-
-################################################################
-# Install the latest libdap snapshot
-#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
-RUN set -e \
-    && echo "Installing the libdap rpm: ${LIBDAP_RPM}" \
-    && ls -l ./libdap* \
-    && dnf -y install ./libdap-*.rpm \
-    && rm -f ./${LIBDAP_RPM}
-
-RUN echo "libdap4 is installed."
-
-################################################################
-# Install the latest BES snapshot
-#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
-RUN set -e \
-    && echo "Installing the latest BES rpm: ${BES_RPM}" \
-    && ls -l ./bes* \
-    && dnf -y install ./bes-*.rpm \
-    && rm -f ./${BES_RPM}
+# BES is already installed by definition on the base image, but 
+# we need to do some final installation steps that would otherwise
+# be handled by RPM installation
 
 RUN echo "besdaemon is here: "`which besdaemon`
+
+# Add bes group and user (previously constructed via rpm installation)
+RUN getent group bes >/dev/null || groupadd -r bes
+RUN getent passwd bes >/dev/null || \
+    useradd -r -g bes -d /var/log/bes -s /sbin/nologin -c "BES daemon" bes
+
+# Instead of rpm post:
+RUN cp ./usr/local/etc/rc.d/init.d/besd /etc/rc.d/init.d/besd
+RUN chkconfig --add besd \
+    && ldconfig
+
+# More rpm-adapting hijinks
+# Adapted from bes/spec.all_static.in
+# Default macros: https://docs.fedoraproject.org/en-US/packaging-guidelines/RPMMacros/
+RUN sed -i.dist -e 's:=/tmp:=/var/cache/bes:' \
+    -e 's:=.*/bes.log:=/var/log/bes/bes.log:' \
+    -e 's:=.*/lib/bes:=/usr/lib/bes:' \
+    -e 's:=.*/share/bes:=/usr/share/bes:' \
+    -e 's:=.*/share/hyrax:=/usr/share/hyrax:' \
+    -e 's:=/full/path/to/serverside/certificate/file.pem:=/etc/pki/bes/cacerts/file.pem:' \
+    -e 's:=/full/path/to/serverside/key/file.pem:=/etc/pki/bes/public/file.pem:' \
+    -e 's:=/full/path/to/clientside/certificate/file.pem:=/etc/pki/bes/cacerts/file.pem:' \
+    -e 's:=/full/path/to/clientside/key/file.pem:=/etc/pki/bes/public/file.pem:' \
+    -e 's:=user_name:=bes:' \
+    -e 's:=group_name:=bes:' \
+    /usr/local/etc/bes/bes.conf
+
+RUN chown -R bes /usr/local/etc/bes \
+    /usr/local/share/bes \
+    /usr/local/include/bes \
+    /usr/local/lib/bes \
+    /usr/local/var/run/bes
 
 ################################################################
 # Install and Setup Tomcat
@@ -178,8 +186,8 @@ RUN set -e && systemctl enable tomcat
 #RUN firewall-cmd --add-port 8080/tcp --permanent
 #RUN firewall-cmd --reload
 
-ENV CATALINA_HOME /usr/share/tomcat
-ENV PATH $CATALINA_HOME/bin:$PATH
+ENV CATALINA_HOME=/usr/share/tomcat
+ENV PATH=$CATALINA_HOME/bin:$PATH
 RUN set -e && echo "CATALINA_HOME: ${CATALINA_HOME}" >&2
 
 # Install our modified server.xml so that the server compresses responses.
@@ -228,7 +236,7 @@ RUN set -e \
 ################################################################
 # Clean up the Hyrax distribution binaries.
 #
-RUN rm -vf /libdap*.rpm /bes*.rpm /olfs*.tgz /robots*.tgz /apache*
+RUN rm -vf /olfs*.tgz /robots*.tgz /apache*
 #
 ################################################################
 
@@ -237,7 +245,7 @@ RUN rm -vf /libdap*.rpm /bes*.rpm /olfs*.tgz /robots*.tgz /apache*
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 
 ARG NCWMS_VERSION
-ENV NCWMS_VERSION ${NCWMS_VERSION:-"2.5.2"}
+ENV NCWMS_VERSION=${NCWMS_VERSION:-"2.5.2"}
 RUN echo "NCWMS_VERSION: ${NCWMS_VERSION}"
 ENV NCWMS_WAR_URL="https://github.com/Reading-eScience-Centre/ncwms/releases/download/ncwms-${NCWMS_VERSION}/ncWMS2.war"
 RUN echo "NCWMS_WAR_URL: ${NCWMS_WAR_URL}"
@@ -324,10 +332,6 @@ EXPOSE 8443
 EXPOSE 10022
 EXPOSE 11002
 
-# can't use USER with entrypoint that needs root
-# use gosu or, as done, enable bes user write so the entrypoint does not need root
-RUN chown -R bes /etc/bes
 USER root
 
 CMD ["-"]
-

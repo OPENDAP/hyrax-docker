@@ -56,10 +56,6 @@ RUN set -e && dnf install -y which bc emacs vim \
     && dnf update -y \
     && dnf clean all
 
-RUN set -e && curl -sS https://bootstrap.pypa.io/get-pip.py | python3 \
-    && python3 -m pip install --upgrade pip \
-    && python3 -m pip install --no-cache-dir awscli
-
 ###############################################################
 # Retrieve and install the latest libdap snapshot
 RUN set -e \

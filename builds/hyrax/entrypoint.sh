@@ -127,7 +127,7 @@ if test "${SERVER_HELP_EMAIL}" != "not_set" ; then
 fi
 if test "${FOLLOW_SYMLINKS}" != "not_set" ; then
     echo "Setting BES FollowSymLinks to YES." >&2
-    sed -i "s/^BES.Catalog.catalog.FollowSymLinks=No/BES.Catalog.catalog.FollowSymLinks=Yes/" /etc/bes/bes.conf
+    sed -i "s/^BES.Catalog.catalog.FollowSymLinks=No/BES.Catalog.catalog.FollowSymLinks=Yes/" usr/local/etc/bes/bes.conf
 fi
 
 echo "JAVA VERSION: "
@@ -149,7 +149,7 @@ bes_gid=$(id -g bes)
 echo "bes_gid: ${bes_gid}" >&2
 
 echo "Launching besd..." >&2
-/usr/bin/besctl start
+/usr/local/bin/besctl start
 status=$?
 if test $status -ne 0 ; then
     echo "ERROR: Failed to start BES: $status" >&2

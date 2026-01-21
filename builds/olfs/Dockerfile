@@ -75,10 +75,6 @@ RUN set -e && dnf install -y curl unzip which emacs vim \
     && dnf install -y java-11-openjdk-devel \
     && dnf install -y tzdata-java \
     && dnf clean all
-#
-RUN set -e && curl -sS https://bootstrap.pypa.io/get-pip.py | python3 \
-    && python3 -m pip install --upgrade pip \
-    && python3 -m pip install awscli
 
 
 ################################################################
