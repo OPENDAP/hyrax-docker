@@ -187,8 +187,8 @@ RUN set -e \
     && echo "JAVA_HOME ${JAVA_HOME}" >&2 \
     && tar -xvf "/${CATALINA_HOME}/bin/tomcat-native.tar.gz" -C ${CATALINA_HOME}/bin >&2 \
     && ls -l ${CATALINA_HOME}/bin >&2 \
-    && ls -l ${CATALINA_HOME}/bin/tomcat-native-1.3.1-src >&2 \
-    && cd ${CATALINA_HOME}/bin/tomcat-native-1.3.1-src/native >&2 \
+    && ls -l ${CATALINA_HOME}/bin/tomcat-native-1.3.5-src >&2 \
+    && cd ${CATALINA_HOME}/bin/tomcat-native-1.3.5-src/native >&2 \
     && ./configure >&2 \
     && make >&2 \
     && make install >&2 \
