@@ -41,6 +41,22 @@ function read_build_recipe() {
     LIBDAP_VERSION=${LIBDAP_VERSION:-$(echo "${build_recipe}" | grep libdap4 | sed "s/libdap4-//g"| awk '{print $1;}')}
     #APR_VERSION="1.7.6-1"
     #APR_VERSION=${APR_VERSION:-$(echo "${build_recipe}" | grep apr | sed "s/apr-//g" | awk '{print $1;}')}
+
+    local td_value="-test-deploy"
+    export TEST_DEPLOYMENT=""
+    if [[ "$TRAVIS_BRANCH" == *"-test-deploy" ]]
+    then
+        TEST_DEPLOYMENT="$td_value"
+    fi
+
+    if test -z "$TEST_DEPLOYMENT"
+    then
+        grep "test-deploy" "$build_recipe_file"
+        if test $? -eq 0
+        then
+            TEST_DEPLOYMENT="$td_value"
+        fi
+    fi
 }
 read_build_recipe "${BUILD_RECIPE_FILE}"
 
@@ -71,6 +87,7 @@ function show_version(){
     loggy ""
     loggy "            NO_CACHE: ${NO_CACHE}"
     loggy ""
+    loggy "     TEST_DEPLOYMENT: '$TEST_DEPLOYMENT'"
     loggy ""
 }
 
@@ -178,8 +195,8 @@ function get_latest_tomcat_version_number(){
         local release_endpoint_url="${release_endpoint_base}-${tomcat_major_version}/v${tomcat_version}"
         loggy "release_endpoint_url=${release_endpoint_url}"
 
-        stat=$(curl -s -o /dev/null -w "%{response_code}" "${release_endpoint_url}")
-        if test $stat -eq 404 ; then
+        status=$(curl -s -o /dev/null -w "%{response_code}" "${release_endpoint_url}")
+        if test $status -eq 404 ; then
             loggy "Candidate tomcat_version: ${tomcat_version} not found on download site: ${release_endpoint_url} "
             if test -n "${tomcat_version}"; then
                 ignore_list+="${ignore_list}  -e ${tomcat_version} "
@@ -231,36 +248,41 @@ function get_tomcat_distro(){
     local tomcat_distro="apache-tomcat-${tomcat_version}.tar.gz"
     loggy "         tomcat_distro: ${tomcat_distro}"
 
+    # Define the Tomcat download endpoints.
+    local tde1="https://downloads.apache.org/tomcat/tomcat-${tomcat_major_version}"
+    local tde2="https://archive.apache.org/dist/tomcat/tomcat-${tomcat_major_version}"
 
-    #
-    # @TODO We may want to consider using this download endpoint: https://downloads.apache.org/tomcat/tomcat-9/v9.0.105/bin/
-    #
-    local tomcat_major_url="https://archive.apache.org/dist/tomcat/tomcat-${tomcat_major_version}"
-    loggy "      tomcat_major_url: ${tomcat_major_url}"
+    local curl_status=1 # Fails unless it succeeded
+    local found_it=1    # 0 when found
+    for download_endpoint in "$tde1" "$tde2"
+    do
+        loggy "Trying download_endpoint: ${download_endpoint}"
 
-    local tomcat_distro_url="${tomcat_major_url}/v${tomcat_version}/bin/${tomcat_distro}"
-    loggy "     tomcat_distro_url: ${tomcat_distro_url}"
-    local tomcat_distro_file="${target_dir}/${tomcat_distro}"
-    loggy "    tomcat_distro_file: ${tomcat_distro_file}"
+        local tomcat_distro_url="${download_endpoint}/v${tomcat_version}/bin/${tomcat_distro}"
+        loggy "       tomcat_distro_url: ${tomcat_distro_url}"
+        local tomcat_distro_file="${target_dir}/${tomcat_distro}"
+        loggy "      tomcat_distro_file: ${tomcat_distro_file}"
+        loggy "         cURL retrieving: ${tomcat_distro_url}"
+        curl ${silent} -o "${tomcat_distro_file}" "${tomcat_distro_url}"
+        curl_status=$?
+        if test $curl_status -ne 0; then
+            echo "WARNING! cURL Failed to retrieve Tomcat distribution. curl_status: $curl_status url: ${tomcat_distro_url}" >&2
+        else
+            found_it=0
+            break
+        fi
+    done
 
-    local tomcat_sig_url="${tomcat_distro_url}.asc"
-    loggy "        tomcat_sig_url: ${tomcat_sig_url}"
-    local tomcat_sig_file="${tomcat_distro_file}.asc"
-    loggy "       tomcat_sig_file: ${tomcat_sig_file}"
-
-    local tomcat_keys_url="${tomcat_major_url}/KEYS"
-    loggy "       tomcat_keys_url: ${tomcat_keys_url}"
-    local tomcat_keys_file="${target_dir}/apache_tomcat_keys"
-    loggy "      tomcat_keys_file: ${tomcat_keys_file}"
-
-    loggy ""
-    loggy "       cURL retrieving: ${tomcat_distro_url}"
-    curl ${silent} -o "${tomcat_distro_file}" "${tomcat_distro_url}"
-    if test $? -ne 0; then
-        echo "ERROR! Failed to retrieve Tomcat distribution from ${tomcat_distro_url}" >&2
+    if test $found_it -ne 0 ; then
+        echo "ERROR! cURL Failed to retrieve Tomcat distribution." >&2
         return 2
     fi
 
+    loggy ""
+    local tomcat_sig_url="${tomcat_distro_url}.asc"
+    loggy "          tomcat_sig_url: ${tomcat_sig_url}"
+    local tomcat_sig_file="${tomcat_distro_file}.asc"
+    loggy "         tomcat_sig_file: ${tomcat_sig_file}"
     loggy ""
     loggy "       cURL retrieving: ${tomcat_sig_url}"
     curl ${silent} -o "${tomcat_sig_file}" "${tomcat_sig_url}"
@@ -269,6 +291,10 @@ function get_tomcat_distro(){
         return 2
     fi
 
+    local tomcat_keys_url="${download_endpoint}/KEYS"
+    loggy "         tomcat_keys_url: ${tomcat_keys_url}"
+    local tomcat_keys_file="${target_dir}/apache_tomcat_keys"
+    loggy "        tomcat_keys_file: ${tomcat_keys_file}"
     loggy ""
     loggy "       cURL retrieving: ${tomcat_keys_url}"
     curl ${silent} -o "${tomcat_keys_file}" "${tomcat_keys_url}"
@@ -286,7 +312,6 @@ function get_tomcat_distro(){
         echo "ERROR! Failed to import Tomcat public keys!" >&2
         return 2
     fi
-
     loggy ""
     loggy "Verifying Tomcat distribution:"
     loggy "    Tomcat public keys: ${tomcat_keys_file}"

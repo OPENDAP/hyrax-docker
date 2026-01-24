@@ -64,7 +64,7 @@ do
     docker image ls -a
     cd ..
     loggy  "Running Test Script"
-    ./regression_test_script -i ${SNAPSHOT_IMAGE_TAG}
+    ./travis/regression_test_script -i ${SNAPSHOT_IMAGE_TAG}
 
     loggy "Cleaning up binaries in $docker_name"
     rm  -v "${BUILD_DIR}/${docker_name}"/*.rpm
