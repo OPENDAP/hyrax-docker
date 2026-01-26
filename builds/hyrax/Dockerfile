@@ -108,8 +108,9 @@ RUN if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else ec
 # Travis build (or at a later time). They need to be part of the container,
 # however, to be run, so install them as part of this Dockerfile.
 # RUN set -e && dnf update  -y
+#TODO: prob don't need reinstallpython3.11 here, can use existing 3.12 in image
 RUN set -e && dnf install -y python3.11 \
-    && python3 --version
+    && python3 --version 
 
 RUN set -e && dnf install -y make curl unzip which autoconf automake emacs vim jq \
     && dnf install -y diffutils \
@@ -131,38 +132,39 @@ RUN set -e && which diff
 # be handled by RPM installation
 
 RUN echo "besdaemon is here: "`which besdaemon`
+RUN echo "chkconfig --list" | grep "besd"
 
-# Add bes group and user (previously constructed via rpm installation)
-RUN getent group bes >/dev/null || groupadd -r bes
-RUN getent passwd bes >/dev/null || \
-    useradd -r -g bes -d /var/log/bes -s /sbin/nologin -c "BES daemon" bes
+# # Add bes group and user (previously constructed via rpm installation)
+# RUN getent group bes >/dev/null || groupadd -r bes
+# RUN getent passwd bes >/dev/null || \
+#     useradd -r -g bes -d /var/log/bes -s /sbin/nologin -c "BES daemon" bes
 
-# Instead of rpm post:
-RUN cp ./usr/local/etc/rc.d/init.d/besd /etc/rc.d/init.d/besd
-RUN chkconfig --add besd \
-    && ldconfig
+# # Instead of rpm post:
+# RUN cp ./usr/local/etc/rc.d/init.d/besd /etc/rc.d/init.d/besd
+# RUN chkconfig --add besd \
+#     && ldconfig
 
-# More rpm-adapting hijinks
-# Adapted from bes/spec.all_static.in
-# Default macros: https://docs.fedoraproject.org/en-US/packaging-guidelines/RPMMacros/
-RUN sed -i.dist -e 's:=/tmp:=/var/cache/bes:' \
-    -e 's:=.*/bes.log:=/var/log/bes/bes.log:' \
-    -e 's:=.*/lib/bes:=/usr/lib/bes:' \
-    -e 's:=.*/share/bes:=/usr/share/bes:' \
-    -e 's:=.*/share/hyrax:=/usr/share/hyrax:' \
-    -e 's:=/full/path/to/serverside/certificate/file.pem:=/etc/pki/bes/cacerts/file.pem:' \
-    -e 's:=/full/path/to/serverside/key/file.pem:=/etc/pki/bes/public/file.pem:' \
-    -e 's:=/full/path/to/clientside/certificate/file.pem:=/etc/pki/bes/cacerts/file.pem:' \
-    -e 's:=/full/path/to/clientside/key/file.pem:=/etc/pki/bes/public/file.pem:' \
-    -e 's:=user_name:=bes:' \
-    -e 's:=group_name:=bes:' \
-    /usr/local/etc/bes/bes.conf
+# # More rpm-adapting hijinks
+# # Adapted from bes/spec.all_static.in
+# # Default macros: https://docs.fedoraproject.org/en-US/packaging-guidelines/RPMMacros/
+# RUN sed -i.dist -e 's:=/tmp:=/var/cache/bes:' \
+#     -e 's:=.*/bes.log:=/var/log/bes/bes.log:' \
+#     -e 's:=.*/lib/bes:=/usr/lib/bes:' \
+#     -e 's:=.*/share/bes:=/usr/share/bes:' \
+#     -e 's:=.*/share/hyrax:=/usr/share/hyrax:' \
+#     -e 's:=/full/path/to/serverside/certificate/file.pem:=/etc/pki/bes/cacerts/file.pem:' \
+#     -e 's:=/full/path/to/serverside/key/file.pem:=/etc/pki/bes/public/file.pem:' \
+#     -e 's:=/full/path/to/clientside/certificate/file.pem:=/etc/pki/bes/cacerts/file.pem:' \
+#     -e 's:=/full/path/to/clientside/key/file.pem:=/etc/pki/bes/public/file.pem:' \
+#     -e 's:=user_name:=bes:' \
+#     -e 's:=group_name:=bes:' \
+#     /usr/local/etc/bes/bes.conf
 
-RUN chown -R bes /usr/local/etc/bes \
-    /usr/local/share/bes \
-    /usr/local/include/bes \
-    /usr/local/lib/bes \
-    /usr/local/var/run/bes
+# RUN chown -R bes /usr/local/etc/bes \
+#     /usr/local/share/bes \
+#     /usr/local/include/bes \
+#     /usr/local/lib/bes \
+#     /usr/local/var/run/bes
 
 ################################################################
 # Install and Setup Tomcat
