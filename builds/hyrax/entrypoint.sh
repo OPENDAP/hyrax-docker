@@ -143,13 +143,14 @@ echo "PythonVersion: "$(python3 --version)
 #-------------------------------------------------------------------------------
 # Start the BES daemon process
 # /usr/bin/besdaemon -i /usr -c /etc/bes/bes.conf -r /var/run/bes.pid
-bes_uid=$(id -u bes)
+bes_username=bes_user # As set in bes dockerfile; TODO make it bes again??
+bes_uid=$(id -u ${bes_username}) #TODO: can hardcode to 101 if we want...
 echo "bes_uid: ${bes_uid}" >&2
-bes_gid=$(id -g bes)
+bes_gid=$(id -g ${bes_username}) # TODO: do we hardcode this in the docker image? we maybe should.
 echo "bes_gid: ${bes_gid}" >&2
 
 echo "Launching besd..." >&2
-/usr/local/bin/besctl start
+$PREFIX/bin/besctl start   # TODO: do we want to install this in root in bes docker image? maybe...
 status=$?
 if test $status -ne 0 ; then
     echo "ERROR: Failed to start BES: $status" >&2

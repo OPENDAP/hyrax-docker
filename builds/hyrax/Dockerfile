@@ -73,6 +73,7 @@ LABEL org.opendap.hyrax.version.is-production="false"
 LABEL maintainer=support@opendap.org
 
 USER root
+WORKDIR /
 
 #
 # The --build-arg USE_NCWMS can be set to "true" in order to 
@@ -131,8 +132,15 @@ RUN set -e && which diff
 # we need to do some final installation steps that would otherwise
 # be handled by RPM installation
 
-RUN echo "besdaemon is here: "`which besdaemon`
-RUN echo "chkconfig --list" | grep "besd"
+RUN echo "besdaemon is here: "`which besdaemon` \
+    && echo "whoami: "`whoami`
+
+# Add besd service to start at boot
+RUN cp ${PREFIX}/etc/rc.d/init.d/besd /etc/rc.d/init.d/besd \
+    && chkconfig --add besd \
+    && ldconfig
+RUN chkconfig --list | grep besd \
+    && echo "whoami: "`whoami`
 
 # # Add bes group and user (previously constructed via rpm installation)
 # RUN getent group bes >/dev/null || groupadd -r bes
@@ -144,21 +152,22 @@ RUN echo "chkconfig --list" | grep "besd"
 # RUN chkconfig --add besd \
 #     && ldconfig
 
-# # More rpm-adapting hijinks
-# # Adapted from bes/spec.all_static.in
-# # Default macros: https://docs.fedoraproject.org/en-US/packaging-guidelines/RPMMacros/
-# RUN sed -i.dist -e 's:=/tmp:=/var/cache/bes:' \
-#     -e 's:=.*/bes.log:=/var/log/bes/bes.log:' \
-#     -e 's:=.*/lib/bes:=/usr/lib/bes:' \
-#     -e 's:=.*/share/bes:=/usr/share/bes:' \
-#     -e 's:=.*/share/hyrax:=/usr/share/hyrax:' \
-#     -e 's:=/full/path/to/serverside/certificate/file.pem:=/etc/pki/bes/cacerts/file.pem:' \
-#     -e 's:=/full/path/to/serverside/key/file.pem:=/etc/pki/bes/public/file.pem:' \
-#     -e 's:=/full/path/to/clientside/certificate/file.pem:=/etc/pki/bes/cacerts/file.pem:' \
-#     -e 's:=/full/path/to/clientside/key/file.pem:=/etc/pki/bes/public/file.pem:' \
-#     -e 's:=user_name:=bes:' \
-#     -e 's:=group_name:=bes:' \
-#     /usr/local/etc/bes/bes.conf
+# More rpm-adapting hijinks
+# Adapted from bes/spec.all_static.in
+# Default macros: https://docs.fedoraproject.org/en-US/packaging-guidelines/RPMMacros/
+RUN sed -i.dist -e 's:=/tmp:=/var/cache/bes:' \
+    -e 's:=.*/bes.log:=/var/log/bes/bes.log:' \
+    -e 's:=.*/lib/bes:=$PREFIX/lib/bes:' \
+    -e 's:=.*/share/bes:=$PREFIX/share/bes:' \
+    # -e 's:=.*/share/hyrax:=/usr/share/hyrax:' \
+    # -e 's:=/full/path/to/serverside/certificate/file.pem:=/etc/pki/bes/cacerts/file.pem:' \
+    # -e 's:=/full/path/to/serverside/key/file.pem:=/etc/pki/bes/public/file.pem:' \
+    # -e 's:=/full/path/to/clientside/certificate/file.pem:=/etc/pki/bes/cacerts/file.pem:' \
+    # -e 's:=/full/path/to/clientside/key/file.pem:=/etc/pki/bes/public/file.pem:' \
+    -e 's:=user_name:='"$BES_USER"':' \
+    -e 's:=group_name:='"$BES_USER"':' \
+    $PREFIX/etc/bes/bes.conf \
+    && mkdir -p "/var/log/bes/"
 
 # RUN chown -R bes /usr/local/etc/bes \
 #     /usr/local/share/bes \
@@ -196,9 +205,7 @@ RUN set -e && echo "CATALINA_HOME: ${CATALINA_HOME}" >&2
 COPY tomcat9-server.xml /
 RUN set -e \
     && mv /tomcat9-server.xml ${CATALINA_HOME}/conf/server.xml \
-    && chown -R tomcat:tomcat ${CATALINA_HOME}/conf/server.xml
-
-RUN set -e \
+    && chown -R tomcat:tomcat ${CATALINA_HOME}/conf/server.xml \
     && echo "Cleaning up Tomcat distribution files..." >&2 \
     && rm -fv "/${TOMCAT_DISTRO}.tar.gz"
 
@@ -211,7 +218,7 @@ RUN echo "Installing the latest olfs distribution (${OLFS_VERSION})." >&2
 RUN set -e \
     && echo "working_dir: "`pwd`  >&2 \
     && ls -l . \
-    && tar -C ${ROOT} -xzvf ./${OLFS_DISTRO}.tgz \
+    && tar -C ${ROOT} -xzvf /${OLFS_DISTRO}.tgz \
     && ls -l ${ROOT} \
     && echo "Unpacking warfile..."  >&2 \
     && mkdir -p $(readlink -f ${CATALINA_HOME})/webapps/${DEPLOYMENT_CONTEXT}/ \
@@ -227,20 +234,15 @@ RUN set -e \
     && echo "Unpacking dynamic robots.txt warfile..."  >&2 \
     && unzip -o ${ROOT}/${ROBOTS_DISTRO}/ROOT.war -d ${CATALINA_HOME}/webapps/ROOT/ \
     && echo "Cleaning up dynamic robots.txt snapshot..."  >&2 \
-    && rm -rf ${ROOT}/${ROBOTS_DISTRO} ${ROBOTS_DISTRO}.tgz
+    && rm -rf ${ROOT}/${ROBOTS_DISTRO} ${ROBOTS_DISTRO}.tgz \
+    && echo "Cleaning up the Hyrax distribution binaries..." \
+    && rm -vf /olfs*.tgz /robots*.tgz /apache*
 
 # Fix ownership and access permissions
 RUN set -e \
     && mkdir -p ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/logs \
     && chown -R tomcat:tomcat ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/logs \
     && chmod 700 ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/logs
-
-################################################################
-# Clean up the Hyrax distribution binaries.
-#
-RUN rm -vf /olfs*.tgz /robots*.tgz /apache*
-#
-################################################################
 
 ################################################################
 # retrieve and install the ncWMS web application
@@ -326,7 +328,7 @@ RUN chmod +x /cleanup_files.sh
 
 COPY entrypoint.sh /
 RUN chmod +x /entrypoint.sh
-ENTRYPOINT [ "/entrypoint.sh" ]
+# ENTRYPOINT [ "/entrypoint.sh" ]
 
 EXPOSE 8009
 EXPOSE 8080
