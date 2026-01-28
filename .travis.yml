@@ -38,7 +38,7 @@ env:
     # DOCKER_HUB_PSWD for our DockerHub account
     - secure: "TwtIaxZhEc+THFGe7qcOTmgeXG37tG9Hqmx0/JQS4UBYmbM+n/RbxV0IK5WjTBsvV/UBPVPdYLb0EOgsZDWjrFR7kyemd1dLc4fgb7EnHEyl17GUK3CR+ZtnRNAn+u10CJ3lq1d+ttda0GrEOpGT9e2nqPo19BxQ4vlhuFq8TAb4lKfBz3y89sY0Py+3htDtqNrIcZ1Ca0cyKmkU90/42Hx5kmBJPcFAIIrxy46cF4iNyQ8cS5TAmY/vQ+ZcoiO5yCA6ACqKWqFH2i7qUZhVsBWI6VWgQTbuRKOJ4RdOv2QtHb3QGO+PdxxitpQvw2aYam4nI7WapqNk84hu+oXoavDSR0kN21vlpfvcyfIi9JuEGGmVb7irbCCVo27kLHrRrntByKJ7GpR5Wf9s8frWd53iri9k0DSwxvKGZBIaFPodnYsJKF1Ck16IrJrr6AgPZvTKN4vBesFiRvI6sIJrZL6gD62cW2s196zKaSzcT0DccUKCaG6/javNazMo+sk74tOgqaeX0r/whXv8Rc/oobdUFI0AkGGOTzp4+QHVKX1swPEVEjP00ewOyurQinG1yhkqOgQU7s6f5dXabepmnFtH5j5W8AjDL6kISk1w/UIfMwGkUDXyxSGZWLaLag2oDxb+0Xe4CC+9m6SxtnRSzUjXDzOL4QBB8ri0VBSMA2E="
     - VERSION_FILE="el8-build-recipe"
-    - TARGET_OS="$(source ./travis/configure_build_env.sh)"
+    - TARGET_OS="$(source ./travis/get_target_os.sh)"
     - TOMCAT_MAJOR_VERSION=9
     - RELEASE_DATE=`date +%s`
     - LIBDAP_VERSION=$(grep "libdap4-" ${VERSION_FILE} | awk '{print $1;}' - | sed "s/libdap4-//g")
