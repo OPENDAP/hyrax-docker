@@ -7,5 +7,5 @@ function loggy() {
     echo "$@" | awk '{ print "# "$0;}' >&2
 }
 
-export TARGET_OS=$(grep "TARGET_OS: " ${VERSION_FILE} | awk '{print $2;}')
-loggy "$prolog S3_BUILD_BUCKET: $S3_BUILD_BUCKET"
+export TARGET_OS=$(grep "TARGET_OS: " "${VERSION_FILE}" | awk '{print $2;}')
+loggy "$prolog TARGET_OS: $TARGET_OS"
