@@ -104,7 +104,7 @@ jobs:
     # RH8 Builds
     #
     - stage: BUILD_AND_TEST
-      name: "Build and Test opendap/hyrax:snapshot (RH8)"
+      name: "Build and Test opendap/hyrax (EL8)"
       script:
         - cd "${TARGET_OS}-builds"
         - export DOCKER_NAME="hyrax"
@@ -140,7 +140,7 @@ jobs:
         - ./travis/regression_test_script -i ${SNAPSHOT_IMAGE_TAG}
 
     - stage: BUILD
-      name: "Build opendap/besd:snapshot (RH8)"
+      name: "Build opendap/besd (EL8)"
       script:
         - cd "${TARGET_OS}-builds"
         - export DOCKER_NAME="besd"
@@ -165,7 +165,7 @@ jobs:
         - docker image ls -a
 
     - stage: BUILD
-      name: "Build opendap/hyrax_ncwms:snapshot (RH8)"
+      name: "Build opendap/hyrax_ncwms (EL8)"
       script:
         - cd "${TARGET_OS}-builds"
         - export DOCKER_NAME="hyrax"
@@ -199,7 +199,7 @@ jobs:
         - docker image ls -a
 
     - stage: BUILD
-      name: "Build opendap/hyrax:ngap-snapshot (RH8)"
+      name: "Build opendap/hyrax:ngap (EL8)"
       script:
         - cd "${TARGET_OS}-builds"
         - export DOCKER_NAME="ngap"
@@ -232,7 +232,7 @@ jobs:
         - docker image ls -a
 
     - stage: BUILD
-      name: "Build opendap/olfs:snapshot"
+      name: "Build opendap/olfs"
       script:
         - cd "${TARGET_OS}-builds"
         - export DOCKER_NAME="olfs"
