@@ -38,16 +38,16 @@
   <!-- Global JNDI resources
        Documentation at /docs/jndi-resources-howto.html
   -->
-  <!-- GlobalNamingResources -->
+  <GlobalNamingResources>
     <!-- Editable user database that can also be used by
          UserDatabaseRealm to authenticate users
     -->
-    <!-- Resource name="UserDatabase" auth="Container"
+    <Resource name="UserDatabase" auth="Container"
               type="org.apache.catalina.UserDatabase"
               description="User database that can be updated and saved"
               factory="org.apache.catalina.users.MemoryUserDatabaseFactory"
-              pathname="conf/tomcat-users.xml" / -->
-  <!-- /GlobalNamingResources -->
+              pathname="conf/tomcat-users.xml" />
+  </GlobalNamingResources>
 
   <!-- A "Service" is a collection of one or more "Connectors" that share
        a single "Container" Note:  A "Service" is not itself a "Container",
@@ -79,7 +79,7 @@
                redirectPort="8443"
                compression="force"
                compressionMinSize="2048"
-               compressableMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/octet-stream,application/vnd.opendap.dap4.dataset-services+xml,application/vnd.opendap.dap4.dataset-metadata+xml,application/vnd.opendap.dap4.data,application/vnd.opendap.dap4.error+xml,application/json,application/prs.coverage+json,application/rdf+xml,application/x-netcdf,image/tiff;application=geotiff"
+               compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/octet-stream,application/vnd.opendap.dap4.dataset-services+xml,application/vnd.opendap.dap4.dataset-metadata+xml,application/vnd.opendap.dap4.data,application/vnd.opendap.dap4.error+xml,application/json,application/prs.coverage+json,application/rdf+xml,application/x-netcdf,image/tiff;application=geotiff"
     />
     -->
 
@@ -115,7 +115,7 @@
 
     <Connector
         port="8443"
-        protocol="org.apache.coyote.http11.Http11NioProtocol"
+        protocol="org.apache.coyote.http11.Http11AprProtocol"
         maxThreads="150"
         SSLEnabled="true"
         compression="force"
@@ -155,14 +155,14 @@
 
       <!-- Use the LockOutRealm to prevent attempts to guess user passwords
            via a brute-force attack -->
-      <!-- Realm className="org.apache.catalina.realm.LockOutRealm" -->
+      <Realm className="org.apache.catalina.realm.LockOutRealm">
         <!-- This Realm uses the UserDatabase configured in the global JNDI
              resources under the key "UserDatabase".  Any edits
              that are performed against this UserDatabase are immediately
              available for use by the Realm.  -->
-        <!-- Realm className="org.apache.catalina.realm.UserDatabaseRealm"
-               resourceName="UserDatabase"/ -->
-      <!--/Realm -->
+        <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
+               resourceName="UserDatabase"/>
+      </Realm>
 
       <Host name="localhost"  appBase="webapps"
             unpackWARs="true" autoDeploy="true">

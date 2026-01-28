@@ -175,9 +175,6 @@ startup_log "OLFS_CONF_DIR: ${OLFS_CONF_DIR}"
 export TOMCAT_CONTEXT_FILE="/usr/share/tomcat/conf/context.xml"
 startup_log "TOMCAT_CONTEXT_FILE: ${TOMCAT_CONTEXT_FILE}"
 
-export TOMCAT_REDISSON_FILE="/usr/share/tomcat/conf/redisson.json"
-startup_log "TOMCAT_REDISSON_FILE: ${TOMCAT_REDISSON_FILE}"
-
 export NCWMS_BASE=${NCWMS_BASE:-"https://localhost:8080"}
 startup_log "NCWMS_BASE: ${NCWMS_BASE}"
 
@@ -254,7 +251,7 @@ if test -n "${OLFS_XML}"; then
   startup_log "Updating OLFS configuration file: ${OLFS_XML_FILE}"
   echo "${OLFS_XML}" > ${OLFS_XML_FILE}
   startup_log " "$( ls -l "${OLFS_XML_FILE}" )
-  ologgy $( cat "${OLFS_XML_FILE}" )
+  # loggy $( cat "${OLFS_XML_FILE}" )
 fi
 ################################################################################
 
@@ -270,7 +267,7 @@ if test -n "${USER_ACCESS_XML}"; then
   startup_log "Updating OLFS user access controls: ${USER_ACCESS_XML_FILE}"
   echo "${USER_ACCESS_XML}" > ${USER_ACCESS_XML_FILE}
   startup_log " "$(ls -l "${USER_ACCESS_XML_FILE}")
-  # ologgy ( cat "${USER_ACCESS_XML_FILE}" )
+  # loggy ( cat "${USER_ACCESS_XML_FILE}" )
 fi
 ################################################################################
 
@@ -285,7 +282,7 @@ if test -n "${BES_SITE_CONF}"; then
   # @TODO THis seems like a crappy hack, we should just change the source file in BitBucket to be correct
   echo "${BES_SITE_CONF}" | sed -e "s+BES.LogName=stdout+BES.LogName=${BES_LOG_FILE}+g" >${BES_SITE_CONF_FILE}
   startup_log " "$( ls -l "${BES_SITE_CONF_FILE}" )
-  # ologgy $( cat "${BES_SITE_CONF_FILE}" )
+  # loggy $( cat "${BES_SITE_CONF_FILE}" )
 fi
 #
 # Update site.conf with the instance-id of this system.
@@ -302,7 +299,7 @@ if test -n "${TOMCAT_CONTEXT_XML}"; then
   startup_log "Writing Tomcat context.xml file: ${TOMCAT_CONTEXT_FILE}"
   echo "${TOMCAT_CONTEXT_XML}" > ${TOMCAT_CONTEXT_FILE}
   startup_log " "$( ls -l "${TOMCAT_CONTEXT_FILE}" )
-  # ologgy $(cat "${TOMCAT_CONTEXT_FILE}" )
+  # loggy $(cat "${TOMCAT_CONTEXT_FILE}" )
 fi
 ################################################################################
 
@@ -315,7 +312,7 @@ if test -n "${NGAP_CERTIFICATE}"; then
   startup_log "Writing certificate file: ${NGAP_CERTIFICATE_FILE}"
   echo "${NGAP_CERTIFICATE}" > "${NGAP_CERTIFICATE_FILE}"
   startup_log " "$( ls -l "${NGAP_CERTIFICATE_FILE}" )
-  # ologgy $(cat "${NGAP_CERTIFICATE_FILE}" )
+  # loggy $(cat "${NGAP_CERTIFICATE_FILE}" )
 fi
 ################################################################################
 
@@ -328,7 +325,7 @@ if test -n "${NGAP_CERTIFICATE_CHAIN}"; then
   startup_log "Writing credentials chain file: ${NGAP_CREDENTIALS_CHAIN_FILE}"
   echo "${NGAP_CERTIFICATE_CHAIN}" > "${NGAP_CERTIFICATE_CHAIN_FILE}"
   startup_log " "$( ls -l "${NGAP_CERTIFICATE_CHAIN_FILE}" )
-  # ologgy $(cat "${NGAP_CERTIFICATE_CHAIN_FILE}" )
+  # loggy $(cat "${NGAP_CERTIFICATE_CHAIN_FILE}" )
 fi
 ################################################################################
 
@@ -341,21 +338,7 @@ if test -n "${NGAP_CERTIFICATE_KEY}"; then
   startup_log "Writing key file: ${NGAP_CERTIFICATE_KEY_FILE}"
   echo "${NGAP_CERTIFICATE_KEY}" > "${NGAP_CERTIFICATE_KEY_FILE}"
   startup_log " "$( ls -l "${NGAP_CERTIFICATE_KEY_FILE}" )
-  # ologgy $(cat "${NGAP_CERTIFICATE_KEY_FILE}" )
-fi
-################################################################################
-
-################################################################################
-# Inject Tomcat's redisson.json configuration document to configure the Tomcat to
-# utilize Redisson Session Management in the NGAP environment.
-#
-# Test if the bes.conf env variable is set (by way of not unset) and not empty
-if test -n "${TOMCAT_REDISSON_XML}"; then
-  startup_log "Writing Tomcat redisson.json file: ${TOMCAT_REDISSON_FILE}"
-  echo "${TOMCAT_REDISSON_XML}" > ${TOMCAT_REDISSON_FILE}
-  chown tomcat:tomcat "${TOMCAT_REDISSON_FILE}"
-  startup_log " "$( ls -l "${TOMCAT_REDISSON_FILE}" )
-  ologgy $(cat "${TOMCAT_REDISSON_FILE}" )
+  # loggy $(cat "${NGAP_CERTIFICATE_KEY_FILE}" )
 fi
 ################################################################################
 
@@ -479,7 +462,7 @@ status=$?
 startup_log $(cat ./besctl.log)
 if test $status -ne 0; then
   error_log "ERROR: Failed to start BES: $status"
-  #exit $status
+  exit $status
 fi
 besd_pid=$(ps aux | grep /usr/bin/besdaemon | grep -v grep | awk '{print $2;}' -)
 startup_log "The besd is UP! [pid: ${besd_pid}]"
@@ -497,7 +480,7 @@ status=$?
 tomcat_pid=$!
 if test $status -ne 0; then
   error_log "ERROR: Failed to start Tomcat: $status"
-  #exit $status
+  exit $status
 fi
 # When we launch tomcat the initial pid gets "retired" because it spawns a
 # secondary processes.
@@ -553,7 +536,7 @@ while /bin/true; do
   if test $BESD_STATUS -ne 0; then
     error_log "BESD_STATUS: $BESD_STATUS bes_pid:$bes_pid"
     error_log "The BES daemon appears to have died! Exiting. (service_uptime: ${suptime} hours)"
-    #exit $BESD_STATUS
+    exit $BESD_STATUS
   fi
 
   tomcat_ps=$(ps -f "${tomcat_pid}")
@@ -563,7 +546,7 @@ while /bin/true; do
     error_log "TOMCAT_STATUS: $TOMCAT_STATUS tomcat_pid:$tomcat_pid"
     error_log "Tomcat appears to have died! Exiting.  (service_uptime: ${suptime} hours)"
     # write_tomcat_logs 100 5 # [number of log lines to grab from each file] [time to sleep after sending]
-    #exit $TOMCAT_STATUS
+    exit $TOMCAT_STATUS
   fi
 
 done
