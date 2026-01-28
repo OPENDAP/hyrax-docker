@@ -103,8 +103,10 @@ jobs:
     # RH8 Builds
     #
     - stage: BUILD_AND_TEST
-      name: "Build and Test opendap/hyrax ($TARGET_OS)"
+      name: "Build and Test opendap/hyrax"
       script:
+        - echo "BUILDING FOR ${TARGET_OS}"
+        - echo "USING TOMCAT MAJOR VERSION'${TOMCAT_MAJOR_VERSION}'"
         - cd "${TARGET_OS}-builds"
         - export DOCKER_NAME="hyrax"
         - source ./build-rh8
