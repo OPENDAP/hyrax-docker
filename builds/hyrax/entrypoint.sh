@@ -143,7 +143,7 @@ echo "PythonVersion: "$(python3 --version)
 #-------------------------------------------------------------------------------
 # Start the BES daemon process
 # /usr/bin/besdaemon -i /usr -c /etc/bes/bes.conf -r /var/run/bes.pid
-bes_username=bes_user # As set in bes dockerfile; TODO make it bes again??
+bes_username=$USER # As set in bes dockerfile; TODO make it bes again??
 bes_uid=$(id -u ${bes_username}) #TODO: can hardcode to 101 if we want...
 echo "bes_uid: ${bes_uid}" >&2
 bes_gid=$(id -g ${bes_username}) # TODO: do we hardcode this in the docker image? we maybe should.
@@ -156,7 +156,7 @@ if test $status -ne 0 ; then
     echo "ERROR: Failed to start BES: $status" >&2
     exit $status
 fi
-besd_pid=`ps aux | grep /usr/bin/besdaemon | grep -v grep | awk '{print $2;}' - `
+besd_pid=`ps aux | grep $PREFIX/bin/besdaemon | grep -v grep | awk '{print $2;}' - `
 echo "The besd is UP! [pid: ${besd_pid}]" >&2
 
 #-------------------------------------------------------------------------------

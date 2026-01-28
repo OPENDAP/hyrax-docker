@@ -164,10 +164,11 @@ RUN sed -i.dist -e 's:=/tmp:=/var/cache/bes:' \
     # -e 's:=/full/path/to/serverside/key/file.pem:=/etc/pki/bes/public/file.pem:' \
     # -e 's:=/full/path/to/clientside/certificate/file.pem:=/etc/pki/bes/cacerts/file.pem:' \
     # -e 's:=/full/path/to/clientside/key/file.pem:=/etc/pki/bes/public/file.pem:' \
-    -e 's:=user_name:='"$BES_USER"':' \
-    -e 's:=group_name:='"$BES_USER"':' \
+    -e 's:=user_name:='"$USER"':' \
+    -e 's:=group_name:='"$USER"':' \
     $PREFIX/etc/bes/bes.conf \
-    && mkdir -p "/var/log/bes/"
+    && mkdir -p "/var/log/bes/" \
+    && sudo chown -R $USER:$USER "/var/log/bes/"
 
 # RUN chown -R bes /usr/local/etc/bes \
 #     /usr/local/share/bes \
@@ -328,7 +329,7 @@ RUN chmod +x /cleanup_files.sh
 
 COPY entrypoint.sh /
 RUN chmod +x /entrypoint.sh
-# ENTRYPOINT [ "/entrypoint.sh" ]
+ENTRYPOINT [ "/entrypoint.sh" ]
 
 EXPOSE 8009
 EXPOSE 8080
