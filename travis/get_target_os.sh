@@ -9,3 +9,4 @@ function loggy() {
 
 export TARGET_OS=$(grep "TARGET_OS: " "${VERSION_FILE}" | awk '{print $2;}')
 loggy "$prolog TARGET_OS: $TARGET_OS"
+echo "$TARGET_OS"
