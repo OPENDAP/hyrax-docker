@@ -54,9 +54,9 @@ env:
     - NGAP_DISTRO_URL="s3://opendap.travis.build/${NGAP_DISTRO}"
     - ROBOTS_DISTRO="robots-olfs-${OLFS_VERSION}-webapp.tgz"
     - ROBOTS_DISTRO_URL="s3://opendap.travis.build/${ROBOTS_DISTRO}"
-    - LIBDAP_RH8_RPM="libdap-${LIBDAP_VERSION}.el8.x86_64.rpm"
+    - LIBDAP_RH8_RPM="libdap-${LIBDAP_VERSION}.${TARGET_OS}.x86_64.rpm"
     - LIBDAP_RH8_RPM_URL="s3://opendap.travis.build/${LIBDAP_RH8_RPM}"
-    - BES_RH8_RPM="bes-${BES_VERSION}.static.el8.x86_64.rpm"
+    - BES_RH8_RPM="bes-${BES_VERSION}.static.${TARGET_OS}.x86_64.rpm"
     - BES_RH8_RPM_URL="s3://opendap.travis.build/${BES_RH8_RPM}"
     - TOMCAT_MAJOR_VERSION=9
     - S3_BUILD_BUCKET="opendap.travis.build"
@@ -120,7 +120,7 @@ jobs:
         - s3_get_besd_distro
           "${S3_BUILD_BUCKET}"
           "${DOCKER_NAME}"
-          "el8"
+          "${TARGET_OS}"
           "${LIBDAP_VERSION}"
           "${BES_VERSION}" $ADD_DEBUG 2>&1
         - s3_get_olfs_distro
@@ -154,7 +154,7 @@ jobs:
         - s3_get_besd_distro
           "${S3_BUILD_BUCKET}"
           "${DOCKER_NAME}"
-          "el8"
+          "${TARGET_OS}"
           "${LIBDAP_VERSION}"
           "${BES_VERSION}" "${ADD_DEBUG_RPMS}" 2>&1
         - docker build
@@ -181,7 +181,7 @@ jobs:
         - s3_get_besd_distro
           "${S3_BUILD_BUCKET}"
           "${DOCKER_NAME}"
-          "el8"
+          "${TARGET_OS}"
           "${LIBDAP_VERSION}"
           "${BES_VERSION}" "${ADD_DEBUG_RPMS}" 2>&1
         - s3_get_olfs_distro
@@ -215,7 +215,7 @@ jobs:
         - s3_get_besd_distro
           "${S3_BUILD_BUCKET}"
           "${DOCKER_NAME}"
-          "el8"
+          "${TARGET_OS}"
           "${LIBDAP_VERSION}"
           "${BES_VERSION}" "${ADD_DEBUG_RPMS}" 2>&1
         - get_ngap_olfs_distro
@@ -261,7 +261,7 @@ jobs:
     - stage: TEST_DEPLOYED_IMAGE
       name: "Test Deployed Image (RH8)"
       script:
-        - source ./el8-builds/build-rh8 ./el8-build-recipe
+        - source ./${TARGET_OS}-builds/build-rh8 ./${TARGET_OS}-build-recipe
         - export TEST_IMAGE="opendap/hyrax:${HYRAX_VERSION}$TEST_DEPLOYMENT"
         - echo "Running Hyrax Regression Test Script on ${TEST_IMAGE}"
         - ./travis/regression_test_script -i "${TEST_IMAGE}"
