@@ -123,11 +123,11 @@ fi
 #
 if test "${SERVER_HELP_EMAIL}" != "not_set" ; then
     echo "Setting Admin Contact To: $SERVER_HELP_EMAIL"
-    sed -i "s/admin.email.address@your.domain.name/$SERVER_HELP_EMAIL/" /etc/bes/bes.conf
+    sed -i "s/admin.email.address@your.domain.name/$SERVER_HELP_EMAIL/" $PREFIX/etc/bes/bes.conf
 fi
 if test "${FOLLOW_SYMLINKS}" != "not_set" ; then
     echo "Setting BES FollowSymLinks to YES." >&2
-    sed -i "s/^BES.Catalog.catalog.FollowSymLinks=No/BES.Catalog.catalog.FollowSymLinks=Yes/" usr/local/etc/bes/bes.conf
+    sed -i "s/^BES.Catalog.catalog.FollowSymLinks=No/BES.Catalog.catalog.FollowSymLinks=Yes/" $PREFIX/etc/bes/bes.conf
 fi
 
 echo "JAVA VERSION: "

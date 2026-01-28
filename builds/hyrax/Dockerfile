@@ -301,7 +301,7 @@ RUN set -e \
     && echo "Retrieving, and building hyrax regression tests." \
     && echo "h_r_t will be in: ${TEST_INSTALL_DIR}" \
     && mkdir -p ${TEST_INSTALL_DIR} \
-    && git clone -v https://github.com/opendap/hyrax_regression_tests ${TEST_INSTALL_DIR} \
+    && git clone --depth 1 -v https://github.com/opendap/hyrax_regression_tests ${TEST_INSTALL_DIR} \
     && cd ${TEST_INSTALL_DIR} \
     && autoreconf -vif \
     && ./configure
