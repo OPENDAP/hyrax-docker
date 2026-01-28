@@ -9,10 +9,6 @@ language: python
 python:
   - "3.9.7"
 
-# command to install dependencies
-install:
-  - pip install -r requirements.txt
-
 services:
   - docker
 
@@ -42,6 +38,7 @@ env:
     # DOCKER_HUB_PSWD for our DockerHub account
     - secure: "TwtIaxZhEc+THFGe7qcOTmgeXG37tG9Hqmx0/JQS4UBYmbM+n/RbxV0IK5WjTBsvV/UBPVPdYLb0EOgsZDWjrFR7kyemd1dLc4fgb7EnHEyl17GUK3CR+ZtnRNAn+u10CJ3lq1d+ttda0GrEOpGT9e2nqPo19BxQ4vlhuFq8TAb4lKfBz3y89sY0Py+3htDtqNrIcZ1Ca0cyKmkU90/42Hx5kmBJPcFAIIrxy46cF4iNyQ8cS5TAmY/vQ+ZcoiO5yCA6ACqKWqFH2i7qUZhVsBWI6VWgQTbuRKOJ4RdOv2QtHb3QGO+PdxxitpQvw2aYam4nI7WapqNk84hu+oXoavDSR0kN21vlpfvcyfIi9JuEGGmVb7irbCCVo27kLHrRrntByKJ7GpR5Wf9s8frWd53iri9k0DSwxvKGZBIaFPodnYsJKF1Ck16IrJrr6AgPZvTKN4vBesFiRvI6sIJrZL6gD62cW2s196zKaSzcT0DccUKCaG6/javNazMo+sk74tOgqaeX0r/whXv8Rc/oobdUFI0AkGGOTzp4+QHVKX1swPEVEjP00ewOyurQinG1yhkqOgQU7s6f5dXabepmnFtH5j5W8AjDL6kISk1w/UIfMwGkUDXyxSGZWLaLag2oDxb+0Xe4CC+9m6SxtnRSzUjXDzOL4QBB8ri0VBSMA2E="
     - TARGET_OS="el8"
+    - TOMCAT_MAJOR_VERSION=9
     - RELEASE_DATE=`date +%s`
     - VERSION_FILE="${TARGET_OS}-build-recipe"
     - LIBDAP_VERSION=$(grep "libdap4-" ${VERSION_FILE} | awk '{print $1;}' - | sed "s/libdap4-//g")
@@ -54,15 +51,15 @@ env:
     - NGAP_DISTRO_URL="s3://opendap.travis.build/${NGAP_DISTRO}"
     - ROBOTS_DISTRO="robots-olfs-${OLFS_VERSION}-webapp.tgz"
     - ROBOTS_DISTRO_URL="s3://opendap.travis.build/${ROBOTS_DISTRO}"
-    - LIBDAP_RH8_RPM="libdap-${LIBDAP_VERSION}.${TARGET_OS}.x86_64.rpm"
-    - LIBDAP_RH8_RPM_URL="s3://opendap.travis.build/${LIBDAP_RH8_RPM}"
-    - BES_RH8_RPM="bes-${BES_VERSION}.static.${TARGET_OS}.x86_64.rpm"
-    - BES_RH8_RPM_URL="s3://opendap.travis.build/${BES_RH8_RPM}"
-    - TOMCAT_MAJOR_VERSION=9
+    - LIBDAP_RPM_NAME="libdap-${LIBDAP_VERSION}.${TARGET_OS}.x86_64.rpm"
+    - LIBDAP_RPM_URL="s3://opendap.travis.build/${LIBDAP_RPM_NAME}"
+    - BES_RPM_NAME="bes-${BES_VERSION}.static.${TARGET_OS}.x86_64.rpm"
+    - BES_RPM_URL="s3://opendap.travis.build/${BES_RPM_NAME}"
     - S3_BUILD_BUCKET="opendap.travis.build"
     - ADD_DEBUG_RPMS=""
 
 before_install:
+  - pip install -r requirements.txt
   - python3 --version
   - pip3 install awscli
   - if test "${TRAVIS_PULL_REQUEST}" = "false"; then export DEPLOY_ME="true"; else export DEPLOY_ME="false"; fi
@@ -75,10 +72,10 @@ install:
   # - aws --region=us-east-1 s3 cp ${LIBDAP_C7_RPM_URL} ./builds/${LIBDAP_C7_RPM}
   # - echo "Retrieving BES C7 RPM ${BES_C7_RPM}"
   # - aws --region=us-east-1 s3 cp ${BES_C7_RPM_URL} ./builds/${BES_C7_RPM}
-  - echo "Retrieving libdap RH8 RPM ${LIBDAP_RH8_RPM}"
-  - aws --region=us-east-1 s3 cp ${LIBDAP_RH8_RPM_URL} ./builds/${LIBDAP_RH8_RPM}
-  - echo "Retrieving BES RH8 RPM ${BES_RH8_RPM}"
-  - aws --region=us-east-1 s3 cp ${BES_RH8_RPM_URL} ./builds/${BES_RH8_RPM}
+  - echo "Retrieving libdap RH8 RPM ${LIBDAP_RPM_NAME}"
+  - aws --region=us-east-1 s3 cp ${LIBDAP_RPM_URL} ./builds/${LIBDAP_RPM_NAME}
+  - echo "Retrieving BES RH8 RPM ${BES_RPM_NAME}"
+  - aws --region=us-east-1 s3 cp ${BES_RPM_URL} ./builds/${BES_RPM_NAME}
   - echo "Retrieving OLFS Distribution file ${OLFS_DISTRO}"
   - aws --region=us-east-1 s3 cp ${OLFS_DISTRO_URL} ./builds/${OLFS_DISTRO}
   - echo "Retrieving ROBOTS Distribution file ${ROBOTS_DISTRO}"
