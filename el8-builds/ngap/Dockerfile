@@ -105,7 +105,10 @@ RUN set -e && dnf install -y make curl unzip which autoconf automake emacs vim j
     && dnf install -y procps \
     && dnf install -y git bc valgrind gdb \
     && dnf install -y java-11-openjdk-devel \
-    && update-alternatives --set java java-11-openjdk \
+    && j_vers="$(update-alternatives --config java | grep "java-11" | awk '{print $3;}')" \
+    && update-alternatives --set java "$j_vers" \
+    && echo "Enabled $j_vers" \
+    && java -version \
     && dnf install -y redhat-rpm-config \
     && dnf install -y apr-devel \
     && dnf install -y openssl-devel

@@ -80,7 +80,10 @@ RUN set -e \
     && yum install -y libjpeg-devel libxml2-devel libicu-devel \
     && yum install -y rpmdevtools rpmlint \
     && dnf install -y java-11-openjdk-devel\
-    && update-alternatives --set java java-11-openjdk \
+    && j_vers="$(update-alternatives --config java | grep "java-11" | awk '{print $3;}')" \
+    && update-alternatives --set java "$j_vers" \
+    && echo "Enabled $j_vers" \
+    && java -version \
     && yum clean all
 
 #RUN set -e  \

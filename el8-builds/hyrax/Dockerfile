@@ -119,12 +119,13 @@ RUN set -e \
     && dnf install -y make curl unzip which autoconf automake emacs vim jq \
     && dnf install -y diffutils \
     && dnf install -y procps \
-    && dnf install -y git bc valgrind gdb
-
-RUN set -e \
+    && dnf install -y git bc valgrind gdb \
     && dnf install -y java-11-openjdk-devel \
     && j_vers="$(update-alternatives --config java | grep "java-11" | awk '{print $3;}')" \
-    && update-alternatives --set java "$j_vers"
+    && update-alternatives --set java "$j_vers" \
+    && echo "Enabled $j_vers" \
+    && java -version \
+
 # java_sdk_11
 # Temporary Hack to fix broken OpenJDK-11.0.20.0.8-2
 RUN set -e && dnf install -y tzdata-java
