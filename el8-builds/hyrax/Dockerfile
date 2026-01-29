@@ -119,7 +119,7 @@ RUN set -e \
     && dnf install -y make curl unzip which autoconf automake emacs vim jq \
     && dnf install -y diffutils \
     && dnf install -y procps \
-    && dnf install -y git bc valgrind gdb \
+    && dnf install -y git bc valgrind gdb
 
 RUN set -e \
     && dnf install -y java-11-openjdk-devel \
