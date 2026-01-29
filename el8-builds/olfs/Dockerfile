@@ -73,6 +73,7 @@ RUN set -e && dnf install -y python3.11 \
 RUN set -e && dnf install -y curl unzip which emacs vim \
     && dnf install -y bc \
     && dnf install -y java-11-openjdk-devel \
+    && update-alternatives --set java java-11-openjdk \
     && dnf install -y tzdata-java \
     && dnf clean all
 #
