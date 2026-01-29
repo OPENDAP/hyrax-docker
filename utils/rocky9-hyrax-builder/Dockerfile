@@ -81,6 +81,7 @@ RUN set -e \
     && yum install -y libjpeg-devel libxml2-devel libicu-devel \
     && yum install -y rpmdevtools rpmlint \
     && yum install -y java-21-openjdk java-21-openjdk-devel ant \
+    && update-alternatives --set java java-21-openjdk \
     && yum clean all
 
 #RUN set -e  \

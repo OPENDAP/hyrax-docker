@@ -119,7 +119,8 @@ RUN set -e && dnf install -y make curl unzip which autoconf automake emacs vim j
     && dnf install -y diffutils \
     && dnf install -y procps \
     && dnf install -y git bc valgrind gdb \
-    && dnf install -y java-11-openjdk-devel
+    && dnf install -y java-11-openjdk-devel\
+    && update-alternatives --set java java-11-openjdk
 # Temporary Hack to fix broken OpenJDK-11.0.20.0.8-2
 RUN set -e && dnf install -y tzdata-java
 #

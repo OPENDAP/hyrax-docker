@@ -79,7 +79,8 @@ RUN set -e \
     && yum install -y openssl-devel libuuid-devel readline-devel zlib-devel bzip2-devel \
     && yum install -y libjpeg-devel libxml2-devel libicu-devel \
     && yum install -y rpmdevtools rpmlint \
-    && yum install -y java-21-openjdk java-21-openjdk-devel ant \
+    && dnf install -y java-11-openjdk-devel\
+    && update-alternatives --set java java-11-openjdk \
     && yum clean all
 
 #RUN set -e  \
