@@ -123,8 +123,8 @@ RUN set -e \
 
 RUN set -e \
     && dnf install -y java-11-openjdk-devel \
-    && update-alternatives --config java \
-    && update-alternatives --set java /usr/lib/jvm/java-11-openjdk-11.0.25.0.9-2.el8.x86_64
+    && j_vers="$(update-alternatives --config java | grep "java-11" | awk '{print $3;}')" \
+    && update-alternatives --set java "$j_vers"
 # java_sdk_11
 # Temporary Hack to fix broken OpenJDK-11.0.20.0.8-2
 RUN set -e && dnf install -y tzdata-java
