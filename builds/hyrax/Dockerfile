@@ -17,6 +17,7 @@
 # Add a default base image to keep docker from complaining,
 # which is fine because if this ISN'T based on a given image tag,
 # everything downstream will fail due to lack of bes, libdap, etc.
+# TODO: try FROM ${BES_IMAGE_TAG:-"$(some script that fails!)"} thanks ndp :)
 ARG BES_IMAGE_TAG
 FROM ${BES_IMAGE_TAG:-"rockylinux:8"}
 
@@ -120,6 +121,8 @@ RUN set -e && dnf install -y make curl unzip which autoconf automake emacs vim j
     && dnf install -y java-11-openjdk-devel
 # Temporary Hack to fix broken OpenJDK-11.0.20.0.8-2
 RUN set -e && dnf install -y tzdata-java
+
+RUN update-alternatives --set java java-11-openjdk.x86_64
 
 RUN set -e && dnf clean all
 RUN set -e && which diff
