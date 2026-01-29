@@ -115,11 +115,15 @@ RUN set -e && dnf update  -y
 RUN set -e && dnf install -y python3.11 \
     && python3 --version
 
-RUN set -e && dnf install -y make curl unzip which autoconf automake emacs vim jq \
+RUN set -e \
+    && dnf install -y make curl unzip which autoconf automake emacs vim jq \
     && dnf install -y diffutils \
     && dnf install -y procps \
     && dnf install -y git bc valgrind gdb \
+
+RUN set -e \
     && dnf install -y java-11-openjdk-devel \
+    && update-alternatives --list \
     && update-alternatives --set java java-11-openjdk
 # Temporary Hack to fix broken OpenJDK-11.0.20.0.8-2
 RUN set -e && dnf install -y tzdata-java
