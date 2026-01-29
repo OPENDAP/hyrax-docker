@@ -123,7 +123,7 @@ RUN set -e \
 
 RUN set -e \
     && dnf install -y java-11-openjdk-devel \
-    && update-alternatives --list \
+    && update-alternatives --config java \
     && update-alternatives --set java /usr/lib/jvm/java-11-openjdk-11.0.25.0.9-2.el8.x86_64
 # java_sdk_11
 # Temporary Hack to fix broken OpenJDK-11.0.20.0.8-2
