@@ -124,7 +124,7 @@ RUN set -e \
 RUN set -e \
     && dnf install -y java-11-openjdk-devel \
     && update-alternatives --list \
-    && update-alternatives --set java java-11-openjdk
+    && update-alternatives --set java java_sdk_11
 # Temporary Hack to fix broken OpenJDK-11.0.20.0.8-2
 RUN set -e && dnf install -y tzdata-java
 #
