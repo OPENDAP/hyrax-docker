@@ -180,7 +180,7 @@ RUN set -e \
 # Add besd service to start at boot
 RUN cp ${PREFIX}/etc/rc.d/init.d/besd /etc/rc.d/init.d/besd \
     && chkconfig --add besd \
-    && ldconfig
+    && ldconfig \
     && chkconfig --list | grep besd \
     && echo "whoami: "`whoami` \
     && echo "besdaemon is here: "`which besdaemon`
