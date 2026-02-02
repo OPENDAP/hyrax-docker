@@ -14,6 +14,9 @@
 #
 # Set one or more individual labels
 FROM rockylinux:8
+ENV ARCH="x86_64"
+ENV java_version="java-11-openjdk"
+ENV python_version="3.11"
 
 RUN export NOW=`date +%s`
 ARG RELEASE_DATE
@@ -111,35 +114,47 @@ RUN if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else ec
 # are installed in the container but not run until a later stage of the
 # Travis build (or at a later time). They need to be part of the container,
 # however, to be run, so install them as part of this Dockerfile.
-RUN set -e && dnf update  -y
-RUN set -e && dnf install -y python3.11 \
-    && python3 --version
+RUN set -e  \
+    && echo "$HR" \
+    && echo "# It's dnf update Time!" \
+    && dnf update -y \
+    && dnf clean all
 
 RUN set -e \
+    && echo "$HR" \
+    && echo "# Installing command line tools and libraries." \
     && dnf install -y make curl unzip which autoconf automake emacs vim jq \
-    && dnf install -y diffutils \
-    && dnf install -y procps \
-    && dnf install -y git bc valgrind gdb \
-    && dnf install -y java-11-openjdk-devel \
-    && j_vers="$(update-alternatives --config java | grep "java-11" | awk '{print $3;}')" \
-    && update-alternatives --set java "$j_vers" \
-    && echo "Enabled $j_vers" \
-    && java -version \
+    && dnf install -y diffutils procps git bc valgrind gdb \
+    && echo "# The diff executable is here: $(which diff)" \
+    && dnf clean all
 
-# java_sdk_11
-# Temporary Hack to fix broken OpenJDK-11.0.20.0.8-2
-RUN set -e && dnf install -y tzdata-java
-#
+RUN set -e \
+    && echo "$HR" \
+    && echo "# It's Java Time Witches!" \
+    && echo "# Installing $java_version and ant." \
+    && yum install -y "$java_version" "$java_version-devel"  \
+    && yum install -y ant \
+    && echo "$HR2" \
+    && echo "# Using java version $java_version" \
+    && alternatives --set java "$java_version.$ARCH" \
+    && echo "# Enabled $java_version" \
+    && echo "# java version: $(java -version)" \
+    && dnf install -y tzdata-java \
+    && dnf clean all
 
-RUN set -e && curl -sS https://bootstrap.pypa.io/get-pip.py | python3 \
+RUN set -e \
+    && echo "$HR" \
+    && echo "# It's AWS CLI Time People!" \
+    && echo "# Installing Python $python_version" \
+    && dnf install -y python$python_version \
+    && echo "# Python version is: $(python3 --version)" \
+    && echo "# Updating pip" \
+    && curl -sS https://bootstrap.pypa.io/get-pip.py | python3 \
     && python3 -m pip install --upgrade pip \
-    && python3 -m pip install --no-cache-dir awscli
-#
-RUN set -e && dnf clean all
-RUN set -e && which diff
-#
-
-
+    && echo "# Installing aws cli" \
+    && python3 -m pip install --no-cache-dir awscli \
+    && echo "# aws cli version: $(aws --version)" \
+    && dnf clean all
 
 ################################################################
 # Install the latest libdap snapshot
@@ -148,7 +163,8 @@ RUN set -e \
     && echo "Installing the libdap rpm: ${LIBDAP_RPM}" \
     && ls -l ./libdap* \
     && dnf -y install ./libdap-*.rpm \
-    && rm -f ./${LIBDAP_RPM}
+    && rm -f ./${LIBDAP_RPM} \
+    && dnf clean all
 
 RUN echo "libdap4 is installed."
 
@@ -159,7 +175,8 @@ RUN set -e \
     && echo "Installing the latest BES rpm: ${BES_RPM}" \
     && ls -l ./bes* \
     && dnf -y install ./bes-*.rpm \
-    && rm -f ./${BES_RPM}
+    && rm -f ./${BES_RPM} \
+    && dnf clean all
 
 RUN echo "besdaemon is here: "`which besdaemon`
 
