@@ -82,8 +82,8 @@ More elaborate instructions may be found below in this document.
 _Hyrax Docker Hub Pages_
 - [**Hyrax Data Server**](https://cloud.docker.com/u/opendap/repository/docker/opendap/hyrax)
 - [**Hyrax Data Server + ncWMS2**](https://cloud.docker.com/u/opendap/repository/docker/opendap/hyrax_ncmws)
-- [**besd**](https://cloud.docker.com/u/opendap/repository/docker/opendap/olfs)
-- [**olfs**](https://cloud.docker.com/u/opendap/repository/docker/opendap/besd)
+- [**besd**](https://cloud.docker.com/u/opendap/repository/docker/opendap/besd)
+- [**olfs**](https://cloud.docker.com/u/opendap/repository/docker/opendap/olfs)
 
 
 #### Build 
