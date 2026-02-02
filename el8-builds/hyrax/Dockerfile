@@ -143,7 +143,7 @@ RUN set -e \
     && echo "# Enabled $java_version" \
     && jvers="$(java -version)" &&  echo "# java version: $jvers" \
     && echo "$HR2" \
-    && update-alternatives --list java \
+    && update-alternatives --list \
     && echo "$HR2" \
     && dnf install -y tzdata-java \
     && dnf clean all

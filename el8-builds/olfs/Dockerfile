@@ -93,7 +93,7 @@ RUN set -e \
     && echo "# Enabled $java_version" \
     && echo "# java version: $(java -version)" \
     && echo "$HR2" \
-    && alternatives --list \
+    && update-alternatives --list \
     && echo "$HR2" \
     && dnf clean all
 
