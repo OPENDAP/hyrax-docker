@@ -139,6 +139,9 @@ RUN set -e \
     && alternatives --set java "$java_version.$ARCH" \
     && echo "# Enabled $java_version" \
     && echo "# java version: $(java -version)" \
+    && echo "$HR2" \
+    && alternatives --list \
+    && echo "$HR2" \
     && dnf install -y tzdata-java \
     && dnf clean all
 
