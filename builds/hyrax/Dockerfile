@@ -110,59 +110,42 @@ RUN if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else ec
 # Travis build (or at a later time). They need to be part of the container,
 # however, to be run, so install them as part of this Dockerfile.
 # RUN set -e && dnf update  -y
-#TODO: prob don't need reinstallpython3.11 here, can use existing 3.12 in image
-RUN set -e && dnf install -y python3.11 \
-    && python3 --version 
 
 RUN set -e && dnf install -y make curl unzip which autoconf automake emacs vim jq \
     && dnf install -y diffutils \
     && dnf install -y procps \
     && dnf install -y git bc valgrind gdb \
-    && dnf install -y java-11-openjdk-devel
-# Temporary Hack to fix broken OpenJDK-11.0.20.0.8-2
-RUN set -e && dnf install -y tzdata-java
-
-RUN update-alternatives --set java java-11-openjdk.x86_64
-
-RUN set -e && dnf clean all
-RUN set -e && which diff
+    && dnf install -y java-11-openjdk-devel \
+    # Temporary Hack to fix broken OpenJDK-11.0.20.0.8-2
+    && dnf install -y tzdata-java \
+    # Actually *use* the newly-installed java 11
+    && update-alternatives --set java java-11-openjdk.x86_64 \
+    && dnf clean all
+# RUN set -e && which diff
 
 
 ################################################################
 # Set up BES
 #
-# BES is already installed by definition on the base image, but 
-# we need to do some final installation steps that would otherwise
-# be handled by RPM installation
-
-RUN echo "besdaemon is here: "`which besdaemon` \
-    && echo "whoami: "`whoami`
+# BES is already installed on the base image, but 
+# we need to do some additional configuration (to match what was 
+# previously handled by bes RPM installation)
 
 # Add besd service to start at boot
 RUN cp ${PREFIX}/etc/rc.d/init.d/besd /etc/rc.d/init.d/besd \
     && chkconfig --add besd \
     && ldconfig
 RUN chkconfig --list | grep besd \
-    && echo "whoami: "`whoami`
+    && echo "whoami: "`whoami` \
+    && echo "besdaemon is here: "`which besdaemon`
 
-# # Add bes group and user (previously constructed via rpm installation)
-# RUN getent group bes >/dev/null || groupadd -r bes
-# RUN getent passwd bes >/dev/null || \
-#     useradd -r -g bes -d /var/log/bes -s /sbin/nologin -c "BES daemon" bes
-
-# # Instead of rpm post:
-# RUN cp ./usr/local/etc/rc.d/init.d/besd /etc/rc.d/init.d/besd
-# RUN chkconfig --add besd \
-#     && ldconfig
-
-# More rpm-adapting hijinks
 # Adapted from bes/spec.all_static.in
 # Default macros: https://docs.fedoraproject.org/en-US/packaging-guidelines/RPMMacros/
-RUN sed -i.dist -e 's:=/tmp:=/var/cache/bes:' \
+RUN sed -i.dist \
     -e 's:=.*/bes.log:=/var/log/bes/bes.log:' \
-    -e 's:=.*/lib/bes:=$PREFIX/lib/bes:' \
-    -e 's:=.*/share/bes:=$PREFIX/share/bes:' \
-    # -e 's:=.*/share/hyrax:=/usr/share/hyrax:' \
+    -e 's:=.*/lib/bes:='"$PREFIX"'/lib/bes:' \
+    -e 's:=.*/share/bes:='"$PREFIX"'/share/bes:' \
+    -e 's:=.*/share/hyrax:='"$PREFIX"'/share/hyrax:' \
     # -e 's:=/full/path/to/serverside/certificate/file.pem:=/etc/pki/bes/cacerts/file.pem:' \
     # -e 's:=/full/path/to/serverside/key/file.pem:=/etc/pki/bes/public/file.pem:' \
     # -e 's:=/full/path/to/clientside/certificate/file.pem:=/etc/pki/bes/cacerts/file.pem:' \
@@ -171,13 +154,8 @@ RUN sed -i.dist -e 's:=/tmp:=/var/cache/bes:' \
     -e 's:=group_name:='"$USER"':' \
     $PREFIX/etc/bes/bes.conf \
     && mkdir -p "/var/log/bes/" \
+    && touch "/var/log/bes/bes.log" \
     && sudo chown -R $USER:$USER "/var/log/bes/"
-
-# RUN chown -R bes /usr/local/etc/bes \
-#     /usr/local/share/bes \
-#     /usr/local/include/bes \
-#     /usr/local/lib/bes \
-#     /usr/local/var/run/bes
 
 ################################################################
 # Install and Setup Tomcat
