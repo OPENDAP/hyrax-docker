@@ -18,6 +18,9 @@ ENV ARCH="x86_64"
 ENV java_version="java-11-openjdk"
 ENV python_version="3.11"
 
+ENV HR="###########################################################################"
+ENV HR2="# -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - --"
+
 RUN export NOW=`date +%s`
 ARG RELEASE_DATE
 ENV RELEASE_DATE ${RELEASE_DATE:-"${NOW}"}
@@ -140,7 +143,7 @@ RUN set -e \
     && echo "# Enabled $java_version" \
     && echo "# java version: $(java -version)" \
     && echo "$HR2" \
-    && alternatives --list \
+    && alternatives --display java \
     && echo "$HR2" \
     && dnf install -y tzdata-java \
     && dnf clean all
