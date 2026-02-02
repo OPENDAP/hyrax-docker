@@ -26,7 +26,7 @@ ENV package_list="\
     readline-devel zlib-devel bzip2 bzip2-devel libjpeg-devel libxml2-devel \
     libicu-devel rpmdevtools rpmlint \
 "
-ENV dev_ui_packages=" emacs vim bc valgrind gdb unzip which jq"
+ENV dev_ui_packages="emacs vim bc valgrind gdb unzip which jq"
 
 
 LABEL vendor="OPeNDAP"
