@@ -15,6 +15,9 @@
 #
 # Set one or more individual labels
 FROM rockylinux:8
+ENV ARCH="x86_64"
+ENV java_version="java-11-openjdk"
+ENV python_version="3.11"
 
 LABEL vendor="OPeNDAP"
 LABEL maintainer="support@opendap.org"
@@ -22,9 +25,6 @@ LABEL maintainer="support@opendap.org"
 USER root
 
 ENV HR="##########################################################################"
-RUN set -e \
-    && echo "$HR" \
-    && echo "# Update and install packages..."
 
 ################################################################
 # Update and install the needful.
@@ -33,74 +33,93 @@ RUN set -e \
 # are installed in the container but not run until a later stage of the
 # Travis build (or at a later time). They need to be part of the container,
 # however, to be run, so install them as part of this Dockerfile.
-RUN set -e && yum update  -y
 
 RUN set -e \
-    && dnf install -y 'dnf-command(config-manager)'
-
-# Enable crb so we can get the libtirpc and libtirpc-devel
-# RUN set -e && dnf config-manager --set-enabled "crb"
-
-# Set up our friends dnf-plugins-code, epel, and codeready-builder-for-rhel-9
-RUN set -e \
-    && dnf install -y dnf-plugins-core epel-release
-
-RUN set -e \
+    && echo "$HR" \
+    && echo "# Running dnf update" \
+    && dnf update  -y \
+    && echo "# Installing dnf config-manager" \
+    && dnf install -y 'dnf-command(config-manager)' \
+    # Enable crb so we can get the libtirpc and libtirpc-devel
+#    && dnf config-manager --set-enabled "crb"
+    # Set up our friends dnf-plugins-code, epel, and codeready-builder-for-rhel-9
+    && dnf install -y dnf-plugins-core epel-release \
+#    && yum clean all
+#
+#RUN set -e \
+    && echo "$HR" \
+    && echo "# Installing cURL" \
     && yum install -y curl --allowerasing \
     && yum install -y curl-devel  \
-    && curl --version
-
-RUN set -e \
+    && curl --version \
+#    && yum clean all
+#
+# RUN set -e \
     && echo "$HR" \
     && echo "# Installing sqlite and sqlite-devel via yum packages" \
-    && echo "#" \
     && yum install -y sqlite sqlite-devel \
     && pkg-config --exists sqlite3 \
-    && echo "#" \
     && echo "# sqlite and sqlite-devel installed via yum packages" \
-    && echo "$HR"
-
-RUN set -e \
+#    && echo "$HR"
+#
+#RUN set -e \
     && echo "$HR" \
     && echo "# Installing zstd, libzstd, libzstd-devel via yum packages" \
-    && echo "#" \
     && yum install -y zstd libzstd-devel \
     && pkg-config --list-all \
     && pkg-config --exists libzstd \
-    && echo "#" \
     && echo "# zstd, libzstd, libzstd-devel installed via yum packages" \
-    && echo "$HR"
-
+#    && yum clean all
+#
 # The things!
-RUN set -e \
+#RUN set -e \
+    && echo "$HR" \
+    && echo "# Installing All The Packages.." \
     && yum install -y libtirpc  libtirpc-devel \
     && yum install -y procps git gcc-c++ flex bison cmake autoconf automake libtool emacs bzip2 vim bc \
     && yum install -y valgrind gdb unzip which jq diffutils sqlite sqlite-devel \
     && yum install -y openssl-devel libuuid-devel readline-devel zlib-devel bzip2-devel \
     && yum install -y libjpeg-devel libxml2-devel libicu-devel \
     && yum install -y rpmdevtools rpmlint \
-    && yum install -y java-21-openjdk java-21-openjdk-devel ant \
-    && yum clean all
-
+#    && yum clean all
+#
+# It's Java Time Witches!
+#RUN set -e \
+    && echo "$HR" \
+    && echo "# Installing java version $java_version" \
+    && dnf install -y "$java_version" "$java_version-devel" \
+    && echo "# Switching to  java version: $java_version.$ARCH" \
+    && update-alternatives --set java "$java_version.$ARCH" \
+    && echo "# java version: $(java -version 2>&1)" \
+    && java -version \
+#    && yum clean all
 #RUN set -e  \
 #    && yum install -y openjpeg2-devel jasper-devel
-
+#
 #RUN set -e  \
 #    && yum config-manager --set-enabled powertools \
-
+#
 #RUN set -e  \
 #    && yum install -y cppunit cppunit-devel
-
-
-
-RUN set -e \
-    && yum install -y python3.12 \
-    && python3 --version \
-    && yum install -y awscli
-
-RUN  set -e \
+#
+#RUN set -e \
+    && echo "$HR" \
+    && echo "# It's AWS CLI Time People!" \
+    && echo "# Installing Python $python_version" \
+    && dnf install -y python$python_version \
+    && echo "# Python version is: $(python3 --version)" \
+    && echo "# Updating pip" \
+    && curl -sS https://bootstrap.pypa.io/get-pip.py | python3 \
+    && python3 -m pip install --upgrade pip \
+    && echo "# Installing aws cli" \
+    && python3 -m pip install --no-cache-dir awscli \
+    && echo "# aws cli version: $(aws --version)" \
+#    && yum clean all
+#
+# RUN  set -e \
     && echo "# diff is here: $(which diff)" \
-    && echo "$HR"
+    && echo "$HR" \
+    && yum clean all
 
 # We need to make sure there is a directory/mount_point for the calling process
 # to mount a volume that will receieve the RPM files.
