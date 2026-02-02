@@ -139,9 +139,9 @@ RUN set -e \
     && yum install -y ant \
     && echo "$HR2" \
     && echo "# Using java version $java_version" \
-    && alternatives --set java "$java_version.$ARCH" \
+    && update-alternatives --set java "$java_version.$ARCH" \
     && echo "# Enabled $java_version" \
-    && echo "# java version: $(java -version)" \
+    && echo "# java version: $( java -version 2>&1 )" \
     && echo "$HR2" \
     && update-alternatives --list \
     && echo "$HR2" \
@@ -229,10 +229,8 @@ RUN set -e \
 
 ENV CATALINA_OPTS "-Djava.library.path=/usr/local/apr/lib"
 
-RUN set -e && echo "#########################################################"
-RUN set -e && which java && java -version
-# RUN set -e && alternatives --list
-RUN set -e && echo "#########################################################"
+RUN set -e && echo "$HR" && which java && java -version && update-alternatives --list && echo "$HR"
+
 ################################################################
 # Retrieve, verify, and install the NGAP/OLFS web application
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -

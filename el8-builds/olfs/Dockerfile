@@ -14,7 +14,6 @@ ENV HR2="# -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- -
 MAINTAINER support@opendap.org
 USER root
 
-
 RUN export NOW=`date +%s`
 ARG RELEASE_DATE
 ENV RELEASE_DATE ${RELEASE_DATE:-"${NOW}"}
@@ -89,9 +88,9 @@ RUN set -e \
     && yum install -y ant \
     && echo "$HR2" \
     && echo "# Using java version $java_version" \
-    && alternatives --set java "$java_version.$ARCH" \
+    && update-alternatives --set java "$java_version.$ARCH" \
     && echo "# Enabled $java_version" \
-    && echo "# java version: $(java -version)" \
+    && echo "# java version: $( java -version 2>&1 )" \
     && echo "$HR2" \
     && update-alternatives --list \
     && echo "$HR2" \

@@ -139,9 +139,9 @@ RUN set -e \
     # && yum install -y ant \
     && echo "$HR2" \
     && echo "# Using java version $java_version" \
-    && alternatives --set java "$java_version.$ARCH" \
+    && update-alternatives --set java "$java_version.$ARCH" \
     && echo "# Enabled $java_version" \
-    && jvers="$(java -version)" &&  echo "# java version: $jvers" \
+    && echo "# java version: $( java -version 2>&1 )" \
     && echo "$HR2" \
     && update-alternatives --list \
     && echo "$HR2" \

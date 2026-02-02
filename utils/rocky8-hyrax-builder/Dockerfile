@@ -24,8 +24,6 @@ LABEL maintainer="support@opendap.org"
 
 USER root
 
-
-
 ENV HR="##########################################################################"
 
 ################################################################
@@ -91,8 +89,8 @@ RUN set -e \
     && echo "# Installing java version $java_version" \
     && dnf install -y "$java_version" "$java_version-devel" \
     && echo "# Switching to  java version: $java_version.$ARCH" \
-    && alternatives --set java "$java_version.$ARCH" \
-    && echo "# ava version: $(java -version)" \
+    && update-alternatives --set java "$java_version.$ARCH" \
+    && echo "# java version: $(java -version 2>&1)" \
     && java -version \
 #    && yum clean all
 #RUN set -e  \

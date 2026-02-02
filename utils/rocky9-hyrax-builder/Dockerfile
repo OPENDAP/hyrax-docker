@@ -24,7 +24,7 @@ ENV package_list="\
     git gcc-c++ flex bison cmake autoconf271 automake libtool \
     diffutils sqlite sqlite-devel openssl-devel libuuid-devel \
     readline-devel zlib-devel bzip2 bzip2-devel libjpeg-devel libxml2-devel \
-    libicu-devel rpmdevtools rpmlint \
+    libicu-devel rpmdevtools rpmlint zstd libzstd-devel \
 "
 ENV dev_ui_packages="emacs vim bc valgrind gdb unzip which jq"
 
@@ -65,32 +65,30 @@ RUN set -e \
 #    && yum clean all
 #
 # RUN set -e \
-    && echo "$HR" \
-    && echo "# Installing sqlite and sqlite-devel via yum packages" \
-    && yum install -y sqlite sqlite-devel \
-    && pkg-config --exists sqlite3 \
-    && echo "# sqlite and sqlite-devel installed via yum packages" \
+#    && echo "$HR" \
+#    && echo "# Installing sqlite and sqlite-devel via yum packages" \
+#    && yum install -y sqlite sqlite-devel \
+#    && pkg-config --exists sqlite3 \
+#    && echo "# sqlite and sqlite-devel installed via yum packages" \
 #    && yum clean all
 #
 # RUN set -e \
-    && echo "$HR" \
-    && echo "# Installing zstd, libzstd, libzstd-devel via yum packages" \
-    && yum install -y zstd libzstd-devel \
-    && pkg-config --list-all \
-    && pkg-config --exists libzstd \
-    && echo "# zstd, libzstd, libzstd-devel installed via yum packages" \
+#    && echo "$HR" \
+#    && echo "# Installing zstd, libzstd, libzstd-devel via yum packages" \
+#    && yum install -y zstd libzstd-devel \
+#    && pkg-config --list-all \
+#    && pkg-config --exists libzstd \
+#    && echo "# zstd, libzstd, libzstd-devel installed via yum packages" \
 #    && yum clean all
 #
 # RUN set -e \
     && echo "$HR" \
     && echo "# Installing All The Packages.." \
     && yum install -y $package_list $dev_ui_packages \
- #   && yum install -y libtirpc  libtirpc-devel \
- #   && yum install -y procps git gcc-c++ flex bison cmake autoconf271 automake libtool emacs bzip2 vim bc \
- #   && yum install -y valgrind gdb unzip which jq diffutils sqlite sqlite-devel curl which \
- #   && yum install -y openssl-devel libuuid-devel readline-devel zlib-devel bzip2-devel \
- #   && yum install -y libjpeg-devel libxml2-devel libicu-devel \
- #   && yum install -y rpmdevtools rpmlint \
+    && pkg-config --exists sqlite3 \
+    && echo "# sqlite and sqlite-devel installed via yum packages" \
+    && pkg-config --exists libzstd \
+    && echo "# zstd, libzstd, libzstd-devel installed via yum packages" \
 #    && yum clean all
 #
 # RUN set -e \
@@ -102,9 +100,9 @@ RUN set -e \
 #    && yum install -y ant \
     && echo "$HR2" \
     && echo "# Using $java_version" \
-    && alternatives --set java "$java_version.$ARCH" \
+    && update-alternatives --set java "$java_version.$ARCH" \
     && echo "# Enabled $java_version" \
-    && echo "# java version: $(java -version)" \
+    && echo "# java version: $( java -version 2>&1 )" \
 #    && yum clean all
 #
 # RUN set -e  \
