@@ -161,16 +161,6 @@ RUN set -e \
     && dnf clean all
 
 ################################################################
-# Install the latest libdap snapshot
-#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
-RUN set -e \
-    && echo "Installing the libdap rpm: ${LIBDAP_RPM}" \
-    && ls -l ./libdap* \
-    && dnf -y install ./libdap-*.rpm \
-    && rm -f ./${LIBDAP_RPM} \
-    && dnf clean all
-
-################################################################
 # Set up BES
 #
 # BES is already installed on the base image, but 

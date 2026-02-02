@@ -12,7 +12,7 @@ logs
 *.rpm
 *.gz
 *tar.gz.asc
-builds/cookies
-builds/bes.json
-builds/beslog2json.py
 apache_tomcat_keys
+travis/bes.json
+travis/beslog2json.py
+travis/cookies

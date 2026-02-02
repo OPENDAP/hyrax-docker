@@ -271,7 +271,7 @@ jobs:
 
 # deploy:
 #   - provider: script
-#     script: bash ${TRAVIS_BUILD_DIR}/deploy_to_docker_hub.sh
+#     script: bash ${TRAVIS_BUILD_DIR}/travis/deploy_to_docker_hub.sh
 #     on:
 #       branch: master
 #       condition: ${DEPLOY_ME} = "true"
