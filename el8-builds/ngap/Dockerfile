@@ -14,6 +14,12 @@
 #
 # Set one or more individual labels
 FROM rockylinux:8
+ENV ARCH="x86_64"
+ENV java_version="java-11-openjdk"
+ENV python_version="3.11"
+
+ENV HR="###########################################################################"
+ENV HR2="# -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - --"
 
 # ENV DEPLOYMENT_CONTEXT="ROOT"
 ENV DEFAULT_NGAP_DEPLOYMENT_CONTEXT="ngap"
@@ -96,23 +102,53 @@ RUN set -e && \
 # are installed in the container but not run until a later stage of the
 # Travis build (or at a later time). They need to be part of the container,
 # however, to be run, so install them as part of this Dockerfile.
-RUN set -e && dnf update  -y
-RUN set -e && dnf install -y python3.11 \
-    && python3 --version
+RUN set -e \
+    && echo "$HR" \
+    && echo "# It's dnf update Time!" \
+    && dnf update  -y \
+    && dnf clean all
 
-RUN set -e && dnf install -y make curl unzip which autoconf automake emacs vim jq \
-    && dnf install -y diffutils \
-    && dnf install -y procps \
-    && dnf install -y git bc valgrind gdb \
-    && dnf install -y java-11-openjdk-devel \
-    && dnf install -y redhat-rpm-config \
-    && dnf install -y apr-devel \
-    && dnf install -y openssl-devel
-# Temporary Hack to fix broken OpenJDK-11.0.20.0.8-2
-RUN set -e && dnf install -y tzdata-java
+RUN set -e \
+    && echo "$HR" \
+    && echo "# Installing command line tools and libraries." \
+    && dnf install -y make curl unzip which autoconf automake emacs vim jq \
+    && dnf install -y diffutils  procps  git bc valgrind gdb \
+    && dnf install -y redhat-rpm-config  apr-devel openssl-devel \
+    && dnf clean all
+
+RUN set -e \
+    && echo "$HR" \
+    && echo "# It's AWS CLI Time!" \
+    && echo "# Installing python$python_version" \
+    && dnf install -y python$python_version && python3 --version \
+    && echo "# python version: $(python3 --version)" \
+    && echo "# Updating pip" \
+    && curl -sS https://bootstrap.pypa.io/get-pip.py | python3 \
+    && python3 -m pip install --upgrade pip \
+    && echo "# Installing aws cli" \
+    && python3 -m pip install awscli \
+    && echo "# aws cli version: $(aws --version)" \
+    && dnf clean all
+
+
+RUN set -e \
+    && echo "$HR" \
+    && echo "# It's Java Time Witches!" \
+    && echo "# Installing $java_version and ant." \
+    && yum install -y "$java_version" "$java_version-devel" tzdata-java \
+    && yum install -y ant \
+    && echo "$HR2" \
+    && echo "# Using java version $java_version" \
+    && update-alternatives --set java "$java_version.$ARCH" \
+    && echo "# Enabled $java_version" \
+    && echo "# java version: $( java -version 2>&1 )" \
+    && echo "$HR2" \
+    && update-alternatives --list \
+    && echo "$HR2" \
+    && dnf clean all
+
 # Temporary Hack to add missing Apache Portable Runtime library for Tomcat
 #
-RUN set -e && dnf clean all
 #
 
 ################################################################
@@ -193,10 +229,8 @@ RUN set -e \
 
 ENV CATALINA_OPTS "-Djava.library.path=/usr/local/apr/lib"
 
-RUN set -e && echo "#########################################################"
-RUN set -e && which java && java -version
-# RUN set -e && alternatives --list
-RUN set -e && echo "#########################################################"
+RUN set -e && echo "$HR" && which java && java -version && update-alternatives --list && echo "$HR"
+
 ################################################################
 # Retrieve, verify, and install the NGAP/OLFS web application
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -

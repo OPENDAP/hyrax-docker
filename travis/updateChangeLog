@@ -4,7 +4,7 @@ COMMIT_UPDATES=${2:-""} # Anything not empty will trigger commits
 
 debug=${debug:-""}
 
-BUILD_RECIPE_FILE="./snapshot.time"
+BUILD_RECIPE_FILE="./el8-build-recipe"
 
 START_DIR=$PWD
 

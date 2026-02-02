@@ -4,6 +4,13 @@
 
 #
 FROM rockylinux:8
+ENV ARCH="x86_64"
+ENV java_version="java-11-openjdk"
+ENV python_version="3.11"
+
+ENV HR="###########################################################################"
+ENV HR2="# -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - --"
+
 MAINTAINER support@opendap.org
 USER root
 
@@ -66,14 +73,41 @@ RUN set -e && \
 #
 # Installing utils for debugging convenience.
 #
-RUN set -e  && dnf update  -y
-RUN set -e && dnf install -y python3.11 \
-    && python3 --version
+RUN set -e  \
+    && echo "$HR" \
+    && echo "# It's dnf update Time!" \
+    && yum update -y \
+    && yum install -y curl unzip which emacs vim bc \
+    && yum clean all
 
-RUN set -e && dnf install -y curl unzip which emacs vim \
-    && dnf install -y bc \
-    && dnf install -y java-11-openjdk-devel \
-    && dnf install -y tzdata-java \
+RUN set -e \
+    && echo "$HR" \
+    && echo "# It's Java Time!" \
+    && echo "# Installing $java_version and ant." \
+    && yum install -y "$java_version" "$java_version-devel"  \
+    && yum install -y ant \
+    && echo "$HR2" \
+    && echo "# Using java version $java_version" \
+    && update-alternatives --set java "$java_version.$ARCH" \
+    && echo "# Enabled $java_version" \
+    && echo "# java version: $( java -version 2>&1 )" \
+    && echo "$HR2" \
+    && update-alternatives --list \
+    && echo "$HR2" \
+    && dnf clean all
+
+#
+RUN set -e \
+    && echo "$HR" \
+    && echo "# It's AWS CLI Time!" \
+    && echo "# Installing python$python_version" \
+    && dnf install -y python$python_version \
+    && echo "# python version: $(python3 --version)" \
+    && echo "# Installing aws cli" \
+    && curl -sS https://bootstrap.pypa.io/get-pip.py | python3 \
+    && python3 -m pip install --upgrade pip \
+    && python3 -m pip install awscli \
+    && echo "# aws cli version: $(aws --version)" \
     && dnf clean all
 
 

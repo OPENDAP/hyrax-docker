@@ -13,13 +13,19 @@
 # it for debugging stuff.
 #
 # Set one or more individual labels
-
 # Add a default base image to keep docker from complaining,
 # which is fine because if this ISN'T based on a given image tag,
 # everything downstream will fail due to lack of bes, libdap, etc.
 # TODO: try FROM ${BES_IMAGE_TAG:-"$(some script that fails!)"} thanks ndp :)
 ARG BES_IMAGE_TAG
 FROM ${BES_IMAGE_TAG:-"rockylinux:8"}
+
+ENV ARCH="x86_64"
+ENV java_version="java-11-openjdk"
+ENV python_version="3.11"
+
+ENV HR="###########################################################################"
+ENV HR2="# -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - --"
 
 ENV NOW="$(`date +%s`)"
 ARG RELEASE_DATE
@@ -109,20 +115,60 @@ RUN if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else ec
 # are installed in the container but not run until a later stage of the
 # Travis build (or at a later time). They need to be part of the container,
 # however, to be run, so install them as part of this Dockerfile.
-# RUN set -e && dnf update  -y
-
-RUN set -e && dnf install -y make curl unzip which autoconf automake emacs vim jq \
-    && dnf install -y diffutils \
-    && dnf install -y procps \
-    && dnf install -y git bc valgrind gdb \
-    && dnf install -y java-11-openjdk-devel \
-    # Temporary Hack to fix broken OpenJDK-11.0.20.0.8-2
-    && dnf install -y tzdata-java \
-    # Actually *use* the newly-installed java 11
-    && update-alternatives --set java java-11-openjdk.x86_64 \
+RUN set -e  \
+    && echo "$HR" \
+    && echo "# It's dnf update Time!" \
+    && dnf update -y \
     && dnf clean all
-# RUN set -e && which diff
 
+RUN set -e \
+    && echo "$HR" \
+    && echo "# Installing command line tools and libraries." \
+    && dnf install -y make curl unzip which autoconf automake emacs vim jq \
+    && dnf install -y diffutils procps git bc valgrind gdb \
+    && echo "# The diff executable is here: $(which diff)" \
+    && dnf clean all
+
+RUN set -e \
+    && echo "$HR" \
+    && echo "# It's Java Time Witches!" \
+    && echo "# Installing $java_version and ant." \
+    && yum install -y "$java_version" "$java_version-devel"  \
+    # && yum install -y ant \
+    && echo "$HR2" \
+    && echo "# Using java version $java_version" \
+    && update-alternatives --set java "$java_version.$ARCH" \
+    && echo "# Enabled $java_version" \
+    && echo "# java version: $( java -version 2>&1 )" \
+    && echo "$HR2" \
+    && update-alternatives --list \
+    && echo "$HR2" \
+    && dnf install -y tzdata-java \
+    && dnf clean all
+
+RUN set -e \
+    && echo "$HR" \
+    && echo "# It's AWS CLI Time People!" \
+    && echo "# Installing Python $python_version" \
+    && dnf install -y python$python_version \
+    && echo "# Python version is: $(python3 --version)" \
+    && echo "# Updating pip" \
+    && curl -sS https://bootstrap.pypa.io/get-pip.py | python3 \
+    && python3 -m pip install --upgrade pip \
+    && echo "# Installing aws cli" \
+    && python3 -m pip install --no-cache-dir awscli \
+    && echo "# aws cli version: $(aws --version)" \
+    && dnf clean all
+
+################################################################
+# Install the latest libdap snapshot
+#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
+RUN set -e \
+    && echo "Installing the libdap rpm: ${LIBDAP_RPM}" \
+    && ls -l ./libdap* \
+    && dnf -y install ./libdap-*.rpm \
+    && rm -f ./${LIBDAP_RPM} \
+    && dnf clean all
 
 ################################################################
 # Set up BES
@@ -135,7 +181,7 @@ RUN set -e && dnf install -y make curl unzip which autoconf automake emacs vim j
 RUN cp ${PREFIX}/etc/rc.d/init.d/besd /etc/rc.d/init.d/besd \
     && chkconfig --add besd \
     && ldconfig
-RUN chkconfig --list | grep besd \
+    && chkconfig --list | grep besd \
     && echo "whoami: "`whoami` \
     && echo "besdaemon is here: "`which besdaemon`
 
