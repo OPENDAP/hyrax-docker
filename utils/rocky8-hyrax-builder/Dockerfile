@@ -44,6 +44,7 @@ RUN set -e \
 #    && dnf config-manager --set-enabled "crb"
     # Set up our friends dnf-plugins-code, epel, and codeready-builder-for-rhel-9
     && dnf install -y dnf-plugins-core epel-release \
+    && update-alternatives --list" \
 #    && yum clean all
 #
 #RUN set -e \
