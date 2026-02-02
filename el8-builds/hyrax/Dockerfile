@@ -136,14 +136,14 @@ RUN set -e \
     && echo "# It's Java Time Witches!" \
     && echo "# Installing $java_version and ant." \
     && yum install -y "$java_version" "$java_version-devel"  \
-    && yum install -y ant \
+    # && yum install -y ant \
     && echo "$HR2" \
     && echo "# Using java version $java_version" \
     && alternatives --set java "$java_version.$ARCH" \
     && echo "# Enabled $java_version" \
     && jvers="$(java -version)" &&  echo "# java version: $jvers" \
     && echo "$HR2" \
-    && alternatives --list java \
+    && update-alternatives --list java \
     && echo "$HR2" \
     && dnf install -y tzdata-java \
     && dnf clean all
