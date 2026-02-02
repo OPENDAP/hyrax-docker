@@ -9,10 +9,6 @@ language: python
 python:
   - "3.9.7"
 
-# command to install dependencies
-install:
-  - pip install -r requirements.txt
-
 services:
   - docker
 
@@ -41,8 +37,10 @@ env:
     - secure: "SpCKRpuU9nIHayBZCQVoUIEK/2niy1Lw0fub/O/mAvzq33/VQa1K4WZcAJjl95KS/mrFjj3e5Gp35jXRNeViB8D3DKE9oZ3R5WDk1V66qDpmxYCSW/6iR2Zm6rjBB4wV6wWPZ1WYBg3Hg6oVZD1X8c5ABqJk7PE59L1IRF8Ocf3p8K0EUYDGINakXZ/RJHe6HtA4++oMhq54dPUTAa6xUrkCw3KNC1UXkoofzS3r/KBAZ+MPtzZkR8/dK8qPQ8hiOuH4Blj4T+d4oHPzcbmz5Nze10wZAhAm6+KwLLBSCs7Morverb1acdKPyye/t1dhzhT3/wiaP75vxDF/STdBYH6GX9HuV9JWXC8bJZxrkZcxyuVsreq/ClpLOhOk0Yfd6pTEa/QZZ+U6hyxcNbu6rROAAZpgsjPAiH3vVC9OdFo11p7bZMpBGyqUeiS82XlZ/3Svj//tiUFji2xwua1SHiM3wmgrLjII2iw8eSYuCEjqtoV6jPT0LfKzLSzuCt1S77SzaujkwBiQ1mSIJuE9SNvpXyJEQ4BInVFn+jOxCxQf6sT7ZnW7mxfK1MmgSKpzoBp8WlIAQAIewTJeaU59ws1nYbha84b80vEXp839Eesfpsf5C44dlnFSCa7sZFJ2tRjPaHv7Swt0dyJ2AmL0EHCfecX3e5sSKQAtxLN9+1E="
     # DOCKER_HUB_PSWD for our DockerHub account
     - secure: "TwtIaxZhEc+THFGe7qcOTmgeXG37tG9Hqmx0/JQS4UBYmbM+n/RbxV0IK5WjTBsvV/UBPVPdYLb0EOgsZDWjrFR7kyemd1dLc4fgb7EnHEyl17GUK3CR+ZtnRNAn+u10CJ3lq1d+ttda0GrEOpGT9e2nqPo19BxQ4vlhuFq8TAb4lKfBz3y89sY0Py+3htDtqNrIcZ1Ca0cyKmkU90/42Hx5kmBJPcFAIIrxy46cF4iNyQ8cS5TAmY/vQ+ZcoiO5yCA6ACqKWqFH2i7qUZhVsBWI6VWgQTbuRKOJ4RdOv2QtHb3QGO+PdxxitpQvw2aYam4nI7WapqNk84hu+oXoavDSR0kN21vlpfvcyfIi9JuEGGmVb7irbCCVo27kLHrRrntByKJ7GpR5Wf9s8frWd53iri9k0DSwxvKGZBIaFPodnYsJKF1Ck16IrJrr6AgPZvTKN4vBesFiRvI6sIJrZL6gD62cW2s196zKaSzcT0DccUKCaG6/javNazMo+sk74tOgqaeX0r/whXv8Rc/oobdUFI0AkGGOTzp4+QHVKX1swPEVEjP00ewOyurQinG1yhkqOgQU7s6f5dXabepmnFtH5j5W8AjDL6kISk1w/UIfMwGkUDXyxSGZWLaLag2oDxb+0Xe4CC+9m6SxtnRSzUjXDzOL4QBB8ri0VBSMA2E="
+    - VERSION_FILE="el8-build-recipe"
+    - TOMCAT_MAJOR_VERSION=$( grep "TOMCAT_MAJOR_VERSION" "${VERSION_FILE}" | awk '{print $2;}' )
+    - TARGET_OS=$( grep "TARGET_OS" "${VERSION_FILE}" | awk '{print $2;}' )
     - RELEASE_DATE=`date +%s`
-    - VERSION_FILE=snapshot.time
     - LIBDAP_VERSION=$(grep "libdap4-" ${VERSION_FILE} | awk '{print $1;}' - | sed "s/libdap4-//g")
     - BES_VERSION=$(grep "bes-" ${VERSION_FILE} | awk '{print $1;}' - | sed "s/bes-//g")
     - HYRAX_VERSION=$(grep "hyrax-" ${VERSION_FILE} | awk '{print $1;}' - | sed "s/hyrax-//g")
@@ -53,11 +51,10 @@ env:
     - NGAP_DISTRO_URL="s3://opendap.travis.build/${NGAP_DISTRO}"
     - ROBOTS_DISTRO="robots-olfs-${OLFS_VERSION}-webapp.tgz"
     - ROBOTS_DISTRO_URL="s3://opendap.travis.build/${ROBOTS_DISTRO}"
-    - LIBDAP_RH8_RPM="libdap-${LIBDAP_VERSION}.el8.x86_64.rpm"
-    - LIBDAP_RH8_RPM_URL="s3://opendap.travis.build/${LIBDAP_RH8_RPM}"
-    - BES_RH8_RPM="bes-${BES_VERSION}.static.el8.x86_64.rpm"
-    - BES_RH8_RPM_URL="s3://opendap.travis.build/${BES_RH8_RPM}"
-    - TOMCAT_MAJOR_VERSION=9
+    - LIBDAP_RPM_NAME="libdap-${LIBDAP_VERSION}.${TARGET_OS}.x86_64.rpm"
+    - LIBDAP_RPM_URL="s3://opendap.travis.build/${LIBDAP_RPM_NAME}"
+    - BES_RPM_NAME="bes-${BES_VERSION}.static.${TARGET_OS}.x86_64.rpm"
+    - BES_RPM_URL="s3://opendap.travis.build/${BES_RPM_NAME}"
     - S3_BUILD_BUCKET="opendap.travis.build"
     - ADD_DEBUG_RPMS=""
 
@@ -74,10 +71,10 @@ install:
   # - aws --region=us-east-1 s3 cp ${LIBDAP_C7_RPM_URL} ./builds/${LIBDAP_C7_RPM}
   # - echo "Retrieving BES C7 RPM ${BES_C7_RPM}"
   # - aws --region=us-east-1 s3 cp ${BES_C7_RPM_URL} ./builds/${BES_C7_RPM}
-  - echo "Retrieving libdap RH8 RPM ${LIBDAP_RH8_RPM}"
-  - aws --region=us-east-1 s3 cp ${LIBDAP_RH8_RPM_URL} ./builds/${LIBDAP_RH8_RPM}
-  - echo "Retrieving BES RH8 RPM ${BES_RH8_RPM}"
-  - aws --region=us-east-1 s3 cp ${BES_RH8_RPM_URL} ./builds/${BES_RH8_RPM}
+  - echo "Retrieving libdap RH8 RPM ${LIBDAP_RPM_NAME}"
+  - aws --region=us-east-1 s3 cp ${LIBDAP_RPM_URL} ./builds/${LIBDAP_RPM_NAME}
+  - echo "Retrieving BES RH8 RPM ${BES_RPM_NAME}"
+  - aws --region=us-east-1 s3 cp ${BES_RPM_URL} ./builds/${BES_RPM_NAME}
   - echo "Retrieving OLFS Distribution file ${OLFS_DISTRO}"
   - aws --region=us-east-1 s3 cp ${OLFS_DISTRO_URL} ./builds/${OLFS_DISTRO}
   - echo "Retrieving ROBOTS Distribution file ${ROBOTS_DISTRO}"
@@ -106,9 +103,11 @@ jobs:
     # RH8 Builds
     #
     - stage: BUILD_AND_TEST
-      name: "Build and Test opendap/hyrax:snapshot (RH8)"
+      name: "Build and Test opendap/hyrax"
       script:
-        - cd builds
+        - echo "BUILDING FOR ${TARGET_OS}"
+        - echo "USING TOMCAT MAJOR VERSION '${TOMCAT_MAJOR_VERSION}'"
+        - cd "${TARGET_OS}-builds"
         - export DOCKER_NAME="hyrax"
         - source ./build-rh8
         - export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}:snapshot$TEST_DEPLOYMENT"
@@ -119,7 +118,7 @@ jobs:
         - s3_get_besd_distro
           "${S3_BUILD_BUCKET}"
           "${DOCKER_NAME}"
-          "el8"
+          "${TARGET_OS}"
           "${LIBDAP_VERSION}"
           "${BES_VERSION}" $ADD_DEBUG 2>&1
         - s3_get_olfs_distro
@@ -142,9 +141,9 @@ jobs:
         - ./travis/regression_test_script -i ${SNAPSHOT_IMAGE_TAG}
 
     - stage: BUILD
-      name: "Build opendap/besd:snapshot (RH8)"
+      name: "Build opendap/besd (EL8)"
       script:
-        - cd builds
+        - cd "${TARGET_OS}-builds"
         - export DOCKER_NAME="besd"
         - source ./build-rh8
         - export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}:snapshot$TEST_DEPLOYMENT"
@@ -153,7 +152,7 @@ jobs:
         - s3_get_besd_distro
           "${S3_BUILD_BUCKET}"
           "${DOCKER_NAME}"
-          "el8"
+          "${TARGET_OS}"
           "${LIBDAP_VERSION}"
           "${BES_VERSION}" "${ADD_DEBUG_RPMS}" 2>&1
         - docker build
@@ -167,9 +166,9 @@ jobs:
         - docker image ls -a
 
     - stage: BUILD
-      name: "Build opendap/hyrax_ncwms:snapshot (RH8)"
+      name: "Build opendap/hyrax_ncwms (EL8)"
       script:
-        - cd builds
+        - cd "${TARGET_OS}-builds"
         - export DOCKER_NAME="hyrax"
         - source ./build-rh8
         - export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}_ncwms:snapshot$TEST_DEPLOYMENT"
@@ -180,7 +179,7 @@ jobs:
         - s3_get_besd_distro
           "${S3_BUILD_BUCKET}"
           "${DOCKER_NAME}"
-          "el8"
+          "${TARGET_OS}"
           "${LIBDAP_VERSION}"
           "${BES_VERSION}" "${ADD_DEBUG_RPMS}" 2>&1
         - s3_get_olfs_distro
@@ -201,9 +200,9 @@ jobs:
         - docker image ls -a
 
     - stage: BUILD
-      name: "Build opendap/hyrax:ngap-snapshot (RH8)"
+      name: "Build opendap/hyrax:ngap (EL8)"
       script:
-        - cd builds
+        - cd "${TARGET_OS}-builds"
         - export DOCKER_NAME="ngap"
         - source ./build-rh8
         - export SNAPSHOT_IMAGE_TAG="opendap/hyrax:${DOCKER_NAME}-snapshot$TEST_DEPLOYMENT"
@@ -214,7 +213,7 @@ jobs:
         - s3_get_besd_distro
           "${S3_BUILD_BUCKET}"
           "${DOCKER_NAME}"
-          "el8"
+          "${TARGET_OS}"
           "${LIBDAP_VERSION}"
           "${BES_VERSION}" "${ADD_DEBUG_RPMS}" 2>&1
         - get_ngap_olfs_distro
@@ -234,9 +233,9 @@ jobs:
         - docker image ls -a
 
     - stage: BUILD
-      name: "Build opendap/olfs:snapshot"
+      name: "Build opendap/olfs"
       script:
-        - cd builds
+        - cd "${TARGET_OS}-builds"
         - export DOCKER_NAME="olfs"
         - source ./build-rh8
         - export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}:snapshot$TEST_DEPLOYMENT"
@@ -260,7 +259,7 @@ jobs:
     - stage: TEST_DEPLOYED_IMAGE
       name: "Test Deployed Image (RH8)"
       script:
-        - source ./builds/build-rh8 ./snapshot.time
+        - source ./${TARGET_OS}-builds/build-rh8 ./${TARGET_OS}-build-recipe
         - export TEST_IMAGE="opendap/hyrax:${HYRAX_VERSION}$TEST_DEPLOYMENT"
         - echo "Running Hyrax Regression Test Script on ${TEST_IMAGE}"
         - ./travis/regression_test_script -i "${TEST_IMAGE}"

@@ -2,7 +2,7 @@
  HR="##########################################################################"
 HR2="== == == == == == == == == == == == == == == == == == == == == == == == =="
 HR3="- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
-export BUILD_RECIPE_FILE=${1:-"../snapshot.time"}
+export BUILD_RECIPE_FILE=${1:-"../el8-build-recipe"}
 export S3_BUILD_BUCKET=${S3_BUILD_BUCKET:-"opendap.travis.build"}
 export DOCKER_NAME=${DOCKER_NAME:-"hyrax"}
 export TOMCAT_MAJOR_VERSION=${TOMCAT_MAJOR_VERSION:-"9"}
@@ -1080,10 +1080,10 @@ function pull_tag_and_push_image(){
 #
 # mk_easy_docker_release()
 #
-# $1 - You must pass a build recipe (aka snapshot.time) file name containing the
+# $1 - You must pass a build recipe (aka el8-build-recipe) file name containing the
 # versions and build times.
 #
-# Reads a snapshot.time file (aka a build recipe) which contains a list of the
+# Reads a el8-build-recipe file (aka a build recipe) which contains a list of the
 # Hyrax Docker files that made up the build. The idea is that is the release
 # process is followed then recipe file will look something like:
 #

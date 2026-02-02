@@ -13,7 +13,7 @@
 # it for debugging stuff.
 #
 # Set one or more individual labels
-FROM rockylinux:9
+FROM rockylinux:8
 
 # ENV DEPLOYMENT_CONTEXT="ROOT"
 ENV DEFAULT_NGAP_DEPLOYMENT_CONTEXT="ngap"
@@ -32,7 +32,7 @@ ENV RELEASE_DATE ${RELEASE_DATE:-"${NOW}"}
 RUN echo "RELEASE_DATE: ${RELEASE_DATE}"
 
 ARG TOMCAT_VERSION
-ENV TOMCAT_VERSION ${TOMCAT_VERSION:-"11.0.7"}
+ENV TOMCAT_VERSION ${TOMCAT_VERSION:-"9.0.64"}
 RUN echo "TOMCAT_VERSION: ${TOMCAT_VERSION}"
 ENV TOMCAT_DISTRO="apache-tomcat-${TOMCAT_VERSION}"
 COPY "${TOMCAT_DISTRO}.tar.gz" /
@@ -47,7 +47,7 @@ ENV LIBDAP_VERSION=${LIBDAP_VERSION:-"snapshot"}
 RUN echo "LIBDAP_VERSION: ${LIBDAP_VERSION}"
 
 ARG LIBDAP_RPM
-ENV LIBDAP_RPM=${LIBDAP_RPM:-"libdap-${LIBDAP_VERSION}.el9.x86_64.rpm"}
+ENV LIBDAP_RPM=${LIBDAP_RPM:-"libdap-${LIBDAP_VERSION}.el8.x86_64.rpm"}
 RUN echo "LIBDAP_RPM: ${LIBDAP_RPM}"
 COPY ${LIBDAP_RPM} libdap-devel-* libdap-debuginfo-* /
 RUN ls -l /libdap-*  >&2
@@ -57,7 +57,7 @@ ENV BES_VERSION=${BES_VERSION:-"snapshot"}
 RUN echo "BES_VERSION: ${BES_VERSION}"
 
 ARG BES_RPM
-ENV BES_RPM=${BES_RPM:-"bes-${BES_VERSION}.static.el9.x86_64.rpm"}
+ENV BES_RPM=${BES_RPM:-"bes-${BES_VERSION}.static.el8.x86_64.rpm"}
 RUN echo "BES_RPM: ${BES_RPM}"
 COPY ${BES_RPM} bes-devel-* bes-debuginfo-* /
 RUN ls -l /bes-* >&2
@@ -66,33 +66,11 @@ ARG OLFS_VERSION
 ENV OLFS_VERSION=${OLFS_VERSION:-"unknown"}
 RUN echo "OLFS_VERSION: ${OLFS_VERSION}"
 
-ARG REDIS_VERSION
-ENV REDIS_VERSION="redisson-3.50.0"
-RUN echo "REDIS_VERSION: ${REDIS_VERSION}"
-
 ARG NGAP_DISTRO
-ENV NGAP_DISTRO="ngap-redisson-3.50.0-webapp"
-#ENV NGAP_DISTRO=${NGAP_DISTRO:-"${REDIS_VERSION}-webapp"}
+ENV NGAP_DISTRO=${NGAP_DISTRO:-"ngap-${OLFS_VERSION}-webapp"}
 RUN echo "NGAP_DISTRO: ${NGAP_DISTRO}"
-#COPY ${NGAP_DISTRO}.tgz /
 COPY ${NGAP_DISTRO}.tgz /${NGAP_DISTRO}.tgz
 RUN tar -tf /${NGAP_DISTRO}.tgz
-
-ARG OPENSSL_VERSION
-ENV OPENSSL_RPM=${OPENSSL_RPM:-"openssl-${OPENSSL_VERSION}.el9.x86_64.rpm"}
-RUN echo "OPENSSL_RPM: ${OPENSSL_RPM}"
-COPY ${OPENSSL_RPM} /
-RUN ls -l /openssl-* >&2
-
-ARG APR_VERSION
-ENV APR_VERSION="1.7.6-1"
-RUN echo "APR_VERSION: ${APR_VERSION}"
-
-ARG APACHE_APR_RPM
-ENV APACHE_APR_RPM=${APACHE_APR_RPM:-"apr-${APR_VERSION}.x86_64.rpm"}
-RUN echo "APACHE_APR_RPM: ${APACHE_APR_RPM}"
-COPY ${APACHED_APR_RPM} apr-devel-* apr-debuginfo-* /
-RUN ls -l /apr-* >&2
 
 ARG TOMCAT_CONNECTION_TIMEOUT_MS
 ENV TOMCAT_CONNECTION_TIMEOUT_MS=${TOMCAT_CONNECTION_TIMEOUT_MS:-"1000000"}
@@ -120,22 +98,16 @@ RUN set -e && \
 # however, to be run, so install them as part of this Dockerfile.
 RUN set -e && dnf update  -y
 RUN set -e && dnf install -y python3.11 \
-    && python3 --version \
-    && curl --version
+    && python3 --version
 
-#RUN set -e && dnf install -y make curl unzip which autoconf automake emacs vim jq \
-RUN set -e && dnf install -y dnf-plugins-core \
-    && dnf config-manager --set-enabled crb \
-    && dnf groupinstall "Development Tools" -y \
-    && dnf install -y libtirpc libtirpc-devel \
-    && dnf install -y libuuid libuuid-devel \
-    && dnf install -y jq \
+RUN set -e && dnf install -y make curl unzip which autoconf automake emacs vim jq \
     && dnf install -y diffutils \
     && dnf install -y procps \
     && dnf install -y git bc valgrind gdb \
-    && dnf install -y java-17-openjdk-devel \
-    && dnf install -y redhat-rpm-config
-#    && dnf install -y openssl-devel
+    && dnf install -y java-11-openjdk-devel \
+    && dnf install -y redhat-rpm-config \
+    && dnf install -y apr-devel \
+    && dnf install -y openssl-devel
 # Temporary Hack to fix broken OpenJDK-11.0.20.0.8-2
 RUN set -e && dnf install -y tzdata-java
 # Temporary Hack to add missing Apache Portable Runtime library for Tomcat
@@ -169,28 +141,6 @@ RUN set -e \
 RUN echo "besdaemon is here: "`which besdaemon`
 
 ################################################################
-# Install the latest openssl3
-#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
-RUN set -e \
-    && echo "Installing the openssl3 rpm: ${OPENSSL_RPM}" >&2 \
-    && ls -l ./openssl* \
-    && dnf -y install ./openssl-*.rpm \
-    && rm -f ./${OPENSSL_RPM}
-
-RUN echo "openssl is installed."
-
-################################################################
-# Install the Apache-Portable-Runtime (Apache APR)
-#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
-RUN set -e \
-    && echo "Installing the Apache APR rpm: ${APACHE_APR_RPM}" >&2 \
-    && ls -l ./apr* \
-    && dnf -y install ./apr-*.rpm \
-    && dnf list installed | grep apr >&2 \
-    && rm -f ./${APACHE_APR_RPM}
-
-RUN echo "Apache APR is installed."
-################################################################
 # Install and Setup Tomcat
 #
 # Make tomcat user and group
@@ -216,10 +166,15 @@ ENV PATH $CATALINA_HOME/bin:$PATH
 RUN set -e && echo "CATALINA_HOME: ${CATALINA_HOME}" >&2
 
 # Install our modified server.xml so that the server compresses responses.
-COPY tomcat11-server.xml /
+COPY tomcat9-server.xml /
 RUN set -e \
-    && mv /tomcat11-server.xml ${CATALINA_HOME}/conf/server.xml \
+    && mv /tomcat9-server.xml ${CATALINA_HOME}/conf/server.xml \
     && chown -R tomcat:tomcat ${CATALINA_HOME}/conf/server.xml
+
+# Tweak the mime-type for javascript. (@TODO Will this satisfy X-Content-Type-Options=nosniff issues?)
+Run set -e \
+    && sed -i 's+text/javascript+application/javascript+g' ${CATALINA_HOME}/conf/web.xml
+
 
 RUN set -e \
     && echo "Cleaning up Tomcat distribution files..." >&2 \
@@ -230,11 +185,11 @@ RUN set -e \
 RUN set -e \
     && export JAVA_HOME="$(dirname $(dirname $(readlink -f $(which javac))))" >&2 \
     && echo "JAVA_HOME ${JAVA_HOME}" >&2 \
-    && tar -xf "/${CATALINA_HOME}/bin/tomcat-native.tar.gz" -C ${CATALINA_HOME}/bin >&2 \
-#    && ls -l ${CATALINA_HOME}/bin >&2 \
-#    && ls -l ${CATALINA_HOME}/bin/tomcat-native-2.0.9-src >&2 \
-    && cd ${CATALINA_HOME}/bin/tomcat-native-2.0.9-src/native >&2 \
-    && ./configure --with-apr=/usr/bin >&2 \
+    && tar -xvf "/${CATALINA_HOME}/bin/tomcat-native.tar.gz" -C ${CATALINA_HOME}/bin >&2 \
+    && ls -l ${CATALINA_HOME}/bin >&2 \
+    && ls -l ${CATALINA_HOME}/bin/tomcat-native-1.3.5-src >&2 \
+    && cd ${CATALINA_HOME}/bin/tomcat-native-1.3.5-src/native >&2 \
+    && ./configure >&2 \
     && make >&2 \
     && make install >&2 \
     && echo "SUCCESS: Tomcat Native-APR Library installed"
@@ -278,28 +233,17 @@ RUN set -e \
     && mkdir -p /etc/tomcat \
     && mv /tomcat.conf /etc/tomcat/tomcat.conf \
     && chown -R tomcat:tomcat /etc/tomcat
-
-#
-# Request Redisson and Apache Session Level logging in the logging.properties
-RUN set -e \
-    && echo "org.redisson.level = FINE" >> ${CATALINA_HOME}/conf/logging.properties \
-    && echo "org.apache.catalina.core.level = FINE" >> ${CATALINA_HOME}/conf/logging.properties \
-    && echo "org.apache.catalina.session.level = FINE" >> ${CATALINA_HOME}/conf/logging.properties
 #
 # Install Memcached Session Manager jars into the Tomcat: ${CATALINA_HOME}/lib
 RUN set -e \
     && echo "Installing Session Manager jar files. Cloning OLFS..." \
-    && git clone https://github.com/OPENDAP/olfs \
-    #&& git clone --depth 1 https://github.com/OPENDAP/olfs \
-    && cd olfs \
-    && git checkout tomcat-11 \
-    && cd .. \
+    && git clone --depth 1 https://github.com/OPENDAP/olfs \
     && echo "Copying elasticache client" \
     && cp olfs/resources/ngap/lib/elasticache-java-cluster-client-1.1.2.jar ${CATALINA_HOME}/lib \
-    && echo "Copying redisson all" \
-    && cp olfs/resources/ngap/lib/redisson-all-3.50.0.jar ${CATALINA_HOME}/lib \
-    && echo "Copying redisson Session Manager TC11" \
-    && cp olfs/resources/ngap/lib/redisson-tomcat-11-3.50.0.jar ${CATALINA_HOME}/lib \
+    && echo "Copying memcached Session Manager" \
+    && cp olfs/resources/ngap/lib/memcached-session-manager-2.3.2.jar ${CATALINA_HOME}/lib \
+    && echo "Copying memcached Session Manager TC9" \
+    && cp olfs/resources/ngap/lib/memcached-session-manager-tc9-2.3.2.jar ${CATALINA_HOME}/lib \
     && chown -R tomcat:tomcat  ${CATALINA_HOME}/lib \
     && rm -rfv olfs
 
