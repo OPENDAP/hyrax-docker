@@ -15,6 +15,7 @@ on:
   pull_request:
     paths:
       - 'utils/**'
+      - '.github/workflows/*.yml'
     types: [opened, synchronize, reopened, ready_for_review]
 concurrency:
   # Cancel intermediate builds only on pull requests
