@@ -1,0 +1,49 @@
+on:
+  # For now, run only on manually triggered builds (workflow_dispatch).
+  # Uncomment the "schedule", "push", and "pull_request" to build on 
+  # all non-draft PRs
+  workflow_dispatch:
+  # schedule:
+  #   # https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#onschedule
+  #   # Run on the first minute of the third hour, every day
+  #   - cron: '0 3 * * *'
+  # push:
+  #   branches:
+  #     - master
+  #     - main
+  #     - /^(.*-test-deploy)$/
+  pull_request:
+    paths:
+      - 'utils/**'
+    types: [opened, synchronize, reopened, ready_for_review]
+concurrency:
+  # Cancel intermediate builds only on pull requests
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ startsWith(github.ref, 'refs/pull/') }}
+
+jobs:
+  build:
+    # Run on pushes or non-draft PRs
+    if: (github.event_name == 'push') ||  (github.event.pull_request.draft == false) || (github.event_name == 'workflow_dispatch') || (github.event_name == 'schedule')
+    # name: Build on ${{ matrix.runs-on }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu, rocky8, rocky9]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Run builder script - dry run
+        run: |
+          ./utils/mk_${{ matrix.os }}_hyrax_builder "" ""
+        shell: bash
+      # - name: Test image
+      #   run: |
+      #     ./utils/test-${{ matrix.os }}
+      #   shell: bash
+      # - name: Run builder script and push to dockerhub
+      #   if: github.event_name == 'workflow_dispatch'
+      #   run: |
+      #     ./utils/mk_${{ matrix.os }}_hyrax_builder ${{ secrets.DOCKER_HUB_ID }} ${{ secrets.DOCKER_HUB_PASSWORD }}
+      #   shell: bash
