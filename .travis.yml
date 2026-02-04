@@ -45,7 +45,7 @@ env:
     - BES_VERSION=$(grep "bes-" ${VERSION_FILE} | awk '{print $1;}' - | sed "s/bes-//g")
     - HYRAX_VERSION=$(grep "hyrax-" ${VERSION_FILE} | awk '{print $1;}' - | sed "s/hyrax-//g")
     - OLFS_VERSION=$(grep "olfs-" ${VERSION_FILE} | awk '{print $1;}' - | sed "s/olfs-//g")
-    - OLFS_DISTRO="olfs-${OLFS_VERSION}-webapp.tgz"
+    - OLFS_DISTRO="olfs-${OLFS_VERSION}-${TARGET_OS}-webapp.tgz"
     - OLFS_DISTRO_URL="s3://opendap.travis.build/${OLFS_DISTRO}"
     - NGAP_DISTRO="ngap-${OLFS_VERSION}-webapp.tgz"
     - NGAP_DISTRO_URL="s3://opendap.travis.build/${NGAP_DISTRO}"
