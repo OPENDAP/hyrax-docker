@@ -33,6 +33,7 @@ function read_build_recipe() {
     export BUILD_DMRPP_VERSION=""
     export LIBDAP_VERSION=""
     #export APR_VERSION=""
+    TARGET_OS="${TARGET_OS:-$(echo "${build_recipe}" | grep "TARGET_OS" | awk '{print $2;}')}"
     RELEASE_DATE=${RELEASE_DATE:-$(echo "${build_recipe}" | grep hyrax | awk '{print $2;}')}
     HYRAX_VERSION=${HYRAX_VERSION:-$(echo "${build_recipe}" | grep hyrax | awk '{print $1;}' | sed "s/hyrax-//g" )}
     OLFS_VERSION=${OLFS_VERSION:-$(echo "${build_recipe}" | grep olfs | sed "s/olfs-//g" | awk '{print $1;}')}
@@ -54,6 +55,7 @@ export RELEASE_HOST=${RELEASE_HOST:-"https://www.opendap.org"}
 function show_version(){
     loggy "${HR}"
     loggy "        RELEASE_DATE: ${RELEASE_DATE}"
+    loggy "           TARGET_OS: ${TARGET_OS}"
     loggy "       HYRAX_VERSION: ${HYRAX_VERSION}"
     loggy "        OLFS_VERSION: ${OLFS_VERSION}"
     loggy "         BES_VERSION: ${BES_VERSION}"

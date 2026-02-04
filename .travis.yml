@@ -110,6 +110,7 @@ jobs:
         - cd "${TARGET_OS}-builds"
         - export DOCKER_NAME="hyrax"
         - source "./build-$TARGET_OS"
+        - show_version
         - export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}:snapshot$TEST_DEPLOYMENT"
         - export BUILD_VERSION_TAG="opendap/${DOCKER_NAME}:${HYRAX_VERSION}$TEST_DEPLOYMENT"
         - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
@@ -124,7 +125,7 @@ jobs:
         - s3_get_olfs_distro
           "${S3_BUILD_BUCKET}"
           "${DOCKER_NAME}"
-          "${OLFS_VERSION}" 2>&1
+          "${OLFS_VERSION}-${TARGET_OS}" 2>&1
         - docker build
           --build-arg TOMCAT_VERSION
           --build-arg RELEASE_DATE
