@@ -102,8 +102,8 @@ function build_libdap_for_rh8() {
     local BUILD_NUMBER="666"
     loggy "$prolog BUILD_NUMBER: $BUILD_NUMBER"
 
-    # export image="opendap/rocky9_hyrax_builder:latest"
-    local image="opendap/rocky8_hyrax_builder:latest"
+    # export image="opendap/rocky9_hyrax_builder:snapshot"
+    local image="opendap/rocky8_hyrax_builder:snapshot"
     loggy "$prolog Using Docker Image: $image"
 
     local build_script="/root/travis/travis/build-rh8-rpm.sh"
@@ -163,8 +163,8 @@ function build_hyrax_dependencies_for_rh8() {
     local docker_result_dir="/root/install"
     loggy "$prolog Using docker_result_dir: $docker_result_dir"
 
-    # export image="opendap/rocky9_hyrax_builder:latest"
-    local image="opendap/rocky8_hyrax_builder:latest"
+    # export image="opendap/rocky9_hyrax_builder:snapshot"
+    local image="opendap/rocky8_hyrax_builder:snapshot"
     loggy "$prolog Using Docker Image: $image"
 
     local build_script=""
@@ -235,7 +235,7 @@ function build_hyrax_dependencies_for_rh8() {
 #      --env BES_BUILD_NUMBER=$BES_BUILD_NUMBER
 #      --env AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
 #      --env AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
-#      opendap/rocky8_hyrax_builder:latest /root/travis/travis/build-rh8-rpm.sh
+#      opendap/rocky8_hyrax_builder:snapshot /root/travis/travis/build-rh8-rpm.sh
 #
 function build_bes_rpms_for_rhel8() {
     local prolog="build_bes_for_ubuntu() -"
@@ -290,7 +290,7 @@ function build_bes_rpms_for_rhel8() {
     local docker_result_dir="/root/install"
     loggy "$prolog Using docker_result_dir: $docker_result_dir"
 
-    local image="opendap/rocky8_hyrax_builder:latest"
+    local image="opendap/rocky8_hyrax_builder:snapshot"
     loggy "$prolog Using Docker Image: $image"
 
     # /root/bes/travis/build-rh8-rpm.sh

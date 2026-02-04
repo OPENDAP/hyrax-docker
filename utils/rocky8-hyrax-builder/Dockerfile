@@ -133,6 +133,8 @@ RUN set -e \
 RUN export BUILD_DATE=`date +%s`
 RUN echo "# BUILD_DATE: ${BUILD_DATE}"
 
+RUN cat /etc/*-release | grep -Eo '[0-9]+(\.[0-9]+){0,}' > OS_VERSION
+
 ENTRYPOINT [ "/bin/bash" ]
 
 USER root
