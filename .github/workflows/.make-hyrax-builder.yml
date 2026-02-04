@@ -47,7 +47,8 @@ jobs:
           export SNAPSHOT_IMAGE_TAG="opendap/${{ matrix.os }}_hyrax_builder:snapshot"
           export BUILD_VERSION="$(docker run --rm ${SNAPSHOT_IMAGE_TAG} -c 'cat OS_VERSION')${{ github.run_id }}"
           export SNAPSHOT_VERSION_TAG="opendap/${{ matrix.os }}_hyrax_builder:${BUILD_VERSION}"
-          docker tag $SNAPSHOT_IMAGE_TAG $SNAPSHOT_VERSION_TAG
+          echo "image tag: $SNAPSHOT_IMAGE_TAG; build version: $BUILD_VERSION; version tag: $SNAPSHOT_VERSION_TAG"
+          docker tag "$SNAPSHOT_IMAGE_TAG" "$SNAPSHOT_VERSION_TAG"
 
           # Make environment variables available for following steps
           echo "SNAPSHOT_IMAGE_TAG=$SNAPSHOT_IMAGE_TAG" >> $GITHUB_ENV
