@@ -2,7 +2,7 @@
  HR="##########################################################################"
 HR2="== == == == == == == == == == == == == == == == == == == == == == == == =="
 HR3="- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
-export BUILD_RECIPE_FILE=${1:-"../snapshot.time"}
+export BUILD_RECIPE_FILE=${1:-"../el9-build-recipe"}
 export S3_BUILD_BUCKET=${S3_BUILD_BUCKET:-"opendap.travis.build"}
 export DOCKER_NAME=${DOCKER_NAME:-"hyrax"}
 export TOMCAT_MAJOR_VERSION=${TOMCAT_MAJOR_VERSION:-"11"}
