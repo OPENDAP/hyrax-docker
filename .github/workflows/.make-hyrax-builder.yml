@@ -58,7 +58,7 @@ jobs:
           echo "SNAPSHOT_VERSION_TAG=$SNAPSHOT_VERSION_TAG" >> $GITHUB_ENV
         shell: bash
       - name: Push to DockerHub
-        if: (github.event_name == 'workflow_dispatch') || (github.event_name == 'push') || (github.event_name == 'schedule')
+        # if: (github.event_name == 'workflow_dispatch') || (github.event_name == 'push') || (github.event_name == 'schedule')
         run: |
           docker login -u "${{ secrets.DOCKER_HUB_ID }}" -p "${{ secrets.DOCKER_HUB_PASSWORD }}" "docker.io"
           docker push ${{ env.SNAPSHOT_IMAGE_TAG }}
