@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-source ./build-rh9
+source ./build-el9
 #
 export DOCKER_NAME="ngap"
 echo "DOCKER_NAME: ${DOCKER_NAME}"
