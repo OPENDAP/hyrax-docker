@@ -18,7 +18,7 @@ ENV TARGET_OS="el9"
 ENV ARCH="x86_64"
 ENV java_version="java-21-openjdk"
 ENV python_version="3.12"
-ENV core_dnf_packages="make autoconf automake git unzip "
+ENV core_dnf_packages="make autoconf automake procps git unzip "
 #ENV extra_dnf_packages="which diffutils emacs vim jq  procps git bc valgrind gdb awscli"
 ENV extra_dnf_packages=""
 
