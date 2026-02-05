@@ -1275,3 +1275,24 @@ function travis_hyrax() {
     docker image ls -a
 
 }
+
+#
+# Stop all running containers
+#
+function dhalt() {
+    docker stop $(docker ps -aq);
+}
+
+#
+# Remove all containers
+#
+function drmac(){
+    docker rm -f $(docker ps -aq);
+}
+
+#
+# Remove all images
+#
+function drmai(){
+    docker rmi -f $(docker images -q);
+}
