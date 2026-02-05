@@ -161,9 +161,9 @@ RUN set -e \
     && echo "Installing the libdap rpm: ${LIBDAP_RPM}" \
     && ls -l ./libdap* \
     && dnf -y install ./libdap-*.rpm \
-    && rm -f ./${LIBDAP_RPM}
-
-RUN echo "libdap4 is installed."
+    && rm -f ./${LIBDAP_RPM} \
+    && dnf clean all \
+    && echo "libdap4 is installed."
 
 ################################################################
 # Install the latest BES snapshot
@@ -173,8 +173,8 @@ RUN set -e \
     && ls -l ./bes* \
     && dnf -y install ./bes-*.rpm \
     && rm -f ./${BES_RPM}
-
-RUN echo "besdaemon is here: "`which besdaemon`
+    && dnf clean all \
+    && echo "besdaemon is here: "`which besdaemon`
 
 ################################################################
 # Install and Setup Tomcat
@@ -193,6 +193,9 @@ RUN set -e \
     && rm -rvf /usr/share/tomcat/webapps/* >&2 \
     && mkdir -p /var/log/tomcat \
     && chown -R tomcat:tomcat /var/log/tomcat /home/tomcat
+    && echo "Cleaning up Tomcat distribution files..." >&2 \
+    && rm -fv "/${TOMCAT_DISTRO}.tar.gz"
+
 COPY tomcat.service /etc/systemd/system/tomcat.service
 RUN set -e && systemctl enable tomcat
 #RUN firewall-cmd --add-port 8080/tcp --permanent
@@ -208,9 +211,6 @@ RUN set -e \
     && mv /tomcat11-server.xml ${CATALINA_HOME}/conf/server.xml \
     && chown -R tomcat:tomcat ${CATALINA_HOME}/conf/server.xml
 
-RUN set -e \
-    && echo "Cleaning up Tomcat distribution files..." >&2 \
-    && rm -fv "/${TOMCAT_DISTRO}.tar.gz"
 
 ################################################################
 # Install the OLFS web application
@@ -226,8 +226,8 @@ RUN set -e \
     && echo "Unpacking warfile..."  >&2 \
     && mkdir -p $(readlink -f ${CATALINA_HOME})/webapps/${DEPLOYMENT_CONTEXT}/ \
     && unzip -o ${ROOT}/${OLFS_DISTRO}/opendap.war -d ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/ \
-    && echo "Cleaning up."  >&2 \
-    && rm -rf ${ROOT}/${OLFS_DISTRO} ./${OLFS_DISTRO}.tgz
+    && echo "Cleaning up OLFS distribution files."  >&2 \
+    && rm -rvf ${ROOT}/${OLFS_DISTRO} ./${OLFS_DISTRO}.tgz
 
 RUN set -e \
     && echo "Installing the latest dynamic robots.txt distribution (${OLFS_VERSION})."  >&2 \
@@ -236,8 +236,8 @@ RUN set -e \
     && ls -l ${ROOT}/${ROBOTS_DISTRO} \
     && echo "Unpacking dynamic robots.txt warfile..."  >&2 \
     && unzip -o ${ROOT}/${ROBOTS_DISTRO}/ROOT.war -d ${CATALINA_HOME}/webapps/ROOT/ \
-    && echo "Cleaning up dynamic robots.txt snapshot..."  >&2 \
-    && rm -rf ${ROOT}/${ROBOTS_DISTRO} ${ROBOTS_DISTRO}.tgz
+    && echo "Cleaning up dynamic robots.txt distribution files..."  >&2 \
+    && rm -rvf ${ROOT}/${ROBOTS_DISTRO} ${ROBOTS_DISTRO}.tgz
 
 # Fix ownership and access permissions
 RUN set -e \
@@ -248,7 +248,6 @@ RUN set -e \
 ################################################################
 # Clean up the Hyrax distribution binaries.
 #
-RUN rm -vf /libdap*.rpm /bes*.rpm /olfs*.tgz /robots*.tgz /apache*
 #
 ################################################################
 
