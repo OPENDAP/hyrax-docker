@@ -19,7 +19,8 @@ ENV ARCH="x86_64"
 ENV java_version="java-21-openjdk"
 ENV python_version="3.12"
 ENV core_dnf_packages="make unzip which autoconf automake git"
-ENV extra_dnf_packages="emacs vim jq diffutils procps git bc valgrind gdb awscli"
+#ENV extra_dnf_packages="emacs vim jq diffutils procps git bc valgrind gdb awscli"
+ENV extra_dnf_packages=""
 
 #
 ENV HR="######################################################"
@@ -122,13 +123,15 @@ RUN if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else ec
 RUN set -e && dnf update  -y
 RUN set -e \
     && dnf install -y "python$python_version" \
-    && echo "Python Version: $(python3 --version)"
+    && echo "Python Version: $(python3 --version)" \
+    && dnf clean all
 
 RUN set -e \
     && echo "$HR" \
     && echo "# Installing cURL" \
     && yum install -y curl curl-devel --allowerasing \
-    && echo "# cURL version: $(curl --version)"
+    && echo "# cURL version: $(curl --version)" \
+    && dnf clean all
 
 RUN set -e \
     && echo "$HR" \
@@ -143,12 +146,13 @@ RUN set -e \
     && echo "# Enabled $java_version" \
     && echo "# java version: $( java -version 2>&1 )" \
     && update-alternatives --list \
-    && dnf install -y tzdata-java
+    && dnf install -y tzdata-java \
+    && dnf clean all
 
 RUN set -e \
-    && dnf install -y $core_dnf_packages $extra_dnf_packages
+    && dnf install -y $core_dnf_packages $extra_dnf_packages \
+    && dnf clean all
 #
-RUN set -e && dnf clean all
 RUN set -e && which diff
 #
 
