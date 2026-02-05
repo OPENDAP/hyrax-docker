@@ -44,7 +44,7 @@ env:
     - LIBDAP_VERSION=$(grep "libdap4-" ${BUILD_RECIPE} | awk '{print $1;}' - | sed "s/libdap4-//g")
     - BES_VERSION=$(grep "bes-" ${BUILD_RECIPE} | awk '{print $1;}' - | sed "s/bes-//g")
     - HYRAX_VERSION=$(grep "hyrax-" ${BUILD_RECIPE} | awk '{print $1;}' - | sed "s/hyrax-//g")
-    - OLFS_VERSION=$(grep "olfs-" ${BUILD_RECIPE} | awk '{print $1;}' - | sed "s/olfs-//g")-$TARGET_OS
+    - OLFS_VERSION=$(grep "olfs-" ${BUILD_RECIPE} | awk '{print $1;}' - | sed "s/olfs-//g")
     - OLFS_DISTRO="olfs-${OLFS_VERSION}-${TARGET_OS}-webapp.tgz"
     - OLFS_DISTRO_URL="s3://opendap.travis.build/${OLFS_DISTRO}"
     - NGAP_DISTRO="ngap-${OLFS_VERSION}-webapp.tgz"
@@ -72,15 +72,15 @@ install:
   # - echo "Retrieving BES C7 RPM ${BES_C7_RPM}"
   # - aws --region=us-east-1 s3 cp ${BES_C7_RPM_URL} ./builds/${BES_C7_RPM}
   - echo "Retrieving libdap RH8 RPM ${LIBDAP_RPM_NAME}"
-  - aws --region=us-east-1 s3 cp ${LIBDAP_RPM_URL} ./builds/${LIBDAP_RPM_NAME}
+  - aws --region=us-east-1 s3 cp ${LIBDAP_RPM_URL} ./${TARGET_OS}-builds/${LIBDAP_RPM_NAME}
   - echo "Retrieving BES RH8 RPM ${BES_RPM_NAME}"
-  - aws --region=us-east-1 s3 cp ${BES_RPM_URL} ./builds/${BES_RPM_NAME}
+  - aws --region=us-east-1 s3 cp ${BES_RPM_URL} ./${TARGET_OS}-builds/${BES_RPM_NAME}
   - echo "Retrieving OLFS Distribution file ${OLFS_DISTRO}"
-  - aws --region=us-east-1 s3 cp ${OLFS_DISTRO_URL} ./builds/${OLFS_DISTRO}
+  - aws --region=us-east-1 s3 cp ${OLFS_DISTRO_URL} ./${TARGET_OS}-builds/${OLFS_DISTRO}
   - echo "Retrieving ROBOTS Distribution file ${ROBOTS_DISTRO}"
-  - aws --region=us-east-1 s3 cp ${ROBOTS_DISTRO_URL} ./builds/${ROBOTS_DISTRO}
+  - aws --region=us-east-1 s3 cp ${ROBOTS_DISTRO_URL} ./${TARGET_OS}-builds/${ROBOTS_DISTRO}
   - echo "Retrieving NGAP Distribution file ${NGAP_DISTRO}"
-  - aws --region=us-east-1 s3 cp ${NGAP_DISTRO_URL} ./builds/${NGAP_DISTRO}
+  - aws --region=us-east-1 s3 cp ${NGAP_DISTRO_URL} ./${TARGET_OS}-builds/${NGAP_DISTRO}
   - ls -l ./builds
 
 stages:
