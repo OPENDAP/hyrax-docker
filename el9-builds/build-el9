@@ -442,7 +442,7 @@ function s3_pull(){
 
 
     loggy "$prolog  Retrieving: $s3_url"
-    aws s3 cp "$s3_url" "$target_file"
+    aws s3 cp --quiet "$s3_url" "$target_file"
     loggy "$prolog END"
 }
 
