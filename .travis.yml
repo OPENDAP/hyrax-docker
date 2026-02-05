@@ -46,11 +46,11 @@ env:
     - HYRAX_VERSION=$(grep "hyrax-" ${BUILD_RECIPE} | awk '{print $1;}' - | sed "s/hyrax-//g")
     - OLFS_VERSION=$(grep "olfs-" ${BUILD_RECIPE} | awk '{print $1;}' - | sed "s/olfs-//g")
     - OLFS_VERSION="$OLFS_VERSION-$TARGET_OS"
-    - OLFS_DISTRO="olfs-${OLFS_VERSION}-${TARGET_OS}-webapp.tgz"
+    - OLFS_DISTRO="olfs-${OLFS_VERSION}-webapp.tgz"
     - OLFS_DISTRO_URL="s3://opendap.travis.build/${OLFS_DISTRO}"
     - NGAP_DISTRO="ngap-${OLFS_VERSION}-webapp.tgz"
     - NGAP_DISTRO_URL="s3://opendap.travis.build/${NGAP_DISTRO}"
-    - ROBOTS_DISTRO="robots-olfs-${OLFS_VERSION}-${TARGET_OS}-webapp.tgz"
+    - ROBOTS_DISTRO="robots-olfs-${OLFS_VERSION}-webapp.tgz"
     - ROBOTS_DISTRO_URL="s3://opendap.travis.build/${ROBOTS_DISTRO}"
     - LIBDAP_RPM_NAME="libdap-${LIBDAP_VERSION}.${TARGET_OS}.x86_64.rpm"
     - LIBDAP_RPM_URL="s3://opendap.travis.build/${LIBDAP_RPM_NAME}"
