@@ -142,7 +142,7 @@ RUN set -e \
     && update-alternatives --set java "$java_version.$ARCH" \
     && echo "# Enabled $java_version" \
     && echo "# java version: $( java -version 2>&1 )" \
-    && update-alternatives --list
+    && update-alternatives --list \
     && dnf install -y tzdata-java
 
 RUN set -e \
@@ -172,7 +172,7 @@ RUN set -e \
     && echo "Installing the latest BES rpm: ${BES_RPM}" \
     && ls -l ./bes* \
     && dnf -y install ./bes-*.rpm \
-    && rm -f ./${BES_RPM}
+    && rm -f ./${BES_RPM} \
     && dnf clean all \
     && echo "besdaemon is here: "`which besdaemon`
 
@@ -192,7 +192,7 @@ RUN set -e \
     && ln -s /home/tomcat/${TOMCAT_DISTRO} /tomcat >&2 \
     && rm -rvf /usr/share/tomcat/webapps/* >&2 \
     && mkdir -p /var/log/tomcat \
-    && chown -R tomcat:tomcat /var/log/tomcat /home/tomcat
+    && chown -R tomcat:tomcat /var/log/tomcat /home/tomcat \
     && echo "Cleaning up Tomcat distribution files..." >&2 \
     && rm -fv "/${TOMCAT_DISTRO}.tar.gz"
 
