@@ -18,7 +18,10 @@ ENV TARGET_OS="el9"
 ENV ARCH="x86_64"
 ENV java_version="java-21-openjdk"
 ENV python_version="3.12"
+ENV core_dnf_packages="make unzip which autoconf automake git"
+ENV extra_dnf_packages="emacs vim jq diffutils procps git bc valgrind gdb awscli"
 
+#
 ENV HR="######################################################"
 
 ENV NOW="$(date +%s)"
@@ -140,23 +143,10 @@ RUN set -e \
     && echo "# Enabled $java_version" \
     && echo "# java version: $( java -version 2>&1 )" \
     && update-alternatives --list
+    && dnf install -y tzdata-java
 
 RUN set -e \
-    && dnf install -y make unzip which autoconf automake emacs vim jq
-RUN set -e \
-    && dnf install -y diffutils
-RUN set -e \
-    && dnf install -y procps
-RUN set -e \
-    && dnf install -y git bc valgrind gdb
-RUN set -e \
-    && dnf install -y java-21-openjdk java-21-openjdk-devel
-# Temporary Hack to fix broken OpenJDK-11.0.20.0.8-2
-RUN set -e && dnf install -y tzdata-java
-#
-
-RUN set -e \
-    && dnf install -y awscli
+    && dnf install -y $core_dnf_packages $extra_dnf_packages
 #
 RUN set -e && dnf clean all
 RUN set -e && which diff
