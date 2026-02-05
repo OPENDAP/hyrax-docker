@@ -111,8 +111,8 @@ jobs:
         - cd "${TARGET_OS}-builds"
         - source "./build-$TARGET_OS"
         - show_version
-        - export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}:snapshot$TEST_DEPLOYMENT"
-        - export BUILD_VERSION_TAG="opendap/${DOCKER_NAME}:${HYRAX_VERSION}$TEST_DEPLOYMENT"
+        - export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}:snapshot-$TARGET_OS$TEST_DEPLOYMENT"
+        - export BUILD_VERSION_TAG="opendap/${DOCKER_NAME}:${HYRAX_VERSION}-$TARGET_OS$TEST_DEPLOYMENT"
         - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
         - show_version
         - get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_VERSION}"
@@ -139,7 +139,7 @@ jobs:
         - docker image ls -a
         - cd ..
         - echo "Running Test Script"
-        - ./travis/regression_test_script -i ${SNAPSHOT_IMAGE_TAG}
+        - ./travis/regression_test_script -i "$SNAPSHOT_IMAGE_TAG"
 
     - stage: BUILD
       name: "Build opendap/besd (EL8)"
