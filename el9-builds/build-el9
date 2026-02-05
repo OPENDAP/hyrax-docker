@@ -80,7 +80,7 @@ function read_build_recipe() {
     TOMCAT_MAJOR_VERSION="${TOMCAT_MAJOR_VERSION:-$(echo "${build_recipe}" | grep "TOMCAT_MAJOR_VERSION" | awk '{print $2;}')}"
     LIBDAP_VERSION=${LIBDAP_VERSION:-$(echo "${build_recipe}" | grep libdap4 | sed "s/libdap4-//g"| awk '{print $1;}')}
     BES_VERSION=${BES_VERSION:-$(echo "${build_recipe}" | grep bes | sed "s/bes-//g" | awk '{print $1;}')}
-    OLFS_VERSION=${OLFS_VERSION:-$(echo "${build_recipe}" | grep olfs | sed "s/olfs-//g" | awk '{print $1;}')}
+    OLFS_VERSION=${OLFS_VERSION:-"$(echo "${build_recipe}" | grep olfs | sed "s/olfs-//g" | awk '{print $1;}')-$TARGET_OS"}
     HYRAX_VERSION=${HYRAX_VERSION:-$(echo "${build_recipe}" | grep hyrax | awk '{print $1;}' | sed "s/hyrax-//g" )}
     RELEASE_DATE=${RELEASE_DATE:-$(echo "${build_recipe}" | grep hyrax | awk '{print $2;}')}
     #APR_VERSION="1.7.6-1"
