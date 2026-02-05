@@ -94,7 +94,6 @@ export SNAPSHOT_IMAGE_TAG=${SNAPSHOT_IMAGE_TAG:-"opendap/$DOCKER_NAME:snapshot-$
 export BUILD_VERSION_TAG=${BUILD_VERSION_TAG:-"opendap/$DOCKER_NAME:$HYRAX_VERSION-$TARGET_OS$TEST_DEPLOYMENT"}
 export RELEASE_HOST=${RELEASE_HOST:-"https://www.opendap.org"}
 
-
 function show_version(){
     loggy "${HR}"
     loggy "        RELEASE_DATE: ${RELEASE_DATE}"
