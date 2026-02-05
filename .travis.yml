@@ -81,7 +81,7 @@ install:
   - aws --region=us-east-1 s3 cp ${ROBOTS_DISTRO_URL} ./${TARGET_OS}-builds/${ROBOTS_DISTRO}
   - echo "Retrieving NGAP Distribution file ${NGAP_DISTRO}"
   - aws --region=us-east-1 s3 cp ${NGAP_DISTRO_URL} ./${TARGET_OS}-builds/${NGAP_DISTRO}
-  - ls -l ./builds
+  - ls -l ./${TARGET_OS}-builds
 
 stages:
   - name: OLFS
