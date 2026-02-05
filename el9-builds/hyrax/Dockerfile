@@ -18,8 +18,8 @@ ENV TARGET_OS="el9"
 ENV ARCH="x86_64"
 ENV java_version="java-21-openjdk"
 ENV python_version="3.12"
-ENV core_dnf_packages="make autoconf automake git unzip which diffutils"
-#ENV extra_dnf_packages="emacs vim jq  procps git bc valgrind gdb awscli"
+ENV core_dnf_packages="make autoconf automake git unzip "
+#ENV extra_dnf_packages="which diffutils emacs vim jq  procps git bc valgrind gdb awscli"
 ENV extra_dnf_packages=""
 
 #
@@ -136,10 +136,8 @@ RUN set -e \
 RUN set -e \
     && echo "$HR" \
     && echo "# It's Java Time Witches!" \
-    && echo "# Installing $java_version and ant." \
+    && echo "# Installing $java_version" \
     && yum install -y "$java_version" "$java_version-devel"  \
-# Do we need ant? Because it loads a completely independent java version stack which is ~150MB!
-#    && yum install -y ant \
     && echo "$HR2" \
     && echo "# Using $java_version" \
     && update-alternatives --set java "$java_version.$ARCH" \
@@ -153,7 +151,7 @@ RUN set -e \
     && dnf install -y $core_dnf_packages $extra_dnf_packages \
     && dnf clean all
 #
-RUN set -e && which diff
+# RUN set -e && which diff
 #
 
 
