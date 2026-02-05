@@ -141,9 +141,12 @@ RUN set -e \
 RUN set -e && dnf install -y tzdata-java
 #
 
-RUN set -e && curl -sS https://bootstrap.pypa.io/get-pip.py | python3 \
-    && python3 -m pip install --root-user-action --upgrade pip \
-    && python3 -m pip install --root-user-action --no-cache-dir awscli
+#RUN set -e && curl -sS https://bootstrap.pypa.io/get-pip.py | python3 \
+#    && python3 -m pip install --upgrade pip \
+#    && python3 -m pip install --no-cache-dir awscli
+
+RUN set -e \
+    && dnf install -y awscli
 #
 RUN set -e && dnf clean all
 RUN set -e && which diff
