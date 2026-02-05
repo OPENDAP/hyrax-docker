@@ -128,6 +128,20 @@ RUN set -e \
     && echo "# cURL version: $(curl --version)"
 
 RUN set -e \
+    && echo "$HR" \
+    && echo "# It's Java Time Witches!" \
+    && echo "# Installing $java_version and ant." \
+    && yum install -y "$java_version" "$java_version-devel"  \
+# Do we need ant? Because it loads a completely independent java version stack which is ~150MB!
+#    && yum install -y ant \
+    && echo "$HR2" \
+    && echo "# Using $java_version" \
+    && update-alternatives --set java "$java_version.$ARCH" \
+    && echo "# Enabled $java_version" \
+    && echo "# java version: $( java -version 2>&1 )" \
+    && update-alternatives --list
+
+RUN set -e \
     && dnf install -y make unzip which autoconf automake emacs vim jq
 RUN set -e \
     && dnf install -y diffutils
@@ -140,10 +154,6 @@ RUN set -e \
 # Temporary Hack to fix broken OpenJDK-11.0.20.0.8-2
 RUN set -e && dnf install -y tzdata-java
 #
-
-#RUN set -e && curl -sS https://bootstrap.pypa.io/get-pip.py | python3 \
-#    && python3 -m pip install --upgrade pip \
-#    && python3 -m pip install --no-cache-dir awscli
 
 RUN set -e \
     && dnf install -y awscli

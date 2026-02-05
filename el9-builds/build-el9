@@ -443,7 +443,7 @@ function s3_pull(){
 
     loggy "$prolog  Retrieving: $s3_url"
     aws s3 cp --quiet "$s3_url" "$target_file"
-    loggy ""
+    loggy "$prolog END"
 }
 
 ################################################################################
