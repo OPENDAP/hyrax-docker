@@ -105,10 +105,10 @@ jobs:
     - stage: BUILD_AND_TEST
       name: "Build and Test opendap/hyrax"
       script:
+        - export DOCKER_NAME="hyrax"
         - echo "BUILDING FOR ${TARGET_OS}"
         - echo "USING TOMCAT MAJOR VERSION '${TOMCAT_MAJOR_VERSION}'"
         - cd "${TARGET_OS}-builds"
-        - export DOCKER_NAME="hyrax"
         - source "./build-$TARGET_OS"
         - show_version
         - export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}:snapshot$TEST_DEPLOYMENT"

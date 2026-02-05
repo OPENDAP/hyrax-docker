@@ -1,15 +1,7 @@
 #!/bin/bash
- HR="##########################################################################"
+HR="##########################################################################"
 HR2="== == == == == == == == == == == == == == == == == == == == == == == == =="
 HR3="- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
-export BUILD_RECIPE_FILE=${1:-"../el9-build-recipe"}
-export S3_BUILD_BUCKET=${S3_BUILD_BUCKET:-"opendap.travis.build"}
-export DOCKER_NAME=${DOCKER_NAME:-"hyrax"}
-export TOMCAT_MAJOR_VERSION=${TOMCAT_MAJOR_VERSION:-"11"}
-export SLEEP_INTERVAL=${SLEEP_INTERVAL:-60}
-export NO_CACHE=${NO_CACHE:-""}
-
-
 ###########################################################################
 function loggy(){
     if test -n "${log_file}"
@@ -20,30 +12,85 @@ function loggy(){
     fi
 }
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+loggy "$HR"
+loggy "BEGIN"
+loggy "Retrieving $t_count tags."
+
+export BUILD_RECIPE="${1:-"../el9-build-recipe"}"
+loggy "   BUILD_RECIPE: '$BUILD_RECIPE'"
+
+export S3_BUILD_BUCKET="${S3_BUILD_BUCKET:-"opendap.travis.build"}"
+loggy "S3_BUILD_BUCKET: '$S3_BUILD_BUCKET'"
+
+export DOCKER_NAME="${DOCKER_NAME:-"hyrax"}"
+loggy "    DOCKER_NAME: '$DOCKER_NAME'"
+
+#export TOMCAT_MAJOR_VERSION=${TOMCAT_MAJOR_VERSION:-"11"}
+#loggy "TOMCAT_MAJOR_VERSION: $TOMCAT_MAJOR_VERSION"
+
+export SLEEP_INTERVAL="${SLEEP_INTERVAL:-60}"
+loggy " SLEEP_INTERVAL: $SLEEP_INTERVAL"
+
+export NO_CACHE="${NO_CACHE:-""}"
+loggy "       NO_CACHE: $NO_CACHE"
+
+
+
+function get_test_deployment_tag(){
+    local build_recipe_file="$1"
+
+    local td_value="-test-deploy"
+    local td
+    if [[ "$TRAVIS_BRANCH" == *"-test-deploy" ]]
+    then
+        td="$td_value"
+    fi
+
+    if test -z "$td"
+    then
+        grep "test-deploy" "$build_recipe_file" > /dev/null
+        if test $? -eq 0
+        then
+            td="$td_value"
+        fi
+    fi
+    echo "$td"
+
+}
 
 function read_build_recipe() {
     local build_recipe_file="${1}"
     local build_recipe=""
     build_recipe=$(cat "${build_recipe_file}")
 
-    export RELEASE_DATE=""
-    export HYRAX_VERSION=""
-    export OLFS_VERSION=""
-    export BES_VERSION=""
-    export BUILD_DMRPP_VERSION=""
-    export LIBDAP_VERSION=""
-    #export APR_VERSION=""
+    export TEST_DEPLOYMENT
+    export TARGET_OS
+    export TOMCAT_MAJOR_VERSION
+    export LIBDAP_VERSION
+    export BES_VERSION
+    export OLFS_VERSION
+    export HYRAX_VERSION
+    export RELEASE_DATE
+    # export APR_VERSION
+    export SNAPSHOT_IMAGE_TAG
+    export BUILD_VERSION_TAG
+
+
     TARGET_OS="${TARGET_OS:-$(echo "${build_recipe}" | grep "TARGET_OS" | awk '{print $2;}')}"
-    RELEASE_DATE=${RELEASE_DATE:-$(echo "${build_recipe}" | grep hyrax | awk '{print $2;}')}
-    HYRAX_VERSION=${HYRAX_VERSION:-$(echo "${build_recipe}" | grep hyrax | awk '{print $1;}' | sed "s/hyrax-//g" )}
-    OLFS_VERSION=${OLFS_VERSION:-$(echo "${build_recipe}" | grep olfs | sed "s/olfs-//g" | awk '{print $1;}')}
-    BES_VERSION=${BES_VERSION:-$(echo "${build_recipe}" | grep bes | sed "s/bes-//g" | awk '{print $1;}')}
-    BUILD_DMRPP_VERSION=${BUILD_DMRPP_VERSION:-$(echo "${build_recipe}" | grep "build_dmrpp-" | sed "s/build_dmrpp-//g" | awk '{print $1;}')}
+    TOMCAT_MAJOR_VERSION="${TOMCAT_MAJOR_VERSION:-$(echo "${build_recipe}" | grep "TOMCAT_MAJOR_VERSION" | awk '{print $2;}')}"
     LIBDAP_VERSION=${LIBDAP_VERSION:-$(echo "${build_recipe}" | grep libdap4 | sed "s/libdap4-//g"| awk '{print $1;}')}
+    BES_VERSION=${BES_VERSION:-$(echo "${build_recipe}" | grep bes | sed "s/bes-//g" | awk '{print $1;}')}
+    OLFS_VERSION=${OLFS_VERSION:-$(echo "${build_recipe}" | grep olfs | sed "s/olfs-//g" | awk '{print $1;}')}
+    HYRAX_VERSION=${HYRAX_VERSION:-$(echo "${build_recipe}" | grep hyrax | awk '{print $1;}' | sed "s/hyrax-//g" )}
+    RELEASE_DATE=${RELEASE_DATE:-$(echo "${build_recipe}" | grep hyrax | awk '{print $2;}')}
     #APR_VERSION="1.7.6-1"
     #APR_VERSION=${APR_VERSION:-$(echo "${build_recipe}" | grep apr | sed "s/apr-//g" | awk '{print $1;}')}
+
+    TEST_DEPLOYMENT="$(get_test_deployment_tag $build_recipe_file)"
+
+
 }
-read_build_recipe "${BUILD_RECIPE_FILE}"
+read_build_recipe "${BUILD_RECIPE}"
 
 
 export SNAPSHOT_IMAGE_TAG=${SNAPSHOT_IMAGE_TAG:-"opendap/${DOCKER_NAME}:snapshot"}
@@ -56,11 +103,11 @@ function show_version(){
     loggy "${HR}"
     loggy "        RELEASE_DATE: ${RELEASE_DATE}"
     loggy "           TARGET_OS: ${TARGET_OS}"
-    loggy "       HYRAX_VERSION: ${HYRAX_VERSION}"
-    loggy "        OLFS_VERSION: ${OLFS_VERSION}"
-    loggy "         BES_VERSION: ${BES_VERSION}"
-    loggy " BUILD_DMRPP_VERSION: ${BUILD_DMRPP_VERSION}"
+    loggy "     TEST_DEPLOYMENT: ${TEST_DEPLOYMENT}"
     loggy "      LIBDAP_VERSION: ${LIBDAP_VERSION}"
+    loggy "         BES_VERSION: ${BES_VERSION}"
+    loggy "        OLFS_VERSION: ${OLFS_VERSION}"
+    loggy "       HYRAX_VERSION: ${HYRAX_VERSION}"
     loggy "         DOCKER_NAME: ${DOCKER_NAME}"
     loggy "   BUILD_VERSION_TAG: ${BUILD_VERSION_TAG}"
     loggy "  SNAPSHOT_IMAGE_TAG: ${SNAPSHOT_IMAGE_TAG}"
@@ -210,57 +257,63 @@ function get_latest_tomcat_version_number(){
 #          Example: 9.0.64
 #
 function get_tomcat_distro(){
+    local prolog="get_tomcat_distro() -"
     loggy "${HR}"
-    loggy "TASK: get_tomcat_distro()"
+    loggy "$prolog BEGIN"
 
     # $1 - The directory into which the Tomcat distribution files
     #      will be placed
     local target_dir="${1}"
-    loggy "            target_dir: ${target_dir}"
+    loggy "$prolog            target_dir: ${target_dir}"
 
     # $2 - The version number of the Tomcat distribution to retrieve.
     #       Example: 9.0.64
     local tomcat_version="${2}"
-    loggy "        tomcat_version: ${tomcat_version}"
+    loggy "$prolog        tomcat_version: ${tomcat_version}"
 
     local tomcat_major_version=""
     tomcat_major_version=$(echo "${tomcat_version}" | awk 'BEGIN{FS="."}{print $1;}')
-    loggy "  tomcat_major_version: ${tomcat_major_version}"
+    loggy "$prolog  tomcat_major_version: ${tomcat_major_version}"
 
 
     local silent="-s"
 
     local tomcat_distro="apache-tomcat-${tomcat_version}.tar.gz"
-    loggy "         tomcat_distro: ${tomcat_distro}"
+    loggy "$prolog         tomcat_distro: ${tomcat_distro}"
 
     local tomcat_major_url="https://archive.apache.org/dist/tomcat/tomcat-${tomcat_major_version}"
-    loggy "      tomcat_major_url: ${tomcat_major_url}"
+    loggy "$prolog      tomcat_major_url: ${tomcat_major_url}"
 
     local tomcat_distro_url="${tomcat_major_url}/v${tomcat_version}/bin/${tomcat_distro}"
-    loggy "     tomcat_distro_url: ${tomcat_distro_url}"
+    loggy "$prolog     tomcat_distro_url: ${tomcat_distro_url}"
     local tomcat_distro_file="${target_dir}/${tomcat_distro}"
-    loggy "    tomcat_distro_file: ${tomcat_distro_file}"
+    loggy "$prolog    tomcat_distro_file: ${tomcat_distro_file}"
 
     local tomcat_sig_url="${tomcat_distro_url}.asc"
-    loggy "        tomcat_sig_url: ${tomcat_sig_url}"
+    loggy "$prolog        tomcat_sig_url: ${tomcat_sig_url}"
     local tomcat_sig_file="${tomcat_distro_file}.asc"
-    loggy "       tomcat_sig_file: ${tomcat_sig_file}"
+    loggy "$prolog       tomcat_sig_file: ${tomcat_sig_file}"
 
     local tomcat_keys_url="${tomcat_major_url}/KEYS"
-    loggy "       tomcat_keys_url: ${tomcat_keys_url}"
+    loggy "$prolog       tomcat_keys_url: ${tomcat_keys_url}"
     local tomcat_keys_file="${target_dir}/apache_tomcat_keys"
-    loggy "      tomcat_keys_file: ${tomcat_keys_file}"
+    loggy "$prolog      tomcat_keys_file: ${tomcat_keys_file}"
 
-    loggy ""
-    loggy "       cURL retrieving: ${tomcat_distro_url}"
-    curl ${silent} -o "${tomcat_distro_file}" "${tomcat_distro_url}"
-    if test $? -ne 0; then
-        echo "ERROR! Failed to retrieve Tomcat distribution from ${tomcat_distro_url}" >&2
-        return 2
+    if test -f "$tomcat_distro_file"
+    then
+        loggy "$prolog The tomcat distribution file $tomcat_distro_file already exists."
+    else
+        loggy ""
+        loggy "$prolog       cURL retrieving: ${tomcat_distro_url}"
+        curl ${silent} -o "${tomcat_distro_file}" "${tomcat_distro_url}"
+        if test $? -ne 0; then
+            echo "ERROR! Failed to retrieve Tomcat distribution from ${tomcat_distro_url}" >&2
+            return 2
+        fi
     fi
 
     loggy ""
-    loggy "       cURL retrieving: ${tomcat_sig_url}"
+    loggy "$prolog       cURL retrieving: ${tomcat_sig_url}"
     curl ${silent} -o "${tomcat_sig_file}" "${tomcat_sig_url}"
     if test $? -ne 0; then
         echo "ERROR! Failed to retrieve Tomcat distribution signature from ${tomcat_sig_url}" >&2
@@ -268,7 +321,7 @@ function get_tomcat_distro(){
     fi
 
     loggy ""
-    loggy "       cURL retrieving: ${tomcat_keys_url}"
+    loggy "$prolog       cURL retrieving: ${tomcat_keys_url}"
     curl ${silent} -o "${tomcat_keys_file}" "${tomcat_keys_url}"
     if test $? -ne 0; then
         echo "ERROR! Failed to retrieve Tomcat public keys from ${tomcat_keys_url}" >&2
@@ -276,9 +329,9 @@ function get_tomcat_distro(){
     fi
 
     loggy ""
-    loggy "Importing Tomcat public keys:"
-    loggy "       Local keys file: ${tomcat_keys_file}"
-    loggy "                Source: ${tomcat_keys_url}"
+    loggy "$prolog Importing Tomcat public keys:"
+    loggy "$prolog       Local keys file: ${tomcat_keys_file}"
+    loggy "$prolog                Source: ${tomcat_keys_url}"
     gpg --import "${tomcat_keys_file}" 2>&1 | awk '{print "#    ", $0;}'
     if test $? -ne 0 ; then
         echo "ERROR! Failed to import Tomcat public keys!" >&2
@@ -286,10 +339,10 @@ function get_tomcat_distro(){
     fi
 
     loggy ""
-    loggy "Verifying Tomcat distribution:"
-    loggy "    Tomcat public keys: ${tomcat_keys_file}"
-    loggy "     distribution file: ${tomcat_distro_file}"
-    loggy "             signature: ${tomcat_sig_file}"
+    loggy "$prolog Verifying Tomcat distribution:"
+    loggy "$prolog    Tomcat public keys: ${tomcat_keys_file}"
+    loggy "$prolog     distribution file: ${tomcat_distro_file}"
+    loggy "$prolog             signature: ${tomcat_sig_file}"
     loggy ""
 
     gpg --verify "${tomcat_sig_file}" "${tomcat_distro_file}" 2>&1 | awk '{print "#    ", $0;}'
@@ -354,6 +407,15 @@ function check_aws(){
         status=1
         loggy "${partial}"
     fi
+
+    if test $status -ne 0
+    then
+        loggy "AWS CLI IS NOT CONFIGURED"
+    else
+        loggy "AWS CLI APPEARS TO BE CONFIGURED"
+    fi
+    loggy "${HR}"
+
     return $status
 }
 
@@ -362,11 +424,29 @@ function check_aws(){
 # s3_pull() - Get a thing from an S3 bucket
 #
 function s3_pull(){
+    loggy "$HR3"
+    local prolog="s3_pull() -"
+    loggy "$prolog BEGIN"
+
     local bucket_name="${1}"
+    loggy "$prolog bucket_name: $bucket_name"
+
     local object_name="${2}"
+    loggy "$prolog object_name: $object_name"
+
     local target_dir="${3}"
-    loggy "S3 - Retrieving ${object_name} from ${bucket_name}"
-    python3 -m awscli s3 cp --quiet "s3://${bucket_name}/${object_name}" "${target_dir}/${object_name}"
+    loggy "$prolog  target_dir: $target_dir"
+
+    local s3_url="s3://${bucket_name}/${object_name}"
+    loggy "$prolog      s3_url: $s3_url"
+    loggy "$prolog   aws s3 ls: $(aws s3 ls "$s3_url")"
+
+    local target_file="${target_dir}/${object_name}"
+    loggy "$prolog target_file: $target_file"
+
+
+    loggy "$prolog  Retrieving: $s3_url"
+    aws s3 cp --quiet "$s3_url" "$target_file"
     loggy ""
 }
 
@@ -383,24 +463,25 @@ function s3_pull(){
 #         debuginfo rpm files for libdap and bes will be retrieved as well.
 #
 function s3_get_besd_distro() {
+    local prolog="s3_get_besd_distro() -"
     loggy "${HR2}"
-    loggy "TASK: s3_get_besd_distro()"
+    loggy "$prolog BEGIN"
     local s3_bucket="${1}"
-    loggy "         s3_bucket: ${s3_bucket}"
+    loggy "$prolog          s3_bucket: ${s3_bucket}"
     local target_dir="${2}"
-    loggy "        target_dir: ${target_dir}"
+    loggy "$prolog         target_dir: ${target_dir}"
     local larch="${3}"
-    loggy "linux_architecture: ${larch}"
+    loggy "$prolog linux_architecture: ${larch}"
     local libdap_version="${4}"
-    loggy "    libdap_version: ${libdap_version}"
+    loggy "$prolog     libdap_version: ${libdap_version}"
     local bes_version="${5}"
-    loggy "       bes_version: ${bes_version}"
+    loggy "$prolog        bes_version: ${bes_version}"
     local debug="${6}"
-    loggy "             debug: ${debug}"
+    loggy "$prolog              debug: ${debug}"
 
     set -e
 
-    loggy "Cleaning up..."
+    loggy "$prolog Cleaning up..."
     rm -fv "${target_dir}/*.rpm"
 
     loggy ""
@@ -539,7 +620,7 @@ function curl_pull(){
     loggy "  release_url: ${release_url}"
     loggy "   target_url: ${target_url}"
     curl -s -L -o "${target_dir}/${target_file}" "${target_url}"
-    loggy ""$(ls -l "${target_dir}/${target_file}")
+    loggy "$(ls -l "${target_dir}/${target_file}")"
     loggy ""
 }
 
@@ -621,17 +702,18 @@ function woo_get_besd_distro() {
 #    $3 - The olfs version number ##.##.##-##
 #
 function s3_get_olfs_distro() {
+    local prolog="s3_get_olfs_distro() -"
     loggy "${HR}"
-    loggy "TASK: s3_get_olfs_distro()"
+    loggy "$prolog BEGIN"
     local s3_bucket="${1}"
-    loggy "         s3_bucket: ${s3_bucket}"
+    loggy "$prolog         s3_bucket: ${s3_bucket}"
     local target_dir="${2}"
-    loggy "        target_dir: ${target_dir}"
+    loggy "$prolog        target_dir: ${target_dir}"
     local olfs_version="${3}"
-    loggy "      olfs_version: ${olfs_version}"
+    loggy "$prolog      olfs_version: ${olfs_version}"
 
     set -e
-    loggy "Cleaning up..."
+    loggy "$prolog Cleaning up..."
     rm -fv "${target_dir}/olfs*.tgz"
 
     loggy ""
@@ -643,7 +725,7 @@ function s3_get_olfs_distro() {
             "robots-olfs-${olfs_version}-webapp.tgz" \
             "${target_dir}"
     set +e
-    loggy ""
+    loggy "$prolog END"
     return 0
 }
 
@@ -697,7 +779,7 @@ function woo_get_olfs_distro() {
     loggy "      olfs_version: ${olfs_version}"
 
     release_url="${RELEASE_HOST}/pub/olfs"
-    loggy "release_url: ${release_dir}"
+    loggy "release_url: ${release_url}"
 
     set -e
     loggy "Cleaning up..."
@@ -905,7 +987,9 @@ function build_hyrax() {
     local log_file="build_hyrax.log"
     show_version 2>&1 | tee "${log_file}"
 
-    export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
+    export TOMCAT_VERSION
+    TOMCAT_VERSION="$(get_latest_tomcat_version_number "$TOMCAT_MAJOR_VERSION")"
+
     show_version
 
     get_tomcat_distro \
@@ -915,7 +999,7 @@ function build_hyrax() {
     s3_get_besd_distro \
         "${S3_BUILD_BUCKET}" \
         "${DOCKER_NAME}" \
-        "el8" \
+        "$TARGET_OS" \
         "${LIBDAP_VERSION}" \
         "${BES_VERSION}" $debug 2>&1 | tee -a "${log_file}"
 
@@ -932,37 +1016,6 @@ function build_hyrax() {
     build_hyrax_docker "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}"
     cleanup_build_files "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}"
 }
-
-function build_dmrpp_service() {
-    local debug="${1}"
-
-    local log_file="build_dmrpp_service.log"
-    show_version 2>&1 | tee "${log_file}"
-
-    export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
-    show_version
-
-    get_tomcat_distro \
-        "${DOCKER_NAME}" \
-        "${TOMCAT_VERSION}" 2>&1 | tee -a "${log_file}"
-
-    s3_get_besd_distro \
-        "${S3_BUILD_BUCKET}" \
-        "${DOCKER_NAME}" \
-        "el8" \
-        "${LIBDAP_VERSION}" \
-        "${BES_VERSION}" $debug 2>&1 | tee -a "${log_file}"
-
-    s3_get_build_dmrpp_distro \
-        "${S3_BUILD_BUCKET}" \
-        "${DOCKER_NAME}" \
-        "${BUILD_DMRPP_VERSION}" 2>&1 | tee -a "${log_file}"
-
-    build_dmrpp_service_docker "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}"
-    cleanup_build_files "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}"
-}
-
-
 
 
 function build_ngap() {
@@ -1063,7 +1116,7 @@ function build_besd() {
     s3_get_besd_distro \
         "${S3_BUILD_BUCKET}" \
         "${DOCKER_NAME}" \
-        "el9" \
+        "$TARGET_OS" \
         "${LIBDAP_VERSION}" \
         "${BES_VERSION}" 2>&1 | tee -a "${log_file}"
 
@@ -1192,21 +1245,26 @@ function travis_hyrax() {
         return $status
     fi
 
-    export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}:snapshot"
-    export BUILD_VERSION_TAG="opendap/${DOCKER_NAME}:${HYRAX_VERSION}"
-    export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
+    export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}:snapshot$TEST_DEPLOYMENT"
+    export BUILD_VERSION_TAG="opendap/${DOCKER_NAME}:${HYRAX_VERSION}$TEST_DEPLOYMENT"
+    export TOMCAT_VERSION
+    TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
     show_version
     get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_VERSION}"
     s3_get_besd_distro \
         "${S3_BUILD_BUCKET}" \
         "${DOCKER_NAME}" \
-        "el8" \
+        "$TARGET_OS" \
         "${LIBDAP_VERSION}" \
-        "${BES_VERSION}" $ADD_DEBUG 2>&1
+        "${BES_VERSION}" \
+        "$ADD_DEBUG" 2>&1
     s3_get_olfs_distro \
         "${S3_BUILD_BUCKET}" \
         "${DOCKER_NAME}" \
-        "${OLFS_VERSION}" 2>&1
+        "${OLFS_VERSION}-${TARGET_OS}" 2>&1
+
+    OLFS_VERSION="$OLFS_VERSION-${TARGET_OS}"
+    loggy "OLFS_VERSION: $OLFS_VERSION"
     docker build \
         --build-arg TOMCAT_VERSION \
         --build-arg RELEASE_DATE \

@@ -14,16 +14,20 @@
 #
 # Set one or more individual labels
 FROM rockylinux:9
-
 ENV TARGET_OS="el9"
+ENV ARCH="x86_64"
+ENV java_version="java-21-openjdk"
+ENV python_version="3.12"
 
-RUN export NOW=`date +%s`
+ENV HR="######################################################"
+
+ENV NOW="$(date +%s)"
 ARG RELEASE_DATE
-ENV RELEASE_DATE ${RELEASE_DATE:-"${NOW}"}
+ENV RELEASE_DATE=${RELEASE_DATE:-"${NOW}"}
 RUN echo "RELEASE_DATE: ${RELEASE_DATE}"
 
 ARG TOMCAT_VERSION
-ENV TOMCAT_VERSION ${TOMCAT_VERSION:-"11.0.7"}
+ENV TOMCAT_VERSION=${TOMCAT_VERSION:-"11.0.7"}
 RUN echo "TOMCAT_VERSION: ${TOMCAT_VERSION}"
 ENV TOMCAT_DISTRO="apache-tomcat-${TOMCAT_VERSION}"
 COPY "${TOMCAT_DISTRO}.tar.gz" /
@@ -54,7 +58,7 @@ COPY ${BES_RPM} bes-devel-* bes-debuginfo-* /
 RUN ls -l /bes-* >&2
 
 ARG OLFS_VERSION
-ENV OLFS_VERSION=${OLFS_VERSION:-"snapshot"}
+ENV OLFS_VERSION=${OLFS_VERSION:-"snapshot-${TARGET_OS}"}
 RUN echo "OLFS_VERSION: ${OLFS_VERSION}"
 
 ARG OLFS_DISTRO
@@ -75,8 +79,7 @@ LABEL vendor="OPeNDAP"
 LABEL org.opendap.hyrax.version=${HYRAX_VERSION}
 LABEL org.opendap.hyrax.release-date=${RELEASE_DATE}
 LABEL org.opendap.hyrax.version.is-production="false"
-
-MAINTAINER support@opendap.org
+LABEL org.opencontainers.image.authors="support@opendap.org"
 
 USER root
 
@@ -84,7 +87,7 @@ USER root
 # The --build-arg USE_NCWMS can be set to "true" in order to 
 # add the ncWMS application to the build.
 ARG USE_NCWMS
-ENV USE_NCWMS ${USE_NCWMS:-"false"}
+ENV USE_NCWMS=${USE_NCWMS:-"false"}
 RUN if [ $USE_NCWMS = "true" ];then echo "NCWMS: ENABLED"; else echo "NCWMS: DISABLED"; fi
 
 #
@@ -93,12 +96,12 @@ RUN if [ $USE_NCWMS = "true" ];then echo "NCWMS: ENABLED"; else echo "NCWMS: DIS
 # the URL: https://localhost:8080 if the environment variable NCWMS_BASE
 # is not in the shell from which the entrypoint.sh script is called.
 ARG NCWMS_BASE
-ENV NCWMS_BASE ${NCWMS_BASE:-"https://localhost:8080"}
+ENV NCWMS_BASE=${NCWMS_BASE:-"https://localhost:8080"}
 RUN if [ $USE_NCWMS = "true" ];then echo "NCWMS_BASE: {$NCWMS_BASE}"; fi
 
 
 ARG DEVELOPER_MODE
-ENV DEVELOPER_MODE ${DEVELOPER_MODE:-"false"}
+ENV DEVELOPER_MODE=${DEVELOPER_MODE:-"false"}
 RUN if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else echo "DEVELOPER_MODE: DISABLED"; fi
 
 #Get mirrorlist before running yum
@@ -114,14 +117,26 @@ RUN if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else ec
 # Travis build (or at a later time). They need to be part of the container,
 # however, to be run, so install them as part of this Dockerfile.
 RUN set -e && dnf update  -y
-RUN set -e && dnf install -y python3.11 \
-    && python3 --version
+RUN set -e \
+    && dnf install -y "python$python_version" \
+    && echo "Python Version: $(python3 --version)"
 
-RUN set -e && dnf install -y make curl unzip which autoconf automake emacs vim jq \
-    && dnf install -y diffutils \
-    && dnf install -y procps \
-    && dnf install -y git bc valgrind gdb \
-    && dnf install -y java-11-openjdk-devel
+RUN set -e \
+    && echo "$HR" \
+    && echo "# Installing cURL" \
+    && yum install -y curl curl-devel --allowerasing \
+    && echo "# cURL version: $(curl --version)"
+
+RUN set -e \
+    && dnf install -y make unzip which autoconf automake emacs vim jq
+RUN set -e \
+    && dnf install -y diffutils
+RUN set -e \
+    && dnf install -y procps
+RUN set -e \
+    && dnf install -y git bc valgrind gdb
+RUN set -e \
+    && dnf install -y java-21-openjdk java-21-openjdk-devel
 # Temporary Hack to fix broken OpenJDK-11.0.20.0.8-2
 RUN set -e && dnf install -y tzdata-java
 #
@@ -180,14 +195,14 @@ RUN set -e && systemctl enable tomcat
 #RUN firewall-cmd --add-port 8080/tcp --permanent
 #RUN firewall-cmd --reload
 
-ENV CATALINA_HOME /usr/share/tomcat
-ENV PATH $CATALINA_HOME/bin:$PATH
+ENV CATALINA_HOME=/usr/share/tomcat
+ENV PATH=$CATALINA_HOME/bin:$PATH
 RUN set -e && echo "CATALINA_HOME: ${CATALINA_HOME}" >&2
 
 # Install our modified server.xml so that the server compresses responses.
-COPY tomcat9-server.xml /
+COPY tomcat11-server.xml /
 RUN set -e \
-    && mv /tomcat9-server.xml ${CATALINA_HOME}/conf/server.xml \
+    && mv /tomcat11-server.xml ${CATALINA_HOME}/conf/server.xml \
     && chown -R tomcat:tomcat ${CATALINA_HOME}/conf/server.xml
 
 RUN set -e \
@@ -239,7 +254,7 @@ RUN rm -vf /libdap*.rpm /bes*.rpm /olfs*.tgz /robots*.tgz /apache*
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 
 ARG NCWMS_VERSION
-ENV NCWMS_VERSION ${NCWMS_VERSION:-"2.5.2"}
+ENV NCWMS_VERSION=${NCWMS_VERSION:-"2.5.2"}
 RUN echo "NCWMS_VERSION: ${NCWMS_VERSION}"
 ENV NCWMS_WAR_URL="https://github.com/Reading-eScience-Centre/ncwms/releases/download/ncwms-${NCWMS_VERSION}/ncWMS2.war"
 RUN echo "NCWMS_WAR_URL: ${NCWMS_WAR_URL}"
