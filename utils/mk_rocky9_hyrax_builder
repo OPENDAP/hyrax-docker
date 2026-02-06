@@ -21,7 +21,7 @@ then
     loggy "Will use to authenticate with docker.io and upload image."
 fi
 
-image_tag="${image_tag:-"opendap/rocky9_hyrax_builder:latest"}"
+image_tag="${image_tag:-"opendap/rocky9_hyrax_builder:snapshot"}"
 loggy "  image_tag: $image_tag"
 
 docker_repo="docker.io"
