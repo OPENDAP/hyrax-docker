@@ -101,8 +101,8 @@ function build_libdap_for_rh9() {
     local BUILD_NUMBER="666"
     loggy "BUILD_NUMBER: $BUILD_NUMBER"
 
-    # export image="opendap/rocky9_hyrax_builder:latest"
-    local image="opendap/rocky9_hyrax_builder:latest"
+    # export image="opendap/rocky9_hyrax_builder:snapshot"
+    local image="opendap/rocky9_hyrax_builder:snapshot"
     loggy "image: $image"
 
     local build_script="/root/libdap4/travis/build-rh9-rpm.sh"
@@ -166,8 +166,8 @@ function build_hyrax_dependencies_for_rh9() {
     local docker_result_dir="/root/install"
     loggy "$prolog Using docker_result_dir: $docker_result_dir"
 
-    # export image="opendap/rocky9_hyrax_builder:latest"
-    local image="opendap/rocky9_hyrax_builder:latest"
+    # export image="opendap/rocky9_hyrax_builder:snapshot"
+    local image="opendap/rocky9_hyrax_builder:snapshot"
     loggy "$prolog image: $image"
 
     local build_script=""
