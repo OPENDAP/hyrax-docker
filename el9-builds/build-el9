@@ -439,10 +439,10 @@ function s3_pull(){
     local target_file="${target_dir}/${object_name}"
     loggy "$prolog target_file: $target_file"
 
-    local aws_quiet="${aws_quiet:-""})"
+    local be_quiet="${aws_quiet:-""})"
 
     loggy "$prolog  Retrieving: $s3_url"
-    aws s3 cp $aws_quiet "$s3_url" "$target_file"
+    aws s3 cp $be_quiet "$s3_url" "$target_file"
     loggy "$prolog END"
 }
 
