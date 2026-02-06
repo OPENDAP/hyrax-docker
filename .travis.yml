@@ -101,7 +101,7 @@ jobs:
 
     ############################################################################
     #
-    # RH8 Builds
+    # RHEL Builds
     #
     - stage: BUILD_AND_TEST
       name: "Build and Test opendap/hyrax"
