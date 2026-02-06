@@ -99,7 +99,7 @@ function build_libdap_for_ubuntu() {
     local BUILD_NUMBER="666"
     loggy "$prolog BUILD_NUMBER: $BUILD_NUMBER"
 
-    local image="opendap/ubuntu_hyrax_builder:latest"
+    local image="opendap/ubuntu_hyrax_builder:snapshot"
     loggy "$prolog Using Docker Image: $image"
 
     local build_script="/root/libdap4/travis/build-rh8-rpm.sh"
@@ -163,7 +163,7 @@ function build_hyrax_dependencies_for_ubuntu() {
     local docker_result_dir="/root/install"
     loggy "$prolog Using docker_result_dir: $docker_result_dir"
 
-    local image="opendap/ubuntu_hyrax_builder:latest"
+    local image="opendap/ubuntu_hyrax_builder:snapshot"
     loggy "$prolog Using Docker Image: $image"
 
     local build_script_name=""
@@ -312,7 +312,7 @@ function build_bes_for_ubuntu() {
     local docker_result_dir="/root/install"
     loggy "$prolog Using docker_result_dir: $docker_result_dir"
 
-    local image="opendap/ubuntu_hyrax_builder:latest"
+    local image="opendap/ubuntu_hyrax_builder:snapshot"
     loggy "$prolog Using Docker Image: $image"
 
     local build_script_name="build-bes-for-ubuntu.sh"

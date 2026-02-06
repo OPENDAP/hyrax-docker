@@ -64,8 +64,11 @@ RUN set -e \
 #/usr/bin/ld: cannot find -ltiff
 #/usr/bin/ld: cannot find -lpcre
 RUN set -e \
-    && apt-get install -y libopenexr-dev libimath-dev elixir
+    && apt-get install -y libopenexr-dev elixir
 
+# Unable to locate package libimath-dev
+# RUN set -e \
+    # && apt-get install -y libimath-dev
 
 
 
@@ -133,6 +136,8 @@ RUN set -e \
 
 RUN export BUILD_DATE=`date +%s`
 RUN echo "# BUILD_DATE: ${BUILD_DATE}"
+
+RUN cat /etc/os-release | grep VERSION= | grep -Eo '[0-9]+(\.[0-9]+){0,}' > OS_VERSION
 
 ENTRYPOINT [ "/bin/bash" ]
 
