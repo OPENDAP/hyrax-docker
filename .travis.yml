@@ -44,8 +44,8 @@ env:
     - LIBDAP_VERSION=$(grep "libdap4-" ${BUILD_RECIPE} | awk '{print $1;}' - | sed "s/libdap4-//g")
     - BES_VERSION=$(grep "bes-" ${BUILD_RECIPE} | awk '{print $1;}' - | sed "s/bes-//g")
     - HYRAX_VERSION=$(grep "hyrax-" ${BUILD_RECIPE} | awk '{print $1;}' - | sed "s/hyrax-//g")
-    - OLFS_VERSION=$(grep "olfs-" ${BUILD_RECIPE} | awk '{print $1;}' - | sed "s/olfs-//g")
-    - OLFS_VERSION="$OLFS_VERSION-$TARGET_OS"
+    - OLFS_VERSION_NUM=$(grep "olfs-" ${BUILD_RECIPE} | awk '{print $1;}' - | sed "s/olfs-//g")
+    - OLFS_VERSION="OLFS_VERSION_NUM-$TARGET_OS"
     - OLFS_DISTRO="olfs-${OLFS_VERSION}-webapp.tgz"
     - OLFS_DISTRO_URL="s3://opendap.travis.build/${OLFS_DISTRO}"
     - NGAP_DISTRO="ngap-${OLFS_VERSION}-webapp.tgz"
