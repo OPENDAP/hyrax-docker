@@ -32,7 +32,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu, rocky8, rocky9]
+        os: [rocky8, rocky9]
     steps:
       - name: Output Run Number
         run: echo "The current run number is ${{ github.run_number }}"
