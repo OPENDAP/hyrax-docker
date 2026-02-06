@@ -45,7 +45,7 @@ LABEL org.opendap.besdaemon.version=${BES_VERSION}
 LABEL org.opendap.besdaemon.release-date=RELEASE_DATE
 LABEL org.opendap.hyrax.version.is-production="false"
 
-MAINTAINER support@opendap.org
+LABEL org.opencontainers.image.authors="support@opendap.org"
 
 USER root
 

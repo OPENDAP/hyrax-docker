@@ -11,7 +11,7 @@ ENV python_version="3.11"
 ENV HR="###########################################################################"
 ENV HR2="# -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - --"
 
-MAINTAINER support@opendap.org
+LABEL org.opencontainers.image.authors="support@opendap.org"
 USER root
 
 RUN export NOW=`date +%s`

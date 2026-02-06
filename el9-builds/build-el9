@@ -441,7 +441,7 @@ function s3_pull(){
 
     local be_quiet
     if test -n "${aws_quiet}"; then be_quiet="--quiet"; fi
-    loggy "$prolog be_quiet: '$be_quiet'"
+    loggy "$prolog    be_quiet: '$be_quiet'"
 
     loggy "$prolog  Retrieving: $s3_url"
     aws s3 cp $be_quiet "$s3_url" "$target_file"

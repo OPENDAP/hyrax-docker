@@ -4,7 +4,7 @@
 
 #
 FROM rockylinux:8
-MAINTAINER support@opendap.org
+LABEL org.opencontainers.image.authors="support@opendap.org"
 USER root
 
 ENV TARGET_OS="el9"
