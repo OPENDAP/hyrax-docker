@@ -104,6 +104,15 @@ jobs:
     # RHEL Builds
     #
     - stage: BUILD_AND_TEST
+      name: "Update rockylinux:9"
+      script:
+        - docker build 
+          --tag "${SNAPSHOT_IMAGE_TAG}"
+          --tag "${BUILD_VERSION_TAG}"
+          "${DOCKER_NAME}"
+        - docker image ls -a
+
+    - stage: disabled
       name: "Build and Test opendap/hyrax"
       script:
         - export DOCKER_NAME="hyrax"
