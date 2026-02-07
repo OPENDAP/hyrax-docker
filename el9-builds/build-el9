@@ -34,7 +34,7 @@ loggy " SLEEP_INTERVAL: $SLEEP_INTERVAL"
 export NO_CACHE="${NO_CACHE:-""}"
 loggy "       NO_CACHE: $NO_CACHE"
 
-
+export aws_quiet="${aws_quiet:-"shhhh"}"
 
 function get_test_deployment_tag(){
     local build_recipe_file="$1"
