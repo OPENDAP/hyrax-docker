@@ -15,7 +15,7 @@
 # Set one or more individual labels
 FROM rockylinux:9
 
-RUN set -e && dnf update  -y
+RUN set -e && yum update  -y
 
 
 COPY entrypoint.sh /
