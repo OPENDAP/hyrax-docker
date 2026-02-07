@@ -4,15 +4,11 @@
 
 #
 FROM rockylinux:8
-ENV ARCH="x86_64"
-ENV java_version="java-11-openjdk"
-ENV python_version="3.11"
-
-ENV HR="###########################################################################"
-ENV HR2="# -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - --"
-
 LABEL org.opencontainers.image.authors="support@opendap.org"
 USER root
+
+ENV TARGET_OS="el9"
+
 
 RUN export NOW=`date +%s`
 ARG RELEASE_DATE
@@ -20,7 +16,7 @@ ENV RELEASE_DATE ${RELEASE_DATE:-"${NOW}"}
 RUN echo "RELEASE_DATE: ${RELEASE_DATE}"
 
 ARG TOMCAT_VERSION
-ENV TOMCAT_VERSION ${TOMCAT_VERSION:-"9.0.64"}
+ENV TOMCAT_VERSION ${TOMCAT_VERSION:-"11.0.7"}
 RUN echo "TOMCAT_VERSION: ${TOMCAT_VERSION}"
 ENV TOMCAT_DISTRO="apache-tomcat-${TOMCAT_VERSION}"
 COPY "${TOMCAT_DISTRO}.tar.gz" /
@@ -73,42 +69,19 @@ RUN set -e && \
 #
 # Installing utils for debugging convenience.
 #
-RUN set -e  \
-    && echo "$HR" \
-    && echo "# It's dnf update Time!" \
-    && yum update -y \
-    && yum install -y curl unzip which emacs vim bc \
-    && yum clean all
+RUN set -e  && dnf update  -y
+RUN set -e && dnf install -y python3.11 \
+    && python3 --version
 
-RUN set -e \
-    && echo "$HR" \
-    && echo "# It's Java Time!" \
-    && echo "# Installing $java_version and ant." \
-    && yum install -y "$java_version" "$java_version-devel"  \
-    && yum install -y ant \
-    && echo "$HR2" \
-    && echo "# Using java version $java_version" \
-    && update-alternatives --set java "$java_version.$ARCH" \
-    && echo "# Enabled $java_version" \
-    && echo "# java version: $( java -version 2>&1 )" \
-    && echo "$HR2" \
-    && update-alternatives --list \
-    && echo "$HR2" \
+RUN set -e && dnf install -y curl unzip which emacs vim \
+    && dnf install -y bc \
+    && dnf install -y java-11-openjdk-devel \
+    && dnf install -y tzdata-java \
     && dnf clean all
-
 #
-RUN set -e \
-    && echo "$HR" \
-    && echo "# It's AWS CLI Time!" \
-    && echo "# Installing python$python_version" \
-    && dnf install -y python$python_version \
-    && echo "# python version: $(python3 --version)" \
-    && echo "# Installing aws cli" \
-    && curl -sS https://bootstrap.pypa.io/get-pip.py | python3 \
+RUN set -e && curl -sS https://bootstrap.pypa.io/get-pip.py | python3 \
     && python3 -m pip install --upgrade pip \
-    && python3 -m pip install awscli \
-    && echo "# aws cli version: $(aws --version)" \
-    && dnf clean all
+    && python3 -m pip install awscli
 
 
 ################################################################
@@ -137,9 +110,9 @@ ENV PATH $CATALINA_HOME/bin:$PATH
 RUN set -e && echo "CATALINA_HOME: ${CATALINA_HOME}" >&2
 
 # Install our modified server.xml so that the server compresses responses.
-COPY tomcat9-server.xml /
+COPY tomcat11-server.xml /
 RUN set -e \
-    && mv /tomcat9-server.xml ${CATALINA_HOME}/conf/server.xml \
+    && mv /tomcat11-server.xml ${CATALINA_HOME}/conf/server.xml \
     && chown -R tomcat:tomcat ${CATALINA_HOME}/conf/server.xml
 
 RUN set -e \

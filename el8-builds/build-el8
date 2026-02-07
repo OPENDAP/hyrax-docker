@@ -770,7 +770,7 @@ function build_hyrax_ncwms_docker() {
     loggy "build_hyrax_ncwms_docker()"
     loggy ""
     export DOCKER_NAME="hyrax"
-    source ./build-rh8
+    source ./build-el8
     export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}_ncwms:rh8-snapshot"
     export BUILD_VERSION_TAG="opendap/${DOCKER_NAME}_ncwms:rh8-${HYRAX_VERSION}"
     export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")

@@ -13,21 +13,26 @@
 # it for debugging stuff.
 #
 # Set one or more individual labels
-FROM rockylinux:8
+FROM rockylinux:9
+ENV TARGET_OS="el9"
 ENV ARCH="x86_64"
-ENV java_version="java-11-openjdk"
-ENV python_version="3.11"
+ENV java_version="java-21-openjdk"
+ENV python_version="3.12"
+RUN echo "Python Version: $(python3 --version) (config says we want: $python_version)"
+ENV core_dnf_packages="make autoconf automake procps git unzip "
+#ENV extra_dnf_packages="which diffutils emacs vim jq  procps git bc valgrind gdb awscli"
+ENV extra_dnf_packages=""
 
-ENV HR="###########################################################################"
-ENV HR2="# -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - --"
+#
+ENV HR="######################################################"
 
-RUN export NOW=`date +%s`
+ENV NOW="$(date +%s)"
 ARG RELEASE_DATE
-ENV RELEASE_DATE ${RELEASE_DATE:-"${NOW}"}
+ENV RELEASE_DATE=${RELEASE_DATE:-"${NOW}"}
 RUN echo "RELEASE_DATE: ${RELEASE_DATE}"
 
 ARG TOMCAT_VERSION
-ENV TOMCAT_VERSION ${TOMCAT_VERSION:-"9.0.64"}
+ENV TOMCAT_VERSION=${TOMCAT_VERSION:-"11.0.7"}
 RUN echo "TOMCAT_VERSION: ${TOMCAT_VERSION}"
 ENV TOMCAT_DISTRO="apache-tomcat-${TOMCAT_VERSION}"
 COPY "${TOMCAT_DISTRO}.tar.gz" /
@@ -42,7 +47,7 @@ ENV LIBDAP_VERSION=${LIBDAP_VERSION:-"snapshot"}
 RUN echo "LIBDAP_VERSION: ${LIBDAP_VERSION}"
 
 ARG LIBDAP_RPM
-ENV LIBDAP_RPM=${LIBDAP_RPM:-"libdap-${LIBDAP_VERSION}.el8.x86_64.rpm"}
+ENV LIBDAP_RPM=${LIBDAP_RPM:-"libdap-${LIBDAP_VERSION}.${TARGET_OS}.x86_64.rpm"}
 RUN echo "LIBDAP_RPM: ${LIBDAP_RPM}"
 COPY ${LIBDAP_RPM} libdap-devel-* libdap-debuginfo-* /
 RUN ls -l /libdap-*  >&2
@@ -52,13 +57,13 @@ ENV BES_VERSION=${BES_VERSION:-"snapshot"}
 RUN echo "BES_VERSION: ${BES_VERSION}"
 
 ARG BES_RPM
-ENV BES_RPM=${BES_RPM:-"bes-${BES_VERSION}.static.el8.x86_64.rpm"}
+ENV BES_RPM=${BES_RPM:-"bes-${BES_VERSION}.static.${TARGET_OS}.x86_64.rpm"}
 RUN echo "BES_RPM: ${BES_RPM}"
 COPY ${BES_RPM} bes-devel-* bes-debuginfo-* /
 RUN ls -l /bes-* >&2
 
 ARG OLFS_VERSION
-ENV OLFS_VERSION=${OLFS_VERSION:-"snapshot"}
+ENV OLFS_VERSION=${OLFS_VERSION:-"snapshot-${TARGET_OS}"}
 RUN echo "OLFS_VERSION: ${OLFS_VERSION}"
 
 ARG OLFS_DISTRO
@@ -79,7 +84,6 @@ LABEL vendor="OPeNDAP"
 LABEL org.opendap.hyrax.version=${HYRAX_VERSION}
 LABEL org.opendap.hyrax.release-date=${RELEASE_DATE}
 LABEL org.opendap.hyrax.version.is-production="false"
-
 LABEL org.opencontainers.image.authors="support@opendap.org"
 
 USER root
@@ -88,7 +92,7 @@ USER root
 # The --build-arg USE_NCWMS can be set to "true" in order to 
 # add the ncWMS application to the build.
 ARG USE_NCWMS
-ENV USE_NCWMS ${USE_NCWMS:-"false"}
+ENV USE_NCWMS=${USE_NCWMS:-"false"}
 RUN if [ $USE_NCWMS = "true" ];then echo "NCWMS: ENABLED"; else echo "NCWMS: DISABLED"; fi
 
 #
@@ -97,12 +101,12 @@ RUN if [ $USE_NCWMS = "true" ];then echo "NCWMS: ENABLED"; else echo "NCWMS: DIS
 # the URL: https://localhost:8080 if the environment variable NCWMS_BASE
 # is not in the shell from which the entrypoint.sh script is called.
 ARG NCWMS_BASE
-ENV NCWMS_BASE ${NCWMS_BASE:-"https://localhost:8080"}
+ENV NCWMS_BASE=${NCWMS_BASE:-"https://localhost:8080"}
 RUN if [ $USE_NCWMS = "true" ];then echo "NCWMS_BASE: {$NCWMS_BASE}"; fi
 
 
 ARG DEVELOPER_MODE
-ENV DEVELOPER_MODE ${DEVELOPER_MODE:-"false"}
+ENV DEVELOPER_MODE=${DEVELOPER_MODE:-"false"}
 RUN if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else echo "DEVELOPER_MODE: DISABLED"; fi
 
 #Get mirrorlist before running yum
@@ -117,50 +121,39 @@ RUN if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else ec
 # are installed in the container but not run until a later stage of the
 # Travis build (or at a later time). They need to be part of the container,
 # however, to be run, so install them as part of this Dockerfile.
-RUN set -e  \
-    && echo "$HR" \
-    && echo "# It's dnf update Time!" \
-    && dnf update -y \
-    && dnf clean all
+RUN set -e && dnf update  -y
 
 RUN set -e \
-    && echo "$HR" \
-    && echo "# Installing command line tools and libraries." \
-    && dnf install -y make curl unzip which autoconf automake emacs vim jq \
-    && dnf install -y diffutils procps git bc valgrind gdb \
-    && echo "# The diff executable is here: $(which diff)" \
+    && dnf install -y "python$python_version" \
+    && echo "Python Version: $(python3 --version)" \
     && dnf clean all
-
+RUN set -e \
+    && echo "$HR" \
+    && echo "# Installing cURL" \
+    && yum install -y curl curl-devel --allowerasing \
+    && echo "# cURL version: $(curl --version)" \
+    && dnf clean all
 RUN set -e \
     && echo "$HR" \
     && echo "# It's Java Time Witches!" \
-    && echo "# Installing $java_version and ant." \
+    && echo "# Installing $java_version" \
     && yum install -y "$java_version" "$java_version-devel"  \
-    # && yum install -y ant \
     && echo "$HR2" \
-    && echo "# Using java version $java_version" \
+    && echo "# Using $java_version" \
     && update-alternatives --set java "$java_version.$ARCH" \
     && echo "# Enabled $java_version" \
     && echo "# java version: $( java -version 2>&1 )" \
-    && echo "$HR2" \
     && update-alternatives --list \
-    && echo "$HR2" \
     && dnf install -y tzdata-java \
     && dnf clean all
-
 RUN set -e \
-    && echo "$HR" \
-    && echo "# It's AWS CLI Time People!" \
-    && echo "# Installing Python $python_version" \
-    && dnf install -y python$python_version \
-    && echo "# Python version is: $(python3 --version)" \
-    && echo "# Updating pip" \
-    && curl -sS https://bootstrap.pypa.io/get-pip.py | python3 \
-    && python3 -m pip install --upgrade pip \
-    && echo "# Installing aws cli" \
-    && python3 -m pip install --no-cache-dir awscli \
-    && echo "# aws cli version: $(aws --version)" \
+    && dnf install -y $core_dnf_packages $extra_dnf_packages \
     && dnf clean all
+#
+# RUN set -e && which diff
+#
+
+
 
 ################################################################
 # Install the latest libdap snapshot
@@ -170,9 +163,8 @@ RUN set -e \
     && ls -l ./libdap* \
     && dnf -y install ./libdap-*.rpm \
     && rm -f ./${LIBDAP_RPM} \
-    && dnf clean all
-
-RUN echo "libdap4 is installed."
+    && dnf clean all \
+    && echo "libdap4 is installed."
 
 ################################################################
 # Install the latest BES snapshot
@@ -182,9 +174,8 @@ RUN set -e \
     && ls -l ./bes* \
     && dnf -y install ./bes-*.rpm \
     && rm -f ./${BES_RPM} \
-    && dnf clean all
-
-RUN echo "besdaemon is here: "`which besdaemon`
+    && dnf clean all \
+    && echo "besdaemon is here: "`which besdaemon`
 
 ################################################################
 # Install and Setup Tomcat
@@ -202,25 +193,25 @@ RUN set -e \
     && ln -s /home/tomcat/${TOMCAT_DISTRO} /tomcat >&2 \
     && rm -rvf /usr/share/tomcat/webapps/* >&2 \
     && mkdir -p /var/log/tomcat \
-    && chown -R tomcat:tomcat /var/log/tomcat /home/tomcat
+    && chown -R tomcat:tomcat /var/log/tomcat /home/tomcat \
+    && echo "Cleaning up Tomcat distribution files..." >&2 \
+    && rm -fv "/${TOMCAT_DISTRO}.tar.gz"
+
 COPY tomcat.service /etc/systemd/system/tomcat.service
 RUN set -e && systemctl enable tomcat
 #RUN firewall-cmd --add-port 8080/tcp --permanent
 #RUN firewall-cmd --reload
 
-ENV CATALINA_HOME /usr/share/tomcat
-ENV PATH $CATALINA_HOME/bin:$PATH
+ENV CATALINA_HOME=/usr/share/tomcat
+ENV PATH=$CATALINA_HOME/bin:$PATH
 RUN set -e && echo "CATALINA_HOME: ${CATALINA_HOME}" >&2
 
 # Install our modified server.xml so that the server compresses responses.
-COPY tomcat9-server.xml /
+COPY tomcat11-server.xml /
 RUN set -e \
-    && mv /tomcat9-server.xml ${CATALINA_HOME}/conf/server.xml \
+    && mv /tomcat11-server.xml ${CATALINA_HOME}/conf/server.xml \
     && chown -R tomcat:tomcat ${CATALINA_HOME}/conf/server.xml
 
-RUN set -e \
-    && echo "Cleaning up Tomcat distribution files..." >&2 \
-    && rm -fv "/${TOMCAT_DISTRO}.tar.gz"
 
 ################################################################
 # Install the OLFS web application
@@ -236,8 +227,8 @@ RUN set -e \
     && echo "Unpacking warfile..."  >&2 \
     && mkdir -p $(readlink -f ${CATALINA_HOME})/webapps/${DEPLOYMENT_CONTEXT}/ \
     && unzip -o ${ROOT}/${OLFS_DISTRO}/opendap.war -d ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/ \
-    && echo "Cleaning up."  >&2 \
-    && rm -rf ${ROOT}/${OLFS_DISTRO} ./${OLFS_DISTRO}.tgz
+    && echo "Cleaning up OLFS distribution files."  >&2 \
+    && rm -rvf ${ROOT}/${OLFS_DISTRO} ./${OLFS_DISTRO}.tgz
 
 RUN set -e \
     && echo "Installing the latest dynamic robots.txt distribution (${OLFS_VERSION})."  >&2 \
@@ -246,8 +237,8 @@ RUN set -e \
     && ls -l ${ROOT}/${ROBOTS_DISTRO} \
     && echo "Unpacking dynamic robots.txt warfile..."  >&2 \
     && unzip -o ${ROOT}/${ROBOTS_DISTRO}/ROOT.war -d ${CATALINA_HOME}/webapps/ROOT/ \
-    && echo "Cleaning up dynamic robots.txt snapshot..."  >&2 \
-    && rm -rf ${ROOT}/${ROBOTS_DISTRO} ${ROBOTS_DISTRO}.tgz
+    && echo "Cleaning up dynamic robots.txt distribution files..."  >&2 \
+    && rm -rvf ${ROOT}/${ROBOTS_DISTRO} ${ROBOTS_DISTRO}.tgz
 
 # Fix ownership and access permissions
 RUN set -e \
@@ -258,7 +249,6 @@ RUN set -e \
 ################################################################
 # Clean up the Hyrax distribution binaries.
 #
-RUN rm -vf /libdap*.rpm /bes*.rpm /olfs*.tgz /robots*.tgz /apache*
 #
 ################################################################
 
@@ -267,7 +257,7 @@ RUN rm -vf /libdap*.rpm /bes*.rpm /olfs*.tgz /robots*.tgz /apache*
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 
 ARG NCWMS_VERSION
-ENV NCWMS_VERSION ${NCWMS_VERSION:-"2.5.2"}
+ENV NCWMS_VERSION=${NCWMS_VERSION:-"2.5.2"}
 RUN echo "NCWMS_VERSION: ${NCWMS_VERSION}"
 ENV NCWMS_WAR_URL="https://github.com/Reading-eScience-Centre/ncwms/releases/download/ncwms-${NCWMS_VERSION}/ncWMS2.war"
 RUN echo "NCWMS_WAR_URL: ${NCWMS_WAR_URL}"

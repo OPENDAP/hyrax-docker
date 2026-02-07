@@ -13,7 +13,9 @@
 # it for debugging stuff.
 #
 # Set one or more individual labels
-FROM rockylinux:8
+FROM rockylinux:9
+
+ENV TARGET_OS="el9"
 
 ARG RELEASE_DATE
 ENV RELEASE_DATE ${RELEASE_DATE:-"unknown"}
@@ -24,7 +26,7 @@ ENV LIBDAP_VERSION=${LIBDAP_VERSION:-"snapshot"}
 RUN echo "LIBDAP_VERSION: ${LIBDAP_VERSION}"
 
 ARG LIBDAP_RPM
-ENV LIBDAP_RPM=${LIBDAP_RPM:-"libdap-${LIBDAP_VERSION}.el8.x86_64.rpm"}
+ENV LIBDAP_RPM=${LIBDAP_RPM:-"libdap-${LIBDAP_VERSION}.${TARGET_OS}.x86_64.rpm"}
 RUN echo "LIBDAP_RPM: ${LIBDAP_RPM}"
 COPY ${LIBDAP_RPM} /${LIBDAP_RPM}
 
@@ -33,7 +35,7 @@ ENV BES_VERSION=${BES_VERSION:-"snapshot"}
 RUN echo "BES_VERSION: ${BES_VERSION}"
 
 ARG BES_RPM
-ENV BES_RPM=${BES_RPM:-"bes-${BES_VERSION}.static.el8.x86_64.rpm"}
+ENV BES_RPM=${BES_RPM:-"bes-${BES_VERSION}.static.${TARGET_OS}.x86_64.rpm"}
 RUN echo "BES_RPM: ${BES_RPM}"
 COPY ${BES_RPM} /${BES_RPM}
 
@@ -42,6 +44,7 @@ LABEL vendor="OPeNDAP Incorporated"
 LABEL org.opendap.besdaemon.version=${BES_VERSION}
 LABEL org.opendap.besdaemon.release-date=RELEASE_DATE
 LABEL org.opendap.hyrax.version.is-production="false"
+
 LABEL org.opencontainers.image.authors="support@opendap.org"
 
 USER root
