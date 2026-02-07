@@ -107,8 +107,8 @@ jobs:
       name: "Update rockylinux:9"
       script:
         - docker build 
-          --tag "${SNAPSHOT_IMAGE_TAG}"
-          --tag "${BUILD_VERSION_TAG}"
+          --tag "opendap/hyrax:snapshot-el9-update"
+          --tag "opendap/hyrax:${OLFS_VERSION}-update"
           "${DOCKER_NAME}"
         - docker image ls -a
 
