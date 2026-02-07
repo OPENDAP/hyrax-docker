@@ -106,10 +106,11 @@ jobs:
     - stage: BUILD_AND_TEST
       name: "Update rockylinux:9"
       script:
+        - cd "${TARGET_OS}-builds"
         - docker build 
           --tag "opendap/hyrax:snapshot-el9-update"
           --tag "opendap/hyrax:${OLFS_VERSION}-update"
-          "${DOCKER_NAME}"
+          "testy"
         - docker image ls -a
 
     - stage: disabled
