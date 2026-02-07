@@ -3,7 +3,7 @@
 # Initial Travic-CI control file. 6.11.15 jhrg
 # Added sonar scan 3.12.19 jhrg 
 
-dist: xenial
+dist: jammy
 
 language: python
 python:
