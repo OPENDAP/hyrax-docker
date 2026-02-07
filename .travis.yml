@@ -40,24 +40,24 @@ env:
     - BUILD_RECIPE="el9-build-recipe"
     - TOMCAT_MAJOR_VERSION=$( grep "TOMCAT_MAJOR_VERSION" "${BUILD_RECIPE}" | awk '{print $2;}' )
     - TARGET_OS=$( grep "TARGET_OS" "${BUILD_RECIPE}" | awk '{print $2;}' )
-    #- RELEASE_DATE=`date +%s`
-    #- LIBDAP_VERSION=$(grep "libdap4-" ${BUILD_RECIPE} | awk '{print $1;}' - | sed "s/libdap4-//g")
-    #- BES_VERSION=$(grep "bes-" ${BUILD_RECIPE} | awk '{print $1;}' - | sed "s/bes-//g")
-    #- HYRAX_VERSION=$(grep "hyrax-" ${BUILD_RECIPE} | awk '{print $1;}' - | sed "s/hyrax-//g")
-    #- OLFS_VERSION_NUM=$(grep "olfs-" ${BUILD_RECIPE} | awk '{print $1;}' - | sed "s/olfs-//g")
-    #- OLFS_VERSION="$OLFS_VERSION_NUM-$TARGET_OS"
-    #- OLFS_DISTRO="olfs-${OLFS_VERSION}-webapp.tgz"
-    #- OLFS_DISTRO_URL="s3://opendap.travis.build/${OLFS_DISTRO}"
-    #- NGAP_DISTRO="ngap-${OLFS_VERSION}-webapp.tgz"
-    #- NGAP_DISTRO_URL="s3://opendap.travis.build/${NGAP_DISTRO}"
-    #- ROBOTS_DISTRO="robots-olfs-${OLFS_VERSION}-webapp.tgz"
-    #- ROBOTS_DISTRO_URL="s3://opendap.travis.build/${ROBOTS_DISTRO}"
-    #- LIBDAP_RPM_NAME="libdap-${LIBDAP_VERSION}.${TARGET_OS}.x86_64.rpm"
-    #- LIBDAP_RPM_URL="s3://opendap.travis.build/${LIBDAP_RPM_NAME}"
-    #- BES_RPM_NAME="bes-${BES_VERSION}.static.${TARGET_OS}.x86_64.rpm"
-    #- BES_RPM_URL="s3://opendap.travis.build/${BES_RPM_NAME}"
-    #- S3_BUILD_BUCKET="opendap.travis.build"
-    #- ADD_DEBUG_RPMS=""
+    - RELEASE_DATE=`date +%s`
+    - LIBDAP_VERSION=$(grep "libdap4-" ${BUILD_RECIPE} | awk '{print $1;}' - | sed "s/libdap4-//g")
+    - BES_VERSION=$(grep "bes-" ${BUILD_RECIPE} | awk '{print $1;}' - | sed "s/bes-//g")
+    - HYRAX_VERSION=$(grep "hyrax-" ${BUILD_RECIPE} | awk '{print $1;}' - | sed "s/hyrax-//g")
+    - OLFS_VERSION_NUM=$(grep "olfs-" ${BUILD_RECIPE} | awk '{print $1;}' - | sed "s/olfs-//g")
+    - OLFS_VERSION="$OLFS_VERSION_NUM-$TARGET_OS"
+    - OLFS_DISTRO="olfs-${OLFS_VERSION}-webapp.tgz"
+    - OLFS_DISTRO_URL="s3://opendap.travis.build/${OLFS_DISTRO}"
+    - NGAP_DISTRO="ngap-${OLFS_VERSION}-webapp.tgz"
+    - NGAP_DISTRO_URL="s3://opendap.travis.build/${NGAP_DISTRO}"
+    - ROBOTS_DISTRO="robots-olfs-${OLFS_VERSION}-webapp.tgz"
+    - ROBOTS_DISTRO_URL="s3://opendap.travis.build/${ROBOTS_DISTRO}"
+    - LIBDAP_RPM_NAME="libdap-${LIBDAP_VERSION}.${TARGET_OS}.x86_64.rpm"
+    - LIBDAP_RPM_URL="s3://opendap.travis.build/${LIBDAP_RPM_NAME}"
+    - BES_RPM_NAME="bes-${BES_VERSION}.static.${TARGET_OS}.x86_64.rpm"
+    - BES_RPM_URL="s3://opendap.travis.build/${BES_RPM_NAME}"
+    - S3_BUILD_BUCKET="opendap.travis.build"
+    - ADD_DEBUG_RPMS=""
 
 before_install:
   - python3 --version
@@ -111,7 +111,7 @@ jobs:
         - docker build --tag "opendap/hyrax:snapshot-el9-update" "testy"
         - docker image ls -a
 
-    - stage: disabled
+    - stage: BUILD_AND_TEST
       name: "Build and Test opendap/hyrax"
       script:
         - export DOCKER_NAME="hyrax"
