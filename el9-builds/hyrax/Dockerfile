@@ -14,6 +14,9 @@
 #
 # Set one or more individual labels
 FROM rockylinux:9
+
+RUN set -e && dnf update  -y
+
 ENV TARGET_OS="el9"
 ENV ARCH="x86_64"
 ENV java_version="java-21-openjdk"
