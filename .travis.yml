@@ -72,17 +72,18 @@ install:
   # - aws --region=us-east-1 s3 cp ${LIBDAP_C7_RPM_URL} ./builds/${LIBDAP_C7_RPM}
   # - echo "Retrieving BES C7 RPM ${BES_C7_RPM}"
   # - aws --region=us-east-1 s3 cp ${BES_C7_RPM_URL} ./builds/${BES_C7_RPM}
-  - echo "Retrieving libdap RH8 RPM ${LIBDAP_RPM_NAME}"
-  - aws --region=us-east-1 s3 cp ${LIBDAP_RPM_URL} ./${TARGET_OS}-builds/${LIBDAP_RPM_NAME}
-  - echo "Retrieving BES RH8 RPM ${BES_RPM_NAME}"
-  - aws --region=us-east-1 s3 cp ${BES_RPM_URL} ./${TARGET_OS}-builds/${BES_RPM_NAME}
-  - echo "Retrieving OLFS Distribution file ${OLFS_DISTRO}"
-  - aws --region=us-east-1 s3 cp ${OLFS_DISTRO_URL} ./${TARGET_OS}-builds/${OLFS_DISTRO}
-  - echo "Retrieving ROBOTS Distribution file ${ROBOTS_DISTRO}"
-  - aws --region=us-east-1 s3 cp ${ROBOTS_DISTRO_URL} ./${TARGET_OS}-builds/${ROBOTS_DISTRO}
-  - echo "Retrieving NGAP Distribution file ${NGAP_DISTRO}"
-  - aws --region=us-east-1 s3 cp ${NGAP_DISTRO_URL} ./${TARGET_OS}-builds/${NGAP_DISTRO}
-  - ls -l ./${TARGET_OS}-builds
+  #
+#  - echo "Retrieving libdap RH8 RPM ${LIBDAP_RPM_NAME}"
+#  - aws --region=us-east-1 s3 cp ${LIBDAP_RPM_URL} ./${TARGET_OS}-builds/${LIBDAP_RPM_NAME}
+#  - echo "Retrieving BES RH8 RPM ${BES_RPM_NAME}"
+#  - aws --region=us-east-1 s3 cp ${BES_RPM_URL} ./${TARGET_OS}-builds/${BES_RPM_NAME}
+#  - echo "Retrieving OLFS Distribution file ${OLFS_DISTRO}"
+#  - aws --region=us-east-1 s3 cp ${OLFS_DISTRO_URL} ./${TARGET_OS}-builds/${OLFS_DISTRO}
+#  - echo "Retrieving ROBOTS Distribution file ${ROBOTS_DISTRO}"
+#  - aws --region=us-east-1 s3 cp ${ROBOTS_DISTRO_URL} ./${TARGET_OS}-builds/${ROBOTS_DISTRO}
+#  - echo "Retrieving NGAP Distribution file ${NGAP_DISTRO}"
+#  - aws --region=us-east-1 s3 cp ${NGAP_DISTRO_URL} ./${TARGET_OS}-builds/${NGAP_DISTRO}
+#  - ls -l ./${TARGET_OS}-builds
 
 stages:
   - name: OLFS
