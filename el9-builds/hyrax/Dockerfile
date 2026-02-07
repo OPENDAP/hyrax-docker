@@ -18,6 +18,7 @@ ENV TARGET_OS="el9"
 ENV ARCH="x86_64"
 ENV java_version="java-21-openjdk"
 ENV python_version="3.12"
+RUN echo "Python Version: $(python3 --version) (config says we want: $python_version)"
 ENV core_dnf_packages="make autoconf automake procps git unzip "
 #ENV extra_dnf_packages="which diffutils emacs vim jq  procps git bc valgrind gdb awscli"
 ENV extra_dnf_packages=""
@@ -121,18 +122,17 @@ RUN if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else ec
 # Travis build (or at a later time). They need to be part of the container,
 # however, to be run, so install them as part of this Dockerfile.
 RUN set -e && dnf update  -y
+
 RUN set -e \
     && dnf install -y "python$python_version" \
     && echo "Python Version: $(python3 --version)" \
     && dnf clean all
-
 RUN set -e \
     && echo "$HR" \
     && echo "# Installing cURL" \
     && yum install -y curl curl-devel --allowerasing \
     && echo "# cURL version: $(curl --version)" \
     && dnf clean all
-
 RUN set -e \
     && echo "$HR" \
     && echo "# It's Java Time Witches!" \
@@ -146,7 +146,6 @@ RUN set -e \
     && update-alternatives --list \
     && dnf install -y tzdata-java \
     && dnf clean all
-
 RUN set -e \
     && dnf install -y $core_dnf_packages $extra_dnf_packages \
     && dnf clean all

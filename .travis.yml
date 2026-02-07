@@ -104,12 +104,6 @@ jobs:
     #
     # RHEL Builds
     #
-    - stage: BUILD_AND_TEST
-      name: "Update rockylinux:9"
-      script:
-        - cd "${TARGET_OS}-builds"
-        - docker build --tag "opendap/hyrax:snapshot-el9-update" "testy"
-        - docker image ls -a
 
     - stage: BUILD_AND_TEST
       name: "Build and Test opendap/hyrax"
