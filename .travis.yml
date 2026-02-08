@@ -271,7 +271,7 @@ jobs:
         - export DEPLOY_ME="false"
 
 after_script:
-  - ./travis/upload-test-results.sh "$DOCKER_NAME" "/tmp/$TESTS_LOG_BASE.tgz"
+  - ./travis/upload-test-results.sh "$DOCKER_NAME" "$TESTS_LOG_BASE.tgz"
 
 before_deploy:
   - export DOCKER_LOGIN=`aws ecr get-login --region us-east-1 | sed "s/-e none //g"`;
