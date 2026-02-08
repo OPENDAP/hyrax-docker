@@ -149,11 +149,12 @@ waitForHyrax
 loggy "$HR1"
 loggy "$prolog Testing image: ${test_image_name}"
 set -x
+
+# If the regression tests fail we want the logs, so don't exit on fail right here
 set +e
 docker exec -it $d_id /bin/bash -c "cd hyrax_regression_tests; ./testsuite --hyraxurl=\"${end_point}\" ${netrc_file} ${tests};"
 test_status=$?
 set -e
-
 # http_url https_url stdout testsuite.log
 log_file="$tests_log_base.tgz"
 loggy "$prolog log_file: $log_file"
@@ -174,11 +175,11 @@ do
     loggy "$prolog AWS S3: Copying '$source_name' to '$target_name'"
     docker cp "$source_name" "$target_name"
 done
-loggy "$prolog Tarballgzipping': $rt_dir)"
+loggy "$prolog TarballBeGzipping': $rt_dir)"
 tar -cvzf "$log_file" "$rt_dir"
 loggy "$prolog log_file: $(ls -l "$log_file")"
 
-#./show_fails
+cd "$ret_dir"
 
 loggy "$HR1"
 loggy "$prolog Checking beslog2json.awk"
@@ -211,4 +212,4 @@ loggy "Checking bes.json parsability jq"
 jq '.' ./bes.json >/dev/null
 loggy "$prolog JQ STATUS: $?"
 
-return $test_status
+exit $test_status
