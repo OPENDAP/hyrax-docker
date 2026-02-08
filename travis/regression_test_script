@@ -118,23 +118,41 @@ function waitForHyrax() {
     return 0
 }
 
-# Dump all other containers
-containers=$(docker ps -aq)
-if test -n "${containers}"; then
-    loggy  "$prolog Removing containers: ${containers}"
-    loggy  "$(docker rm -f ${containers})"
-fi
+function clean_and_start(){
+    local prolog="clean_and_start_docker() -"
 
-# Start Hyrax
+    local d_id="$1"
+    loggy "$prolog       d_id: $d_id"
+
+    local test_image="$2"
+    loggy "$prolog test_image: $test_image"
+
+    # Dump all other containers
+    containers=$(docker ps -aq)
+    if test -n "${containers}"; then
+        loggy  "$prolog Removing containers: ${containers}"
+        loggy  "$(docker rm -f ${containers})"
+    fi
+
+    loggy "$prolog Starting: $d_id"
+    container_id=$(docker run -d -h "$d_id" -p 8080:8080 --name="$d_id" "$test_image")
+    loggy "$prolog Started container: $container_id"
+}
+
+
+
 d_id="hyrax"
-container_id=$(docker run -d -h $d_id -p 8080:8080 --name=$d_id ${test_image_name})
 
+clean_and_start "$d_id" "$test_image_name"
 waitForHyrax
 
 loggy "$HR1"
 loggy "$prolog Testing image: ${test_image_name}"
 set -x
+set +e
 docker exec -it $d_id /bin/bash -c "cd hyrax_regression_tests; ./testsuite --hyraxurl=\"${end_point}\" ${netrc_file} ${tests};"
+test_status=$?
+set -e
 
 # http_url https_url stdout testsuite.log
 log_file="$tests_log_base.tgz"
@@ -189,3 +207,5 @@ loggy "$HR1"
 loggy "Checking bes.json parsability jq"
 jq '.' ./bes.json >/dev/null
 loggy "$prolog JQ STATUS: $?"
+
+return $test_status
