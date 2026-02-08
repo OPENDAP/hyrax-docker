@@ -17,7 +17,8 @@ FROM rockylinux:9
 ENV TARGET_OS="el9"
 ENV ARCH="x86_64"
 ENV java_version="java-21-openjdk"
-ENV python_version="3.12"
+# python 3.9 is the default on rocky 9
+ENV python_version="3.9"
 RUN echo "Python Version: $(python3 --version) (config says we want: $python_version)"
 ENV core_dnf_packages="make autoconf automake procps git unzip "
 #ENV extra_dnf_packages="which diffutils emacs vim jq  procps git bc valgrind gdb awscli"
@@ -123,7 +124,7 @@ RUN if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else ec
 # however, to be run, so install them as part of this Dockerfile.
 RUN set -e && dnf update  -y
 
-RUN set -e \
+#RUN set -e \
     && dnf install -y "python$python_version" \
     && echo "Python Version: $(python3 --version)" \
     && dnf clean all
