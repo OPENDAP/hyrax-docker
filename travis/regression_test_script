@@ -1,6 +1,20 @@
 #!/bin/bash
 set -e
-echo "Starting up ..."
+
+#
+# Travis invocation: ./travis/regression_test_script -i "$SNAPSHOT_IMAGE_TAG"
+#
+HR0="#######################################################################"
+HR1="- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
+HR2="--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---"
+#############################################################################
+# loggy()
+function loggy(){
+    echo  "$@" | awk '{ print "# "$0;}'  >&2
+}
+prolog="$0"
+loggy "$HR0"
+loggy "$prolog BEGIN"
 
 default_time_out=30
 default_image_name="opendap/hyrax:snapshot"
@@ -11,126 +25,163 @@ test_image_name="${default_image_name}"
 end_point="${default_endpoint}"
 netrc_file=""
 tests=""
+tests_log_base=
 
-while getopts "ht:i:e:n:" OPTION; do
+while getopts "ht:i:e:n:l:" OPTION; do
     case $OPTION in
-    h)
-        echo "-h help -t time_out -i image_name -e end_point_url -n netrc_file test1 test2 ..."
-	exit 0
-        ;;
-    t)
-        time_out=$OPTARG
-        ;;
-    i)
-        test_image_name=$OPTARG
-        ;;
-    e)
-        end_point=$OPTARG
-        ;;
-    n)
-        netrc_file="--netrc ${OPTARG}"
-        ;;
-    *)
-        echo "Incorrect options provided"
-        exit 1
-        ;;
+        h)
+            echo "-h help -t time_out -i image_name -e end_point_url -n netrc_file test1 test2 ..."
+            exit 0
+            ;;
+        t)
+            time_out=$OPTARG
+            ;;
+        i)
+            test_image_name=$OPTARG
+            ;;
+        e)
+            end_point=$OPTARG
+            ;;
+        l)
+            tests_log_base=$OPTARG
+            ;;
+        n)
+            netrc_file="--netrc ${OPTARG}"
+            ;;
+        *)
+            loggy "Incorrect options provided"
+            exit 1
+            ;;
     esac
 done
 
 shift $(($OPTIND - 1))
 tests="$@"
 
-echo "Using following configurations:" >&2
-echo "Time out duration: ${time_out}" >&2
-echo "Image name: ${test_image_name}" >&2
-echo "End point: ${end_point}" >&2
-echo "Tests: ${tests}" >&2
+loggy "$prolog Using the following configuration:"
+loggy "$prolog        time_out: ${time_out}"
+loggy "$prolog test_image_name: ${test_image_name}"
+loggy "$prolog       end_point: ${end_point}"
+loggy "$prolog           tests: ${tests}"
+loggy "$prolog  tests_log_base: ${tests_log_base}"
 
+#############################################################################
+# waitForHyrax()
+#
 function waitForHyrax() {
+    local prolog="waitForHyrax() -"
     # Don't fail on errors, they're expected...
     set +e
     local start
-    let start=`date "+%s"`
-    local done_flag="";
+    let start=$(date "+%s")
+    local done_flag=""
     local curl_response
-    while test -z "${done_flag}"
-    do
-        echo -n "."
-        curl -s -c cookies -b cookies -n --netrc-file ${netrc_file} -L ${end_point} > /dev/null
+    while test -z "${done_flag}"; do
+        echo -n "." >&2
+        curl -s -c cookies -b cookies -n --netrc-file ${netrc_file} -L ${end_point} >/dev/null
         status=$?
         # echo "cURL status: ${status}";
-        if [ ${status} -eq 0 ]
-        then
-            echo ""
-            echo "Endpoint may have been retrieved. Checking again..."
+        if [ ${status} -eq 0 ]; then
+            loggy "$prolog "
+            loggy "$prolog Endpoint may have been retrieved. Checking again..."
             # What happens next: We get the response headers "-I" and look
             # for the string "HTTP/" because we know there will be redirects.
             # We use tail to look at the last HTTP/ header and if that status is
             # 200 we're off to the races.
-            curl_response=$(set -x; curl -s -c cookies -b cookies -n ${netrc_file} -I -L ${end_point}; set +x)
-            echo "curl_response: $curl_response"
-            echo "$curl_response" | grep "HTTP/" | tail -1 | grep 200  # > /dev/null;
-            found=$?;
-            set +x; # Stop echoing the stuff...
+            curl_response=$(
+                set -x
+                curl -s -c cookies -b cookies -n ${netrc_file} -I -L ${end_point}
+                set +x
+            )
+            loggy "$prolog curl_response: $curl_response"
+            loggy "$curl_response" | grep "HTTP/" | tail -1 | grep 200 # > /dev/null;
+            found=$?
+            set +x # Stop echoing the stuff...
             # echo "cURL found: ${found}";
             if [ ${found} -eq 0 ]; then
-                echo "The Test Endpoint URL: ${end_point} returned a status of 200"
-                done_flag="yup";
+                loggy "$prolog The Test Endpoint URL: ${end_point} returned a status of 200"
+                done_flag="yup"
             fi
         fi
         let now=$(date "+%s")
-        let elapsed=$now-$start;
+        let elapsed=$now-$start
         # echo "elapsed: $elapsed"
-        if [ ${elapsed} -gt ${time_out} ]
-        then
-            echo ""
-            echo "ERROR: Hyrax FAILED To Start! Waited for ${elapsed} seconds"
-            exit 1;
-        fi   
+        if [ ${elapsed} -gt ${time_out} ]; then
+            loggy "$prolog "
+            loggy "$prolog ERROR: Hyrax FAILED To Start! Waited for ${elapsed} seconds"
+            exit 1
+        fi
     done
     # Now we can fail on errors again.
     set -e
-    echo "Hyrax has arrived!"
+    loggy "$prolog Hyrax has arrived!"
     return 0
 }
 
-
 # Dump all other containers
-containers=$(docker ps -aq);
-if test -n "${containers}"
-then
-    echo "Removing containers: ${containers}";
-    docker rm -f ${containers};
+containers=$(docker ps -aq)
+if test -n "${containers}"; then
+    loggy  "$prolog Removing containers: ${containers}"
+    loggy  "$(docker rm -f ${containers})"
 fi
 
-#start Hyrax
-container_id=$(docker run -d -h hyrax -p 8080:8080 --name=hyrax ${test_image_name})
+# Start Hyrax
+d_id="hyrax"
+container_id=$(docker run -d -h $d_id -p 8080:8080 --name=$d_id ${test_image_name})
 
 waitForHyrax
 
-echo "############################################################################"
-echo "# Testing the following image: ${test_image_name}"
+loggy "$HR1"
+loggy "$prolog Testing image: ${test_image_name}"
 set -x
-docker exec -it hyrax /bin/bash -c "cd hyrax_regression_tests; ./testsuite --hyraxurl=\"${end_point}\" ${netrc_file} ${tests}; "
-#./show_fails"
-echo "############################################################################"
-echo "# Checking beslog2json.awk"
-echo "# Python Version: '$(python3 --version)'"
-echo "# Acquiring bes.log from docker image."
-docker cp hyrax:/var/log/bes/bes.log .
-echo "# Acquiring beslog2json.py from docker image."
-docker cp hyrax:/usr/bin/beslog2json.py $(pwd)/beslog2json.py
-ls -l ./beslog2json.py
-echo "############################################################################"
-echo "# head ./bes.log"
-head ./bes.log
-cat ./bes.log | python3 ./beslog2json.py --all > ./bes.json
-echo "############################################################################"
-echo "# head -20 ./bes.json"
-head -n 10 ./bes.json
-echo "# tail -20 ./bes.json"
-tail -n 20 ./bes.json
-echo "############################################################################"
-jq '.' ./bes.json > /dev/null
-echo "JQ STATUS: $?"
+docker exec -it $d_id /bin/bash -c "cd hyrax_regression_tests; ./testsuite --hyraxurl=\"${end_point}\" ${netrc_file} ${tests};"
 
+# http_url https_url stdout testsuite.log
+log_file="$tests_log_base.tgz"
+loggy "$prolog log_file: $log_file"
+
+rt_dir="/tmp/$tests_log_base"
+loggy "$prolog rt_dir: $rt_dir"
+
+loggy "$prolog Creating host directory './$rt_dir' for docker run reggression test results."
+mkdir -p "$rt_dir"
+
+for name in testsuite.log testsuite.dir
+do
+    source_name="$d_id:/hyrax_regression_tests/$name"
+    target_name="$rt_dir/$name"
+    loggy "$prolog AWS S3: Copying '$source_name' to '$target_name'"
+    docker cp "$source_name" "$target_name"
+done
+loggy "$prolog Tarballgzipping': $rt_dir)"
+tar -cvzf "$log_file" "$rt_dir"
+loggy "$prolog log_file: $(ls -l "$log_file")"
+
+#./show_fails
+
+loggy "$HR1"
+loggy "$prolog Checking beslog2json.awk"
+loggy "$prolog Python Version: '$(python3 --version)'"
+loggy "$prolog Acquiring bes.log from docker image."
+docker cp $d_id:/var/log/bes/bes.log .
+
+loggy "$prolog Acquiring beslog2json.py from docker image."
+docker cp $d_id:/usr/bin/beslog2json.py $(pwd)/beslog2json.py
+ls -l ./beslog2json.py
+
+loggy "$HR2"
+loggy "$prolog head ./bes.log"
+head ./bes.log
+
+loggy "Running beslog2json.py:  bes.log -> bes.json "
+cat ./bes.log | python3 ./beslog2json.py --all >./bes.json
+
+loggy "$HR2"
+loggy "$prolog head -20 ./bes.json"
+head -n 10 ./bes.json
+loggy "$prolog tail -20 ./bes.json"
+tail -n 20 ./bes.json
+loggy "$HR1"
+loggy "Checking bes.json parsability jq"
+jq '.' ./bes.json >/dev/null
+loggy "$prolog JQ STATUS: $?"
