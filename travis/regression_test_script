@@ -94,7 +94,7 @@ function waitForHyrax() {
                 set +x
             )
             loggy "$prolog curl_response: $curl_response"
-            loggy "$curl_response" | grep "HTTP/" | tail -1 | grep 200 # > /dev/null;
+            echo "$curl_response" | grep "HTTP/" | tail -1 | grep 200 # > /dev/null;
             found=$?
             set +x # Stop echoing the stuff...
             # echo "cURL found: ${found}";
