@@ -20,10 +20,14 @@ ENV java_version="java-21-openjdk"
 # rocky9 comes with python 3.9 by default.
 ENV python_version="3.9"
 RUN echo "Python Version: $(python3 --version) (config says we want: $python_version)"
-# Stuff we need - mostly for hyrax_regression_tests
-ENV core_dnf_packages="make autoconf automake procps git unzip diffutils"
-#ENV extra_dnf_packages="which diffutils emacs vim jq  procps git bc valgrind gdb awscli"
-ENV extra_dnf_packages=""
+ENV core_dnf_packages="procps git unzip"
+
+# Stuff we need for hyrax_regression_tests
+ENV regression_test_dnf_packages="make autoconf automake diffutils"
+
+ENV develoer_dnf_packages=""
+#ENV develoer_dnf_packages="which diffutils emacs vim jq  procps git bc valgrind gdb awscli"
+
 
 #
 ENV HR="######################################################"
@@ -149,7 +153,7 @@ RUN set -e \
     && dnf install -y tzdata-java \
     && dnf clean all
 RUN set -e \
-    && dnf install -y $core_dnf_packages $extra_dnf_packages \
+    && dnf install -y $core_dnf_packages $regression_test_dnf_packages $develoer_dnf_packages \
     && dnf clean all
 #
 # RUN set -e && which diff
