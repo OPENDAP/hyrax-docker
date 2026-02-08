@@ -170,17 +170,21 @@ docker cp $d_id:/usr/bin/beslog2json.py $(pwd)/beslog2json.py
 ls -l ./beslog2json.py
 
 loggy "$HR2"
-loggy "$prolog head ./bes.log"
-head ./bes.log
+loggy "$prolog head -n 20 ./bes.log"
+head -n 20 ./bes.log
 
+loggy "$HR2"
 loggy "Running beslog2json.py:  bes.log -> bes.json "
 cat ./bes.log | python3 ./beslog2json.py --all >./bes.json
 
 loggy "$HR2"
-loggy "$prolog head -20 ./bes.json"
+loggy "$prolog head -n 10 ./bes.json"
 head -n 10 ./bes.json
-loggy "$prolog tail -20 ./bes.json"
-tail -n 20 ./bes.json
+
+loggy "$HR2"
+loggy "$prolog tail -n 10 ./bes.json"
+tail -n 10 ./bes.json
+
 loggy "$HR1"
 loggy "Checking bes.json parsability jq"
 jq '.' ./bes.json >/dev/null
