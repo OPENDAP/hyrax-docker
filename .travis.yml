@@ -143,7 +143,7 @@ jobs:
         - docker image ls -a
         - cd ..
         - echo "Running Test Script"
-        - ./travis/regression_test_script -i "$SNAPSHOT_IMAGE_TAG" "$TESTS_LOG_BASE"
+        - ./travis/regression_test_script -i "$SNAPSHOT_IMAGE_TAG" -l "$TESTS_LOG_BASE"
 
     - stage: BUILD
       name: "Build opendap/besd (EL8)"
