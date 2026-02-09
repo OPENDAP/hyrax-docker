@@ -128,9 +128,9 @@ RUN set -e && systemctl enable tomcat
 #RUN firewall-cmd --add-port 8080/tcp --permanent
 #RUN firewall-cmd --reload
 
-ENV CATALINA_HOME /usr/share/tomcat
-ENV PATH $CATALINA_HOME/bin:$PATH
-RUN set -e && echo "CATALINA_HOME: ${CATALINA_HOME}" >&2
+ENV CATALINA_HOME="/usr/share/tomcat"
+ENV PATH="$CATALINA_HOME/bin:$PATH"
+RUN set -e && echo "# CATALINA_HOME: $CATALINA_HOME" >&2
 
 # Install our modified server.xml so that the server compresses responses.
 COPY tomcat11-server.xml /
@@ -139,42 +139,42 @@ RUN set -e \
     && chown -R tomcat:tomcat ${CATALINA_HOME}/conf/server.xml
 
 RUN set -e \
-    && echo "Cleaning up Tomcat distribution files..." >&2 \
+    && echo "# Cleaning up Tomcat distribution files..." >&2 \
     && rm -fv "/${TOMCAT_DISTRO}.tar.gz"
 
 
 ################################################################
 # Install the OLFS web application
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
-ENV ROOT=/dev/shm
+ENV ROOT="/dev/shm"
 
-RUN echo "Installing the latest olfs distribution (${OLFS_VERSION})." >&2
+RUN echo "# Installing the latest olfs distribution ($OLFS_VERSION)." >&2
 RUN set -e \
-    && echo "working_dir: "`pwd`  >&2 \
+    && echo "# Working_dir: "`pwd`  >&2 \
     && ls -l . \
-    && tar -C ${ROOT} -xzvf ./${OLFS_DISTRO}.tgz \
-    && ls -l ${ROOT} \
-    && echo "Unpacking warfile..."  >&2 \
-    && mkdir -p $(readlink -f ${CATALINA_HOME})/webapps/opendap/ \
-    && unzip -o ${ROOT}/${OLFS_DISTRO}/opendap.war -d ${CATALINA_HOME}/webapps/opendap/ \
-    && echo "Cleaning up."  >&2 \
-    && rm -rf ${ROOT}/${OLFS_DISTRO} ./${OLFS_DISTRO}.tgz
+    && tar -C "$ROOT" -xzvf "./$OLFS_DISTRO.tgz" \
+    && ls -l "$ROOT" \
+    && echo "# Unpacking warfile..."  >&2 \
+    && mkdir -p "$(readlink -f "$CATALINA_HOME")/webapps/opendap/"\
+    && unzip -o "$ROOT/$OLFS_DISTRO/opendap.war" -d "$CATALINA_HOME/webapps/opendap/" \
+    && echo "# Cleaning up."  >&2 \
+    && rm -rf "$ROOT/$OLFS_DISTRO" "./$OLFS_DISTRO.tgz"
 
 RUN set -e \
-    && echo "Installing the latest dynamic robots.txt distribution (${OLFS_VERSION})."  >&2 \
+    && echo "# Installing the latest dynamic robots.txt distribution ($OLFS_VERSION)."  >&2 \
     && ls -l ./robots* \
-    && tar -C ${ROOT} -xzf ./${ROBOTS_DISTRO}.tgz \
-    && ls -l ${ROOT}/${ROBOTS_DISTRO} \
-    && echo "Unpacking dynamic robots.txt warfile..."  >&2 \
-    && unzip -o ${ROOT}/${ROBOTS_DISTRO}/ROOT.war -d ${CATALINA_HOME}/webapps/ROOT/ \
-    && echo "Cleaning up dynamic robots.txt snapshot..."  >&2 \
-    && rm -rf ${ROOT}/${ROBOTS_DISTRO} ${ROBOTS_DISTRO}.tgz
+    && tar -C "$ROOT" -xzf "./$ROBOTS_DISTRO.tgz" \
+    && ls -l "$ROOT/$ROBOTS_DISTRO" \
+    && echo "# Unpacking dynamic robots.txt war file..."  >&2 \
+    && unzip -o "$ROOT/$ROBOTS_DISTRO/ROOT.war" -d "$CATALINA_HOME/webapps/ROOT/" \
+    && echo "# Cleaning up dynamic robots.txt snapshot..."  >&2 \
+    && rm -rvf "$ROOT/$ROBOTS_DISTRO" "$ROBOTS_DISTRO.tgz"
 
 # Fix ownership and access permissions
 RUN set -e \
-    && mkdir -p ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs \
-    && chown -R tomcat:tomcat ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs \
-    && chmod 700 ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs
+    && mkdir -p "$CATALINA_HOME/webapps/opendap/WEB-INF/conf/logs" \
+    && chown -R tomcat:tomcat "$CATALINA_HOME/webapps/opendap/WEB-INF/conf/logs" \
+    && chmod 700 "$CATALINA_HOME/webapps/opendap/WEB-INF/conf/logs"
 
 ################################################################
 # Clean up the distribution binaries.
@@ -187,8 +187,8 @@ RUN rm -vf  /olfs*.tgz /robots*.tgz /apache*
 
 # set host for bes that olfs will contact - this is expected to be over docker's internal network
 ARG BES_HOST
-ENV BES_HOST ${BES_HOST:-besd}
-RUN sed -i "s/localhost/${BES_HOST}/" ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/olfs.xml
+ENV BES_HOST="${BES_HOST:-besd}"
+RUN sed -i "s/localhost/$BES_HOST/" "$CATALINA_HOME/webapps/opendap/WEB-INF/conf/olfs.xml"
 
 #
 # Setting NCWMS_HOST to the protocol, host, and port 
