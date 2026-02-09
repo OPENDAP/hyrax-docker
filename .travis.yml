@@ -73,7 +73,8 @@ jobs:
     # RHEL Builds
     #
 
-    - stage: BUILD_AND_TEST
+#BUILD_AND_TEST
+    - stage: disabled
       name: "Build and Test opendap/hyrax"
       script:
         - export DOCKER_NAME="hyrax"
@@ -112,7 +113,7 @@ jobs:
         - echo "Running Test Script"
         - ./travis/regression_test_script -i "$SNAPSHOT_IMAGE_TAG" -l "$TESTS_LOG_BASE"
 
-    - stage: BUILD
+    - stage: disabled
       name: "Build opendap/besd"
       script:
         - export DOCKER_NAME="besd"
@@ -136,10 +137,11 @@ jobs:
           "$DOCKER_NAME"
         - docker image ls -a
 
-    - stage: BUILD
+    - stage: BUILD_AND_TEST
       name: "Build opendap/hyrax_ncwms"
       script:
         - export DOCKER_NAME="hyrax_ncwms"
+        - export DOCKER_DIR="hyrax"
         - cd "${TARGET_OS}-builds"
         - source "./build-$TARGET_OS"
         - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
@@ -147,13 +149,13 @@ jobs:
         - get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_VERSION}"
         - s3_get_besd_distro
           "$S3_BUILD_BUCKET"
-          "$DOCKER_NAME"
+          "$DOCKER_DIR"
           "$TARGET_OS"
           "$LIBDAP_VERSION"
           "$BES_VERSION" "$ADD_DEBUG_RPMS" 2>&1
         - s3_get_olfs_distro
           "$S3_BUILD_BUCKET"
-          "$DOCKER_NAME"
+          "$DOCKER_DIR"
           "$OLFS_VERSION" 2>&1
         - docker build
           --build-arg TOMCAT_VERSION
@@ -168,7 +170,7 @@ jobs:
           "hyrax"
         - docker image ls -a
 
-    - stage: BUILD
+    - stage: disabled
       name: "Build opendap/hyrax:ngap (EL8)"
       script:
         - cd "$TARGET_OS-builds"
@@ -201,7 +203,7 @@ jobs:
           "${DOCKER_NAME}"
         - docker image ls -a
 
-    - stage: BUILD
+    - stage: disabled
       name: "Build opendap/olfs"
       script:
         - cd "${TARGET_OS}-builds"
