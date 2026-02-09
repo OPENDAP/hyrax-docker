@@ -158,7 +158,7 @@ jobs:
           "$S3_BUILD_BUCKET"
           "$DOCKER_DIR"
           "$OLFS_VERSION" 2>&1
-        - ls -l "$DOCKER_DIR/*.tgz"
+        - ls -l "$DOCKER_DIR/*.tar.gz"
         - docker build
           --build-arg TOMCAT_VERSION
           --build-arg RELEASE_DATE
