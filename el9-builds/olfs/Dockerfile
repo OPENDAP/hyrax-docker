@@ -3,7 +3,7 @@
 ###
 
 #
-FROM rockylinux:8
+FROM rockylinux:9
 LABEL org.opencontainers.image.authors="support@opendap.org"
 USER root
 ENV HR="######################################################"
