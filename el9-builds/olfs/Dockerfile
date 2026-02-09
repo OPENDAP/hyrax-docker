@@ -8,9 +8,21 @@ LABEL org.opencontainers.image.authors="support@opendap.org"
 USER root
 
 ENV TARGET_OS="el9"
+ENV ARCH="x86_64"
+ENV java_version="java-21-openjdk"
+# rocky9 comes with python 3.9 by default.
+ENV python_version="3.9"
+RUN echo "Python Version: $(python3 --version) (config says we want: $python_version)"
+ENV core_dnf_packages="procp unzip"
+# Stuff we need for hyrax_regression_tests
+# ENV regression_test_dnf_packages="git make autoconf automake diffutils"
+
+ENV developer_dnf_packages="curl unzip which emacs vim bc awscli"
+#ENV developer_dnf_packages="which diffutils emacs vim jq  procps git bc valgrind gdb awscli"
 
 
-RUN export NOW=`date +%s`
+
+RUN export NOW="$(date +%s)"
 ARG RELEASE_DATE
 ENV RELEASE_DATE ${RELEASE_DATE:-"${NOW}"}
 RUN echo "RELEASE_DATE: ${RELEASE_DATE}"
@@ -69,19 +81,30 @@ RUN set -e && \
 #
 # Installing utils for debugging convenience.
 #
-RUN set -e  && dnf update  -y
-RUN set -e && dnf install -y python3.11 \
-    && python3 --version
-
-RUN set -e && dnf install -y curl unzip which emacs vim \
-    && dnf install -y bc \
-    && dnf install -y java-11-openjdk-devel \
+RUN set -e \
+    && echo "$HR" \
+    && echo "# Installing cURL" \
+    && yum install -y curl curl-devel --allowerasing \
+    && echo "# cURL version: $(curl --version)" \
+    && dnf clean all
+RUN set -e \
+    && echo "$HR" \
+    && echo "# It's Java Time Witches!" \
+    && echo "# Installing $java_version" \
+    && yum install -y "$java_version" "$java_version-devel"  \
+    && echo "$HR2" \
+    && echo "# Using $java_version" \
+    && update-alternatives --set java "$java_version.$ARCH" \
+    && echo "# Enabled $java_version" \
+    && echo "# java version: $( java -version 2>&1 )" \
+    && update-alternatives --list \
     && dnf install -y tzdata-java \
     && dnf clean all
-#
-RUN set -e && curl -sS https://bootstrap.pypa.io/get-pip.py | python3 \
-    && python3 -m pip install --upgrade pip \
-    && python3 -m pip install awscli
+RUN set -e \
+    && dnf install -y $core_dnf_packages $regression_test_dnf_packages $developer_dnf_packages \
+    && dnf clean all
+
+
 
 
 ################################################################
