@@ -181,19 +181,19 @@ jobs:
         - source "./build-$TARGET_OS"
         - export SNAPSHOT_IMAGE_TAG="opendap/hyrax:$DOCKER_NAME-snapshot-$TARGET_OS$TEST_DEPLOYMENT"
         - export BUILD_VERSION_TAG="opendap/hyrax:$DOCKER_NAME-$HYRAX_VERSION-$TARGET_OS$TEST_DEPLOYMENT"
-        - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
+        - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "$TOMCAT_MAJOR_VERSION")
         - show_version
-        - get_tomcat_distro "${DOCKER_DIR}" "${TOMCAT_VERSION}"
+        - get_tomcat_distro "$DOCKER_DIR" "$TOMCAT_VERSION"
         - s3_get_besd_distro
-          "${S3_BUILD_BUCKET}"
-          "${DOCKER_DIR}"
-          "${TARGET_OS}"
-          "${LIBDAP_VERSION}"
-          "${BES_VERSION}" "${ADD_DEBUG_RPMS}" 2>&1
+          "$S3_BUILD_BUCKET"
+          "$DOCKER_DIR"
+          "$TARGET_OS"
+          "$LIBDAP_VERSION"
+          "$BES_VERSION" "$ADD_DEBUG_RPMS" 2>&1
         - get_ngap_olfs_distro
-          "${S3_BUILD_BUCKET}"
-          "${DOCKER_DIR}"
-          "${OLFS_VERSION}" 2>&1
+          "$S3_BUILD_BUCKET"
+          "$DOCKER_DIR"
+          "$OLFS_VERSION" 2>&1
         - docker build
           --build-arg TOMCAT_VERSION
           --build-arg RELEASE_DATE
@@ -201,9 +201,9 @@ jobs:
           --build-arg LIBDAP_VERSION
           --build-arg BES_VERSION
           --build-arg OLFS_VERSION
-          --tag "${SNAPSHOT_IMAGE_TAG}"
-          --tag "${BUILD_VERSION_TAG}"
-          "${DOCKER_DIR}"
+          --tag "$SNAPSHOT_IMAGE_TAG"
+          --tag "$BUILD_VERSION_TAG"
+          "$DOCKER_DIR"
         - docker image ls -a
 
     - stage: disabled
