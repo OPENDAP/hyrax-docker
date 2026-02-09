@@ -24,7 +24,7 @@ ENV developer_dnf_packages="curl unzip which emacs vim bc awscli"
 
 
 ARG RELEASE_DATE
-ENV RELEASE_DATE=${RELEASE_DATE:-$(date +%s)}
+ENV RELEASE_DATE=${RELEASE_DATE:-"$(date +%s)"}
 RUN echo "RELEASE_DATE: ${RELEASE_DATE}"
 
 ARG TOMCAT_VERSION
