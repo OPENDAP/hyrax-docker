@@ -109,27 +109,27 @@ jobs:
       name: "Build and Test opendap/hyrax"
       script:
         - export DOCKER_NAME="hyrax"
-        - echo "BUILDING FOR ${TARGET_OS}"
-        - echo "USING TOMCAT MAJOR VERSION '${TOMCAT_MAJOR_VERSION}'"
-        - cd "${TARGET_OS}-builds"
+        - echo "BUILDING FOR $TARGET_OS"
+        - echo "USING TOMCAT MAJOR VERSION '$TOMCAT_MAJOR_VERSION'"
+        - cd "$TARGET_OS-builds"
         - source "./build-$TARGET_OS"
         - show_version
-        - export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}:snapshot-$TARGET_OS$TEST_DEPLOYMENT"
-        - export BUILD_VERSION_TAG="opendap/${DOCKER_NAME}:${HYRAX_VERSION}-$TARGET_OS$TEST_DEPLOYMENT"
+        #- export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}:snapshot-$TARGET_OS$TEST_DEPLOYMENT"
+        #- export BUILD_VERSION_TAG="opendap/${DOCKER_NAME}:${HYRAX_VERSION}-$TARGET_OS$TEST_DEPLOYMENT"
         - export TESTS_LOG_BASE="$DOCKER_NAME-regression-tests-$TRAVIS_JOB_NUMBER"
-        - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
+        - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "$TOMCAT_MAJOR_VERSION")
         - show_version
-        - get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_VERSION}"
+        - get_tomcat_distro "$DOCKER_NAME" "$TOMCAT_VERSION"
         - s3_get_besd_distro
-          "${S3_BUILD_BUCKET}"
-          "${DOCKER_NAME}"
-          "${TARGET_OS}"
-          "${LIBDAP_VERSION}"
-          "${BES_VERSION}" $ADD_DEBUG 2>&1
+          "$S3_BUILD_BUCKET"
+          "$DOCKER_NAME"
+          "$TARGET_OS"
+          "$LIBDAP_VERSION"
+          "$BES_VERSION" $ADD_DEBUG 2>&1
         - s3_get_olfs_distro
-          "${S3_BUILD_BUCKET}"
-          "${DOCKER_NAME}"
-          "${OLFS_VERSION}" 2>&1
+          "$S3_BUILD_BUCKET"
+          "$DOCKER_NAME"
+          "$OLFS_VERSION" 2>&1
         - docker build
           --build-arg TOMCAT_VERSION
           --build-arg RELEASE_DATE
@@ -137,9 +137,9 @@ jobs:
           --build-arg LIBDAP_VERSION
           --build-arg BES_VERSION
           --build-arg OLFS_VERSION
-          --tag "${SNAPSHOT_IMAGE_TAG}"
-          --tag "${BUILD_VERSION_TAG}"
-          "${DOCKER_NAME}"
+          --tag "$SNAPSHOT_IMAGE_TAG"
+          --tag "$BUILD_VERSION_TAG"
+          "$DOCKER_NAME"
         - docker image ls -a
         - cd ..
         - echo "Running Test Script"
@@ -148,26 +148,26 @@ jobs:
     - stage: BUILD
       name: "Build opendap/besd"
       script:
-        - cd "${TARGET_OS}-builds"
+        - cd "$TARGET_OS-builds"
         - export DOCKER_NAME="besd"
         - source "./build-$TARGET_OS"
-        - export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}:snapshot-$TARGET_OS$TEST_DEPLOYMENT"
-        - export BUILD_VERSION_TAG="opendap/${DOCKER_NAME}:${BES_VERSION}-$TARGET_OS$TEST_DEPLOYMENT"
+        #- export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}:snapshot-$TARGET_OS$TEST_DEPLOYMENT"
+        #- export BUILD_VERSION_TAG="opendap/${DOCKER_NAME}:${BES_VERSION}-$TARGET_OS$TEST_DEPLOYMENT"
         - show_version
         - s3_get_besd_distro
-          "${S3_BUILD_BUCKET}"
-          "${DOCKER_NAME}"
-          "${TARGET_OS}"
-          "${LIBDAP_VERSION}"
-          "${BES_VERSION}" "${ADD_DEBUG_RPMS}" 2>&1
+          "$S3_BUILD_BUCKET"
+          "$DOCKER_NAME"
+          "$TARGET_OS"
+          "$LIBDAP_VERSION"
+          "$BES_VERSION" "$ADD_DEBUG_RPMS" 2>&1
         - docker build
           --build-arg RELEASE_DATE
           --build-arg HYRAX_VERSION
           --build-arg LIBDAP_VERSION
           --build-arg BES_VERSION
-          --tag "${SNAPSHOT_IMAGE_TAG}"
-          --tag "${BUILD_VERSION_TAG}"
-          "${DOCKER_NAME}"
+          --tag "$SNAPSHOT_IMAGE_TAG"
+          --tag "$BUILD_VERSION_TAG"
+          "$DOCKER_NAME"
         - docker image ls -a
 
     - stage: BUILD
