@@ -142,11 +142,11 @@ jobs:
       script:
         - export DOCKER_NAME="hyrax_ncwms"
         - export DOCKER_DIR="hyrax"
-        - cd "${TARGET_OS}-builds"
+        - cd "$TARGET_OS-builds"
         - source "./build-$TARGET_OS"
-        - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
+        - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "$TOMCAT_MAJOR_VERSION")
         - show_version
-        - get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_VERSION}"
+        - get_tomcat_distro "$DOCKER_DIR" "$TOMCAT_VERSION"
         - s3_get_besd_distro
           "$S3_BUILD_BUCKET"
           "$DOCKER_DIR"
