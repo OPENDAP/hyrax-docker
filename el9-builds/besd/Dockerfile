@@ -24,7 +24,6 @@ RUN echo "Python Version: $(python3 --version) (config says we want: $python_ver
 
 ENV core_dnf_packages=""
 ENV developer_dnf_packages="which bc emacs vim procps awscli"
-ENV developer_dnf_packages=""
 
 ARG RELEASE_DATE
 ENV RELEASE_DATE ${RELEASE_DATE:-"unknown"}
@@ -59,7 +58,7 @@ USER root
 
 RUN set -e \
     && dnf update -y \
-    && dnf install -y $core_dnf_packages $developer_dnf_packages \
+    # && dnf install -y $core_dnf_packages $developer_dnf_packages \
     && dnf clean all
 
 # Update and install the needful.
