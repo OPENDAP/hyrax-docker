@@ -18,6 +18,7 @@ ENV core_dnf_packages="unzip"
 # Stuff we need for hyrax_regression_tests
 # ENV regression_test_dnf_packages="git make autoconf automake diffutils"
 
+
 ENV developer_dnf_packages="procps curl unzip which emacs vim bc awscli"
 ENV developer_dnf_packages=""
 
