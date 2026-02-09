@@ -120,7 +120,7 @@ RUN set -e && useradd -m -U -d /home/tomcat -s /bin/false tomcat
 RUN set -e \
     && tar -xvf "/${TOMCAT_DISTRO}.tar.gz" -C /home/tomcat >&2 \
     && ln -s /home/tomcat/${TOMCAT_DISTRO} /usr/share/tomcat >&2 \
-    && rm -rvf /usr/share/tomcat/webapps/* >&2 \
+    && rm -rf /usr/share/tomcat/webapps/* >&2 \
     && mkdir -p /var/log/tomcat \
     && chown -R tomcat:tomcat /var/log/tomcat /home/tomcat
 COPY tomcat.service /etc/systemd/system/tomcat.service
