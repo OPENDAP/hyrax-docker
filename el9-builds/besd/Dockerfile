@@ -14,6 +14,16 @@
 #
 # Set one or more individual labels
 FROM rockylinux:9
+ENV TARGET_OS="el9"
+ENV ARCH="x86_64"
+
+# rocky9 comes with python 3.9 by default.
+ENV python_version="3.11"
+
+RUN echo "Python Version: $(python3 --version) (config says we want: $python_version)"
+
+ENV core_dnf_packages=""
+ENV developer_dnf_packages="which bc emacs vim procps awscli"
 
 ENV TARGET_OS="el9"
 
@@ -49,18 +59,18 @@ LABEL org.opencontainers.image.authors="support@opendap.org"
 
 USER root
 
-# Update and install the needful.
-RUN set -e && dnf install -y python3.11 \
-    && python3 --version
-
-RUN set -e && dnf install -y which bc emacs vim \
-    && dnf install -y procps \
+RUN set -e \
     && dnf update -y \
+    && dnf install -y $core_dnf_packages $developer_dnf_packages \
     && dnf clean all
 
-RUN set -e && curl -sS https://bootstrap.pypa.io/get-pip.py | python3 \
-    && python3 -m pip install --upgrade pip \
-    && python3 -m pip install --no-cache-dir awscli
+# Update and install the needful.
+RUN set -e\
+    && echo "# Installing python version: $python_version" \
+    && dnf install -y python$python_version \
+    && echo "# Using python version: $(python3 --version)"
+
+
 
 ###############################################################
 # Retrieve and install the latest libdap snapshot
