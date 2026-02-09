@@ -153,10 +153,12 @@ jobs:
           "$TARGET_OS"
           "$LIBDAP_VERSION"
           "$BES_VERSION" "$ADD_DEBUG_RPMS" 2>&1
+        - ls -l "$DOCKER_DIR/*.rpm"
         - s3_get_olfs_distro
           "$S3_BUILD_BUCKET"
           "$DOCKER_DIR"
           "$OLFS_VERSION" 2>&1
+        - ls -l "$DOCKER_DIR/*.tgz"
         - docker build
           --build-arg TOMCAT_VERSION
           --build-arg RELEASE_DATE
@@ -167,7 +169,7 @@ jobs:
           --build-arg USE_NCWMS=true
           --tag "$SNAPSHOT_IMAGE_TAG"
           --tag "$BUILD_VERSION_TAG"
-          "hyrax"
+          "$DOCKER_DIR"
         - docker image ls -a
 
     - stage: disabled
