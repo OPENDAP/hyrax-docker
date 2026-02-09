@@ -61,8 +61,6 @@ RUN set -e \
     && chmod 755 /load-dev-tools \
     && dnf clean all
 
-
-
 ###############################################################
 # Retrieve and install the latest libdap snapshot
 RUN set -e \
