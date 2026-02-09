@@ -823,7 +823,7 @@ function get_ngap_olfs_distro() {
 
     loggy ""
     s3_pull "${s3_bucket}" \
-            "${olfs_version}-webapp.tgz" \
+            "ngap-${olfs_version}-webapp.tgz" \
             "${target_dir}"
 
     set +e

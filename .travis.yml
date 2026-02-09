@@ -206,20 +206,19 @@ jobs:
           "$DOCKER_DIR"
         - docker image ls -a
 
-    - stage: disabled
+    - stage: BUILD_AND_TEST
       name: "Build opendap/olfs"
       script:
-        - cd "${TARGET_OS}-builds"
+        - cd "$TARGET_OS-builds"
         - export DOCKER_NAME="olfs"
+        - export DOCKER_DIR="olfs"
         - source "./build-$TARGET_OS"
-        - export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}:snapshot$TEST_DEPLOYMENT"
-        - export BUILD_VERSION_TAG="opendap/${DOCKER_NAME}:${OLFS_VERSION}$TEST_DEPLOYMENT"
         - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
         - show_version
-        - get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_VERSION}"
+        - get_tomcat_distro "${DOCKER_DIR}" "${TOMCAT_VERSION}"
         - s3_get_olfs_distro
           "${S3_BUILD_BUCKET}"
-          "olfs"
+          "$DOCKER_DIR"
           "${OLFS_VERSION}-${TARGET_OS}" 2>&1
         - docker build
           --build-arg TOMCAT_VERSION
