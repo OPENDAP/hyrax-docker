@@ -34,6 +34,9 @@ loggy " SLEEP_INTERVAL: $SLEEP_INTERVAL"
 export NO_CACHE="${NO_CACHE:-""}"
 loggy "       NO_CACHE: $NO_CACHE"
 
+export RELEASE_HOST=${RELEASE_HOST:-"https://www.opendap.org"}
+loggy "   RELEASE_HOST: $RELEASE_HOST"
+
 export aws_quiet="${aws_quiet:-"shhhh"}"
 
 function get_test_deployment_tag(){
@@ -91,7 +94,8 @@ read_build_recipe "${BUILD_RECIPE}"
 
 export SNAPSHOT_IMAGE_TAG=${SNAPSHOT_IMAGE_TAG:-"opendap/$DOCKER_NAME:snapshot-$TARGET_OS$TEST_DEPLOYMENT"}
 export BUILD_VERSION_TAG=${BUILD_VERSION_TAG:-"opendap/$DOCKER_NAME:$HYRAX_VERSION-$TARGET_OS$TEST_DEPLOYMENT"}
-export RELEASE_HOST=${RELEASE_HOST:-"https://www.opendap.org"}
+
+
 
 function show_version(){
     loggy "${HR}"
