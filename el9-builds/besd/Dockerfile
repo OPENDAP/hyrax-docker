@@ -13,6 +13,7 @@
 # it for debugging stuff.
 #
 # Set one or more individual labels
+#
 FROM rockylinux:9
 ENV TARGET_OS="el9"
 ENV ARCH="x86_64"
@@ -52,7 +53,6 @@ LABEL vendor="OPeNDAP Incorporated"
 LABEL org.opendap.besdaemon.version=${BES_VERSION}
 LABEL org.opendap.besdaemon.release-date=RELEASE_DATE
 LABEL org.opendap.hyrax.version.is-production="false"
-
 LABEL org.opencontainers.image.authors="support@opendap.org"
 
 USER root
