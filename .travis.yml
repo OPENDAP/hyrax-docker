@@ -38,24 +38,8 @@ env:
     # DOCKER_HUB_PSWD for our DockerHub account
     - secure: "TwtIaxZhEc+THFGe7qcOTmgeXG37tG9Hqmx0/JQS4UBYmbM+n/RbxV0IK5WjTBsvV/UBPVPdYLb0EOgsZDWjrFR7kyemd1dLc4fgb7EnHEyl17GUK3CR+ZtnRNAn+u10CJ3lq1d+ttda0GrEOpGT9e2nqPo19BxQ4vlhuFq8TAb4lKfBz3y89sY0Py+3htDtqNrIcZ1Ca0cyKmkU90/42Hx5kmBJPcFAIIrxy46cF4iNyQ8cS5TAmY/vQ+ZcoiO5yCA6ACqKWqFH2i7qUZhVsBWI6VWgQTbuRKOJ4RdOv2QtHb3QGO+PdxxitpQvw2aYam4nI7WapqNk84hu+oXoavDSR0kN21vlpfvcyfIi9JuEGGmVb7irbCCVo27kLHrRrntByKJ7GpR5Wf9s8frWd53iri9k0DSwxvKGZBIaFPodnYsJKF1Ck16IrJrr6AgPZvTKN4vBesFiRvI6sIJrZL6gD62cW2s196zKaSzcT0DccUKCaG6/javNazMo+sk74tOgqaeX0r/whXv8Rc/oobdUFI0AkGGOTzp4+QHVKX1swPEVEjP00ewOyurQinG1yhkqOgQU7s6f5dXabepmnFtH5j5W8AjDL6kISk1w/UIfMwGkUDXyxSGZWLaLag2oDxb+0Xe4CC+9m6SxtnRSzUjXDzOL4QBB8ri0VBSMA2E="
     - BUILD_RECIPE="el9-build-recipe"
-    - TOMCAT_MAJOR_VERSION=$( grep "TOMCAT_MAJOR_VERSION" "${BUILD_RECIPE}" | awk '{print $2;}' )
     - TARGET_OS=$( grep "TARGET_OS" "${BUILD_RECIPE}" | awk '{print $2;}' )
     - RELEASE_DATE="$(date +%s)"
-    #- LIBDAP_VERSION=$(grep "libdap4-" ${BUILD_RECIPE} | awk '{print $1;}' - | sed "s/libdap4-//g")
-    #- BES_VERSION=$(grep "bes-" ${BUILD_RECIPE} | awk '{print $1;}' - | sed "s/bes-//g")
-    #- HYRAX_VERSION=$(grep "hyrax-" ${BUILD_RECIPE} | awk '{print $1;}' - | sed "s/hyrax-//g")
-    #- OLFS_VERSION_NUM=$(grep "olfs-" ${BUILD_RECIPE} | awk '{print $1;}' - | sed "s/olfs-//g")
-    #- OLFS_VERSION="$OLFS_VERSION_NUM-$TARGET_OS"
-    #- OLFS_DISTRO="olfs-${OLFS_VERSION}-webapp.tgz"
-    #- OLFS_DISTRO_URL="s3://opendap.travis.build/${OLFS_DISTRO}"
-    #- NGAP_DISTRO="ngap-${OLFS_VERSION}-webapp.tgz"
-    #- NGAP_DISTRO_URL="s3://opendap.travis.build/${NGAP_DISTRO}"
-    #- ROBOTS_DISTRO="robots-olfs-${OLFS_VERSION}-webapp.tgz"
-    #- ROBOTS_DISTRO_URL="s3://opendap.travis.build/${ROBOTS_DISTRO}"
-    #- LIBDAP_RPM_NAME="libdap-${LIBDAP_VERSION}.${TARGET_OS}.x86_64.rpm"
-    #- LIBDAP_RPM_URL="s3://opendap.travis.build/${LIBDAP_RPM_NAME}"
-    #- BES_RPM_NAME="bes-${BES_VERSION}.static.${TARGET_OS}.x86_64.rpm"
-    #- BES_RPM_URL="s3://opendap.travis.build/${BES_RPM_NAME}"
     - S3_BUILD_BUCKET="opendap.travis.build"
     - ADD_DEBUG_RPMS=""
 
@@ -68,22 +52,6 @@ install:
   - echo "print env:"
   - printenv
   - echo $DOCKER_HUB_PSWD | docker login -u $DOCKER_HUB_UID --password-stdin
-  # - echo "Retrieving libdap C7 RPM ${LIBDAP_C7_RPM}"
-  # - aws --region=us-east-1 s3 cp ${LIBDAP_C7_RPM_URL} ./builds/${LIBDAP_C7_RPM}
-  # - echo "Retrieving BES C7 RPM ${BES_C7_RPM}"
-  # - aws --region=us-east-1 s3 cp ${BES_C7_RPM_URL} ./builds/${BES_C7_RPM}
-  #
-#  - echo "Retrieving libdap RH8 RPM ${LIBDAP_RPM_NAME}"
-#  - aws --region=us-east-1 s3 cp ${LIBDAP_RPM_URL} ./${TARGET_OS}-builds/${LIBDAP_RPM_NAME}
-#  - echo "Retrieving BES RH8 RPM ${BES_RPM_NAME}"
-#  - aws --region=us-east-1 s3 cp ${BES_RPM_URL} ./${TARGET_OS}-builds/${BES_RPM_NAME}
-#  - echo "Retrieving OLFS Distribution file ${OLFS_DISTRO}"
-#  - aws --region=us-east-1 s3 cp ${OLFS_DISTRO_URL} ./${TARGET_OS}-builds/${OLFS_DISTRO}
-#  - echo "Retrieving ROBOTS Distribution file ${ROBOTS_DISTRO}"
-#  - aws --region=us-east-1 s3 cp ${ROBOTS_DISTRO_URL} ./${TARGET_OS}-builds/${ROBOTS_DISTRO}
-#  - echo "Retrieving NGAP Distribution file ${NGAP_DISTRO}"
-#  - aws --region=us-east-1 s3 cp ${NGAP_DISTRO_URL} ./${TARGET_OS}-builds/${NGAP_DISTRO}
-#  - ls -l ./${TARGET_OS}-builds
 
 stages:
   - name: OLFS
@@ -109,13 +77,12 @@ jobs:
       name: "Build and Test opendap/hyrax"
       script:
         - export DOCKER_NAME="hyrax"
+        - echo "RELEASE_DATE '$RELEASE_DATE'"
         - echo "BUILDING FOR $TARGET_OS"
-        - echo "USING TOMCAT MAJOR VERSION '$TOMCAT_MAJOR_VERSION'"
         - cd "$TARGET_OS-builds"
         - source "./build-$TARGET_OS"
         - show_version
-        #- export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}:snapshot-$TARGET_OS$TEST_DEPLOYMENT"
-        #- export BUILD_VERSION_TAG="opendap/${DOCKER_NAME}:${HYRAX_VERSION}-$TARGET_OS$TEST_DEPLOYMENT"
+        - echo "USING TOMCAT MAJOR VERSION '$TOMCAT_MAJOR_VERSION'"
         - export TESTS_LOG_BASE="$DOCKER_NAME-regression-tests-$TRAVIS_JOB_NUMBER"
         - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "$TOMCAT_MAJOR_VERSION")
         - show_version
@@ -148,11 +115,10 @@ jobs:
     - stage: BUILD
       name: "Build opendap/besd"
       script:
-        - cd "$TARGET_OS-builds"
         - export DOCKER_NAME="besd"
+        - echo "RELEASE_DATE '$RELEASE_DATE'"
+        - cd "$TARGET_OS-builds"
         - source "./build-$TARGET_OS"
-        #- export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}:snapshot-$TARGET_OS$TEST_DEPLOYMENT"
-        #- export BUILD_VERSION_TAG="opendap/${DOCKER_NAME}:${BES_VERSION}-$TARGET_OS$TEST_DEPLOYMENT"
         - show_version
         - s3_get_besd_distro
           "$S3_BUILD_BUCKET"
