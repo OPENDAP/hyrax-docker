@@ -17,12 +17,12 @@
 FROM rockylinux:9
 ENV TARGET_OS="el9"
 ENV ARCH="x86_64"
+ENV developer_packages="which bc emacs vim procps awscli"
 
 # rocky9 comes with python 3.9 by default, it seems to be good enough for now
 # ENV python_version="3.11"
 RUN echo "Python Version: $(python3 --version) (config says we want: $python_version)"
 
-ENV developer_packages="which bc emacs vim procps awscli"
 
 ARG RELEASE_DATE
 ENV RELEASE_DATE ${RELEASE_DATE:-"unknown"}

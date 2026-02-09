@@ -25,8 +25,8 @@ ENV core_dnf_packages="procps git unzip"
 # Stuff we need for hyrax_regression_tests
 ENV regression_test_dnf_packages="make autoconf automake diffutils"
 
-ENV develoer_dnf_packages=""
-#ENV develoer_dnf_packages="which diffutils emacs vim jq  procps git bc valgrind gdb awscli"
+ENV developer_dnf_packages=""
+#ENV developer_dnf_packages="which diffutils emacs vim jq  procps git bc valgrind gdb awscli"
 
 
 #
@@ -41,7 +41,7 @@ ARG TOMCAT_VERSION
 ENV TOMCAT_VERSION=${TOMCAT_VERSION:-"11.0.7"}
 RUN echo "TOMCAT_VERSION: ${TOMCAT_VERSION}"
 ENV TOMCAT_DISTRO="apache-tomcat-${TOMCAT_VERSION}"
-RUN echo "TOMCAT_VERSION: ${TOMCAT_VERSION}"
+RUN echo "Retrieving TOMCAT_DISTRO: ${TOMCAT_DISTRO}"
 COPY "${TOMCAT_DISTRO}.tar.gz" /
 RUN ls -l /apache-tomcat-*  >&2
 
@@ -154,7 +154,7 @@ RUN set -e \
     && dnf install -y tzdata-java \
     && dnf clean all
 RUN set -e \
-    && dnf install -y $core_dnf_packages $regression_test_dnf_packages $develoer_dnf_packages \
+    && dnf install -y $core_dnf_packages $regression_test_dnf_packages $developer_dnf_packages \
     && dnf clean all
 #
 # RUN set -e && which diff
