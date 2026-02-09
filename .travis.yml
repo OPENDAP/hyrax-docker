@@ -165,7 +165,7 @@ jobs:
           --build-arg USE_NCWMS=true
           --tag "$SNAPSHOT_IMAGE_TAG"
           --tag "$BUILD_VERSION_TAG"
-          "$DOCKER_NAME"
+          "hyrax"
         - docker image ls -a
 
     - stage: BUILD
