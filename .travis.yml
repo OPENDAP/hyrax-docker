@@ -137,13 +137,11 @@ jobs:
         - docker image ls -a
 
     - stage: BUILD
-      name: "Build opendap/hyrax_ncwms (EL8)"
+      name: "Build opendap/hyrax_ncwms"
       script:
+        - export DOCKER_NAME="hyrax_ncwms"
         - cd "${TARGET_OS}-builds"
-        - export DOCKER_NAME="hyrax"
         - source "./build-$TARGET_OS"
-        - export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}_ncwms:snapshot$TEST_DEPLOYMENT"
-        - export BUILD_VERSION_TAG="opendap/${DOCKER_NAME}_ncwms:${HYRAX_VERSION}$TEST_DEPLOYMENT"
         - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
         - show_version
         - get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_VERSION}"
