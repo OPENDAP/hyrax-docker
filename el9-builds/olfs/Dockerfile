@@ -6,7 +6,7 @@
 FROM rockylinux:8
 LABEL org.opencontainers.image.authors="support@opendap.org"
 USER root
-
+ENV HR="######################################################"
 ENV TARGET_OS="el9"
 ENV ARCH="x86_64"
 ENV java_version="java-21-openjdk"
