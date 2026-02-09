@@ -20,10 +20,10 @@ ENV java_version="java-21-openjdk"
 # rocky9 comes with python 3.9 by default.
 ENV python_version="3.9"
 RUN echo "Python Version: $(python3 --version) (config says we want: $python_version)"
-ENV core_dnf_packages="procps git unzip"
+ENV core_dnf_packages="procp unzip"
 
 # Stuff we need for hyrax_regression_tests
-ENV regression_test_dnf_packages="make autoconf automake diffutils"
+ENV regression_test_dnf_packages="git make autoconf automake diffutils"
 
 ENV developer_dnf_packages=""
 #ENV developer_dnf_packages="which diffutils emacs vim jq  procps git bc valgrind gdb awscli"

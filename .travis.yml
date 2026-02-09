@@ -219,7 +219,7 @@ jobs:
         - s3_get_olfs_distro
           "${S3_BUILD_BUCKET}"
           "$DOCKER_DIR"
-          "${OLFS_VERSION}-${TARGET_OS}" 2>&1
+          "${OLFS_VERSION}" 2>&1
         - docker build
           --build-arg TOMCAT_VERSION
           --build-arg RELEASE_DATE
