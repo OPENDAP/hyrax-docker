@@ -7,6 +7,7 @@ FROM rockylinux:9
 LABEL org.opencontainers.image.authors="support@opendap.org"
 USER root
 ENV HR="######################################################"
+ENV HR2="-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --"
 ENV TARGET_OS="el9"
 ENV ARCH="x86_64"
 ENV java_version="java-21-openjdk"
@@ -22,13 +23,12 @@ ENV developer_dnf_packages="curl unzip which emacs vim bc awscli"
 
 
 
-RUN export NOW="$(date +%s)"
 ARG RELEASE_DATE
-ENV RELEASE_DATE ${RELEASE_DATE:-"${NOW}"}
+ENV RELEASE_DATE=${RELEASE_DATE:-$(date +%s)}
 RUN echo "RELEASE_DATE: ${RELEASE_DATE}"
 
 ARG TOMCAT_VERSION
-ENV TOMCAT_VERSION ${TOMCAT_VERSION:-"11.0.7"}
+ENV TOMCAT_VERSION="${TOMCAT_VERSION:-"11.0.7"}"
 RUN echo "TOMCAT_VERSION: ${TOMCAT_VERSION}"
 ENV TOMCAT_DISTRO="apache-tomcat-${TOMCAT_VERSION}"
 COPY "${TOMCAT_DISTRO}.tar.gz" /
@@ -61,7 +61,7 @@ LABEL org.opendap.hyrax.version.is-production="false"
 # The --build-arg USE_NCWMS can be set to "true" in order to 
 # add the ncWMS application to the build.
 ARG USE_NCWMS
-ENV USE_NCWMS ${USE_NCWMS:-"false"}
+ENV USE_NCWMS="${USE_NCWMS:-"false"}"
 RUN set -e && \
     if [ $USE_NCWMS = "true" ];then echo "NCWMS: ENABLED"; else echo "NCWMS: DISABLED"; fi
 
@@ -71,7 +71,7 @@ RUN set -e && \
 # the URL: https://localhost:8080 if the environment variable NCWMS_BASE
 # is not in the shell from which the entrypoint.sh script is called.
 ARG NCWMS_BASE
-ENV NCWMS_BASE ${NCWMS_BASE:-"https://localhost:8080"}
+ENV NCWMS_BASE="${NCWMS_BASE:-"https://localhost:8080"}"
 RUN set -e && \
     if [ $USE_NCWMS = "true" ];then echo "NCWMS_BASE: {$NCWMS_BASE}"; fi
 
@@ -101,7 +101,7 @@ RUN set -e \
     && dnf install -y tzdata-java \
     && dnf clean all
 RUN set -e \
-    && dnf install -y $core_dnf_packages $regression_test_dnf_packages $developer_dnf_packages \
+    && dnf install -y $core_dnf_packages $developer_dnf_packages \
     && dnf clean all
 
 
@@ -154,7 +154,7 @@ RUN set -e \
     && ls -l . \
     && tar -C "$ROOT" -xzvf "./$OLFS_DISTRO.tgz" \
     && ls -l "$ROOT" \
-    && echo "# Unpacking warfile..."  >&2 \
+    && echo "# Unpacking war file..."  >&2 \
     && mkdir -p "$(readlink -f "$CATALINA_HOME")/webapps/opendap/"\
     && unzip -o "$ROOT/$OLFS_DISTRO/opendap.war" -d "$CATALINA_HOME/webapps/opendap/" \
     && echo "# Cleaning up."  >&2 \
@@ -202,7 +202,7 @@ RUN set -e \
     && if [ $USE_NCWMS = "true" ]; then \
         mv /tmp/olfs_viewers.xml ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml; \
     else \
-        echo "Skipping OLFS/ncWMS confguration installation."; \
+        echo "Skipping OLFS/ncWMS configuration installation."; \
     fi
     
 ###
