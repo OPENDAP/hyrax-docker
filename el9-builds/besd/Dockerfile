@@ -22,8 +22,7 @@ ENV ARCH="x86_64"
 # ENV python_version="3.11"
 RUN echo "Python Version: $(python3 --version) (config says we want: $python_version)"
 
-ENV core_dnf_packages=""
-ENV developer_dnf_packages="which bc emacs vim procps awscli"
+ENV developer_packages="which bc emacs vim procps awscli"
 
 ARG RELEASE_DATE
 ENV RELEASE_DATE ${RELEASE_DATE:-"unknown"}
@@ -58,14 +57,9 @@ USER root
 
 RUN set -e \
     && dnf update -y \
-    # && dnf install -y $core_dnf_packages $developer_dnf_packages \
+    && echo "dnf install -y $developer_packages" > /load-dev-tools \
+    && chmod 755 /load-dev-tools \
     && dnf clean all
-
-# Update and install the needful.
-RUN set -e\
-    && echo "# Installing python version: $python_version" \
-    && dnf install -y python$python_version \
-    && echo "# Using python version: $(python3 --version)"
 
 
 
