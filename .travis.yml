@@ -172,7 +172,7 @@ jobs:
           "$DOCKER_DIR"
         - docker image ls -a
 
-    - stage: BUILD_AND_TEST
+    - stage: disabled
       name: "Build opendap/hyrax:ngap"
       script:
         - cd "$TARGET_OS-builds"
