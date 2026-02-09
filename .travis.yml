@@ -40,22 +40,22 @@ env:
     - BUILD_RECIPE="el9-build-recipe"
     - TOMCAT_MAJOR_VERSION=$( grep "TOMCAT_MAJOR_VERSION" "${BUILD_RECIPE}" | awk '{print $2;}' )
     - TARGET_OS=$( grep "TARGET_OS" "${BUILD_RECIPE}" | awk '{print $2;}' )
-    - RELEASE_DATE=`date +%s`
-    - LIBDAP_VERSION=$(grep "libdap4-" ${BUILD_RECIPE} | awk '{print $1;}' - | sed "s/libdap4-//g")
-    - BES_VERSION=$(grep "bes-" ${BUILD_RECIPE} | awk '{print $1;}' - | sed "s/bes-//g")
-    - HYRAX_VERSION=$(grep "hyrax-" ${BUILD_RECIPE} | awk '{print $1;}' - | sed "s/hyrax-//g")
-    - OLFS_VERSION_NUM=$(grep "olfs-" ${BUILD_RECIPE} | awk '{print $1;}' - | sed "s/olfs-//g")
-    - OLFS_VERSION="$OLFS_VERSION_NUM-$TARGET_OS"
-    - OLFS_DISTRO="olfs-${OLFS_VERSION}-webapp.tgz"
-    - OLFS_DISTRO_URL="s3://opendap.travis.build/${OLFS_DISTRO}"
-    - NGAP_DISTRO="ngap-${OLFS_VERSION}-webapp.tgz"
-    - NGAP_DISTRO_URL="s3://opendap.travis.build/${NGAP_DISTRO}"
-    - ROBOTS_DISTRO="robots-olfs-${OLFS_VERSION}-webapp.tgz"
-    - ROBOTS_DISTRO_URL="s3://opendap.travis.build/${ROBOTS_DISTRO}"
-    - LIBDAP_RPM_NAME="libdap-${LIBDAP_VERSION}.${TARGET_OS}.x86_64.rpm"
-    - LIBDAP_RPM_URL="s3://opendap.travis.build/${LIBDAP_RPM_NAME}"
-    - BES_RPM_NAME="bes-${BES_VERSION}.static.${TARGET_OS}.x86_64.rpm"
-    - BES_RPM_URL="s3://opendap.travis.build/${BES_RPM_NAME}"
+    - RELEASE_DATE="$(date +%s)"
+    #- LIBDAP_VERSION=$(grep "libdap4-" ${BUILD_RECIPE} | awk '{print $1;}' - | sed "s/libdap4-//g")
+    #- BES_VERSION=$(grep "bes-" ${BUILD_RECIPE} | awk '{print $1;}' - | sed "s/bes-//g")
+    #- HYRAX_VERSION=$(grep "hyrax-" ${BUILD_RECIPE} | awk '{print $1;}' - | sed "s/hyrax-//g")
+    #- OLFS_VERSION_NUM=$(grep "olfs-" ${BUILD_RECIPE} | awk '{print $1;}' - | sed "s/olfs-//g")
+    #- OLFS_VERSION="$OLFS_VERSION_NUM-$TARGET_OS"
+    #- OLFS_DISTRO="olfs-${OLFS_VERSION}-webapp.tgz"
+    #- OLFS_DISTRO_URL="s3://opendap.travis.build/${OLFS_DISTRO}"
+    #- NGAP_DISTRO="ngap-${OLFS_VERSION}-webapp.tgz"
+    #- NGAP_DISTRO_URL="s3://opendap.travis.build/${NGAP_DISTRO}"
+    #- ROBOTS_DISTRO="robots-olfs-${OLFS_VERSION}-webapp.tgz"
+    #- ROBOTS_DISTRO_URL="s3://opendap.travis.build/${ROBOTS_DISTRO}"
+    #- LIBDAP_RPM_NAME="libdap-${LIBDAP_VERSION}.${TARGET_OS}.x86_64.rpm"
+    #- LIBDAP_RPM_URL="s3://opendap.travis.build/${LIBDAP_RPM_NAME}"
+    #- BES_RPM_NAME="bes-${BES_VERSION}.static.${TARGET_OS}.x86_64.rpm"
+    #- BES_RPM_URL="s3://opendap.travis.build/${BES_RPM_NAME}"
     - S3_BUILD_BUCKET="opendap.travis.build"
     - ADD_DEBUG_RPMS=""
 
@@ -182,15 +182,15 @@ jobs:
         - show_version
         - get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_VERSION}"
         - s3_get_besd_distro
-          "${S3_BUILD_BUCKET}"
-          "${DOCKER_NAME}"
-          "${TARGET_OS}"
-          "${LIBDAP_VERSION}"
-          "${BES_VERSION}" "${ADD_DEBUG_RPMS}" 2>&1
+          "$S3_BUILD_BUCKET"
+          "$DOCKER_NAME"
+          "$TARGET_OS"
+          "$LIBDAP_VERSION"
+          "$BES_VERSION" "$ADD_DEBUG_RPMS" 2>&1
         - s3_get_olfs_distro
-          "${S3_BUILD_BUCKET}"
-          "${DOCKER_NAME}"
-          "${OLFS_VERSION}" 2>&1
+          "$S3_BUILD_BUCKET"
+          "$DOCKER_NAME"
+          "$OLFS_VERSION" 2>&1
         - docker build
           --build-arg TOMCAT_VERSION
           --build-arg RELEASE_DATE
@@ -199,19 +199,19 @@ jobs:
           --build-arg BES_VERSION
           --build-arg OLFS_VERSION
           --build-arg USE_NCWMS=true
-          --tag "${SNAPSHOT_IMAGE_TAG}"
-          --tag "${BUILD_VERSION_TAG}"
-          "${DOCKER_NAME}"
+          --tag "$SNAPSHOT_IMAGE_TAG"
+          --tag "$BUILD_VERSION_TAG"
+          "$DOCKER_NAME"
         - docker image ls -a
 
     - stage: BUILD
       name: "Build opendap/hyrax:ngap (EL8)"
       script:
-        - cd "${TARGET_OS}-builds"
+        - cd "$TARGET_OS-builds"
         - export DOCKER_NAME="ngap"
         - source "./build-$TARGET_OS"
-        - export SNAPSHOT_IMAGE_TAG="opendap/hyrax:${DOCKER_NAME}-snapshot$TEST_DEPLOYMENT"
-        - export BUILD_VERSION_TAG="opendap/hyrax:${DOCKER_NAME}-${HYRAX_VERSION}$TEST_DEPLOYMENT"
+        - export SNAPSHOT_IMAGE_TAG="opendap/hyrax:$DOCKER_NAME-snapshot$TEST_DEPLOYMENT"
+        - export BUILD_VERSION_TAG="opendap/hyrax:$DOCKER_NAME-$HYRAX_VERSION$TEST_DEPLOYMENT"
         - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
         - show_version
         - get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_VERSION}"
