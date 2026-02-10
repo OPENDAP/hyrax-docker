@@ -13,7 +13,7 @@ ENV ARCH="x86_64"
 ENV java_version="java-21-openjdk"
 # rocky9 comes with python 3.9 by default.
 ENV python_version="3.9"
-RUN echo "Python Version: $(python3 --version) (config says we want: $python_version)"
+RUN echo "$HR" && echo "# Python Version: $(python3 --version) (config says we want: $python_version)" && echo "$HR"
 ENV core_dnf_packages="unzip"
 # Stuff we need for hyrax_regression_tests
 # ENV regression_test_dnf_packages="git make autoconf automake diffutils"
@@ -26,31 +26,31 @@ ENV developer_dnf_packages=""
 
 ARG RELEASE_DATE
 ENV RELEASE_DATE=${RELEASE_DATE:-"$(date +%s)"}
-RUN echo "RELEASE_DATE: ${RELEASE_DATE}"
+RUN echo "# RELEASE_DATE: ${RELEASE_DATE}"
 
 ARG TOMCAT_VERSION
 ENV TOMCAT_VERSION="${TOMCAT_VERSION:-"11.0.7"}"
-RUN echo "TOMCAT_VERSION: ${TOMCAT_VERSION}"
+RUN echo "# TOMCAT_VERSION: ${TOMCAT_VERSION}"
 ENV TOMCAT_DISTRO="apache-tomcat-${TOMCAT_VERSION}"
 COPY "${TOMCAT_DISTRO}.tar.gz" /
 RUN ls -l /apache-tomcat-*  >&2
 
 ARG HYRAX_VERSION
 ENV HYRAX_VERSION=${HYRAX_VERSION:-"snapshot"}
-RUN echo "HYRAX_VERSION: ${HYRAX_VERSION}"
+RUN echo "# HYRAX_VERSION: ${HYRAX_VERSION}"
 
 ARG OLFS_VERSION
 ENV OLFS_VERSION=${OLFS_VERSION:-"unknown"}
-RUN echo "OLFS_VERSION: ${OLFS_VERSION}"
+RUN echo "# OLFS_VERSION: ${OLFS_VERSION}"
 
 ARG OLFS_DISTRO
 ENV OLFS_DISTRO=${OLFS_DISTRO:-"olfs-${OLFS_VERSION}-webapp"}
-RUN echo "OLFS_DISTRO: ${OLFS_DISTRO}"
+RUN echo "# OLFS_DISTRO: ${OLFS_DISTRO}"
 COPY ${OLFS_DISTRO}.tgz /${OLFS_DISTRO}.tgz
 
 ARG ROBOTS_DISTRO
 ENV ROBOTS_DISTRO=${ROBOTS_DISTRO:-"robots-olfs-${OLFS_VERSION}-webapp"}
-RUN echo "ROBOTS_DISTRO: ${ROBOTS_DISTRO}"
+RUN echo "# ROBOTS_DISTRO: ${ROBOTS_DISTRO}"
 COPY ${ROBOTS_DISTRO}.tgz /${ROBOTS_DISTRO}.tgz
 
 LABEL vendor="OPeNDAP"
@@ -100,7 +100,8 @@ RUN set -e \
     && echo "# java version: $( java -version 2>&1 )" \
     && update-alternatives --list \
     && dnf install -y tzdata-java \
-    && dnf clean all
+    && dnf clean all \
+    && echo "$HR"
 RUN set -e \
     #&& dnf install -y $core_dnf_packages $developer_dnf_packages \
     && dnf clean all
@@ -125,7 +126,9 @@ RUN set -e \
     && mkdir -p /var/log/tomcat \
     && chown -R tomcat:tomcat /var/log/tomcat /home/tomcat
 COPY tomcat.service /etc/systemd/system/tomcat.service
-RUN set -e && systemctl enable tomcat
+RUN set -e \
+     && which systemctl \
+   && systemctl enable tomcat
 #RUN firewall-cmd --add-port 8080/tcp --permanent
 #RUN firewall-cmd --reload
 

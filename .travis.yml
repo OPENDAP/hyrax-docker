@@ -73,8 +73,8 @@ jobs:
     # RHEL Builds
     #
 
-#BUILD_AND_TEST
-    - stage: disabled
+# BUILD_AND_TEST
+    - stage: BUILD_AND_TEST
       name: "Build and Test opendap/hyrax"
       script:
         - export DOCKER_NAME="hyrax"

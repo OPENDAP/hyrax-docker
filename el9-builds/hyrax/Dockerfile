@@ -26,11 +26,14 @@ ENV core_dnf_packages="procp unzip"
 ENV regression_test_dnf_packages="git make autoconf automake diffutils"
 
 ENV developer_dnf_packages=""
-#ENV developer_dnf_packages="which diffutils emacs vim jq  procps git bc valgrind gdb awscli"
+#ENV developer_dnf_packages="which diffutils emacs vim jq  procps git bc valgrind gdb"
+ENV awscli_dnf_packages="awscli"
+#ENV awscli_dnf_packages="awscli"
 
 
 #
-ENV HR="######################################################"
+ENV  HR="######################################################"
+ENV HR2="#-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --"
 
 ENV NOW="$(date +%s)"
 ARG RELEASE_DATE
@@ -168,7 +171,7 @@ RUN set -e \
 RUN set -e \
     && echo "Installing the libdap rpm: ${LIBDAP_RPM}" \
     && ls -l ./libdap* \
-    && dnf -y install ./libdap-*.rpm \
+    && dnf install -y ./libdap-*.rpm \
     && rm -f ./${LIBDAP_RPM} \
     && dnf clean all \
     && echo "libdap4 is installed."
@@ -179,7 +182,7 @@ RUN set -e \
 RUN set -e \
     && echo "Installing the latest BES rpm: ${BES_RPM}" \
     && ls -l ./bes* \
-    && dnf -y install ./bes-*.rpm \
+    && dnf install -y ./bes-*.rpm \
     && rm -f ./${BES_RPM} \
     && dnf clean all \
     && echo "besdaemon is here: "`which besdaemon`
@@ -205,7 +208,11 @@ RUN set -e \
     && rm -fv "/${TOMCAT_DISTRO}.tar.gz"
 
 COPY tomcat.service /etc/systemd/system/tomcat.service
-RUN set -e && systemctl enable tomcat
+RUN set -e \
+    && which systemctl \
+    && systemctl enable tomcat
+
+
 #RUN firewall-cmd --add-port 8080/tcp --permanent
 #RUN firewall-cmd --reload
 
@@ -231,7 +238,7 @@ RUN set -e \
     && ls -l . \
     && tar -C ${ROOT} -xzvf ./${OLFS_DISTRO}.tgz \
     && ls -l ${ROOT} \
-    && echo "Unpacking warfile..."  >&2 \
+    && echo "Unpacking war file..."  >&2 \
     && mkdir -p $(readlink -f ${CATALINA_HOME})/webapps/${DEPLOYMENT_CONTEXT}/ \
     && unzip -o ${ROOT}/${OLFS_DISTRO}/opendap.war -d ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/ \
     && echo "Cleaning up OLFS distribution files."  >&2 \
@@ -242,7 +249,7 @@ RUN set -e \
     && ls -l ./robots* \
     && tar -C ${ROOT} -xzf ./${ROBOTS_DISTRO}.tgz \
     && ls -l ${ROOT}/${ROBOTS_DISTRO} \
-    && echo "Unpacking dynamic robots.txt warfile..."  >&2 \
+    && echo "Unpacking dynamic robots.txt war file..."  >&2 \
     && unzip -o ${ROOT}/${ROBOTS_DISTRO}/ROOT.war -d ${CATALINA_HOME}/webapps/ROOT/ \
     && echo "Cleaning up dynamic robots.txt distribution files..."  >&2 \
     && rm -rvf ${ROOT}/${ROBOTS_DISTRO} ${ROBOTS_DISTRO}.tgz
@@ -301,7 +308,7 @@ RUN if [ $USE_NCWMS = "true" ]; then \
         # at startup.
         mv /tmp/olfs_viewers.xml ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/viewers.xml; \
     else \
-        echo "Skipping OLFS/ncWMS confguration installation."; \
+        echo "Skipping OLFS/ncWMS configuration installation."; \
     fi
 
 ################################################################
