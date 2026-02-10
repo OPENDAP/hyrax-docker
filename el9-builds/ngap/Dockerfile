@@ -92,7 +92,7 @@ RUN echo "APR_VERSION: $APR_VERSION"
 ARG APACHE_APR_RPM
 ENV APACHE_APR_RPM="${APACHE_APR_RPM:-"apr-$APR_VERSION.x86_64.rpm"}"
 RUN echo "APACHE_APR_RPM: $APACHE_APR_RPM"
-COPY "$APACHED_APR_RPM" apr-devel-* apr-debuginfo-* /
+COPY "$APACHE_APR_RPM" apr-devel-* apr-debuginfo-* /
 RUN ls -l /apr-* >&2
 
 ARG TOMCAT_CONNECTION_TIMEOUT_MS
@@ -108,7 +108,7 @@ LABEL org.opencontainers.image.authors="support@opendap.org"
 USER root
 
 ARG DEVELOPER_MODE
-ENV DEVELOPER_MODE ${DEVELOPER_MODE:-"false"}
+ENV DEVELOPER_MODE="${DEVELOPER_MODE:-"false"}"
 RUN set -e && \
     if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else echo "DEVELOPER_MODE: DISABLED"; fi
 
@@ -142,9 +142,10 @@ RUN set -e && dnf install -y tzdata-java
 #
 RUN set -e && dnf clean all
 #
-RUN set -e && curl -sS https://bootstrap.pypa.io/get-pip.py | python3 \
-    && python3 -m pip install --upgrade pip \
-    && python3 -m pip install awscli
+#RUN set -e && curl -sS https://bootstrap.pypa.io/get-pip.py | python3 \
+#    && python3 -m pip install --upgrade pip \
+#    && python3 -m pip install awscli
+RUN set -e && dnf install -y awscli && dnf clean all
 
 ################################################################
 # Install the latest libdap snapshot
@@ -211,8 +212,8 @@ RUN set -e && systemctl enable tomcat >&2
 #RUN firewall-cmd --add-port 8080/tcp --permanent
 #RUN firewall-cmd --reload
 
-ENV CATALINA_HOME /usr/share/tomcat
-ENV PATH $CATALINA_HOME/bin:$PATH
+ENV CATALINA_HOME="/usr/share/tomcat"
+ENV PATH="$CATALINA_HOME/bin:$PATH"
 RUN set -e && echo "CATALINA_HOME: ${CATALINA_HOME}" >&2
 
 # Install our modified server.xml so that the server compresses responses.
@@ -239,7 +240,7 @@ RUN set -e \
     && make install >&2 \
     && echo "SUCCESS: Tomcat Native-APR Library installed"
 
-ENV CATALINA_OPTS "-Djava.library.path=/usr/local/apr/lib"
+ENV CATALINA_OPTS="-Djava.library.path=/usr/local/apr/lib"
 
 RUN set -e && echo "#########################################################"
 RUN set -e && which java && java -version
