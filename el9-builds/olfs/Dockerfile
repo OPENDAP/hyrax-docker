@@ -103,7 +103,7 @@ RUN set -e \
     && dnf clean all \
     && echo "$HR"
 RUN set -e \
-    #&& dnf install -y $core_dnf_packages $developer_dnf_packages $awscli_dnf_packages\
+    && dnf install -y $core_dnf_packages $developer_dnf_packages $awscli_dnf_packages\
     && dnf clean all
 
 
