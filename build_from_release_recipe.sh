@@ -31,9 +31,7 @@ woo_get_besd_distro \
      true
 
 # Get the OLFS web archive
-woo_get_olfs_distro \
-    `pwd` \
-    "${OLFS_VERSION}"
+curl_get_olfs_distro  `pwd`  "${OLFS_VERSION}"
 
 ls -l *.rpm *.gz *.tgz
 

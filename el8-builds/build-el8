@@ -615,15 +615,15 @@ function s3_get_build_dmrpp_distro() {
 
 ################################################################################
 #
-# woo_get_olfs_distro() - Get the rpm and war files need for a Hyrax installation
+# curl_get_olfs_distro() - Get the rpm and war files need for a Hyrax installation
 #    from the identified S3 bucket.
 #    $1 - The AWS S3 bucket from which to pull the Hyrax components
 #    $2 - The directory into which to place the Hyrax components.
 #    $3 - The olfs version number ##.##.##-##
 #
-function woo_get_olfs_distro() {
+function curl_get_olfs_distro() {
     loggy "${HR}"
-    loggy "TASK: woo_get_olfs_distro()"
+    loggy "TASK: curl_get_olfs_distro()"
     local target_dir="${1}"
     loggy "        target_dir: ${target_dir}"
     local olfs_version="${2}"

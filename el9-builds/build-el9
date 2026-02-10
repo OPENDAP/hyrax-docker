@@ -34,8 +34,8 @@ loggy " SLEEP_INTERVAL: $SLEEP_INTERVAL"
 export NO_CACHE="${NO_CACHE:-""}"
 loggy "       NO_CACHE: $NO_CACHE"
 
-export RELEASE_HOST=${RELEASE_HOST:-"https://www.opendap.org"}
-loggy "   RELEASE_HOST: $RELEASE_HOST"
+export ARCHIVE_HOST=${ARCHIVE_HOST:-"https://www.opendap.org"}
+loggy "   ARCHIVE_HOST: $ARCHIVE_HOST"
 
 export aws_quiet="${aws_quiet:-"shhhh"}"
 
@@ -666,7 +666,7 @@ function woo_get_besd_distro() {
     ######## FIXME #########
     loggy "release_dir: ${release_dir}"
 
-    release_url="${RELEASE_HOST}/${release_dir}"
+    release_url="${ARCHIVE_HOST}/${release_dir}"
     loggy "release_url: ${release_url}"
 
     target_file="libdap-${libdap_version}.${larch}.x86_64.rpm"
@@ -707,11 +707,11 @@ function s3_get_olfs_distro() {
     loggy "${HR}"
     loggy "$prolog BEGIN"
     local s3_bucket="${1}"
-    loggy "$prolog         s3_bucket: ${s3_bucket}"
+    loggy "$prolog    s3_bucket: ${s3_bucket}"
     local target_dir="${2}"
-    loggy "$prolog        target_dir: ${target_dir}"
+    loggy "$prolog   target_dir: ${target_dir}"
     local olfs_version="${3}"
-    loggy "$prolog      olfs_version: ${olfs_version}"
+    loggy "$prolog olfs_version: ${olfs_version}"
 
     set -e
     loggy "$prolog Cleaning up..."
@@ -739,17 +739,18 @@ function s3_get_olfs_distro() {
 #    $3 - The olfs version number ##.##.##-##
 #
 function s3_get_build_dmrpp_distro() {
+    local prolog="s3_get_build_dmrpp_distro() -"
     loggy "${HR}"
-    loggy "TASK: s3_get_build_dmrpp_distro()"
+    loggy "$prolog BEGIN"
     local s3_bucket="${1}"
-    loggy "          s3_bucket: ${s3_bucket}"
+    loggy "$prolog           s3_bucket: ${s3_bucket}"
     local target_dir="${2}"
-    loggy "         target_dir: ${target_dir}"
+    loggy "$prolog          target_dir: ${target_dir}"
     local build_dmrpp_version="${3}"
-    loggy "build_dmrpp_version: ${build_dmrpp_version}"
+    loggy "$prolog build_dmrpp_version: ${build_dmrpp_version}"
 
     set -e
-    loggy "Cleaning up..."
+    loggy "$prolog Cleaning up..."
     rm -fv "${target_dir}/build_dmrpp*.tgz"
 
     loggy ""
@@ -759,31 +760,32 @@ function s3_get_build_dmrpp_distro() {
 
     set +e
     loggy ""
+    loggy "$prolog END"
     return 0
 }
 
 
 ################################################################################
 #
-# woo_get_olfs_distro() - Get the rpm and war files need for a Hyrax installation
+# curl_get_olfs_distro() - Get the rpm and war files need for a Hyrax installation
 #    from the identified S3 bucket.
-#    $1 - The AWS S3 bucket from which to pull the Hyrax components
 #    $2 - The directory into which to place the Hyrax components.
 #    $3 - The olfs version number ##.##.##-##
 #
-function woo_get_olfs_distro() {
+function curl_get_olfs_distro() {
+    local prolog="curl_get_olfs_distro() -"
     loggy "${HR}"
-    loggy "TASK: woo_get_olfs_distro()"
+    loggy "$prolog BEGIN"
     local target_dir="${1}"
-    loggy "        target_dir: ${target_dir}"
+    loggy "$prolog         target_dir: ${target_dir}"
     local olfs_version="${2}"
-    loggy "      olfs_version: ${olfs_version}"
+    loggy "$prolog      olfs_version: ${olfs_version}"
 
-    release_url="${RELEASE_HOST}/pub/olfs"
-    loggy "release_url: ${release_url}"
+    release_url="${ARCHIVE_HOST}/pub/olfs"
+    loggy "$prolog release_url: ${release_url}"
 
     set -e
-    loggy "Cleaning up..."
+    loggy "$prolog Cleaning up..."
     rm -fv "${target_dir}/olfs*.tgz"
     rm -fv "${target_dir}/robots-olfs*.tgz"
 
@@ -795,6 +797,7 @@ function woo_get_olfs_distro() {
 
     set +e
     loggy ""
+    loggy "$prolog END"
     return 0
 }
 
@@ -808,17 +811,18 @@ function woo_get_olfs_distro() {
 #    $3 - The olfs version number ##.##.##-##
 #
 function get_ngap_olfs_distro() {
+    local prolog="get_ngap_olfs_distro() -"
     loggy "${HR}"
-    loggy "TASK: get_ngap_olfs_distro()"
+    loggy "$prolog BEGIN"
     local s3_bucket="${1}"
-    loggy "         s3_bucket: ${s3_bucket}"
+    loggy "$prolog          s3_bucket: ${s3_bucket}"
     local target_dir="${2}"
-    loggy "        target_dir: ${target_dir}"
+    loggy "$prolog         target_dir: ${target_dir}"
     local olfs_version="${3}"
-    loggy "      olfs_version: ${olfs_version}"
+    loggy "$prolog       olfs_version: ${olfs_version}"
 
     set -e
-    loggy "Cleaning up..."
+    loggy "$prolog Cleaning up..."
     rm -fv "${target_dir}/ngap*.tgz"
 
     loggy ""
@@ -828,6 +832,8 @@ function get_ngap_olfs_distro() {
 
     set +e
     loggy ""
+    loggy "$prolog END"
+
     return 0
 }
 
