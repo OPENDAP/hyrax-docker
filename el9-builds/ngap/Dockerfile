@@ -168,6 +168,7 @@ RUN set -e \
     && echo "$HR" \
     && echo "# It's Java Time Witches!" \
     && echo "# Installing $java_version" \
+ #    && dnf install -y "$java_version" "$java_version-devel"  \
     && dnf install -y "$java_version"  \
     && echo "$HR2" \
     && echo "# Using $java_version" \
@@ -270,7 +271,7 @@ RUN set -e && systemctl enable tomcat >&2
 
 ENV CATALINA_HOME="/usr/share/tomcat"
 ENV PATH="$CATALINA_HOME/bin:$PATH"
-RUN set -e && echo "# CATALINA_HOME: ${CATALINA_HOME}" >&2
+RUN set -e && echo "CATALINA_HOME: ${CATALINA_HOME}" >&2
 
 # Install our modified server.xml so that the server compresses responses.
 COPY tomcat11-server.xml /
