@@ -233,7 +233,7 @@ RUN set -e \
     && echo "# Installing the openssl3 rpms" >&2 \
     #&& ls -l ./openssl* \
     && dnf -y info openssl \
-    && dnf -y install openssl \
+    && dnf -y install openssl openssl-devel \
     && echo "# openssl version: $(openssl version)" \
     #&& rm -vf ./openssl*
     && echo "# openssl is installed."
@@ -300,9 +300,7 @@ RUN set -e \
     && echo "$HR" \
     && tar -xf "/${CATALINA_HOME}/bin/tomcat-native.tar.gz" -C ${CATALINA_HOME}/bin >&2 \
     && echo "$HR" \
-    && ls -l ${CATALINA_HOME}/bin >&2 \
-    && ls -l ${CATALINA_HOME}/bin/* >&2 \
-#    && ls -l ${CATALINA_HOME}/bin/tomcat-native-2.0.9-src >&2 \
+#    && ls -l ${CATALINA_HOME}/bin/tomcat-native-*-src >&2 \
     && cd ${CATALINA_HOME}/bin/tomcat-native-*-src/native >&2 \
     && ./configure --with-apr=/usr/bin >&2 \
     && make >&2 \
