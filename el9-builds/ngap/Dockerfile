@@ -27,7 +27,9 @@ RUN echo "$HR" && echo "# Python Version: $(python3 --version) (config says we w
 
 ENV core_dnf_packages="which unzip "
 
+# The CRB (CodeReady Builder) repository has to be enabled to get the libtirpc-devel package.
 ENV developer_dnf_packages="libtirpc libtirpc-devel libuuid libuuid-devel openssl openssl-devel"
+
 #ENV developer_dnf_packages="procps diffutils curl unzip emacs vim jq procps git bc valgrind gdb"
 ENV awscli_dnf_packages=""
 #ENV awscli_dnf_packages="awscli"
@@ -181,7 +183,8 @@ RUN set -e \
 
 RUN set -e \
     && echo "$HR" \
-    && echo "# Installing 'dnf-plugins-core' and 'Development Tools'" >&2 \
+    # The CRB (CodeReady Builder) repository has to be enabled to get the libtirpc-devel package.
+    && echo "# Installing 'dnf-plugins-core', enabling CRB (CodeReady Builder) repository and installing 'Development Tools'" >&2 \
     && dnf install -y dnf-plugins-core \
     && dnf config-manager --set-enabled crb \
     && dnf groupinstall "Development Tools" -y \
