@@ -209,6 +209,12 @@ RUN set -e \
     && echo "# rpm -ql libtirpc: " \
     && echo "$(rpm -ql libtirpc)" \
     && echo "$HR" \
+    && echo "# libtirpc-devel info:" \
+    && dnf -y info libtirpc-devel \
+    && echo "$HR2" \
+    && echo "# rpm -ql libtirpc-devel: " \
+    && echo "$(rpm -ql libtirpc-devel)" \
+    && echo "$HR" \
     && echo "# libuuid info:" \
     && dnf -y info libuuid \
     && echo "# libuuid-devel info:" \
