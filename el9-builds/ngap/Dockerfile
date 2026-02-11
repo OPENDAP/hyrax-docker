@@ -286,6 +286,10 @@ RUN set -e \
 
 # Install the Tomcat Native-APR library.
 #
+RUN set -e && dnf install -y dnf-plugins-core \
+    && dnf config-manager --set-enabled crb \
+    && dnf groupinstall "Development Tools" -y
+
 RUN set -e \
     && echo "$HR" \
     && echo "# Installing Tomcat Native APR: " \
