@@ -27,7 +27,7 @@ RUN echo "$HR" && echo "# Python Version: $(python3 --version) (config says we w
 
 ENV core_dnf_packages="which unzip "
 
-ENV developer_dnf_packages="libtirpc libuuid libuuid-devel openssl openssl-devel"
+ENV developer_dnf_packages="libtirpc libtirpc-devel libuuid libuuid-devel openssl openssl-devel"
 #ENV developer_dnf_packages="procps diffutils curl unzip emacs vim jq procps git bc valgrind gdb"
 ENV awscli_dnf_packages=""
 #ENV awscli_dnf_packages="awscli"
