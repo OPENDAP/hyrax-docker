@@ -183,6 +183,11 @@ RUN set -e \
 
 RUN set -e \
     && echo "$HR" \
+    && echo "# Installing 'dnf-plugins-core' and 'Development Tools'" >&2 \
+    && dnf install -y dnf-plugins-core \
+    && dnf config-manager --set-enabled crb \
+    && dnf groupinstall "Development Tools" -y \
+    && echo "$HR" \
     && echo "# Installing dnf packages..." \
     && dnf info  $core_dnf_packages $developer_dnf_packages $awscli_dnf_packages \
     && dnf install -y $core_dnf_packages $developer_dnf_packages $awscli_dnf_packages \
@@ -208,11 +213,7 @@ RUN set -e \
     && dnf -y info libuuid \
     && echo "# libuuid-devel info:" \
     && dnf -y info libuuid-devel \
-    && echo "$HR" \
-    && echo "# Installing 'dnf-plugins-core' and 'Development Tools'" >&2 \
-    && dnf install -y dnf-plugins-core \
-    && dnf config-manager --set-enabled crb \
-    && dnf groupinstall "Development Tools" -y \
+    && dnf clean all \
     && echo "$HR"
 
 
