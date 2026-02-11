@@ -142,7 +142,7 @@ USER root
 ARG DEVELOPER_MODE
 ENV DEVELOPER_MODE="${DEVELOPER_MODE:-"false"}"
 RUN set -e && \
-    if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else echo "DEVELOPER_MODE: DISABLED"; fi
+    if [ $DEVELOPER_MODE = "true" ];then echo "# DEVELOPER_MODE: ENABLED"; else echo "# DEVELOPER_MODE: DISABLED"; fi
 
 ################################################################
 # Update and install the needful.
@@ -206,35 +206,34 @@ RUN set -e \
 # Install the latest libdap snapshot
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 RUN set -e \
-    && echo "Installing the libdap rpm: ${LIBDAP_RPM}" >&2 \
+    && echo "# Installing the libdap rpm: ${LIBDAP_RPM}" >&2 \
     && ls -l ./libdap* \
     && dnf -y install ./libdap-*.rpm \
-    && rm -f ./${LIBDAP_RPM}
-
-RUN echo "libdap4 is installed."
+    && rm -f ./${LIBDAP_RPM} \
+    && echo "# libdap4 is installed."
 
 ################################################################
 # Install the latest BES snapshot
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 RUN set -e \
-    && echo "Installing the latest BES rpm: ${BES_RPM}" >&2 \
+    && echo "# Installing the BES rpm: ${BES_RPM}" >&2 \
     && ls -l ./bes* \
     && dnf -y install ./bes-*.rpm \
-    && rm -f ./${BES_RPM}
-
-RUN echo "besdaemon is here: "`which besdaemon`
+    && rm -f ./${BES_RPM} \
+    && echo "# besdaemon is here: $(which besdaemon)" \
+    && echo "# besdaemon -v: $(besdaemon -v)"
 
 ################################################################
 # Install the latest openssl3
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 RUN set -e \
-    && echo "Installing the openssl3 rpms" >&2 \
+    && echo "# Installing the openssl3 rpms" >&2 \
     #&& ls -l ./openssl* \
     && dnf -y info openssl \
     && dnf -y install openssl \
     && echo "# openssl version: $(openssl version)" \
     #&& rm -vf ./openssl*
-    && echo "openssl is installed."
+    && echo "# openssl is installed."
 
 ################################################################
 # Install the Apache-Portable-Runtime (Apache APR)
