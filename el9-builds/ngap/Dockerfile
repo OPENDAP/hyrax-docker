@@ -232,8 +232,7 @@ RUN set -e \
     #&& ls -l ./openssl* \
     && dnf -y install openssl3 \
     #&& rm -vf ./openssl*
-
-RUN echo "openssl is installed."
+    && echo "openssl is installed."
 
 ################################################################
 # Install the Apache-Portable-Runtime (Apache APR)
