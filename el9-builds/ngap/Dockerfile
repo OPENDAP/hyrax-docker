@@ -169,7 +169,7 @@ RUN set -e \
     && echo "# It's Java Time Witches!" \
     && echo "# Installing $java_version" \
  #    && dnf install -y "$java_version" "$java_version-devel"  \
-    && dnf install -y "$java_version"  \
+    && dnf install -y "$java_version" "$java_version-devel" \
     && echo "$HR2" \
     && echo "# Using $java_version" \
     && update-alternatives --set java "$java_version.$ARCH" \
@@ -299,7 +299,7 @@ RUN set -e \
     && ls -l ${CATALINA_HOME}/bin >&2 \
     && ls -l ${CATALINA_HOME}/bin/* >&2 \
 #    && ls -l ${CATALINA_HOME}/bin/tomcat-native-2.0.9-src >&2 \
-    && cd ${CATALINA_HOME}/bin/tomcat-native-2.0.9-src/native >&2 \
+    && cd ${CATALINA_HOME}/bin/tomcat-native-*-src/native >&2 \
     && ./configure --with-apr=/usr/bin >&2 \
     && make >&2 \
     && make install >&2 \
