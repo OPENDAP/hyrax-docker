@@ -14,7 +14,27 @@
 #
 # Set one or more individual labels
 FROM rockylinux:9
+LABEL org.opencontainers.image.authors="support@opendap.org"
+USER root
+ENV HR="######################################################"
+ENV HR2="-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --"
 ENV TARGET_OS="el9"
+ENV ARCH="x86_64"
+ENV java_version="java-21-openjdk"
+# rocky9 comes with python 3.9 by default.
+ENV python_version="3.9"
+RUN echo "$HR" && echo "# Python Version: $(python3 --version) (config says we want: $python_version)" && echo "$HR"
+
+ENV core_dnf_packages="which unzip libtirpc procps libuuid"
+# openssl-devel
+
+ENV developer_dnf_packages=""
+#ENV developer_dnf_packages="procps diffutils curl unzip emacs vim jq procps git bc valgrind gdb"
+ENV awscli_dnf_packages=""
+#ENV awscli_dnf_packages="awscli"
+
+
+
 
 # ENV DEPLOYMENT_CONTEXT="ROOT"
 ENV DEFAULT_NGAP_DEPLOYMENT_CONTEXT="ngap"
@@ -125,36 +145,56 @@ RUN set -e && \
 # Travis build (or at a later time). They need to be part of the container,
 # however, to be run, so install them as part of this Dockerfile.
 RUN set -e && dnf update  -y
-RUN set -e && dnf install -y python3.11 \
-    && python3 --version \
-    && curl --version
 
-ENV dev_packages="jq diffutils git bc valgrind gdb"
-ENV linux_packages="libtirpc libtirpc-devel procps libuuid libuuid-devel"
+#RUN set -e && dnf install -y dnf-plugins-core \
+#    && dnf config-manager --set-enabled crb \
+#    && dnf groupinstall "Development Tools" -y
+
+RUN set -e \
+    && echo "$HR" \
+    && echo "# Installing cURL" \
+    && yum install -y curl curl-devel --allowerasing \
+    && echo "# cURL version: $(curl --version)" \
+    && dnf clean all \
+    && echo "$HR"
+
+RUN set -e \
+    && echo "$HR" \
+    && echo "# It's Java Time Witches!" \
+    && echo "# Installing $java_version" \
+    && yum install -y "$java_version" "$java_version-devel"  \
+    && echo "$HR2" \
+    && echo "# Using $java_version" \
+    && update-alternatives --set java "$java_version.$ARCH" \
+    && echo "# Enabled $java_version" \
+    && echo "# java version: $( java -version 2>&1 )" \
+    && update-alternatives --list \
+#    && dnf install -y tzdata-java \
+    && dnf clean all \
+    && echo "$HR"
+
+RUN set -e \
+    && echo "$HR" \
+    && echo "# Installing dnf packages..." \
+    && dnf install -y $core_dnf_packages $developer_dnf_packages $awscli_dnf_packages \
+    && dnf clean all \
+    && echo "$HR"
+
+
+
+
+
 
 #RUN set -e && dnf install -y make curl unzip which autoconf automake emacs vim jq \
-RUN set -e && dnf install -y dnf-plugins-core \
-    && dnf config-manager --set-enabled crb \
-    && dnf groupinstall "Development Tools" -y \
-    && dnf install -y libtirpc libtirpc-devel \
-    && dnf install -y libuuid libuuid-devel \
-    && dnf install -y jq \
-    && dnf install -y diffutils \
-    && dnf install -y procps \
-    && dnf install -y git bc valgrind gdb \
-    && dnf install -y java-17-openjdk-devel \
-    && dnf install -y redhat-rpm-config
+#    && dnf install -y libtirpc libtirpc-devel \
+#    && dnf install -y libuuid libuuid-devel \
+#    && dnf install -y jq \
+#    && dnf install -y diffutils \
+#    && dnf install -y procps \
+#    && dnf install -y git bc valgrind gdb \
+#    && dnf install -y java-17-openjdk-devel \
+#    && dnf install -y redhat-rpm-config
 #    && dnf install -y openssl-devel
-# Temporary Hack to fix broken OpenJDK-11.0.20.0.8-2
-RUN set -e && dnf install -y tzdata-java
-# Temporary Hack to add missing Apache Portable Runtime library for Tomcat
-#
-RUN set -e && dnf clean all
-#
-#RUN set -e && curl -sS https://bootstrap.pypa.io/get-pip.py | python3 \
-#    && python3 -m pip install --upgrade pip \
-#    && python3 -m pip install awscli
-RUN set -e && dnf install -y awscli && dnf clean all
 
 ################################################################
 # Install the latest libdap snapshot
