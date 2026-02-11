@@ -232,6 +232,7 @@ RUN set -e \
     #&& ls -l ./openssl* \
     && dnf -y info openssl \
     && dnf -y install openssl \
+    && echo "# openssl version: $(openssl version)" \
     #&& rm -vf ./openssl*
     && echo "openssl is installed."
 
