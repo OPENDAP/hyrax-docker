@@ -178,8 +178,6 @@ RUN set -e \
 #    && dnf install -y tzdata-java \
     && dnf clean all \
     && echo "$HR" \
-    && dnf search java-21 \
-    && echo "$HR"
 
 RUN set -e \
     && echo "$HR" \
@@ -294,7 +292,7 @@ RUN set -e && systemctl enable tomcat >&2
 
 ENV CATALINA_HOME="/usr/share/tomcat"
 ENV PATH="$CATALINA_HOME/bin:$PATH"
-RUN set -e && echo "CATALINA_HOME: ${CATALINA_HOME}" >&2
+RUN set -e && echo "# CATALINA_HOME: ${CATALINA_HOME}" >&2
 
 # Install our modified server.xml so that the server compresses responses.
 COPY tomcat11-server.xml /
