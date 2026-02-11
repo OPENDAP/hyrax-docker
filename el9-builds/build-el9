@@ -189,13 +189,15 @@ function get_tomcat_tag_names(){
 # https://github.com/apache/tomcat
 #
 function get_latest_tomcat_version_number(){
-    local tomcat_major_version="${1}"
+    local prolog="get_latest_tomcat_version_number() -"
+    loggy "$prolog BEGIN"
 
+    local tomcat_major_version="${1}"
     local release_endpoint_base="https://dlcdn.apache.org/tomcat/tomcat"
-    loggy "Tomcat release_endpoint_base: $release_endpoint_base"
+    loggy "$prolog Tomcat release_endpoint_base: $release_endpoint_base"
 
     local tomcat_gh_repo="https://api.github.com/repos/apache/tomcat/tags?per_page=100"
-    loggy "Tomcat tomcat_gh_repo: $tomcat_gh_repo"
+    loggy "$prolog Tomcat tomcat_gh_repo: $tomcat_gh_repo"
 
     local retry=true
     local ignore_list=
@@ -206,33 +208,33 @@ function get_latest_tomcat_version_number(){
     while $retry ; do
         tomcat_major_version_list=$(echo "${tomcat_tags}" | grep "^${tomcat_major_version}" )
 
-        loggy "tomcat_major_version_list: "
+        loggy "$prolog tomcat_major_version_list: "
         loggy "${tomcat_major_version_list}"
 
         local tomcat_version=""
         if test -n "${ignore_list}" ; then
-            loggy "Using ignore_list: '${ignore_list}'"
+            loggy "$prolog Using ignore_list: '${ignore_list}'"
             tomcat_version=$(echo "${tomcat_major_version_list}" | \
             grep -v ${ignore_list} | \
             tail -n 1 )
         else
-            loggy "The ignore_list is empty."
+            loggy "$prolog The ignore_list is empty."
             tomcat_version=$(echo "${tomcat_major_version_list}" | \
             tail -n 1 )
         fi
-        loggy "Candidate tomcat_version: ${tomcat_version}"
+        loggy "$prolog Candidate tomcat_version: ${tomcat_version}"
 
         local release_endpoint_url="${release_endpoint_base}-${tomcat_major_version}/v${tomcat_version}"
-        loggy "release_endpoint_url=${release_endpoint_url}"
+        loggy "$prolog release_endpoint_url=${release_endpoint_url}"
 
         stat=$(curl -s -o /dev/null -w "%{response_code}" "${release_endpoint_url}")
         if test $stat -eq 404 ; then
-            loggy "Candidate tomcat_version: ${tomcat_version} not found on download site: ${release_endpoint_url} "
+            loggy "$prolog Candidate tomcat_version: ${tomcat_version} not found on download site: ${release_endpoint_url} "
             if test -n "${tomcat_version}"; then
                 ignore_list+="${ignore_list}  -e ${tomcat_version} "
             else
-                loggy "ERROR: The tomcat_version is inexplicably empty. Exiting."
-                loggy "FAILED_TO_LOCATE_TOMCAT_VERSION"
+                loggy "$prolog ERROR: The tomcat_version is inexplicably empty. Exiting."
+                loggy "$prolog FAILED_TO_LOCATE_TOMCAT_VERSION"
                 return 1;
             fi
             retry=true
@@ -241,7 +243,8 @@ function get_latest_tomcat_version_number(){
             ignore_list=
         fi
     done
-    loggy "  Using tomcat_version: ${tomcat_version} "
+    loggy "$prolog Using tomcat_version: ${tomcat_version} "
+    loggy "$prolog END"
     echo "${tomcat_version}"
 }
 

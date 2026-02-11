@@ -172,7 +172,7 @@ jobs:
           "$DOCKER_DIR"
         - docker image ls -a
 
-    - stage: BUILD_AND_TEST
+    - stage: disabled
       name: "Build opendap/hyrax:ngap"
       script:
         - cd "$TARGET_OS-builds"
@@ -206,29 +206,16 @@ jobs:
           "$DOCKER_DIR"
         - docker image ls -a
 
-    - stage: disabled
-      name: "Build opendap/olfs"
+
+    - stage: BUILD_AND_TEST
+      name: "Build opendap/hyrax:ngap"
       script:
         - cd "$TARGET_OS-builds"
-        - export DOCKER_NAME="olfs"
-        - export DOCKER_DIR="olfs"
-        - source "./build-$TARGET_OS"
-        - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
-        - show_version
-        - get_tomcat_distro "${DOCKER_DIR}" "${TOMCAT_VERSION}"
-        - s3_get_olfs_distro
-          "${S3_BUILD_BUCKET}"
-          "$DOCKER_DIR"
-          "${OLFS_VERSION}" 2>&1
-        - docker build
-          --build-arg TOMCAT_VERSION
-          --build-arg RELEASE_DATE
-          --build-arg HYRAX_VERSION
-          --build-arg OLFS_VERSION
-          --tag "${SNAPSHOT_IMAGE_TAG}"
-          --tag "${BUILD_VERSION_TAG}" olfs
+        - export DOCKER_NAME="ngap"
+        - export DOCKER_DIR="ngap"
+        - ./build-redis-ngap.sh
         - docker image ls -a
-
+        -
     - stage: TEST_DEPLOYED_IMAGE
       name: "Test Deployed Image (RH8)"
       script:
