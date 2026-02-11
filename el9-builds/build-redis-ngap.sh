@@ -44,6 +44,7 @@ s3_get_openssl_distro \
     "$TARGET_OS" \
     "$ADD_DEBUG_RPMS"
 #
+set -e
 docker build \
        --build-arg TOMCAT_VERSION \
        --build-arg RELEASE_DATE \
@@ -56,5 +57,6 @@ docker build \
        --tag "${BUILD_VERSION_TAG}" \
        "${DOCKER_NAME}"
 #
+set +e
 
 loggy "$(docker image ls -a)"
