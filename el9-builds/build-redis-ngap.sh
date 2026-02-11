@@ -11,8 +11,8 @@ TOMCAT_VERSION="$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")"
 export APR_VERSION="1.7.6-1"
 loggy "APR_VERSION: $APR_VERSION"
 #
-export OPENSSL_VERSION="3.5.0-4"
-loggy "OPENSSL_VERSION: $OPENSSL_VERSION"
+#export OPENSSL_VERSION="3.5.0-4"
+#loggy "OPENSSL_VERSION: $OPENSSL_VERSION"
 #
 show_version
 #

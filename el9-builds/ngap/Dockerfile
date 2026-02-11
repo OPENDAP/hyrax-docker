@@ -201,7 +201,8 @@ RUN set -e \
     && echo "# libtirpc info:" \
     && dnf -y info libtirpc \
     && echo "$HR2" \
-    && echo "rpm -ql package_name: $(rpm -ql package_name)" \
+    && echo "# rpm -ql libtirpc: " \
+    && echo "$(rpm -ql libtirpc)" \
     && echo "$HR" \
     && echo "# libuuid info:" \
     && dnf -y info libuuid \
