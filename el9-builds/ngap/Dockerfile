@@ -229,9 +229,9 @@ RUN echo "besdaemon is here: "`which besdaemon`
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 RUN set -e \
     && echo "Installing the openssl3 rpms" >&2 \
-    && ls -l ./openssl* \
-    && dnf -y install ./openssl-*.rpm \
-    && rm -vf ./openssl*
+    #&& ls -l ./openssl* \
+    && dnf -y install openssl3 \
+    #&& rm -vf ./openssl*
 
 RUN echo "openssl is installed."
 
