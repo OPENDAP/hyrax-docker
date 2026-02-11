@@ -25,7 +25,7 @@ ENV java_version="java-21-openjdk"
 ENV python_version="3.9"
 RUN echo "$HR" && echo "# Python Version: $(python3 --version) (config says we want: $python_version)" && echo "$HR"
 
-ENV core_dnf_packages="which unzip libtirpc procps libuuid"
+ENV core_dnf_packages="which unzip libtirpc libuuid"
 # openssl-devel
 
 ENV developer_dnf_packages=""
@@ -107,8 +107,14 @@ COPY ${NGAP_DISTRO}.tgz /${NGAP_DISTRO}.tgz
 
 ARG OPENSSL_VERSION
 ENV OPENSSL_RPM="${OPENSSL_RPM:-"openssl-$OPENSSL_VERSION.$TARGET_OS.x86_64.rpm"}"
-RUN echo "# OPENSSL_RPM: $OPENSSL_RPM"
+RUN echo "#       OPENSSL_RPM: $OPENSSL_RPM"
 COPY "$OPENSSL_RPM" /
+ENV OPENSSL_LIBS_RPM="${OPENSSL_RPM:-"openssl-libs-$OPENSSL_VERSION.$TARGET_OS.x86_64.rpm"}"
+RUN echo "#  OPENSSL_LIBS_RPM: $OPENSSL_LIBS_RPM"
+COPY "$OPENSSL_LIBS_RPM" /
+ENV OPENSSL_DEVEL_RPM="${OPENSSL_RPM:-"openssl-devel-$OPENSSL_VERSION.$TARGET_OS.x86_64.rpm"}"
+RUN echo "# OPENSSL_DEVEL_RPM: $OPENSSL_DEVEL_RPM"
+COPY "$OPENSSL_DEVEL_RPM" /
 RUN ls -l /openssl-* >&2
 
 ARG APR_VERSION
