@@ -184,10 +184,12 @@ RUN set -e \
 RUN set -e \
     && echo "$HR" \
     && echo "# Installing dnf packages..." \
+    && dnf info  $core_dnf_packages $developer_dnf_packages $awscli_dnf_packages \
     && dnf install -y $core_dnf_packages $developer_dnf_packages $awscli_dnf_packages \
     && dnf clean all \
     && echo "$HR"
 
+# The follow is a sanity check so that we can see what we got.
 RUN set -e \
     && echo "$HR" \
     && echo "# openssl is located here: $(which openssl)" \
@@ -198,11 +200,15 @@ RUN set -e \
     && echo "$HR" \
     && echo "# libtirpc info:" \
     && dnf -y info libtirpc \
+    && echo "# libtirpc-devel info:" \
+    && dnf -y info libtirpc-devel \
     && echo "$HR" \
     && echo "# libuuid info:" \
     && dnf -y info libuuid \
+    && echo "# libuuid-devel info:" \
+    && dnf -y info libuuid-devel \
     && echo "$HR" \
-    && echo "# Installing dnf-plugins-core and 'Development Tools'" >&2 \
+    && echo "# Installing 'dnf-plugins-core' and 'Development Tools'" >&2 \
     && dnf install -y dnf-plugins-core \
     && dnf config-manager --set-enabled crb \
     && dnf groupinstall "Development Tools" -y \
