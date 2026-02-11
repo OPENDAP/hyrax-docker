@@ -191,14 +191,17 @@ RUN set -e \
 
 RUN set -e \
     && echo "$HR" \
-    && echo "# Installing openssl" >&2 \
-    #&& ls -l ./openssl* \
-    && dnf -y install openssl openssl-devel \
     && echo "# openssl is located here: $(which openssl)" \
     && echo "# openssl version: $(openssl version)" \
     && dnf -y info openssl \
     #&& rm -vf ./openssl*
     && echo "# openssl is installed." \
+    && echo "$HR" \
+    && echo "# libtirpc info:" \
+    && dnf -y info libtirpc \
+    && echo "$HR" \
+    && echo "# libuuid info:" \
+    && dnf -y info libuuid \
     && echo "$HR" \
     && echo "# Installing dnf-plugins-core and 'Development Tools'" >&2 \
     && dnf install -y dnf-plugins-core \
