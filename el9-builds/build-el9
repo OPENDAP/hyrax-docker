@@ -696,7 +696,31 @@ function woo_get_besd_distro() {
     return 0
 }
 
+function s3_get_olfs_ngap_distro() {
+    local prolog="s3_get_olfs_ngap_distro() -"
+    loggy "${HR}"
+    loggy "$prolog BEGIN"
+    local s3_bucket="${1}"
+    loggy "$prolog    s3_bucket: ${s3_bucket}"
+    local target_dir="${2}"
+    loggy "$prolog   target_dir: ${target_dir}"
+    local ngap_version="${3}"
+    loggy "$prolog ngap_version: ${ngap_version}"
 
+    set -e
+    loggy "$prolog Cleaning up..."
+    rm -fv "${target_dir}/nap*.tgz"
+
+    loggy ""
+    s3_pull "${s3_bucket}" \
+            "ngap-${ngap_version}-webapp.tgz" \
+            "${target_dir}"
+
+    set +e
+    loggy "$prolog END"
+    return 0
+
+}
 ################################################################################
 #
 # s3_get_olfs_distro() - Get the rpm and war files need for a Hyrax installation

@@ -21,28 +21,28 @@ get_tomcat_distro "$DOCKER_NAME" "$TOMCAT_VERSION"
 
 s3_get_besd_distro \
     "$S3_BUILD_BUCKET" \
-    "$DOCKER_NAME" \
+    "$DOCKER_DIR" \
     "$TARGET_OS" \
     "$LIBDAP_VERSION" \
     "$BES_VERSION" "$ADD_DEBUG_RPMS"
 #
 s3_get_apache_apr_distro \
     "$S3_BUILD_BUCKET" \
-    "$DOCKER_NAME" \
+    "$DOCKER_DIR" \
     "$APR_VERSION" \
     "$ADD_DEBUG_RPMS"
 
-s3_get_olfs_distro \
+s3_get_olfs_ngap_distro \
   "$S3_BUILD_BUCKET" \
-  "$DOCKER_NAME" \
+  "$DOCKER_DIR" \
   "$OLFS_VERSION" 2>&1
 
 s3_get_openssl_distro \
-    "${S3_BUILD_BUCKET}" \
-    "${DOCKER_NAME}" \
-    "${OPENSSL_VERSION}" \
+    "$S3_BUILD_BUCKET" \
+    "$DOCKER_DIR" \
+    "$OPENSSL_VERSION" \
     "$TARGET_OS" \
-    "${ADD_DEBUG_RPMS}"
+    "$ADD_DEBUG_RPMS"
 #
 docker build \
        --build-arg TOMCAT_VERSION \
