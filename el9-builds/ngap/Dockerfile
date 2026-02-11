@@ -25,10 +25,9 @@ ENV java_version="java-21-openjdk"
 ENV python_version="3.9"
 RUN echo "$HR" && echo "# Python Version: $(python3 --version) (config says we want: $python_version)" && echo "$HR"
 
-ENV core_dnf_packages="which unzip libtirpc libtirpc-devel libuuid libuuid-develn openssl openssl-devel"
-# openssl-devel
+ENV core_dnf_packages="which unzip "
 
-ENV developer_dnf_packages=""
+ENV developer_dnf_packages="libtirpc libtirpc-devel libuuid libuuid-devel openssl openssl-devel"
 #ENV developer_dnf_packages="procps diffutils curl unzip emacs vim jq procps git bc valgrind gdb"
 ENV awscli_dnf_packages=""
 #ENV awscli_dnf_packages="awscli"
@@ -105,17 +104,17 @@ RUN echo "# NGAP_DISTRO: ${NGAP_DISTRO}"
 COPY ${NGAP_DISTRO}.tgz /${NGAP_DISTRO}.tgz
 
 
-ARG OPENSSL_VERSION
-ENV OPENSSL_RPM="openssl-$OPENSSL_VERSION.$TARGET_OS.x86_64.rpm"
-RUN echo "#       OPENSSL_RPM: $OPENSSL_RPM"
-COPY "$OPENSSL_RPM" /
-ENV OPENSSL_LIBS_RPM="openssl-libs-$OPENSSL_VERSION.$TARGET_OS.x86_64.rpm"
-RUN echo "#  OPENSSL_LIBS_RPM: $OPENSSL_LIBS_RPM"
-COPY "$OPENSSL_LIBS_RPM" /
-ENV OPENSSL_DEVEL_RPM="openssl-devel-$OPENSSL_VERSION.$TARGET_OS.x86_64.rpm"
-RUN echo "# OPENSSL_DEVEL_RPM: $OPENSSL_DEVEL_RPM"
-COPY "$OPENSSL_DEVEL_RPM" /
-RUN ls -l /openssl-* >&2
+#ARG OPENSSL_VERSION
+#ENV OPENSSL_RPM="openssl-$OPENSSL_VERSION.$TARGET_OS.x86_64.rpm"
+#RUN echo "#       OPENSSL_RPM: $OPENSSL_RPM"
+#COPY "$OPENSSL_RPM" /
+#ENV OPENSSL_LIBS_RPM="openssl-libs-$OPENSSL_VERSION.$TARGET_OS.x86_64.rpm"
+#RUN echo "#  OPENSSL_LIBS_RPM: $OPENSSL_LIBS_RPM"
+#COPY "$OPENSSL_LIBS_RPM" /
+#ENV OPENSSL_DEVEL_RPM="openssl-devel-$OPENSSL_VERSION.$TARGET_OS.x86_64.rpm"
+#RUN echo "# OPENSSL_DEVEL_RPM: $OPENSSL_DEVEL_RPM"
+#COPY "$OPENSSL_DEVEL_RPM" /
+#RUN ls -l /openssl-* >&2
 
 ARG APR_VERSION
 ENV APR_VERSION="1.7.6-1"
@@ -246,9 +245,6 @@ RUN set -e \
     && echo "# besdaemon is here: $(which besdaemon)" \
     && echo "# besdaemon -v: $(besdaemon -v)"
 
-################################################################
-# Install the latest openssl3
-#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 
 ################################################################
 # Install the Apache-Portable-Runtime (Apache APR)

@@ -37,12 +37,12 @@ s3_get_olfs_ngap_distro \
   "$DOCKER_DIR" \
   "$OLFS_VERSION" 2>&1
 
-s3_get_openssl_distro \
-    "$S3_BUILD_BUCKET" \
-    "$DOCKER_DIR" \
-    "$OPENSSL_VERSION" \
-    "$TARGET_OS" \
-    "$ADD_DEBUG_RPMS"
+#s3_get_openssl_distro \
+#    "$S3_BUILD_BUCKET" \
+#    "$DOCKER_DIR" \
+#    "$OPENSSL_VERSION" \
+#    "$TARGET_OS" \
+#    "$ADD_DEBUG_RPMS"
 #
 set -e
 docker build \
