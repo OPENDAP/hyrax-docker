@@ -200,6 +200,8 @@ RUN set -e \
     && echo "$HR" \
     && echo "# libtirpc info:" \
     && dnf -y info libtirpc \
+    && echo "$HR2" \
+    && echo "rpm -ql package_name: $(rpm -ql package_name)" \
     && echo "$HR" \
     && echo "# libuuid info:" \
     && dnf -y info libuuid \
@@ -302,7 +304,7 @@ RUN set -e \
     && echo "$HR" \
     && echo "# Installing Tomcat Native APR: " \
     && export JAVA_HOME="$(dirname $(dirname $(readlink -f $(which javac))))" >&2 \
-    && echo "# JAVA_HOME $JAVA_HOME" >&2 \
+    && echo "# JAVA_HOME: $JAVA_HOME" >&2 \
     && echo "$HR" \
     && ls -l ${CATALINA_HOME}/bin >&2 \
     && echo "$HR" \
