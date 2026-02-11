@@ -159,7 +159,7 @@ RUN set -e && dnf update  -y
 RUN set -e \
     && echo "$HR" \
     && echo "# Installing cURL" \
-    && yum install -y curl curl-devel --allowerasing \
+    && dnf install -y curl curl-devel --allowerasing \
     && echo "# cURL version: $(curl --version)" \
     && dnf clean all \
     && echo "$HR"
@@ -168,7 +168,7 @@ RUN set -e \
     && echo "$HR" \
     && echo "# It's Java Time Witches!" \
     && echo "# Installing $java_version" \
-    && yum install -y "$java_version" "$java_version-devel"  \
+    && dnf install -y "$java_version" "$java_version-devel"  \
     && echo "$HR2" \
     && echo "# Using $java_version" \
     && update-alternatives --set java "$java_version.$ARCH" \
@@ -177,6 +177,7 @@ RUN set -e \
     && update-alternatives --list \
 #    && dnf install -y tzdata-java \
     && dnf clean all \
+    && dnf search java-21 \
     && echo "$HR"
 
 RUN set -e \
@@ -269,7 +270,7 @@ RUN set -e && systemctl enable tomcat >&2
 
 ENV CATALINA_HOME="/usr/share/tomcat"
 ENV PATH="$CATALINA_HOME/bin:$PATH"
-RUN set -e && echo "CATALINA_HOME: ${CATALINA_HOME}" >&2
+RUN set -e && echo "# CATALINA_HOME: ${CATALINA_HOME}" >&2
 
 # Install our modified server.xml so that the server compresses responses.
 COPY tomcat11-server.xml /
