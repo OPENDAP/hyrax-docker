@@ -178,6 +178,7 @@ RUN set -e \
     && update-alternatives --list \
 #    && dnf install -y tzdata-java \
     && dnf clean all \
+    && echo "$HR" \
     && dnf search java-21 \
     && echo "$HR"
 
@@ -289,16 +290,20 @@ RUN set -e \
     && echo "$HR" \
     && echo "# Installing Tomcat Native APR: " \
     && export JAVA_HOME="$(dirname $(dirname $(readlink -f $(which javac))))" >&2 \
-    && echo "JAVA_HOME ${JAVA_HOME}" >&2 \
+    && echo "# JAVA_HOME $JAVA_HOME" >&2 \
+    && echo "$HR" \
     && ls -l ${CATALINA_HOME}/bin >&2 \
+    && echo "$HR" \
     && tar -xf "/${CATALINA_HOME}/bin/tomcat-native.tar.gz" -C ${CATALINA_HOME}/bin >&2 \
+    && echo "$HR" \
     && ls -l ${CATALINA_HOME}/bin >&2 \
+    && ls -l ${CATALINA_HOME}/bin/* >&2 \
 #    && ls -l ${CATALINA_HOME}/bin/tomcat-native-2.0.9-src >&2 \
     && cd ${CATALINA_HOME}/bin/tomcat-native-2.0.9-src/native >&2 \
     && ./configure --with-apr=/usr/bin >&2 \
     && make >&2 \
     && make install >&2 \
-    && echo "SUCCESS: Tomcat Native-APR Library installed"
+    && echo "# SUCCESS: Tomcat Native-APR Library installed"
 
 ENV CATALINA_OPTS="-Djava.library.path=/usr/local/apr/lib"
 
