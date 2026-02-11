@@ -25,7 +25,7 @@ ENV java_version="java-21-openjdk"
 ENV python_version="3.9"
 RUN echo "$HR" && echo "# Python Version: $(python3 --version) (config says we want: $python_version)" && echo "$HR"
 
-ENV core_dnf_packages="which unzip libtirpc libuuid"
+ENV core_dnf_packages="which unzip libtirpc libtirpc-devel libuuid libuuid-devel"
 # openssl-devel
 
 ENV developer_dnf_packages=""
@@ -189,6 +189,14 @@ RUN set -e \
     && dnf clean all \
     && echo "$HR"
 
+RUN set -e \
+    && echo "# Installing the openssl" >&2 \
+    #&& ls -l ./openssl* \
+    && dnf -y info openssl \
+    && dnf -y install openssl openssl-devel \
+    && echo "# openssl version: $(openssl version)" \
+    #&& rm -vf ./openssl*
+    && echo "# openssl is installed."
 
 
 
@@ -229,14 +237,6 @@ RUN set -e \
 ################################################################
 # Install the latest openssl3
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
-RUN set -e \
-    && echo "# Installing the openssl3 rpms" >&2 \
-    #&& ls -l ./openssl* \
-    && dnf -y info openssl \
-    && dnf -y install openssl openssl-devel \
-    && echo "# openssl version: $(openssl version)" \
-    #&& rm -vf ./openssl*
-    && echo "# openssl is installed."
 
 ################################################################
 # Install the Apache-Portable-Runtime (Apache APR)
