@@ -227,10 +227,6 @@ RUN set -e \
     && echo "$HR" >&2
 
 
-
-
-
-
 #RUN set -e && dnf install -y make curl unzip which autoconf automake emacs vim jq \
 #    && dnf install -y libtirpc libtirpc-devel \
 #    && dnf install -y libuuid libuuid-devel \
@@ -263,6 +259,7 @@ RUN set -e \
     && echo "# Installing the BES rpm: $BES_RPM" >&2 \
     && ls -l ./bes* \
     && dnf -y install ./bes-*.rpm \
+    && echo "# The 'dnf install' command exited with status: $?" >&2 \
     && rm -f "./$BES_RPM" \
     && dnf clean all \
     && echo "# besdaemon is here: $(which besdaemon)" >&2 \
