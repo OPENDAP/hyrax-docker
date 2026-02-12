@@ -336,7 +336,7 @@ ENV CATALINA_OPTS="-Djava.library.path=/usr/local/apr/lib"
 RUN set -e \
     && echo "#########################################################" \
     && echo "# The java executable is here: $(which java)" \
-    && echo "# Using java version: $(java -version)" \
+    && echo "# Using java version: $( java -version 2>&1 )" \
     && echo "#########################################################"
 ################################################################
 # Retrieve, verify, and install the NGAP/OLFS web application
