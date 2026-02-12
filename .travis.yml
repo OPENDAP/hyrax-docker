@@ -180,7 +180,9 @@ jobs:
         - export DOCKER_DIR="$DOCKER_NAME"
         - source "./build-$TARGET_OS"
         - export SNAPSHOT_IMAGE_TAG="opendap/hyrax:$DOCKER_NAME-snapshot-$TARGET_OS$TEST_DEPLOYMENT"
+        - echo "SNAPSHOT_IMAGE_TAG - $SNAPSHOT_IMAGE_TAG"
         - export BUILD_VERSION_TAG="opendap/hyrax:$DOCKER_NAME-$HYRAX_VERSION-$TARGET_OS$TEST_DEPLOYMENT"
+        - echo "BUILD_VERSION_TAG - $BUILD_VERSION_TAG"
         - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "$TOMCAT_MAJOR_VERSION")
         - show_version
         - get_tomcat_distro "$DOCKER_DIR" "$TOMCAT_VERSION"
