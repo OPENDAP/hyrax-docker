@@ -292,7 +292,7 @@ COPY tomcat.service /etc/systemd/system/tomcat.service
 RUN set -e \
     && echo "$HR" \
     && echo "# Calling: 'systemctl enable tomcat'" \
-    && systemctl enable tomcat >&2 \
+    && systemctl enable tomcat 2>&1  \
     && echo "# status: $?" \
     && echo "$HR"
 #RUN firewall-cmd --add-port 8080/tcp --permanent
