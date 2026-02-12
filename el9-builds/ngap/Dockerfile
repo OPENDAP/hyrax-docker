@@ -198,6 +198,7 @@ RUN set -e \
 # The follow is a sanity check so that we can see what we got.
 RUN set -e \
     && echo "$HR" \
+    && echo "# Checking installed packages..." >&2 \
     && echo "# openssl is located here: $(which openssl)" \
     && echo "# openssl version: $(openssl version)" \
     && dnf -y info openssl \
@@ -243,35 +244,40 @@ RUN set -e \
 # Install the latest libdap snapshot
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 RUN set -e \
+    && echo "$HR" >&2 \
     && echo "# Installing the libdap rpm: ${LIBDAP_RPM}" >&2 \
     && ls -l ./libdap* \
     && dnf -y install ./libdap-*.rpm \
-    && rm -f ./${LIBDAP_RPM} \
-    && echo "# libdap4 is installed."
+    && rm -f "./$LIBDAP_RPM" \
+    && echo "# libdap4 is installed." >&2
+    && echo "$HR" >&2
 
 ################################################################
 # Install the latest BES snapshot
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 RUN set -e \
-    && echo "# Installing the BES rpm: ${BES_RPM}" >&2 \
+    && echo "$HR" >&2 \
+    && echo "# Installing the BES rpm: $BES_RPM" >&2 \
     && ls -l ./bes* \
     && dnf -y install ./bes-*.rpm \
-    && rm -f ./${BES_RPM} \
-    && echo "# besdaemon is here: $(which besdaemon)" \
-    && echo "# besdaemon -v: $(besdaemon -v)"
+    && rm -f "./$BES_RPM" \
+    && echo "# besdaemon is here: $(which besdaemon)" >&2 \
+    && echo "# besdaemon -v: $(besdaemon -v)" >&2
+    && echo "$HR" >&2
 
 
 ################################################################
 # Install the Apache-Portable-Runtime (Apache APR)
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 RUN set -e \
+    && echo "$HR" >&2 \
     && echo "Installing the Apache APR rpm: ${APACHE_APR_RPM}" >&2 \
-    && ls -l ./apr* \
-    && dnf -y install ./apr-*.rpm \
+    && ls -l ./apr*  >&2\
+    && dnf -y install ./apr-*.rpm  >&2\
     && dnf list installed | grep apr >&2 \
-    && rm -f ./${APACHE_APR_RPM}
-
-RUN echo "Apache APR is installed."
+    && rm -f "./$APACHE_APR_RPM" \
+    && echo "Apache APR is installed." >&2 \
+    && echo "$HR" >&2
 ################################################################
 # Install and Setup Tomcat
 #
@@ -283,14 +289,15 @@ RUN set -e && useradd -m -U -d /home/tomcat -s /bin/false tomcat
 # the root directory prior to this layer.
 #
 RUN set -e \
-    && tar -xvf "/${TOMCAT_DISTRO}.tar.gz" -C /home/tomcat >&2 \
-    && ln -s /home/tomcat/${TOMCAT_DISTRO} /usr/share/tomcat >&2 \
+    && echo "$HR" >&2 \
+    && tar -xvf "/$TOMCAT_DISTRO.tar.gz" -C "/home/tomcat" >&2 \
+    && ln -s" /home/tomcat/$TOMCAT_DISTRO" "/usr/share/tomcat" >&2 \
     && rm -rvf /usr/share/tomcat/webapps/* >&2 \
     && mkdir -p /var/log/tomcat \
     && chown -R tomcat:tomcat /var/log/tomcat /home/tomcat
 COPY tomcat.service /etc/systemd/system/tomcat.service
 RUN set -e \
-    && echo "$HR" >&2 \
+    && echo "$HR2" >&2 \
     && echo "# Calling: 'systemctl enable tomcat'" >&2 \
     && systemctl enable tomcat >&2 \
     && echo "# status: $?" >&2 \
@@ -300,17 +307,17 @@ RUN set -e \
 
 ENV CATALINA_HOME="/usr/share/tomcat"
 ENV PATH="$CATALINA_HOME/bin:$PATH"
-RUN set -e && echo "# CATALINA_HOME: ${CATALINA_HOME}" >&2
+RUN set -e && echo "# CATALINA_HOME: $CATALINA_HOME" >&2
 
 # Install our modified server.xml so that the server compresses responses.
 COPY tomcat11-server.xml /
 RUN set -e \
-    && mv /tomcat11-server.xml ${CATALINA_HOME}/conf/server.xml \
-    && chown -R tomcat:tomcat ${CATALINA_HOME}/conf/server.xml
+    && mv "/tomcat11-server.xml" "$CATALINA_HOME/conf/server.xml" \
+    && chown -R tomcat:tomcat "$CATALINA_HOME/conf/server.xml"
 
 RUN set -e \
     && echo "Cleaning up Tomcat distribution files..." >&2 \
-    && rm -fv "/${TOMCAT_DISTRO}.tar.gz"  >&2
+    && rm -fv "/$TOMCAT_DISTRO.tar.gz"  >&2
 
 ###########################################################################################
 #
@@ -318,25 +325,25 @@ RUN set -e \
 # @TODO This building should be done elsewhere and brought in
 #
 RUN set -e \
-    && echo "$HR" \
-    && echo "# Installing Tomcat Native APR" \
+    && echo "$HR" >&2 \
+    && echo "# Installing Tomcat Native APR" >&2 \
     && export JAVA_HOME="$(dirname $(dirname $(readlink -f $(which javac))))" >&2 \
     && echo "# JAVA_HOME: $JAVA_HOME" >&2 \
-    && echo "$HR2" \
-    && ls -l ${CATALINA_HOME}/bin >&2 \
-    && echo "$HR2" \
-    && tar -xf "/${CATALINA_HOME}/bin/tomcat-native.tar.gz" -C ${CATALINA_HOME}/bin >&2 \
-    && echo "$HR2" \
+    && echo "$HR2" >&2 \
+    && ls -l "$CATALINA_HOME/bin" >&2 \
+    && echo "$HR2" >&2 \
+    && tar -xf "/$CATALINA_HOME/bin/tomcat-native.tar.gz" -C "$CATALINA_HOME/bin" >&2 \
+    && echo "$HR2" >&2 \
 #    && ls -l ${CATALINA_HOME}/bin/tomcat-native-*-src >&2 \
-    && cd ${CATALINA_HOME}/bin/tomcat-native-*-src/native >&2 \
+    && cd $CATALINA_HOME/bin/tomcat-native-*-src/native >&2 \
     && ./configure --with-apr=/usr/bin >&2 \
-    && echo "$HR2" \
+    && echo "$HR2" >&2 \
     && make >&2 \
-    && echo "$HR2" \
+    && echo "$HR2" >&2 \
     && make install >&2 \
-    && echo "$HR2" \
-    && echo "# SUCCESS: Tomcat Native-APR Library installed."\
-    && echo "$HR"
+    && echo "$HR2" >&2 \
+    && echo "# SUCCESS: Tomcat Native-APR Library installed." >&2 \
+    && echo "$HR" >&2
 
 ENV CATALINA_OPTS="-Djava.library.path=/usr/local/apr/lib"
 
@@ -353,20 +360,22 @@ ENV ROOT=/dev/shm
 
 # NGAP package uses the OLFS_VERSION number. jhrg 4/2/21
 RUN set -e \
-    && echo "Installing the latest NGAP distribution (${NGAP_DISTRO})." >&2 \
-    && echo "working dir: "$(pwd)"    ROOT: ${ROOT}"  >&2 \
-    && tar -C "${ROOT}" -xzvf /${NGAP_DISTRO}.tgz >&2 \
-    && ls -l "${ROOT}" >&2 \
-    && echo "Unpacking warfile..." >&2 \
-    && unzip -o ${ROOT}/${NGAP_DISTRO}/${DEFAULT_NGAP_DEPLOYMENT_CONTEXT}.war -d ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/ \
+    && echo "$HR" \
+    && echo "Installing the latest NGAP distribution ($NGAP_DISTRO)." >&2 \
+    && echo "working dir: "$(pwd)"    ROOT: $ROOT"  >&2 \
+    && tar -C "$ROOT" -xzvf "/$NGAP_DISTRO.tgz" >&2 \
+    && ls -l "$ROOT" >&2 \
+    && echo "Unpacking war file..." >&2 \
+    && unzip -o "$ROOT/$NGAP_DISTRO/$DEFAULT_NGAP_DEPLOYMENT_CONTEXT.war" -d "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/" \
     && echo "Cleaning up." >&2 \
-    && rm -rf ${ROOT}/${NGAP_DISTRO} /${NGAP_DISTRO}.tgz
+    && rm -rf "$ROOT/$NGAP_DISTRO" "/$NGAP_DISTRO.tgz" \
+    && echo "$HR" >&2
 
 # Fix ownership and access permissions
 RUN set -e \
-    && mkdir -p ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/logs \
-    && chown -R tomcat:tomcat ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/logs \
-    && chmod 700 ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/logs
+    && mkdir -p "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/WEB-INF/conf/logs" \
+    && chown -R tomcat:tomcat "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/WEB-INF/conf/logs" \
+    && chmod 700 "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/WEB-INF/conf/logs"
 ################################################################
 
 ################################################################
@@ -383,26 +392,29 @@ RUN set -e \
 #
 # Request Redisson and Apache Session Level logging in the logging.properties
 RUN set -e \
-    && echo "org.redisson.level = FINE" >> ${CATALINA_HOME}/conf/logging.properties \
-    && echo "org.apache.catalina.core.level = FINE" >> ${CATALINA_HOME}/conf/logging.properties \
-    && echo "org.apache.catalina.session.level = FINE" >> ${CATALINA_HOME}/conf/logging.properties
+    && echo "org.redisson.level = FINE" >> "$CATALINA_HOME/conf/logging.properties" \
+    && echo "org.apache.catalina.core.level = FINE" >> "$CATALINA_HOME/conf/logging.properties" \
+    && echo "org.apache.catalina.session.level = FINE" >> "$CATALINA_HOME/conf/logging.properties"
 #
 # Install Memcached Session Manager jars into the Tomcat: ${CATALINA_HOME}/lib
 RUN set -e \
-    && echo "Installing Session Manager jar files. Cloning OLFS..." \
+    && echo "$HR" >&2 \
+    && echo "Installing Session Manager jar files. Cloning OLFS..." >&2 \
     && git clone https://github.com/OPENDAP/olfs \
     #&& git clone --depth 1 https://github.com/OPENDAP/olfs \
     && cd olfs \
     && git checkout tomcat-11 \
     && cd .. \
-    && echo "Copying elasticache client" \
-    && cp olfs/resources/ngap/lib/elasticache-java-cluster-client-1.1.2.jar ${CATALINA_HOME}/lib \
-    && echo "Copying redisson all" \
-    && cp olfs/resources/ngap/lib/redisson-all-3.50.0.jar ${CATALINA_HOME}/lib \
-    && echo "Copying redisson Session Manager TC11" \
-    && cp olfs/resources/ngap/lib/redisson-tomcat-11-3.50.0.jar ${CATALINA_HOME}/lib \
-    && chown -R tomcat:tomcat  ${CATALINA_HOME}/lib \
-    && rm -rfv olfs
+    && echo "$HR2" >&2 \
+    && echo "Copying elasticache client" >&2 \
+    && cp -v "olfs/resources/ngap/lib/elasticache-java-cluster-client-1.1.2.jar" "$CATALINA_HOME/lib" \
+    && echo "Copying redisson all" >&2 \
+    && cp -v "olfs/resources/ngap/lib/redisson-all-3.50.0.jar" "$CATALINA_HOME/lib" \
+    && echo "Copying redisson Session Manager TC11" >&2 \
+    && cp -v "olfs/resources/ngap/lib/redisson-tomcat-11-3.50.0.jar" "$CATALINA_HOME/lib" \
+    && chown -R tomcat:tomcat "$CATALINA_HOME/lib" \
+    && rm -rfv olfs \
+    && echo "$HR" >&2
 
 ################################################################
 #
@@ -412,23 +424,18 @@ RUN set -e \
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 ENV TEST_INSTALL_DIR="/hyrax_regression_tests"
 RUN set -e \
-    && echo "Retrieving, and building hyrax regression tests." \
-    && echo "h_r_t will be in: ${TEST_INSTALL_DIR}" \
-    && mkdir -p ${TEST_INSTALL_DIR} \
-    && git clone -v https://github.com/opendap/hyrax_regression_tests ${TEST_INSTALL_DIR} \
-    && cd ${TEST_INSTALL_DIR} \
-    && git status \
-    && autoreconf -vif \
-    && ./configure
-
-
-# In order to get the executable "testsuite" to build we have to run
-# "make check" But that will fail at build time so the "make check" call
-# ends up pretty tortured to avoid a build error.
-RUN set -e \
-    && cd ${TEST_INSTALL_DIR} \
+    && echo "$HR" >&2 \
+    && echo "Retrieving, and building hyrax regression tests." >&2 \
+    && echo "h_r_t will be in: $TEST_INSTALL_DIR" >&2 \
+    && mkdir -p "$TEST_INSTALL_DIR" \
+    && git clone -v "https://github.com/opendap/hyrax_regression_tests" "$TEST_INSTALL_DIR" \
+    && cd "$TEST_INSTALL_DIR" \
+    && git status >&2 \
+    && autoreconf -vif >&2 \
+    && ./configure >&2 \
     && make testsuite > mk.log 2>&1 \
-    && echo "SUCCESS: hyrax_regression_tests ready!"
+    && echo "SUCCESS: hyrax_regression_tests ready!" >&2 \
+    && echo "$HR" >&2
 
 ################################################################
 # TEMPORARY
