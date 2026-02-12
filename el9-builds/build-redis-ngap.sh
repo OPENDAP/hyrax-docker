@@ -1,9 +1,10 @@
 #!/bin/bash
 #
 export DOCKER_NAME="${DOCKER_NAME:-"ngap"}"
+source ./build-el9
+
 loggy "DOCKER_NAME: ${DOCKER_NAME}"
 
-source ./build-el9
 #
 #
 export SNAPSHOT_IMAGE_TAG="opendap/hyrax:$DOCKER_NAME-snapshot-$TARGET_OS$TEST_DEPLOYMENT"
