@@ -361,7 +361,6 @@ RUN set -e \
     && echo "# Using java version: $( java -version 2>&1 )" \
     && echo "$HR"
 
-
 ################################################################
 # Retrieve, verify, and install the NGAP/OLFS web application
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
