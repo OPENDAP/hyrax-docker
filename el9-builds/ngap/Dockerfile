@@ -151,7 +151,9 @@ RUN set -e && \
 # are installed in the container but not run until a later stage of the
 # Travis build (or at a later time). They need to be part of the container,
 # however, to be run, so install them as part of this Dockerfile.
-RUN set -e && dnf update  -y
+RUN set -e \
+    && dnf update  -y \
+    && dnf clean all
 
 #RUN set -e && dnf install -y dnf-plugins-core \
 #    && dnf config-manager --set-enabled crb \
@@ -249,6 +251,7 @@ RUN set -e \
     && ls -l ./libdap* \
     && dnf -y install ./libdap-*.rpm \
     && rm -f "./$LIBDAP_RPM" \
+    && dnf clean all \
     && echo "# libdap4 is installed." >&2 \
     && echo "$HR" >&2
 
@@ -261,6 +264,7 @@ RUN set -e \
     && ls -l ./bes* \
     && dnf -y install ./bes-*.rpm \
     && rm -f "./$BES_RPM" \
+    && dnf clean all \
     && echo "# besdaemon is here: $(which besdaemon)" >&2 \
     && echo "# besdaemon -v: $(besdaemon -v)" >&2 \
     && echo "$HR" >&2
@@ -276,6 +280,7 @@ RUN set -e \
     && dnf -y install ./apr-*.rpm  >&2\
     && dnf list installed | grep apr >&2 \
     && rm -f "./$APACHE_APR_RPM" \
+    && dnf clean all \
     && echo "Apache APR is installed." >&2 \
     && echo "$HR" >&2
 ################################################################
