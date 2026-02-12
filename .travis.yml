@@ -179,12 +179,12 @@ jobs:
         - export DOCKER_NAME="ngap"
         - export DOCKER_DIR="$DOCKER_NAME"
         - source "./build-$TARGET_OS"
-        - echo "# SNAPSHOT_IMAGE_TAG - $SNAPSHOT_IMAGE_TAG (post source build script)"
-        - echo "# BUILD_VERSION_TAG - $BUILD_VERSION_TAG (post source build script)"
+        - echo "# SNAPSHOT_IMAGE_TAG - $SNAPSHOT_IMAGE_TAG (post source build script)" >&2
+        - echo "# BUILD_VERSION_TAG - $BUILD_VERSION_TAG (post source build script)" >&2
         - export SNAPSHOT_IMAGE_TAG="opendap/hyrax:$DOCKER_NAME-snapshot-$TARGET_OS$TEST_DEPLOYMENT"
-        - echo "SNAPSHOT_IMAGE_TAG - $SNAPSHOT_IMAGE_TAG (After Travis set/export)"
+        - echo "SNAPSHOT_IMAGE_TAG - $SNAPSHOT_IMAGE_TAG (After Travis set/export)" >&2
         - export BUILD_VERSION_TAG="opendap/hyrax:$DOCKER_NAME-$HYRAX_VERSION-$TARGET_OS$TEST_DEPLOYMENT"
-        - echo "BUILD_VERSION_TAG - $BUILD_VERSION_TAG(After Travis set/export)"
+        - echo "BUILD_VERSION_TAG - $BUILD_VERSION_TAG(After Travis set/export)" >&2
         - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "$TOMCAT_MAJOR_VERSION")
         - show_version
         - get_tomcat_distro "$DOCKER_DIR" "$TOMCAT_VERSION"
