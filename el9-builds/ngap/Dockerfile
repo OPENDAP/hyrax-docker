@@ -304,7 +304,6 @@ RUN set -e \
     && mkdir -p /var/log/tomcat \
     && chown -R tomcat:tomcat /var/log/tomcat /home/tomcat \
     && echo "# Tomcat is unpacked and ready. >&2 "
-
 COPY tomcat.service /etc/systemd/system/tomcat.service
 
 RUN set -e \
