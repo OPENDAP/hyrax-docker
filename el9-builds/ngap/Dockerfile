@@ -290,11 +290,11 @@ RUN set -e \
     && chown -R tomcat:tomcat /var/log/tomcat /home/tomcat
 COPY tomcat.service /etc/systemd/system/tomcat.service
 RUN set -e \
-    && echo "$HR" \
-    && echo "# Calling: 'systemctl enable tomcat'" \
-    && systemctl enable tomcat 2>&1  \
-    && echo "# status: $?" \
-    && echo "$HR"
+    && echo "$HR" >&2 \
+    && echo "# Calling: 'systemctl enable tomcat'" >&2 \
+    && systemctl enable tomcat >&2 \
+    && echo "# status: $?" >&2 \
+    && echo "$HR" >&2
 #RUN firewall-cmd --add-port 8080/tcp --permanent
 #RUN firewall-cmd --reload
 
