@@ -295,6 +295,8 @@ RUN set -e && useradd -m -U -d /home/tomcat -s /bin/false tomcat
 #
 RUN set -e \
     && echo "$HR" >&2 \
+    && df -h >&2 \
+    && echo "$HR" >&2 \
     && echo "# Installing Tomcat distribution: $TOMCAT_DISTRO" >&2 \
     && tar -xvf "/$TOMCAT_DISTRO.tar.gz" -C "/home/tomcat" >&2 \
     && ln -s" /home/tomcat/$TOMCAT_DISTRO" "/usr/share/tomcat" >&2 \
