@@ -348,9 +348,11 @@ function get_tomcat_distro(){
 
     gpg --verify "${tomcat_sig_file}" "${tomcat_distro_file}" 2>&1 | awk '{print "#    ", $0;}'
     if test $? -ne 0 ; then
-        echo "ERROR! Failed to verify Tomcat distribution!" >&2
+        echo "$prolog ERROR! Failed to verify Tomcat distribution!" >&2
         return 2
     fi
+    echo "$prolog SUCCESS - Retrieved Tomcat distribution: ${tomcat_distro_file}" >&2
+    echo "$prolog $(ls -l ${tomcat_distro_file})" >&2
     loggy ""
     return 0
 }
