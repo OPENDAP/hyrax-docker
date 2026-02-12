@@ -289,7 +289,12 @@ RUN set -e \
     && mkdir -p /var/log/tomcat \
     && chown -R tomcat:tomcat /var/log/tomcat /home/tomcat
 COPY tomcat.service /etc/systemd/system/tomcat.service
-RUN set -e && systemctl enable tomcat >&2
+RUN set -e \
+    && echo "$HR" \
+    && echo "# Calling: 'systemctl enable tomcat'" \
+    && systemctl enable tomcat >&2 \
+    && echo "# status: $?" \
+    && echo "$HR"
 #RUN firewall-cmd --add-port 8080/tcp --permanent
 #RUN firewall-cmd --reload
 
@@ -328,10 +333,11 @@ RUN set -e \
 
 ENV CATALINA_OPTS="-Djava.library.path=/usr/local/apr/lib"
 
-RUN set -e && echo "#########################################################"
-RUN set -e && which java && java -version
-# RUN set -e && alternatives --list
-RUN set -e && echo "#########################################################"
+RUN set -e \
+    && echo "#########################################################" \
+    && "# The java executable is here: $(which java)" \
+    && "# Using java version: $(java -version)" \
+    && echo "#########################################################"
 ################################################################
 # Retrieve, verify, and install the NGAP/OLFS web application
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
