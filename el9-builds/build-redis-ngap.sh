@@ -55,7 +55,7 @@ s3_get_olfs_ngap_distro \
 #    "$ADD_DEBUG_RPMS"
 #
 set -e
-docker build \
+docker build --debug \
        --build-arg TOMCAT_VERSION \
        --build-arg RELEASE_DATE \
        --build-arg HYRAX_VERSION \
