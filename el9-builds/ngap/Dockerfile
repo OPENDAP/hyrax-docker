@@ -192,7 +192,7 @@ RUN set -e \
     && dnf groupinstall "Development Tools" -y \
     && echo "$HR2" >&2 \
     && echo "# Installing dnf packages..." >&2 \
-    && dnf info  $core_dnf_packages $developer_dnf_packages $awscli_dnf_packages \
+    # && dnf info  $core_dnf_packages $developer_dnf_packages $awscli_dnf_packages \
     && dnf install -y $core_dnf_packages $developer_dnf_packages $awscli_dnf_packages \
     && dnf clean all \
     && echo "$HR" >&2
@@ -246,6 +246,7 @@ RUN set -e \
     && echo "# Installing the libdap rpm: ${LIBDAP_RPM}" >&2 \
     && ls -l ./libdap* \
     && dnf -y install ./libdap-*.rpm \
+    && echo "# The 'dnf install' command exited with status: $?" >&2 \
     && rm -f "./$LIBDAP_RPM" \
     && dnf clean all \
     && echo "# libdap4 is installed." >&2 \
@@ -275,6 +276,7 @@ RUN set -e \
     && echo "Installing the Apache APR rpm: ${APACHE_APR_RPM}" >&2 \
     && ls -l ./apr*  >&2\
     && dnf -y install ./apr-*.rpm  >&2\
+    && echo "# The 'dnf install' command exited with status: $?" >&2 \
     && dnf list installed | grep apr >&2 \
     && rm -f "./$APACHE_APR_RPM" \
     && dnf clean all \
@@ -308,8 +310,8 @@ COPY tomcat.service /etc/systemd/system/tomcat.service
 RUN set -e \
     && echo "$HR2" >&2 \
     && echo "# Calling: 'systemctl enable tomcat'" >&2 \
-    && systemctl enable tomcat >&2 \
-    && echo "# status: $?" >&2 \
+    && echo "# $(systemctl enable tomcat)" >&2 \
+    && echo "# systemctl status: $?" >&2 \
     && echo "$HR" >&2
 #RUN firewall-cmd --add-port 8080/tcp --permanent
 #RUN firewall-cmd --reload
