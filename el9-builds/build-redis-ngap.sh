@@ -1,12 +1,21 @@
 #!/bin/bash
 #
-source ./build-el9
-#
 export DOCKER_NAME="${DOCKER_NAME:-"ngap"}"
 loggy "DOCKER_NAME: ${DOCKER_NAME}"
+
+source ./build-el9
 #
+#
+export SNAPSHOT_IMAGE_TAG="opendap/hyrax:$DOCKER_NAME-snapshot-$TARGET_OS$TEST_DEPLOYMENT"
+loggy "SNAPSHOT_IMAGE_TAG - $SNAPSHOT_IMAGE_TAG" >&2
+
+export BUILD_VERSION_TAG="opendap/hyrax:$DOCKER_NAME-$HYRAX_VERSION-$TARGET_OS$TEST_DEPLOYMENT"
+loggy "BUILD_VERSION_TAG - $BUILD_VERSION_TAG" >&2
+
+
 export TOMCAT_VERSION=
 TOMCAT_VERSION="$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")"
+loggy "TOMCAT_VERSION - $TOMCAT_VERSION" >&2
 #
 export APACHE_APR_VERSION="${APACHE_APR_VERSION:-"1.7.6-1"}"
 loggy "APACHE_APR_VERSION: $APACHE_APR_VERSION"
