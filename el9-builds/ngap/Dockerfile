@@ -263,7 +263,7 @@ RUN set -e \
     && rm -f "./$BES_RPM" \
     && dnf clean all \
     && echo "# besdaemon is here: $(which besdaemon)" >&2 \
-    && echo "# besdaemon -v: $(besdaemon -v)" >&2 \
+    && echo "#      besdaemon -v: '$(besdaemon -v)'" >&2 \
     && echo "$HR" >&2
 
 
@@ -295,7 +295,7 @@ RUN set -e \
     && df -h >&2 \
     && echo "$HR" >&2 \
     && echo "# Installing Tomcat distribution: $TOMCAT_DISTRO" >&2 \
-    && tar -xvf "/$TOMCAT_DISTRO.tar.gz" -C "/home/tomcat" >&2 \
+    && tar -xf "/$TOMCAT_DISTRO.tar.gz" -C "/home/tomcat" >&2 \
     && ln -s" /home/tomcat/$TOMCAT_DISTRO" "/usr/share/tomcat" >&2 \
     && rm -rf /usr/share/tomcat/webapps/* >&2 \
     && mkdir -p /var/log/tomcat \
