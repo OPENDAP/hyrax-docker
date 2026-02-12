@@ -123,7 +123,7 @@ function show_version(){
     loggy "$prolog       TOMCAT_VERSION: $TOMCAT_VERSION"
     loggy "$prolog   APACHE_APR_VERSION: $APR_VERSION"
     loggy "$prolog"
-    loggy "                    NO_CACHE: '$NO_CACHE'"
+    loggy "$prolog             NO_CACHE: '$NO_CACHE'"
     loggy "$prolog END"
     loggy "$HR"
 }
