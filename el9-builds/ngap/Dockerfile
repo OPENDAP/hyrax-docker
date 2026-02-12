@@ -158,71 +158,71 @@ RUN set -e && dnf update  -y
 #    && dnf groupinstall "Development Tools" -y
 
 RUN set -e \
-    && echo "$HR" \
-    && echo "# Installing cURL" \
+    && echo "$HR" >&2 \
+    && echo "# Installing cURL" >&2 \
     && dnf install -y curl curl-devel --allowerasing \
-    && echo "# cURL version: $(curl --version)" \
+    && echo "# cURL version: $(curl --version)" >&2 \
     && dnf clean all \
-    && echo "$HR"
+    && echo "$HR" >&2
 
 RUN set -e \
-    && echo "$HR" \
-    && echo "# It's Java Time Witches!" \
-    && echo "# Installing $java_version" \
+    && echo "$HR" >&2 \
+    && echo "# It's Java Time Witches!" >&2 \
+    && echo "# Installing $java_version" >&2 \
  #    && dnf install -y "$java_version" "$java_version-devel"  \
     && dnf install -y "$java_version" "$java_version-devel" \
-    && echo "$HR2" \
-    && echo "# Using $java_version" \
+    && echo "$HR2" >&2 \
+    && echo "# Using $java_version" >&2 \
     && update-alternatives --set java "$java_version.$ARCH" \
-    && echo "# Enabled $java_version" \
+    && echo "# Enabled $java_version" >&2 \
     && echo "# java version: $( java -version 2>&1 )" \
     && update-alternatives --list \
 #    && dnf install -y tzdata-java \
     && dnf clean all \
-    && echo "$HR" \
+    && echo "$HR" >&2 \
 
 RUN set -e \
-    && echo "$HR" \
+    && echo "$HR" >&2 \
     # The CRB (CodeReady Builder) repository has to be enabled to get the libtirpc-devel package.
     && echo "# Installing 'dnf-plugins-core', enabling CRB (CodeReady Builder) repository and installing 'Development Tools'" >&2 \
     && dnf install -y dnf-plugins-core \
     && dnf config-manager --set-enabled crb \
     && dnf groupinstall "Development Tools" -y \
-    && echo "$HR" \
-    && echo "# Installing dnf packages..." \
+    && echo "$HR2" >&2 \
+    && echo "# Installing dnf packages..." >&2 \
     && dnf info  $core_dnf_packages $developer_dnf_packages $awscli_dnf_packages \
     && dnf install -y $core_dnf_packages $developer_dnf_packages $awscli_dnf_packages \
     && dnf clean all \
-    && echo "$HR"
+    && echo "$HR" >&2
 
 # The follow is a sanity check so that we can see what we got.
 RUN set -e \
-    && echo "$HR" \
-    && echo "# Checking installed packages..." >&2 \
-    && echo "# openssl is located here: $(which openssl)" \
-    && echo "# openssl version: $(openssl version)" \
-    && dnf -y info openssl \
+    && echo "$HR" >&2 \
+    && echo "# Sanity checking installed packages..." >&2 \
+    && echo "# openssl is located here: $(which openssl)" >&2 \
+    && echo "# openssl version: $(openssl version)" >&2 \
+    && dnf -y info openssl >&2 \
     #&& rm -vf ./openssl*
-    && echo "# openssl is installed." \
-    && echo "$HR" \
-    && echo "# libtirpc info:" \
-    && dnf -y info libtirpc \
-    && echo "$HR2" \
-    && echo "# rpm -ql libtirpc: " \
-    && echo "$(rpm -ql libtirpc)" \
-    && echo "$HR" \
-    && echo "# libtirpc-devel info:" \
-    && dnf -y info libtirpc-devel \
-    && echo "$HR2" \
-    && echo "# rpm -ql libtirpc-devel: " \
-    && echo "$(rpm -ql libtirpc-devel)" \
-    && echo "$HR" \
-    && echo "# libuuid info:" \
-    && dnf -y info libuuid \
-    && echo "# libuuid-devel info:" \
-    && dnf -y info libuuid-devel \
+    && echo "# openssl is installed." >&2 \
+    && echo "$HR" >&2 \
+    && echo "# libtirpc info:" >&2 \
+    && dnf -y info libtirpc >&2 \
+    && echo "$HR2" >&2 \
+    && echo "# rpm -ql libtirpc: " >&2 \
+    && rpm -ql libtirpc  >&2 \
+    && echo "$HR" >&2 \
+    && echo "# libtirpc-devel info:" >&2 \
+    && dnf -y info libtirpc-devel >&2 \
+    && echo "$HR2" >&2 \
+    && echo "# rpm -ql libtirpc-devel: " >&2 \
+    && rpm -ql libtirpc-devel >&2 \
+    && echo "$HR" >&2 \
+    && echo "# libuuid info:" >&2 \
+    && dnf -y info libuuid >&2 \
+    && echo "# libuuid-devel info:" >&2 \
+    && dnf -y info libuuid-devel >&2 \
     && dnf clean all \
-    && echo "$HR"
+    && echo "$HR" >&2
 
 
 
