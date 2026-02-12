@@ -290,9 +290,10 @@ RUN set -e && useradd -m -U -d /home/tomcat -s /bin/false tomcat
 #
 RUN set -e \
     && echo "$HR" >&2 \
+    && echo "# Installing Tomcat distribution: $TOMCAT_DISTRO" >&2 \
     && tar -xvf "/$TOMCAT_DISTRO.tar.gz" -C "/home/tomcat" >&2 \
     && ln -s" /home/tomcat/$TOMCAT_DISTRO" "/usr/share/tomcat" >&2 \
-    && rm -rvf /usr/share/tomcat/webapps/* >&2 \
+    && rm -rf /usr/share/tomcat/webapps/* >&2 \
     && mkdir -p /var/log/tomcat \
     && chown -R tomcat:tomcat /var/log/tomcat /home/tomcat
 COPY tomcat.service /etc/systemd/system/tomcat.service
@@ -352,6 +353,7 @@ RUN set -e \
     && echo "# The java executable is here: $(which java)" \
     && echo "# Using java version: $( java -version 2>&1 )" \
     && echo "$HR"
+
 
 ################################################################
 # Retrieve, verify, and install the NGAP/OLFS web application
