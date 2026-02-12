@@ -16,8 +16,8 @@
 FROM rockylinux:9
 LABEL org.opencontainers.image.authors="support@opendap.org"
 USER root
-ENV HR="######################################################"
-ENV HR2="-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --"
+ENV HR="###############################################################################################################"
+ENV HR2="-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --"
 ENV TARGET_OS="el9"
 ENV ARCH="x86_64"
 ENV java_version="java-21-openjdk"
@@ -120,7 +120,7 @@ COPY ${NGAP_DISTRO}.tgz /${NGAP_DISTRO}.tgz
 
 ARG APR_VERSION
 ENV APR_VERSION="1.7.6-1"
-RUN echo "# APR_VERSION: $APR_VERSION"
+RUN echo "# Apache APR version: $APR_VERSION"
 
 ARG APACHE_APR_RPM
 ENV APACHE_APR_RPM="${APACHE_APR_RPM:-"apr-$APR_VERSION.x86_64.rpm"}"
@@ -312,7 +312,10 @@ RUN set -e \
     && echo "Cleaning up Tomcat distribution files..." >&2 \
     && rm -fv "/${TOMCAT_DISTRO}.tar.gz"  >&2
 
-# Install the Tomcat Native-APR library.
+###########################################################################################
+#
+# Build and Install the Tomcat Native-APR library.
+# @TODO This building should be done elsewhere and brought in
 #
 RUN set -e \
     && echo "$HR" \
