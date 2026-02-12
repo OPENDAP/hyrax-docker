@@ -249,7 +249,7 @@ RUN set -e \
     && ls -l ./libdap* \
     && dnf -y install ./libdap-*.rpm \
     && rm -f "./$LIBDAP_RPM" \
-    && echo "# libdap4 is installed." >&2
+    && echo "# libdap4 is installed." >&2 \
     && echo "$HR" >&2
 
 ################################################################
@@ -262,7 +262,7 @@ RUN set -e \
     && dnf -y install ./bes-*.rpm \
     && rm -f "./$BES_RPM" \
     && echo "# besdaemon is here: $(which besdaemon)" >&2 \
-    && echo "# besdaemon -v: $(besdaemon -v)" >&2
+    && echo "# besdaemon -v: $(besdaemon -v)" >&2 \
     && echo "$HR" >&2
 
 
