@@ -359,10 +359,10 @@ RUN set -e \
 ENV CATALINA_OPTS="-Djava.library.path=/usr/local/apr/lib"
 
 RUN set -e \
-    && echo "$HR" \
-    && echo "# The java executable is here: $(which java)" \
-    && echo "# Using java version: $( java -version 2>&1 )" \
-    && echo "$HR"
+    && echo "$HR" >&2 \
+    && echo "# The java executable is here: $(which java)" >&2 \
+    && echo "# Using java version: $( java -version 2>&1 )" >&2 \
+    && echo "$HR" >&2
 
 ################################################################
 # Retrieve, verify, and install the NGAP/OLFS web application
