@@ -297,7 +297,7 @@ RUN set -e \
     && echo "# Unpacking Tomcat distribution: $TOMCAT_DISTRO.tar.gz" >&2 \
     && tar -xf "/$TOMCAT_DISTRO.tar.gz" -C "/home/tomcat" >&2 \
     && echo "# Distribution unpacked. Linking to /usr/share/tomcat" >&2 \
-    && ln -vs "/home/tomcat/$TOMCAT_DISTRO" "/usr/share/tomcat" >&2 \
+    && echo "# $(ln -vs " /home/tomcat/$TOMCAT_DISTRO" "/usr/share/tomcat")" >&2 \
     && echo "# Cleaning webapps dir" >&2 \
     && rm -rf /usr/share/tomcat/webapps/* >&2 \
     && echo "# Setting up logs" >&2 \
