@@ -181,7 +181,7 @@ RUN set -e \
     && update-alternatives --list \
 #    && dnf install -y tzdata-java \
     && dnf clean all \
-    && echo "$HR" >&2 \
+    && echo "$HR" >&2
 
 RUN set -e \
     && echo "$HR" >&2 \
