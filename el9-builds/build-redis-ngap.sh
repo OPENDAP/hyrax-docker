@@ -2,14 +2,14 @@
 #
 source ./build-el9
 #
-export DOCKER_NAME="ngap"
+export DOCKER_NAME="${DOCKER_NAME:-"ngap"}"
 loggy "DOCKER_NAME: ${DOCKER_NAME}"
 #
 export TOMCAT_VERSION=
 TOMCAT_VERSION="$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")"
 #
-export APR_VERSION="1.7.6-1"
-loggy "APR_VERSION: $APR_VERSION"
+export APACHE_APR_VERSION="${APACHE_APR_VERSION:-"1.7.6-1"}"
+loggy "APACHE_APR_VERSION: $APACHE_APR_VERSION"
 #
 #export OPENSSL_VERSION="3.5.0-4"
 #loggy "OPENSSL_VERSION: $OPENSSL_VERSION"
@@ -29,7 +29,7 @@ s3_get_besd_distro \
 s3_get_apache_apr_distro \
     "$S3_BUILD_BUCKET" \
     "$DOCKER_DIR" \
-    "$APR_VERSION" \
+    "$APACHE_APR_VERSION" \
     "$ADD_DEBUG_RPMS"
 
 s3_get_olfs_ngap_distro \
