@@ -296,15 +296,17 @@ RUN set -e \
     && echo "$HR" >&2 \
     && echo "# Unpacking Tomcat distribution: $TOMCAT_DISTRO.tar.gz" >&2 \
     && tar -xf "/$TOMCAT_DISTRO.tar.gz" -C "/home/tomcat" >&2 \
-    && echo "# Distribution unpacked. Linking to /usr/share/tomcat"\
-    && ln -s" /home/tomcat/$TOMCAT_DISTRO" "/usr/share/tomcat" >&2 \
-    && echo "# Cleaning webapps dir"\
+    && echo "# Distribution unpacked. Linking to /usr/share/tomcat" >&2 \
+    && ln -vs "/home/tomcat/$TOMCAT_DISTRO" "/usr/share/tomcat" >&2 \
+    && echo "# Cleaning webapps dir" >&2 \
     && rm -rf /usr/share/tomcat/webapps/* >&2 \
-    && echo "# Setting up logs"\
+    && echo "# Setting up logs" >&2 \
     && mkdir -p /var/log/tomcat \
     && chown -R tomcat:tomcat /var/log/tomcat /home/tomcat \
-    && echo "# Tomcat is unpacked and ready."
+    && echo "# Tomcat is unpacked and ready. >&2 "
+
 COPY tomcat.service /etc/systemd/system/tomcat.service
+
 RUN set -e \
     && echo "$HR2" >&2 \
     && echo "# Calling: 'systemctl enable tomcat'" >&2 \
