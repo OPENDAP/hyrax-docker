@@ -12,7 +12,7 @@ loggy "$prolog DOCKER_NAME: ${DOCKER_NAME}"
 #
 export SNAPSHOT_IMAGE_TAG="opendap/hyrax:$DOCKER_NAME-snapshot-$TARGET_OS$TEST_DEPLOYMENT"
 loggy "$prolog SNAPSHOT_IMAGE_TAG - $SNAPSHOT_IMAGE_TAG" >&2
-
+#
 export BUILD_VERSION_TAG="opendap/hyrax:$DOCKER_NAME-$HYRAX_VERSION-$TARGET_OS$TEST_DEPLOYMENT"
 loggy "$prolog BUILD_VERSION_TAG - $BUILD_VERSION_TAG" >&2
 ###############################################################################################
@@ -74,4 +74,5 @@ docker build \
 #
 set +e
 
-loggy "$prolog $(docker image ls -a)"
+loggy "$prolog docker image ls -a: "
+loggy "$(docker image ls -a)"
