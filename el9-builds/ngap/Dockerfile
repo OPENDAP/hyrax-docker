@@ -161,7 +161,7 @@ RUN set -e \
 
 RUN set -e \
     && echo "$HR" >&2 \
-    && echo "# Installing cURL" >&2 \
+    && echo "# Installing cURL for developers (not minimal cURL)" >&2 \
     && dnf install -y curl curl-devel --allowerasing \
     && echo "# cURL version: $(curl --version)" >&2 \
     && dnf clean all \
@@ -198,13 +198,12 @@ RUN set -e \
     && echo "$HR" >&2
 
 # The follow is a sanity check so that we can see what we got.
-RUN set -e \
+RUN set -e if test -n "$DEBUG_BUILD"; then \
     && echo "$HR" >&2 \
     && echo "# Sanity checking installed packages..." >&2 \
     && echo "# openssl is located here: $(which openssl)" >&2 \
     && echo "# openssl version: $(openssl version)" >&2 \
     && dnf -y info openssl >&2 \
-    #&& rm -vf ./openssl*
     && echo "# openssl is installed." >&2 \
     && echo "$HR" >&2 \
     && echo "# libtirpc info:" >&2 \
@@ -224,7 +223,8 @@ RUN set -e \
     && echo "# libuuid-devel info:" >&2 \
     && dnf -y info libuuid-devel >&2 \
     && dnf clean all \
-    && echo "$HR" >&2
+    && echo "$HR" >&2 \
+    fi
 
 
 #RUN set -e && dnf install -y make curl unzip which autoconf automake emacs vim jq \
