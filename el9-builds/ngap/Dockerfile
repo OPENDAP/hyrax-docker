@@ -191,7 +191,7 @@ RUN set -e \
     && dnf config-manager --set-enabled crb \
     && dnf groupinstall "Development Tools" -y \
     && echo "$HR2" >&2 \
-    && echo "# Installing dnf packages..." >&2 \
+    && echo "# Installing NGAP package lists..." >&2 \
     # && dnf info  $core_dnf_packages $developer_dnf_packages $awscli_dnf_packages \
     && dnf install -y $core_dnf_packages $developer_dnf_packages $awscli_dnf_packages \
     && dnf clean all \
