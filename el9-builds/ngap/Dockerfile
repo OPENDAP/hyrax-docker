@@ -224,7 +224,7 @@ RUN set -e \
     && dnf -y info libuuid-devel >&2 \
     && dnf clean all \
     && echo "$HR" >&2 \
-    fi
+    && fi
 
 
 #RUN set -e && dnf install -y make curl unzip which autoconf automake emacs vim jq \
