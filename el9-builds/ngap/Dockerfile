@@ -199,6 +199,7 @@ RUN set -e \
 
 # The follow is a sanity check so that we can see what we got.
 RUN set -e; \
+    && echo "$HR" >&2  \
     if test -n "$DEBUG_BUILD"; then echo "$HR" >&2 \
     && echo "# Sanity checking installed packages..." >&2 \
     && echo "# openssl is located here: $(which openssl)" >&2 \
@@ -222,8 +223,8 @@ RUN set -e; \
     && dnf -y info libuuid >&2 \
     && echo "# libuuid-devel info:" >&2 \
     && dnf -y info libuuid-devel >&2 \
-    && dnf clean all \
-    && echo "$HR" >&2 ; fi
+    && dnf clean all; else echo "# Skipping Sanity Checks..."; fi\
+    && echo "$HR" >&2
 
 
 #RUN set -e && dnf install -y make curl unzip which autoconf automake emacs vim jq \
