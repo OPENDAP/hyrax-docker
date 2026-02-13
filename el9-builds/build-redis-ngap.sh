@@ -6,7 +6,7 @@ export DOCKER_NAME="${DOCKER_NAME:-"ngap"}"
 #
 source ./build-el9
 
-loggy "$prolog DOCKER_NAME: ${DOCKER_NAME}"
+loggy "$prolog DOCKER_NAME: $DOCKER_NAME"
 
 ###############################################################################################
 # We overwrite the SNAPSHOT_IMAGE_TAG and BUILD_VERSION_TAG variables because the ngap product

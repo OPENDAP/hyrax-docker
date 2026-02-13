@@ -68,7 +68,7 @@ function get_test_deployment_tag(){
 }
 
 function read_build_recipe() {
-    local prolog"read_build_recipe() -"
+    local prolog="read_build_recipe() -"
     local build_recipe_file="${1}"
     local build_recipe=""
     build_recipe=$(cat "${build_recipe_file}")
