@@ -199,7 +199,7 @@ RUN set -e \
 
 # The follow is a sanity check so that we can see what we got.
 RUN set -e; \
-    && echo "$HR" >&2  \
+    echo "$HR" >&2  \
     && if test -n "$DEBUG_BUILD"; then echo "$HR2" >&2 \
     && echo "# Sanity checking installed packages..." >&2 \
     && echo "# openssl is located here: $(which openssl)" >&2 \
