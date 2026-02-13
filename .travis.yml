@@ -219,9 +219,9 @@ jobs:
         - cd "$TARGET_OS-builds"
         - export DOCKER_NAME="ngap"
         - export DOCKER_DIR="ngap"
-        - SNAPSHOT_IMAGE_TAG=${SNAPSHOT_IMAGE_TAG:-"opendap/$DOCKER_NAME:snapshot-$TARGET_OS-test-deploy"}
+        - export SNAPSHOT_IMAGE_TAG=${SNAPSHOT_IMAGE_TAG:-"opendap/hyrax:$DOCKER_NAME-snapshot-$TARGET_OS-test-deploy"}
         - echo "TravisCI set SNAPSHOT_IMAGE_TAG - $SNAPSHOT_IMAGE_TAG" >&2
-        - BUILD_VERSION_TAG=${BUILD_VERSION_TAG:-"opendap/$DOCKER_NAME:$HYRAX_VERSION-$TARGET_OS-test-deploy"}
+        - export BUILD_VERSION_TAG=${BUILD_VERSION_TAG:-"opendap/hyrax:$DOCKER_NAME-$TARGET_OS-test-deploy"}
         - echo "TravisCI set BUILD_VERSION_TAG - $BUILD_VERSION_TAG" >&2
         - ./build-redis-ngap.sh
         - docker image ls -a
