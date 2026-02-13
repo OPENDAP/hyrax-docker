@@ -223,7 +223,8 @@ RUN set -e; \
     && dnf -y info libuuid >&2 \
     && echo "# libuuid-devel info:" >&2 \
     && dnf -y info libuuid-devel >&2 \
-    && dnf clean all; else echo "# Skipping Sanity Checks..."; fi\
+    && dnf clean all; \
+    else echo "# Skipping Sanity Checks..."; fi \
     && echo "$HR" >&2
 
 
