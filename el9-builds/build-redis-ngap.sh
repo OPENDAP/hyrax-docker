@@ -1,10 +1,10 @@
 #!/bin/bash
 #
-prolog="$0 -"
 export DOCKER_NAME="${DOCKER_NAME:-"ngap"}"
 
 #
 source ./build-el9
+prolog="$0 -"
 
 loggy "$prolog DOCKER_NAME: $DOCKER_NAME"
 
