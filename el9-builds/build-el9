@@ -98,10 +98,10 @@ function read_build_recipe() {
     TEST_DEPLOYMENT="$(get_test_deployment_tag $build_recipe_file)"
 
     SNAPSHOT_IMAGE_TAG=${SNAPSHOT_IMAGE_TAG:-"opendap/$DOCKER_NAME:snapshot-$TARGET_OS$TEST_DEPLOYMENT"}
-    loggy "$prolog SNAPSHOT_IMAGE_TAG: $SNAPSHOT_IMAGE_TAG"
+    # loggy "$prolog SNAPSHOT_IMAGE_TAG: $SNAPSHOT_IMAGE_TAG"
 
     BUILD_VERSION_TAG=${BUILD_VERSION_TAG:-"opendap/$DOCKER_NAME:$HYRAX_VERSION-$TARGET_OS$TEST_DEPLOYMENT"}
-    loggy "$prolog BUILD_VERSION_TAG: $BUILD_VERSION_TAG"
+    # loggy "$prolog BUILD_VERSION_TAG: $BUILD_VERSION_TAG"
 
 }
 read_build_recipe "${BUILD_RECIPE}"
@@ -882,27 +882,12 @@ function get_ngap_olfs_distro() {
 }
 
 
-function build_ngap() {
-    loggy "${HR}"
-    loggy "TASK: build_ngap_rh9()"
-#        --no-cache \
-        docker build ${NO_CACHE} \
-        --platform linux/amd64 \
-        --build-arg TOMCAT_VERSION \
-        --build-arg RELEASE_DATE \
-        --build-arg HYRAX_VERSION \
-        --build-arg LIBDAP_VERSION \
-        --build-arg BES_VERSION \
-        --build-arg OLFS_VERSION \
-        --tag "${BUILD_VERSION_TAG}" \
-        --tag "${SNAPSHOT_IMAGE_TAG}" \
-        ${DOCKER_NAME}
-    loggy ""
-    loggy ""
-}
 
 
 
+################################################################################
+#
+#
 function build_hyrax_docker() {
     local docker_name="${1}"
 
@@ -940,6 +925,9 @@ function build_hyrax_docker() {
 #  --tag "${BUILD_VERSION_TAG}"
 #  "${DOCKER_NAME}"
 
+################################################################################
+#
+#
 function build_dmrpp_service_docker() {
     local docker_name="${1}"
     export DEPLOYMENT_CONTEXT="${2:-"build_dmrpp"}"
@@ -964,6 +952,9 @@ function build_dmrpp_service_docker() {
 }
 
 
+################################################################################
+#
+#
 function get_platform(){
     local platform=""
     if test "$(uname -m)" = "arm64" ; then platform="--platform linux/amd64"; fi
@@ -971,6 +962,9 @@ function get_platform(){
 }
 
 
+################################################################################
+#
+#
 function start_hyrax(){
     local image_tag="${1}"
 
@@ -993,6 +987,9 @@ function start_hyrax(){
     loggy ""
 }
 
+################################################################################
+#
+#
 function debug_hyrax(){
     local image_tag="${1}"
 
@@ -1013,6 +1010,9 @@ function debug_hyrax(){
         "${image_tag}"
 }
 
+################################################################################
+#
+#
 function cleanup_build_files(){
     local docker_name="${1}"
 
@@ -1032,6 +1032,9 @@ function cleanup_build_files(){
     loggy ""
 }
 
+################################################################################
+#
+#
 function build_hyrax() {
     local debug="${1}"
 
@@ -1069,12 +1072,38 @@ function build_hyrax() {
 }
 
 
+
+
+
+################################################################################
+#
+#
+function docker_build_ngap() {
+    loggy "${HR}"
+    loggy "TASK: build_ngap_rh9()"
+#        --no-cache \
+        docker build ${NO_CACHE} \
+        --platform linux/amd64 \
+        --build-arg TOMCAT_VERSION \
+        --build-arg RELEASE_DATE \
+        --build-arg HYRAX_VERSION \
+        --build-arg LIBDAP_VERSION \
+        --build-arg BES_VERSION \
+        --build-arg OLFS_VERSION \
+        --tag "${BUILD_VERSION_TAG}" \
+        --tag "${SNAPSHOT_IMAGE_TAG}" \
+        ${DOCKER_NAME}
+    loggy ""
+    loggy ""
+}
+################################################################################
+#
+#
 function build_ngap() {
     local log_file="./build_ngap.log"
 
     export DOCKER_NAME="ngap"
     show_version 2>&1 | tee "${log_file}"
-
 
     local tomcat_version="unset"
     tomcat_version=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
@@ -1103,6 +1132,9 @@ function build_ngap() {
 
 
 
+################################################################################
+#
+#
 function build_olfs_docker() {
     loggy "${HR}"
     loggy "TASK: build_olfs_docker()"
@@ -1120,6 +1152,9 @@ function build_olfs_docker() {
     loggy ""
 }
 
+################################################################################
+#
+#
 function build_olfs() {
     local log_file="build_olfs.log"
 
@@ -1142,6 +1177,9 @@ function build_olfs() {
 }
 
 
+################################################################################
+#
+#
 function build_besd_docker() {
     loggy "${HR}"
     loggy "TASK: build_besd_docker()"
@@ -1158,6 +1196,9 @@ function build_besd_docker() {
     loggy ""
 }
 
+################################################################################
+#
+#
 function build_besd() {
     local log_file="build_besd.log"
 
@@ -1175,8 +1216,10 @@ function build_besd() {
 #    cleanup_build_files "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}"
 }
 
-
-function pull_tag_and_push_image(){
+################################################################################
+# pull_then_tag_and_push_new_tag()
+#
+function pull_then_tag_and_push_new_tag(){
     set -e
     loggy "${HR2}"
     loggy ""
@@ -1269,17 +1312,17 @@ function mk_easy_docker_release(){
     bes_release_version=$(echo "${BES_VERSION}" | awk '{split($0,a,"-"); print a[1];}')
     loggy "   bes_release_version: ${bes_release_version}"
 
-    pull_tag_and_push_image "opendap/hyrax:${HYRAX_VERSION}" "opendap/hyrax:${hyrax_release_version}"
-    pull_tag_and_push_image "opendap/hyrax:${HYRAX_VERSION}" "opendap/hyrax:latest"
+    pull_then_tag_and_push_new_tag "opendap/hyrax:${HYRAX_VERSION}" "opendap/hyrax:${hyrax_release_version}"
+    pull_then_tag_and_push_new_tag "opendap/hyrax:${HYRAX_VERSION}" "opendap/hyrax:latest"
 
-    pull_tag_and_push_image "opendap/hyrax_ncwms:${HYRAX_VERSION}" "opendap/hyrax_ncwms:${hyrax_release_version}"
-    pull_tag_and_push_image "opendap/hyrax_ncwms:${HYRAX_VERSION}" "opendap/hyrax_ncwms:latest"
+    pull_then_tag_and_push_new_tag "opendap/hyrax_ncwms:${HYRAX_VERSION}" "opendap/hyrax_ncwms:${hyrax_release_version}"
+    pull_then_tag_and_push_new_tag "opendap/hyrax_ncwms:${HYRAX_VERSION}" "opendap/hyrax_ncwms:latest"
 
-    pull_tag_and_push_image "opendap/besd:${BES_VERSION}" "opendap/besd:${bes_release_version}"
-    pull_tag_and_push_image "opendap/besd:${BES_VERSION}" "opendap/besd:latest"
+    pull_then_tag_and_push_new_tag "opendap/besd:${BES_VERSION}" "opendap/besd:${bes_release_version}"
+    pull_then_tag_and_push_new_tag "opendap/besd:${BES_VERSION}" "opendap/besd:latest"
 
-    pull_tag_and_push_image "opendap/olfs:${OLFS_VERSION}" "opendap/olfs:${olfs_release_version}"
-    pull_tag_and_push_image "opendap/olfs:${OLFS_VERSION}" "opendap/olfs:latest"
+    pull_then_tag_and_push_new_tag "opendap/olfs:${OLFS_VERSION}" "opendap/olfs:${olfs_release_version}"
+    pull_then_tag_and_push_new_tag "opendap/olfs:${OLFS_VERSION}" "opendap/olfs:latest"
 
     loggy ""
     loggy "mk_easy_docker_release() - END"
@@ -1288,7 +1331,9 @@ function mk_easy_docker_release(){
 
 # make_hyrax_release "${RELEASE_DATE}" "${HYRAX_VERSION}" "${OLFS_VERSION}" "${BES_VERSION}" "${LIBDAP_VERSION}"
 
-
+################################################################################
+#
+#
 function travis_hyrax() {
     check_aws
     if test $? -ne 0; then
@@ -1331,21 +1376,21 @@ function travis_hyrax() {
 
 }
 
-#
+################################################################################
 # Stop all running containers
 #
 function dhalt() {
     docker stop $(docker ps -aq);
 }
 
-#
+################################################################################
 # Remove all containers
 #
 function drmac(){
     docker rm -f $(docker ps -aq);
 }
 
-#
+################################################################################
 # Remove all images
 #
 function drmai(){
