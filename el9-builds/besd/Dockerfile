@@ -13,7 +13,16 @@
 # it for debugging stuff.
 #
 # Set one or more individual labels
-FROM rockylinux:8
+#
+FROM rockylinux:9
+ENV TARGET_OS="el9"
+ENV ARCH="x86_64"
+ENV developer_packages="which bc emacs vim procps awscli"
+
+# rocky9 comes with python 3.9 by default, it seems to be good enough for now
+# ENV python_version="3.11"
+RUN echo "Python Version: $(python3 --version) (config says we want: $python_version)"
+
 
 ARG RELEASE_DATE
 ENV RELEASE_DATE ${RELEASE_DATE:-"unknown"}
@@ -24,7 +33,7 @@ ENV LIBDAP_VERSION=${LIBDAP_VERSION:-"snapshot"}
 RUN echo "LIBDAP_VERSION: ${LIBDAP_VERSION}"
 
 ARG LIBDAP_RPM
-ENV LIBDAP_RPM=${LIBDAP_RPM:-"libdap-${LIBDAP_VERSION}.el8.x86_64.rpm"}
+ENV LIBDAP_RPM=${LIBDAP_RPM:-"libdap-${LIBDAP_VERSION}.${TARGET_OS}.x86_64.rpm"}
 RUN echo "LIBDAP_RPM: ${LIBDAP_RPM}"
 COPY ${LIBDAP_RPM} /${LIBDAP_RPM}
 
@@ -33,7 +42,7 @@ ENV BES_VERSION=${BES_VERSION:-"snapshot"}
 RUN echo "BES_VERSION: ${BES_VERSION}"
 
 ARG BES_RPM
-ENV BES_RPM=${BES_RPM:-"bes-${BES_VERSION}.static.el8.x86_64.rpm"}
+ENV BES_RPM=${BES_RPM:-"bes-${BES_VERSION}.static.${TARGET_OS}.x86_64.rpm"}
 RUN echo "BES_RPM: ${BES_RPM}"
 COPY ${BES_RPM} /${BES_RPM}
 
@@ -46,18 +55,11 @@ LABEL org.opencontainers.image.authors="support@opendap.org"
 
 USER root
 
-# Update and install the needful.
-RUN set -e && dnf install -y python3.11 \
-    && python3 --version
-
-RUN set -e && dnf install -y which bc emacs vim \
-    && dnf install -y procps \
+RUN set -e \
     && dnf update -y \
+    && echo "dnf install -y $developer_packages" > /load-dev-tools \
+    && chmod 755 /load-dev-tools \
     && dnf clean all
-
-RUN set -e && curl -sS https://bootstrap.pypa.io/get-pip.py | python3 \
-    && python3 -m pip install --upgrade pip \
-    && python3 -m pip install --no-cache-dir awscli
 
 ###############################################################
 # Retrieve and install the latest libdap snapshot

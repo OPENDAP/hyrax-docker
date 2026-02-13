@@ -1,0 +1,34 @@
+---
+- hosts: localhost
+  tasks:
+  - name: build olfs
+    docker_image:
+      name: olfs
+      tag: snapshot
+      path: olfs
+      state: present
+      force: yes
+  - name: build besd
+    docker_image:
+      name: besd
+      tag: snapshot
+      path: besd
+      state: present
+      force: yes
+  - name: run hyrax
+    docker_service:
+      project_name: hyrax
+      definition:
+        version: '2'
+        services:
+          besd:
+            image: besd
+            env_file: ${PWD}/local.env
+          olfs:
+            image: olfs
+            env_file: ${PWD}/local.env
+            ports:
+              - "8080:8080"
+            depends_on:
+              - besd
+
