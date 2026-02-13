@@ -2,6 +2,7 @@
 HR="##########################################################################"
 HR2="== == == == == == == == == == == == == == == == == == == == == == == == =="
 HR3="- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
+prolog="$0 -"
 ###########################################################################
 function loggy(){
     if test -n "${log_file}"
@@ -13,32 +14,38 @@ function loggy(){
 }
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 loggy "$HR"
-loggy "BEGIN"
-loggy "Retrieving $t_count tags."
+loggy "$prolog BEGIN"
+loggy "$prolog Retrieving $t_count tags."
 
 export BUILD_RECIPE="${1:-"../el9-build-recipe"}"
-loggy "   BUILD_RECIPE: '$BUILD_RECIPE'"
+loggy "$prolog    BUILD_RECIPE: '$BUILD_RECIPE'"
 
 export S3_BUILD_BUCKET="${S3_BUILD_BUCKET:-"opendap.travis.build"}"
-loggy "S3_BUILD_BUCKET: '$S3_BUILD_BUCKET'"
+loggy "$prolog S3_BUILD_BUCKET: '$S3_BUILD_BUCKET'"
 
 export DOCKER_NAME="${DOCKER_NAME:-"hyrax"}"
-loggy "    DOCKER_NAME: '$DOCKER_NAME'"
+loggy "$prolog     DOCKER_NAME: '$DOCKER_NAME'"
 
 #export TOMCAT_MAJOR_VERSION=${TOMCAT_MAJOR_VERSION:-"11"}
 #loggy "TOMCAT_MAJOR_VERSION: $TOMCAT_MAJOR_VERSION"
 
 export SLEEP_INTERVAL="${SLEEP_INTERVAL:-60}"
-loggy " SLEEP_INTERVAL: $SLEEP_INTERVAL"
+loggy "$prolog  SLEEP_INTERVAL: $SLEEP_INTERVAL"
 
 export NO_CACHE="${NO_CACHE:-""}"
-loggy "       NO_CACHE: $NO_CACHE"
+loggy "$prolog        NO_CACHE: $NO_CACHE"
 
 export ARCHIVE_HOST=${ARCHIVE_HOST:-"https://www.opendap.org"}
-loggy "   ARCHIVE_HOST: $ARCHIVE_HOST"
+loggy "$prolog    ARCHIVE_HOST: $ARCHIVE_HOST"
 
 export aws_quiet="${aws_quiet:-"shhhh"}"
 
+################################################################################
+#
+# get_test_deployment_tag()
+# Returns a value of "-test-deploy" if either the current branch or
+# the build-recipe file contains the string "test-deploy"
+#
 function get_test_deployment_tag(){
     local build_recipe_file="$1"
 
@@ -62,11 +69,11 @@ function get_test_deployment_tag(){
 }
 
 function read_build_recipe() {
+    local prolog"read_build_recipe() -"
     local build_recipe_file="${1}"
     local build_recipe=""
     build_recipe=$(cat "${build_recipe_file}")
 
-    export TEST_DEPLOYMENT
     export TARGET_OS
     export TOMCAT_MAJOR_VERSION
     export LIBDAP_VERSION
@@ -77,27 +84,29 @@ function read_build_recipe() {
     # export APR_VERSION
     export SNAPSHOT_IMAGE_TAG
     export BUILD_VERSION_TAG
+    export TEST_DEPLOYMENT
 
 
-    TARGET_OS="${TARGET_OS:-$(echo "${build_recipe}" | grep "TARGET_OS" | awk '{print $2;}')}"
-    TOMCAT_MAJOR_VERSION="${TOMCAT_MAJOR_VERSION:-$(echo "${build_recipe}" | grep "TOMCAT_MAJOR_VERSION" | awk '{print $2;}')}"
-    LIBDAP_VERSION=${LIBDAP_VERSION:-$(echo "${build_recipe}" | grep libdap4 | sed "s/libdap4-//g"| awk '{print $1;}')}
-    BES_VERSION=${BES_VERSION:-$(echo "${build_recipe}" | grep bes | sed "s/bes-//g" | awk '{print $1;}')}
-    OLFS_VERSION=${OLFS_VERSION:-"$(echo "${build_recipe}" | grep olfs | sed "s/olfs-//g" | awk '{print $1;}')-$TARGET_OS"}
-    HYRAX_VERSION=${HYRAX_VERSION:-$(echo "${build_recipe}" | grep hyrax | awk '{print $1;}' | sed "s/hyrax-//g" )}
-    RELEASE_DATE=${RELEASE_DATE:-$(echo "${build_recipe}" | grep hyrax | awk '{print $2;}')}
+    TARGET_OS="${TARGET_OS:-$(echo "$build_recipe" | grep "TARGET_OS" | awk '{print $2;}')}"
+    TOMCAT_MAJOR_VERSION="${TOMCAT_MAJOR_VERSION:-$(echo "$build_recipe" | grep "TOMCAT_MAJOR_VERSION" | awk '{print $2;}')}"
+    LIBDAP_VERSION=${LIBDAP_VERSION:-$(echo "$build_recipe" | grep libdap4 | sed "s/libdap4-//g"| awk '{print $1;}')}
+    BES_VERSION=${BES_VERSION:-$(echo "$build_recipe" | grep bes | sed "s/bes-//g" | awk '{print $1;}')}
+    OLFS_VERSION=${OLFS_VERSION:-"$(echo "$build_recipe" | grep olfs | sed "s/olfs-//g" | awk '{print $1;}')-$TARGET_OS"}
+    HYRAX_VERSION=${HYRAX_VERSION:-$(echo "$build_recipe" | grep hyrax | awk '{print $1;}' | sed "s/hyrax-//g" )}
+    RELEASE_DATE=${RELEASE_DATE:-$(echo "$build_recipe" | grep hyrax | awk '{print $2;}')}
     #APR_VERSION="1.7.6-1"
     #APR_VERSION=${APR_VERSION:-$(echo "${build_recipe}" | grep apr | sed "s/apr-//g" | awk '{print $1;}')}
     TEST_DEPLOYMENT="$(get_test_deployment_tag $build_recipe_file)"
+
+    SNAPSHOT_IMAGE_TAG=${SNAPSHOT_IMAGE_TAG:-"opendap/$DOCKER_NAME:snapshot-$TARGET_OS$TEST_DEPLOYMENT"}
+    loggy "$prolog SNAPSHOT_IMAGE_TAG: $SNAPSHOT_IMAGE_TAG"
+
+    BUILD_VERSION_TAG=${BUILD_VERSION_TAG:-"opendap/$DOCKER_NAME:$HYRAX_VERSION-$TARGET_OS$TEST_DEPLOYMENT"}
+    loggy "$prolog BUILD_VERSION_TAG: $BUILD_VERSION_TAG"
+
 }
 read_build_recipe "${BUILD_RECIPE}"
 
-loggy "SNAPSHOT_IMAGE_TAG: $SNAPSHOT_IMAGE_TAG"
-export SNAPSHOT_IMAGE_TAG=${SNAPSHOT_IMAGE_TAG:-"opendap/$DOCKER_NAME:snapshot-$TARGET_OS$TEST_DEPLOYMENT"}
-loggy "SNAPSHOT_IMAGE_TAG: $SNAPSHOT_IMAGE_TAG"
-loggy "BUILD_VERSION_TAG: $BUILD_VERSION_TAG"
-export BUILD_VERSION_TAG=${BUILD_VERSION_TAG:-"opendap/$DOCKER_NAME:$HYRAX_VERSION-$TARGET_OS$TEST_DEPLOYMENT"}
-loggy "BUILD_VERSION_TAG: $BUILD_VERSION_TAG"
 
 
 

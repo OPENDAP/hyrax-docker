@@ -2,25 +2,36 @@
 #
 prolog="$0 -"
 export DOCKER_NAME="${DOCKER_NAME:-"ngap"}"
+
+#
 source ./build-el9
 
 loggy "$prolog DOCKER_NAME: ${DOCKER_NAME}"
 
 ###############################################################################################
-# We override these docker tag definitions because the ngap product gets tagged differently than
-# the products from our regular repos.
+# We overwrite the SNAPSHOT_IMAGE_TAG and BUILD_VERSION_TAG variables because the ngap product
+# gets tagged differently than the products from our other repos.
+# Specifically, we use the opendap/hyrax repo since the ngap product is just a specialization
+# of hyrax, at least for now. So we use a fixed opendap/hyrax project, and we add the
+# $DOCKER_NAME ("ngap" in this case) to the image tag:
+# Examples:
+#     opendap/hyrax:ngap-snapshot-el9
+#     opendap/hyrax:ngap-1.17.1-846-el9
+#     opendap/hyrax:ngap-snapshot-el9-test-deploy
+#     opendap/hyrax:ngap--1.17.1-846-el9-test-deploy
 #
 export SNAPSHOT_IMAGE_TAG="opendap/hyrax:$DOCKER_NAME-snapshot-$TARGET_OS$TEST_DEPLOYMENT"
-loggy "$prolog SNAPSHOT_IMAGE_TAG - $SNAPSHOT_IMAGE_TAG" >&2
+loggy "$prolog SNAPSHOT_IMAGE_TAG: $SNAPSHOT_IMAGE_TAG" >&2
 #
 export BUILD_VERSION_TAG="opendap/hyrax:$DOCKER_NAME-$HYRAX_VERSION-$TARGET_OS$TEST_DEPLOYMENT"
-loggy "$prolog BUILD_VERSION_TAG - $BUILD_VERSION_TAG" >&2
+loggy "$prolog BUILD_VERSION_TAG: $BUILD_VERSION_TAG" >&2
 ###############################################################################################
 
 
+loggy "$prolog TOMCAT_MAJOR_VERSION: $TOMCAT_MAJOR_VERSION" >&2
 export TOMCAT_VERSION=
 TOMCAT_VERSION="$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")"
-loggy "$prolog TOMCAT_VERSION - $TOMCAT_VERSION" >&2
+loggy "$prolog TOMCAT_VERSION: $TOMCAT_VERSION" >&2
 #
 export APACHE_APR_VERSION="${APACHE_APR_VERSION:-"1.7.6-1"}"
 loggy "$prolog APACHE_APR_VERSION: $APACHE_APR_VERSION"
