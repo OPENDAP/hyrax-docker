@@ -16,7 +16,7 @@
 FROM rockylinux:9
 LABEL org.opencontainers.image.authors="support@opendap.org"
 USER root
-ENV DEBUG_BUILD=true
+ENV DEBUG_BUILD=""
 ENV HR="###############################################################################################################"
 ENV HR2="-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --"
 ENV TARGET_OS="el9"

@@ -87,3 +87,38 @@ set +e
 
 loggy "$prolog docker image ls -a: "
 loggy "$(docker image ls -a)"
+
+function ngap_el9_dnf_sanity_check() {
+    local prolog="el9_dnf_sanity_check() -"
+    set -e
+    loggy "$HR"
+    if test -n "$DEBUG_BUILD"
+    then
+        loggy "$prolog Sanity checking installed packages..."
+        loggy "$prolog openssl is located here: $(which openssl)"
+        loggy "$prolog openssl version: $(openssl version)"
+        loggy "$(dnf -y info openssl)"
+        loggy "$prolog openssl is installed."
+        loggy "$HR"
+        loggy "$prolog libtirpc info:"
+        loggy "$(dnf -y info libtirpc)"
+        loggy "$HR2"
+        loggy "$prolog rpm -ql libtirpc: "
+        rpm -ql libtirpc
+        loggy "$HR"
+        loggy "$prolog libtirpc-devel info:"
+        dnf -y info libtirpc-devel
+        loggy "$HR2"
+        loggy "$prolog rpm -ql libtirpc-devel: "
+        rpm -ql libtirpc-devel
+        loggy "$HR"
+        loggy "$prolog libuuid info:"
+        dnf -y info libuuid
+        loggy "$prolog libuuid-devel info:"
+        dnf -y info libuuid-devel
+        dnf clean all
+    else
+        loggy "$prolog Skipping Sanity Checks..."
+    fi
+    loggy "$HR"
+}
