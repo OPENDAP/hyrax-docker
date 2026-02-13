@@ -95,7 +95,7 @@ function read_build_recipe() {
     RELEASE_DATE=${RELEASE_DATE:-$(echo "$build_recipe" | grep hyrax | awk '{print $2;}')}
     #APR_VERSION="1.7.6-1"
     #APR_VERSION=${APR_VERSION:-$(echo "${build_recipe}" | grep apr | sed "s/apr-//g" | awk '{print $1;}')}
-    TEST_DEPLOYMENT="$(get_test_deployment_tag $build_recipe_file)"
+    TEST_DEPLOYMENT="${TEST_DEPLOYMENT:-"$(get_test_deployment_tag "$build_recipe_file")"}"
 
     SNAPSHOT_IMAGE_TAG=${SNAPSHOT_IMAGE_TAG:-"opendap/$DOCKER_NAME:snapshot-$TARGET_OS$TEST_DEPLOYMENT"}
     # loggy "$prolog SNAPSHOT_IMAGE_TAG: $SNAPSHOT_IMAGE_TAG"
