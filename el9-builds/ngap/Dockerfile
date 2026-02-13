@@ -17,6 +17,7 @@ FROM rockylinux:9
 LABEL org.opencontainers.image.authors="support@opendap.org"
 USER root
 ENV DEBUG_BUILD=true
+ENV function foo() { echo "foo" >&2; }
 ENV HR="###############################################################################################################"
 ENV HR2="-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --"
 ENV TARGET_OS="el9"
@@ -24,7 +25,7 @@ ENV ARCH="x86_64"
 ENV java_version="java-21-openjdk"
 # rocky9 comes with python 3.9 by default.
 ENV python_version="3.9"
-RUN echo "$HR" && echo "# Python Version: $(python3 --version) (config says we want: $python_version)" && echo "$HR"
+RUN echo "$HR" && echo "# Python Version: $(python3 --version) (config says we want: $python_version)" && foo && echo "$HR"
 
 ENV core_dnf_packages="which unzip "
 
