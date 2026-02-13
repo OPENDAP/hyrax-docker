@@ -2,7 +2,7 @@
 HR="##########################################################################"
 HR2="== == == == == == == == == == == == == == == == == == == == == == == == =="
 HR3="- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
-prolog="$0 -"
+prolog="build_el9 -"
 ###########################################################################
 function loggy(){
     if test -n "${log_file}"
@@ -15,7 +15,6 @@ function loggy(){
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 loggy "$HR"
 loggy "$prolog BEGIN"
-loggy "$prolog Retrieving $t_count tags."
 
 export BUILD_RECIPE="${1:-"../el9-build-recipe"}"
 loggy "$prolog    BUILD_RECIPE: '$BUILD_RECIPE'"
