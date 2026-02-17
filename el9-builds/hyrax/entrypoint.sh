@@ -56,6 +56,7 @@ loggy "   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION"
 export DEBUG=${DEBUG:-"true"}
 loggy "                DEBUG: $DEBUG"
 
+loggy "Processing Command Line Options..."
 while getopts "de:sn:i:k:r:" opt; do
   loggy "Processing command line opt: $opt"
   case $opt in
@@ -104,6 +105,8 @@ while getopts "de:sn:i:k:r:" opt; do
       ;;
   esac
 done
+loggy "Command Line Options Have Been Processed."
+loggy "$HR0"
 
 if test "$DEBUG" = "true" ; then
     loggy "CATALINA_HOME: $CATALINA_HOME"
@@ -213,7 +216,7 @@ loggy "Hyrax Has Arrived..."
 loggy "--------------------------------------------------------------------"
 #-------------------------------------------------------------------------------
 while /bin/true; do
-    loggy "SLEEP_INTERVAL: '$SLEEP_INTERVAL'"
+    loggy "Hyrax Check BEGIN. SLEEP_INTERVAL: '$SLEEP_INTERVAL'"
     sleep 60
     loggy "Checking Hyrax Operational State..."
     besd_ps="$(ps -f "$besd_pid")"
