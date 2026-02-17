@@ -20,7 +20,12 @@ ENV java_version="java-21-openjdk"
 # rocky9 comes with python 3.9 by default.
 ENV python_version="3.9"
 RUN echo "Python Version: $(python3 --version) (config says we want: $python_version)"
+
 ENV core_dnf_packages="which unzip procps bc"
+# We install:
+#  unzip - to unpack stuff we install
+# procps - so we can use 'ps' to track the bes and tomcat processes.
+#     bc - is used by the cleanup_files.sh script to compute time stuff for orphaned files.
 
 # Stuff we need for hyrax_regression_tests
 ENV regression_test_dnf_packages="git make autoconf automake diffutils"

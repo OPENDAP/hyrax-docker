@@ -111,16 +111,17 @@ if test "$DEBUG" = "true" ; then
     loggy "$(ls -l "$CATALINA_HOME/bin")"
 fi
 
+export VIEWERS_XML="$CATALINA_HOME/webapps/opendap/WEB-INF/conf/viewers.xml"
 if test "$DEBUG" = "true" ; then
     loggy "NCWMS: Using NCWMS_BASE: $NCWMS_BASE"
     loggy "NCWMS: Setting ncWMS access URLs in viewers.xml (if needed)."
     loggy "$(ls -l "$VIEWERS_XML")"
 fi
 
-sed -i "s+@NCWMS_BASE@+$NCWMS_BASE+g" "$CATALINA_HOME/webapps/opendap/WEB-INF/conf/viewers.xml"
+sed -i "s+@NCWMS_BASE@+$NCWMS_BASE+g" "$VIEWERS_XML"
 if test "$DEBUG" = "true" ; then
-    loggy "$CATALINA_HOME/webapps/opendap/WEB-INF/conf/viewers.xml"
-    loggy "$(cat "$CATALINA_HOME/webapps/opendap/WEB-INF/conf/viewers.xml")"
+    loggy "$VIEWERS_XML"
+    loggy "$(cat "$VIEWERS_XML")"
 fi
 
 #-------------------------------------------------------------------------------
@@ -135,7 +136,7 @@ if test "$FOLLOW_SYMLINKS" != "not_set" ; then
     sed -i "s/^BES.Catalog.catalog.FollowSymLinks=No/BES.Catalog.catalog.FollowSymLinks=Yes/" "/etc/bes/bes.conf"
 fi
 
-loggy "JAVA VERSION: $(java -version)"
+loggy "JAVA VERSION: $( java -version 2>&1 )"
 
 loggy "Checking AWS CLI..."
 set +e
@@ -153,7 +154,7 @@ else
     fi
 fi
 
-loggy "PythonVersion: $(python3 --version)"
+loggy "PythonVersion: $( python3 --version 2>&1 )"
 #-------------------------------------------------------------------------------
 # Start the BES daemon process
 # /usr/bin/besdaemon -i /usr -c /etc/bes/bes.conf -r /var/run/bes.pid
