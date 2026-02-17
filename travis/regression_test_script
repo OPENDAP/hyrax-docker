@@ -78,12 +78,14 @@ function waitForHyrax() {
     let start=$(date "+%s")
     local done_flag=""
     local curl_response
+    echo -n "$prolog " >&2
     while test -z "${done_flag}"; do
         echo -n "." >&2
         curl -s -c cookies -b cookies -n --netrc-file ${netrc_file} -L ${end_point} >/dev/null 2>&1
         status=$?
         # echo "cURL status: ${status}";
         if [ ${status} -eq 0 ]; then
+            echo "" >&2
             loggy "$prolog "
             loggy "$prolog Endpoint may have been retrieved. Checking again..."
             # What happens next: We get the response headers "-I" and look
