@@ -53,7 +53,7 @@ export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-"us-west-2"}
 loggy "       AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION"
 
 
-export DEBUG=${DEBUG:-false}
+export DEBUG=${DEBUG:-"true"}
 loggy "DEBUG: $DEBUG"
 
 while getopts "de:sn:i:k:r:" opt; do
@@ -204,6 +204,7 @@ loggy "Tomcat is UP! pid: $tomcat_pid"
 /cleanup_files.sh >&2 &
 # TEMPORARY
 
+sleep -h
 
 loggy "Hyrax Has Arrived..."
 loggy "--------------------------------------------------------------------"
