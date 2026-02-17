@@ -111,7 +111,10 @@ function waitForHyrax() {
         if [ ${elapsed} -gt ${time_out} ]; then
             loggy "$prolog "
             loggy "$prolog ERROR: Hyrax FAILED To Start! Waited for ${elapsed} seconds"
+            loggy "$prolog docker logs: "
             loggy "$(docker logs "$docker_id")"
+            loggy "$prolog $HR2"
+            loggy "$prolog Hyrax failed to arrive...!"
             exit 1
         fi
     done
