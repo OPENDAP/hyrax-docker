@@ -16,22 +16,22 @@ loggy "Greetings, I am "`whoami`" (uid: "`echo ${UID}`")."
 # set -e
 # set -x
 
-echo "PythonVersion: "$(python3 --version)
+echo "     PythonVersion: "$(python3 --version)
 
 export JAVA_HOME=${JAVA_HOME:-"/etc/alternatives/jre"}
-loggy "JAVA_HOME: $JAVA_HOME"
+loggy "        JAVA_HOME: $JAVA_HOME"
 
 export SLEEP_INTERVAL=${SLEEP_INTERVAL:-60}
-loggy "SLEEP_INTERVAL: $SLEEP_INTERVAL seconds."
+loggy "   SLEEP_INTERVAL: $SLEEP_INTERVAL seconds."
 
 export SERVER_HELP_EMAIL=${SERVER_HELP_EMAIL:-"not_set"}
 loggy "SERVER_HELP_EMAIL: $SERVER_HELP_EMAIL"
 
 export FOLLOW_SYMLINKS=${FOLLOW_SYMLINKS:-"false"}
-loggy "FOLLOW_SYMLINKS: $FOLLOW_SYMLINKS"
+loggy "  FOLLOW_SYMLINKS: $FOLLOW_SYMLINKS"
 
 export NCWMS_BASE=${NCWMS_BASE:-"https://localhost:8080"}
-loggy "NCWMS_BASE: $NCWMS_BASE"
+loggy "       NCWMS_BASE: $NCWMS_BASE"
 
 # AWS ##########################################################################
 loggy "$HR2"
@@ -50,11 +50,11 @@ else
 fi
 
 export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-"us-west-2"}
-loggy "       AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION"
+loggy "   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION"
 
 
 export DEBUG=${DEBUG:-"true"}
-loggy "DEBUG: $DEBUG"
+loggy "                DEBUG: $DEBUG"
 
 while getopts "de:sn:i:k:r:" opt; do
   loggy "Processing command line opt: $opt"
@@ -107,19 +107,20 @@ done
 
 if test "$DEBUG" = "true" ; then
     loggy "CATALINA_HOME: $CATALINA_HOME"
-    ls -l "$CATALINA_HOME" "$CATALINA_HOME/bin"
+    loggy "$(ls -l "$CATALINA_HOME")"
+    loggy "$(ls -l "$CATALINA_HOME/bin")"
 fi
 
-if test "${DEBUG}" = "true" ; then
+if test "$DEBUG" = "true" ; then
     loggy "NCWMS: Using NCWMS_BASE: $NCWMS_BASE"
     loggy "NCWMS: Setting ncWMS access URLs in viewers.xml (if needed)."
-    ls -l "$VIEWERS_XML"
+    loggy "$(ls -l "$VIEWERS_XML")"
 fi
 
 sed -i "s+@NCWMS_BASE@+$NCWMS_BASE+g" "$CATALINA_HOME/webapps/opendap/WEB-INF/conf/viewers.xml"
 if test "$DEBUG" = "true" ; then
-    loggy "${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml"
-    loggy "$(cat "${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml")"
+    loggy "$CATALINA_HOME/webapps/opendap/WEB-INF/conf/viewers.xml"
+    loggy "$(cat "$CATALINA_HOME/webapps/opendap/WEB-INF/conf/viewers.xml")"
 fi
 
 #-------------------------------------------------------------------------------
