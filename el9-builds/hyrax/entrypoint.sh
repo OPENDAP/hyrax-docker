@@ -208,7 +208,7 @@ loggy "Hyrax Has Arrived..."
 loggy "--------------------------------------------------------------------"
 #-------------------------------------------------------------------------------
 while /bin/true; do
-    sleep "$SLEEP_INTERVAL"
+    sleep $SLEEP_INTERVAL
     loggy "Checking Hyrax Operational State..."
     besd_ps="$(ps -f "$besd_pid")"
     BESD_STATUS=$?
