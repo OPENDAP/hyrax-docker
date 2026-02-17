@@ -17,7 +17,7 @@ function loggy(){
 
 loggy "$HR0"
 loggy "#################################### HYRAX ########################################"
-loggy "$PLOG Greetings, I am "`whoami`" (uid: $UID)"
+loggy "$PLOG Greetings, I am $(whoami) (uid: $UID)"
 # set -e
 # set -x
 
