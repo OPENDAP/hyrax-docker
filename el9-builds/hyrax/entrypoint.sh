@@ -223,12 +223,9 @@ loggy "$HR1"
 loggy "$PLOG Hyrax Has Arrived..."
 loggy "$HR2"
 while /bin/true; do
-    loggy "$PLOG Hyrax Check BEGIN. SLEEP_INTERVAL: '$SLEEP_INTERVAL'"
-    set -x
+    loggy "$PLOG Hyrax Monitor (SLEEP_INTERVAL: '$SLEEP_INTERVAL')"
     sleep "$SLEEP_INTERVAL"
-    sleep 5
-    set +x
-    loggy "$PLOG Checking Hyrax Operational State..."
+    loggy "$PLOG Checking Hyrax Operational State."
     besd_ps="$(ps -f "$besd_pid")"
     BESD_STATUS=$?
     loggy "$PLOG BESD_STATUS: $BESD_STATUS"
@@ -260,7 +257,7 @@ while /bin/true; do
     if test "${DEBUG}" = "true" ; then
         loggy "-------------------------------------------------------------------"
         date
-        loggy "$PLOG BESD_STATUS: $BESD_STATUS  besd_pid:$besd_pid"
+        loggy "$PLOG   BESD_STATUS: $BESD_STATUS     besd_pid:$besd_pid"
         loggy "$PLOG TOMCAT_STATUS: $TOMCAT_STATUS tomcat_pid:$tomcat_pid"
     fi
 done
