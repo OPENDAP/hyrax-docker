@@ -140,9 +140,10 @@ loggy "JAVA VERSION: $( java -version 2>&1 )"
 
 loggy "Checking AWS CLI..."
 set +e
-loggy "$(which aws 2>&1)"
+which_output=$(eval "which aws" 2>&1)
 status=$?
 set -e
+loggy "$which_output"
 if test $status -ne 0
 then
     loggy "WARNING: AWS CLI not detected on PATH, may not be installed."
