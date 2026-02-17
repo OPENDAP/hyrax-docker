@@ -74,7 +74,7 @@ jobs:
     #
 
 # BUILD_AND_TEST
-    - stage: disabled
+    - stage: BUILD_AND_TEST
       name: "Build and Test opendap/hyrax"
       script:
         - export DOCKER_NAME="hyrax"
@@ -214,19 +214,19 @@ jobs:
 
 
     - stage: BUILD_AND_TEST
-      name: "Build opendap/hyrax:ngap"
+      name: "Build opendap/hyrax:ngap with reddis session manager"
       script:
         - cd "$TARGET_OS-builds"
         - export DOCKER_NAME="ngap"
         - export DOCKER_DIR="ngap"
-        - export TEST_DEPLOYMENT="-wootwoot"
+        - export TEST_DEPLOYMENT="-test-deploy"
         - ./build-redis-ngap.sh
         - docker image ls -a
         -
     - stage: TEST_DEPLOYED_IMAGE
       name: "Test Deployed Image (RH8)"
       script:
-        - source "./${TARGET_OS}-builds/build-$TARGET_OS" ./${TARGET_OS}-build-recipe
+        - source "./$TARGET_OS-builds/build-$TARGET_OS" ./${TARGET_OS}-build-recipe
         - export TEST_IMAGE="opendap/hyrax:${HYRAX_VERSION}$TEST_DEPLOYMENT"
         - echo "Running Hyrax Regression Test Script on ${TEST_IMAGE}"
         - ./travis/regression_test_script -i "${TEST_IMAGE}"
