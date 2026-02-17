@@ -17,12 +17,12 @@ function loggy(){
 
 loggy "$HR0"
 loggy "#################################### HYRAX ########################################"
-loggy "$PLOG Greetings, I am "`whoami`" (uid: "`echo ${UID}`")."
+loggy "$PLOG Greetings, I am "`whoami`" (uid: $UID)"
 # set -e
 # set -x
 
 loggy "$PLOG                 PLOG: '$PLOG'"
-loggy "$PLOG        PythonVersion: "$(python3 --version)
+loggy "$PLOG        PythonVersion: $(python3 --version)"
 
 export JAVA_HOME=${JAVA_HOME:-"/etc/alternatives/jre"}
 loggy "$PLOG            JAVA_HOME: $JAVA_HOME"
@@ -224,7 +224,7 @@ loggy "$PLOG Hyrax Has Arrived..."
 loggy "$HR2"
 while /bin/true; do
     loggy "$PLOG Hyrax Check BEGIN. SLEEP_INTERVAL: '$SLEEP_INTERVAL'"
-    sleep 60
+    sleep "$SLEEP_INTERVAL"
     loggy "$PLOG Checking Hyrax Operational State..."
     besd_ps="$(ps -f "$besd_pid")"
     BESD_STATUS=$?
