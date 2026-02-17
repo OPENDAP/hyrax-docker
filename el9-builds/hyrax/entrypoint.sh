@@ -6,7 +6,7 @@
 # set -x # "set -o xtrace"  Print command traces before executing command.
 # set -e #  Exit on error.
 
-#echo "entrypoint.sh  command line: \"$@\""
+#echo "entrypoint.sh  command line: '$@' "
 export HR0="###################################################################################"
 export HR1="-----------------------------------------------------------------------------------"
 export HR2="-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --"
