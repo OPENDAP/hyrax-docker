@@ -204,12 +204,12 @@ loggy "Tomcat is UP! pid: $tomcat_pid"
 /cleanup_files.sh >&2 &
 # TEMPORARY
 
-loggy "SLEEP_INTERVAL: '$SLEEP_INTERVAL'"
 
 loggy "Hyrax Has Arrived..."
 loggy "--------------------------------------------------------------------"
 #-------------------------------------------------------------------------------
 while /bin/true; do
+    loggy "SLEEP_INTERVAL: '$SLEEP_INTERVAL'"
     sleep $SLEEP_INTERVAL
     loggy "Checking Hyrax Operational State..."
     besd_ps="$(ps -f "$besd_pid")"
