@@ -7,6 +7,9 @@
 # set -e #  Exit on error.
 
 #echo "entrypoint.sh  command line: \"$@\""
+export HR0="###################################################################################"
+export HR1="-----------------------------------------------------------------------------------"
+export HR2="-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --"
 function loggy(){
     echo  "$@" | awk '{ print "# "$0;}'  >&2
 }
@@ -210,11 +213,12 @@ loggy "Tomcat is UP! pid: $tomcat_pid"
 /cleanup_files.sh >&2 &
 # TEMPORARY
 
-sleep --help
+# sleep --help
 
-loggy "Hyrax Has Arrived..."
-loggy "--------------------------------------------------------------------"
 #-------------------------------------------------------------------------------
+loggy "$HR1"
+loggy "Hyrax Has Arrived..."
+loggy "$HR2"
 while /bin/true; do
     loggy "Hyrax Check BEGIN. SLEEP_INTERVAL: '$SLEEP_INTERVAL'"
     sleep 60
