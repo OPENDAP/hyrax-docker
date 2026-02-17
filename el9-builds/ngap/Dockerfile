@@ -308,13 +308,13 @@ RUN set -e \
     && mkdir -p /var/log/tomcat \
     && chown -R tomcat:tomcat /var/log/tomcat /home/tomcat \
     && echo "# Tomcat is unpacked and ready. >&2 "
-COPY tomcat.service /etc/systemd/system/tomcat.service
-RUN set -e \
-    && echo "$HR2" >&2 \
-    && echo "# Calling: 'systemctl enable tomcat'" >&2 \
-    && echo "# $(systemctl enable tomcat)" >&2 \
-    && echo "# systemctl status: $?" >&2 \
-    && echo "$HR" >&2
+#COPY tomcat.service /etc/systemd/system/tomcat.service
+#RUN set -e \
+#    && echo "$HR2" >&2 \
+#    && echo "# Calling: 'systemctl enable tomcat'" >&2 \
+#    && echo "# $(systemctl enable tomcat)" >&2 \
+#    && echo "# systemctl status: $?" >&2 \
+#    && echo "$HR" >&2
 #RUN firewall-cmd --add-port 8080/tcp --permanent
 #RUN firewall-cmd --reload
 
