@@ -219,7 +219,7 @@ jobs:
         - cd "$TARGET_OS-builds"
         - export DOCKER_NAME="ngap"
         - export DOCKER_DIR="ngap"
-        - export TEST_DEPLOYMENT="-test-deploy"
+        - export TEST_DEPLOYMENT="-wootwoot"
         - ./build-redis-ngap.sh
         - docker image ls -a
         -
