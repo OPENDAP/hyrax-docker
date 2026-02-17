@@ -58,6 +58,7 @@ done
 shift $(($OPTIND - 1))
 tests="$@"
 
+loggy "$prolog $HR1"
 loggy "$prolog Using the following configuration:"
 loggy "$prolog        time_out: ${time_out}"
 loggy "$prolog test_image_name: ${test_image_name}"
@@ -70,6 +71,7 @@ loggy "$prolog  tests_log_base: ${tests_log_base}"
 #
 function waitForHyrax() {
     local prolog="waitForHyrax() -"
+    local docker_id="$1"
     # Don't fail on errors, they're expected...
     set +e
     local start
@@ -109,6 +111,7 @@ function waitForHyrax() {
         if [ ${elapsed} -gt ${time_out} ]; then
             loggy "$prolog "
             loggy "$prolog ERROR: Hyrax FAILED To Start! Waited for ${elapsed} seconds"
+            loggy "$(docker logs "$docker_id")"
             exit 1
         fi
     done
@@ -120,6 +123,8 @@ function waitForHyrax() {
 
 function clean_and_start(){
     local prolog="clean_and_start_docker() -"
+    loggy "$prolog $HR1"
+    loggy "$prolog BEGIN"
 
     local d_id="$1"
     loggy "$prolog       d_id: $d_id"
@@ -137,6 +142,7 @@ function clean_and_start(){
     loggy "$prolog Starting: $d_id"
     container_id=$(docker run -d -h "$d_id" -p 8080:8080 --name="$d_id" "$test_image")
     loggy "$prolog Started container: $container_id"
+    loggy "$prolog END"
 }
 
 
@@ -144,7 +150,7 @@ function clean_and_start(){
 d_id="hyrax"
 
 clean_and_start "$d_id" "$test_image_name"
-waitForHyrax
+waitForHyrax "$d_id"
 
 loggy "$HR1"
 loggy "$prolog Testing image: ${test_image_name}"

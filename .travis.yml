@@ -78,6 +78,7 @@ jobs:
       name: "Build and Test opendap/hyrax"
       script:
         - export DOCKER_NAME="hyrax"
+        - echo "DOCKER_NAME '$DOCKER_NAME'"
         - echo "RELEASE_DATE '$RELEASE_DATE'"
         - echo "BUILDING FOR $TARGET_OS"
         - cd "$TARGET_OS-builds"
