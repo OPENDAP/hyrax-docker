@@ -113,6 +113,11 @@ function waitForHyrax() {
             exit 1
         fi
     done
+    loggy "$prolog "
+    loggy "$prolog $HR2"
+    loggy "$prolog Start-up Docker logs: "
+    loggy "$(docker logs "$docker_id")"
+    loggy "$prolog $HR2"
     # Now we can fail on errors again.
     set -e
     loggy "$prolog Hyrax has arrived!"
