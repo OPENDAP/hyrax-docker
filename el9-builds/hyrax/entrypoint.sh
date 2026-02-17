@@ -17,7 +17,7 @@ function loggy(){
 
 loggy "$HR0"
 loggy "#################################### HYRAX ########################################"
-loggy "Greetings, I am "`whoami`" (uid: "`echo ${UID}`")."
+loggy "$PLOG Greetings, I am "`whoami`" (uid: "`echo ${UID}`")."
 # set -e
 # set -x
 
@@ -56,7 +56,7 @@ else
 fi
 
 export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-"us-west-2"}
-loggy " $PLOG   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION"
+loggy "$PLOG    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION"
 
 
 export DEBUG=${DEBUG:-"true"}
