@@ -204,6 +204,8 @@ loggy "Tomcat is UP! pid: $tomcat_pid"
 /cleanup_files.sh >&2 &
 # TEMPORARY
 
+loggy "SLEEP_INTERVAL: '$SLEEP_INTERVAL'"
+
 loggy "Hyrax Has Arrived..."
 loggy "--------------------------------------------------------------------"
 #-------------------------------------------------------------------------------
