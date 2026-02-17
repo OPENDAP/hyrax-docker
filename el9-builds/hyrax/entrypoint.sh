@@ -225,6 +225,7 @@ loggy "$HR2"
 while /bin/true; do
     loggy "$PLOG Hyrax Check BEGIN. SLEEP_INTERVAL: '$SLEEP_INTERVAL'"
     sleep "$SLEEP_INTERVAL"
+    sleep 60
     loggy "$PLOG Checking Hyrax Operational State..."
     besd_ps="$(ps -f "$besd_pid")"
     BESD_STATUS=$?
