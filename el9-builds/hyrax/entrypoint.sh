@@ -140,7 +140,7 @@ loggy "JAVA VERSION: $( java -version 2>&1 )"
 
 loggy "Checking AWS CLI..."
 set +e
-which aws
+loggy "$(which aws 2>&1)"
 status=$?
 set -e
 if test $status -ne 0
