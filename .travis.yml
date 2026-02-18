@@ -296,4 +296,10 @@ deploy:
       branch: master OR el9
       condition: "$DEPLOY_ME" = "true"
 
+  - provider: script
+    script: bash ${TRAVIS_BUILD_DIR}/travis/deploy_to_docker_hub.sh
+    on:
+      branch: el9
+      condition: "$DEPLOY_ME" = "true"
+
 
