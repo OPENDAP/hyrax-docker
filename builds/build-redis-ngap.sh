@@ -37,7 +37,7 @@ s3_get_apache_apr_distro \
 get_ngap_olfs_distro \
     "${S3_BUILD_BUCKET}" \
     "${DOCKER_NAME}" \
-    "ngap-redisson-3.50.0"
+    "ngap-1.18.15-395"
 
 s3_get_openssl_distro \
     "${S3_BUILD_BUCKET}" \
