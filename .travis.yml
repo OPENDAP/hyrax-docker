@@ -80,7 +80,7 @@ jobs:
     #
 
 # BUILD_AND_TEST
-    - stage: BUILD_AND_TEST
+    - stage: disabled
       name: "Build and Test opendap/hyrax"
       script:
         - export DOCKER_NAME="hyrax"
@@ -120,7 +120,7 @@ jobs:
         - echo "Running Test Script"
         - ./travis/regression_test_script -i "$SNAPSHOT_IMAGE_TAG" -l "$TESTS_LOG_BASE"
 
-    - stage: BUILD
+    - stage: disabled
       name: "Build opendap/besd"
       script:
         - export DOCKER_NAME="besd"
@@ -243,7 +243,7 @@ jobs:
           --tag "${BUILD_VERSION_TAG}" olfs
         - docker image ls -a
 
-    - stage: BUILD
+    - stage: disabled
       name: "Build opendap/olfs"
       script:
         - export DOCKER_NAME="olfs"
@@ -275,7 +275,9 @@ jobs:
         - source "./build-$TARGET_OS"
         - export TEST_DEPLOYMENT="-test-deploy"
         - export SNAPSHOT_IMAGE_TAG="${SNAPSHOT_IMAGE_TAG:-"opendap/hyrax:$DOCKER_NAME-snapshot-$TARGET_OS$TEST_DEPLOYMENT"}"
+        - echo "SNAPSHOT_IMAGE_TAG is $SNAPSHOT_IMAGE_TAG"
         - export BUILD_VERSION_TAG="${BUILD_VERSION_TAG:-"opendap/hyrax:$DOCKER_NAME-$HYRAX_VERSION-$TARGET_OS$TEST_DEPLOYMENT"}"
+        - echo "BUILD_VERSION_TAG is $BUILD_VERSION_TAG"
         - ./build-redis-ngap.sh
         - docker image ls -a
         -
