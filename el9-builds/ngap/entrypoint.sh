@@ -151,9 +151,9 @@ SYSTEM_ID=$(get_aws_instance_id)
 
 ################################################################################
 startup_log "Checking AWS CLI: "
-acl=$(aws configure list 2>&1)
+acl="$(aws configure list 2>&1)"
 acl_status=$?
-startup_log $acl
+startup_log "$acl"
 if test $acl_status -ne 0; then
   startup_log "WARNING: Problem with AWS CLI! (status: ${acl_status})"
 fi
