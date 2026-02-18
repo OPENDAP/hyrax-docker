@@ -61,13 +61,13 @@ install:
 
 stages:
   - name: OLFS
-    if: branch = master
+    if: branch = master OR branch = el9
   - name: BUILD_AND_TEST
-    if:  branch = master
+    if:  branch = master OR branch = el9
   - name: BUILD
-    if:  branch = master
+    if:  branch = master OR branch = el9
   - name: TEST_DEPLOYED_IMAGE
-    if: branch = master
+    if: branch = master OR branch = el9
   - name: disabled
     if: branch = disabled
 
