@@ -213,6 +213,52 @@ jobs:
           "$DOCKER_DIR"
         - docker image ls -a
 
+    - stage: disabled
+      name: "Build opendap/olfs:snapshot"
+      script:
+        - cd "${TARGET_OS}-builds"
+        - export DOCKER_NAME="olfs"
+        - source ./build-rh8
+        - export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}:snapshot$TEST_DEPLOYMENT"
+        - export BUILD_VERSION_TAG="opendap/${DOCKER_NAME}:${OLFS_VERSION}$TEST_DEPLOYMENT"
+        - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
+        - show_version
+        - get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_VERSION}"
+        - s3_get_olfs_distro
+          "${S3_BUILD_BUCKET}"
+          "olfs"
+          "${OLFS_VERSION}" 2>&1
+        - docker build
+          --build-arg TOMCAT_VERSION
+          --build-arg RELEASE_DATE
+          --build-arg HYRAX_VERSION
+          --build-arg OLFS_VERSION
+          --tag "${SNAPSHOT_IMAGE_TAG}"
+          --tag "${BUILD_VERSION_TAG}" olfs
+        - docker image ls -a
+
+    - stage: BUILD
+      name: "Build opendap/olfs"
+      script:
+        - export DOCKER_NAME="olfs"
+        - export DOCKER_DIR="olfs"
+        - cd "$TARGET_OS-builds"
+        - source "./build-$TARGET_OS"
+        - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
+        - show_version
+        - get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_VERSION}"
+        - s3_get_olfs_distro
+          "${S3_BUILD_BUCKET}"
+          "olfs"
+          "${OLFS_VERSION}" 2>&1
+        - docker build
+          --build-arg TOMCAT_VERSION
+          --build-arg RELEASE_DATE
+          --build-arg HYRAX_VERSION
+          --build-arg OLFS_VERSION
+          --tag "${SNAPSHOT_IMAGE_TAG}"
+          --tag "${BUILD_VERSION_TAG}" olfs
+        - docker image ls -a
 
     - stage: BUILD
       name: "Build opendap/hyrax:ngap with reddis session manager"
