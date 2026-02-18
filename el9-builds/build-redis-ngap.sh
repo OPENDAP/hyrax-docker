@@ -1,9 +1,11 @@
 #!/bin/bash
 #
-export DOCKER_NAME="${DOCKER_NAME:-"ngap"}"
-
 #
-source ./build-el9
+# We must assume that the shell has sourced ./build-el9 prior (in Travis) so that
+# downstream Travis activities (like deployment) will have all the ENV vars they
+# need to run.
+# ./build-$TARGET_OS
+
 prolog="$0 -"
 
 export DOCKER_NAME="${DOCKER_NAME:-"ngap"}"
@@ -21,10 +23,10 @@ loggy "$prolog DOCKER_NAME: $DOCKER_NAME"
 #     opendap/hyrax:ngap-snapshot-el9-test-deploy
 #     opendap/hyrax:ngap--1.17.1-846-el9-test-deploy
 #
-export SNAPSHOT_IMAGE_TAG="${SNAPSHOT_IMAGE_TAG:-"opendap/hyrax:$DOCKER_NAME-snapshot-$TARGET_OS$TEST_DEPLOYMENT"}"
+#export SNAPSHOT_IMAGE_TAG="${SNAPSHOT_IMAGE_TAG:-"opendap/hyrax:$DOCKER_NAME-snapshot-$TARGET_OS$TEST_DEPLOYMENT"}"
 loggy "$prolog SNAPSHOT_IMAGE_TAG: $SNAPSHOT_IMAGE_TAG" >&2
 #
-export BUILD_VERSION_TAG="${BUILD_VERSION_TAG:-"opendap/hyrax:$DOCKER_NAME-$HYRAX_VERSION-$TARGET_OS$TEST_DEPLOYMENT"}"
+#export BUILD_VERSION_TAG="${BUILD_VERSION_TAG:-"opendap/hyrax:$DOCKER_NAME-$HYRAX_VERSION-$TARGET_OS$TEST_DEPLOYMENT"}"
 loggy "$prolog BUILD_VERSION_TAG: $BUILD_VERSION_TAG" >&2
 ###############################################################################################
 

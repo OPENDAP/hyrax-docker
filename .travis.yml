@@ -274,6 +274,9 @@ jobs:
         - export DOCKER_DIR="ngap"
         - source "./build-$TARGET_OS"
         - export TEST_DEPLOYMENT="-test-deploy"
+        - export SNAPSHOT_IMAGE_TAG="${SNAPSHOT_IMAGE_TAG:-"opendap/hyrax:$DOCKER_NAME-snapshot-$TARGET_OS$TEST_DEPLOYMENT"}"
+        - export BUILD_VERSION_TAG="${BUILD_VERSION_TAG:-"opendap/hyrax:$DOCKER_NAME-$HYRAX_VERSION-$TARGET_OS$TEST_DEPLOYMENT"}"
+
         - ./build-redis-ngap.sh
         - docker image ls -a
         -
