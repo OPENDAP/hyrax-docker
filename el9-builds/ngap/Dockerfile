@@ -26,7 +26,7 @@ ENV java_version="java-21-openjdk"
 ENV python_version="3.9"
 RUN echo "$HR" && echo "# Python Version: $(python3 --version) (config says we want: $python_version)" && echo "$HR"
 
-ENV core_dnf_packages="which unzip "
+ENV core_dnf_packages="which unzip jq"
 
 # The CRB (CodeReady Builder) repository has to be enabled to get the libtirpc-devel package.
 ENV developer_dnf_packages="libtirpc libtirpc-devel libuuid libuuid-devel openssl openssl-devel"
