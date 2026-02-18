@@ -299,6 +299,6 @@ deploy:
     script: bash "$TRAVIS_BUILD_DIR/travis/deploy_to_docker_hub.sh"
     on:
       branch: el9
-      condition: "$DEPLOY_ME" = "true"
+      condition: $DEPLOY_ME = "true"
 
 
