@@ -49,8 +49,10 @@ echo "Tests: ${tests}" >&2
 function waitForHyrax() {
     # Don't fail on errors, they're expected...
     set +e
+    local start
     let start=`date "+%s"`
-    done_flag="";
+    local done_flag="";
+    local curl_response
     while test -z "${done_flag}"
     do
         echo -n "."
@@ -65,8 +67,9 @@ function waitForHyrax() {
             # for the string "HTTP/" because we know there will be redirects.
             # We use tail to look at the last HTTP/ header and if that status is
             # 200 we're off to the races.
-            set -x; # Echo the stuff
-            curl -s -c cookies -b cookies -n ${netrc_file} -I -L ${end_point} | grep "HTTP/" | tail -1 | grep 200  > /dev/null;
+            curl_response=$(set -x; curl -s -c cookies -b cookies -n ${netrc_file} -I -L ${end_point}; set +x)
+            echo "curl_response: $curl_response"
+            echo "$curl_response" | grep "HTTP/" | tail -1 | grep 200  # > /dev/null;
             found=$?;
             set +x; # Stop echoing the stuff...
             # echo "cURL found: ${found}";
@@ -88,6 +91,7 @@ function waitForHyrax() {
     # Now we can fail on errors again.
     set -e
     echo "Hyrax has arrived!"
+    return 0
 }
 
 

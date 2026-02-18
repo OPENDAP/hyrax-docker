@@ -1,0 +1,206 @@
+#!/bin/bash
+HR="#######################################################################"
+###########################################################################
+# loggy()
+function loggy(){
+    echo  "$@" | awk '{ print "# "$0;}'  >&2
+}
+
+###########################################################################
+# Remove all containers
+function drmac(){
+    docker rm -f $(docker ps -aq);
+}
+
+###########################################################################
+# Remove all images
+function drmai(){
+    docker rmi -f $(docker images -q);
+}
+
+
+
+###########################################################################
+# use_branch()
+function use_branch() {
+    local prolog="use_branch() -"
+    loggy "$prolog BEGIN"
+
+    local repo="${1}"
+    loggy "$prolog repo: $repo"
+
+    local branch="${2}"
+    loggy "$prolog branch: $branch"
+
+    local start_dir
+    start_dir="$PWD"
+
+    cd "$repo"
+    loggy "$prolog Fetching and checking out target branch $branch in: $PWD"
+    git remote set-branches origin '*'
+    git fetch -v --depth=1
+    git checkout "$branch"
+    status=$?
+    if test $status -ne 0
+    then
+        loggy "ERROR! Failed to checkout branch '$branch' for repository: '$repo'"
+        cd "$start_dir"
+        exit $status
+    fi
+    cd "$start_dir"
+    loggy "$prolog END (pwd: $PWD)"
+}
+
+###########################################################################
+# clean_and_get_repo()
+function clean_and_get_repo() {
+    local prolog="clean_and_get_repo() -"
+    local repo_name="$1"
+    local branch_name="$2"
+    local host_target="$3"
+
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # cleanup repo from previous efforts
+    loggy "$prolog Cleaning $host_target"
+    loggy "$prolog Removed $( rm -vrf $host_target | wc -l ) files."
+
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # Clone fresh repo
+    local repo_url
+    repo_url="https://github.com/OPENDAP/$repo_name"
+    loggy "$prolog Cloning $repo_url"
+    git clone --depth 1 "$repo_url" "$host_target"
+
+    if test -n "$branch_name"
+    then
+        use_branch "$host_target" "$branch_name"
+    fi
+}
+
+###########################################################################
+# build_libdap_for_rh9
+function build_libdap_for_rh9() {
+    local branch_name="$1"
+    local clean="$2"
+
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # configuration
+
+    local repo_name="libdap4"
+    loggy "Using repo_name: $repo_name"
+
+    local host_target
+    host_target="$(pwd)/libdap4"
+    loggy "Using host_target: $host_target"
+
+    local rpmdir
+    rpmdir="$(pwd)/rpmdir"
+    loggy "Using rpmdir: $rpmdir"
+    mkdir -p "$rpmdir"
+
+    local BUILD_NUMBER="666"
+    loggy "BUILD_NUMBER: $BUILD_NUMBER"
+
+    # export image="opendap/rocky9_hyrax_builder:latest"
+    local image="opendap/rocky9_hyrax_builder:latest"
+    loggy "image: $image"
+
+    local build_script="/root/libdap4/travis/build-rh9-rpm.sh"
+    loggy "build_script (inside docker image): $build_script"
+
+    if test -n "$clean"
+    then
+        clean_and_get_repo "$repo_name" "$branch_name" "$host_target"
+    fi
+
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # Build it
+    loggy "Starting docker. Image: $image"
+    docker run -it \
+        --volume "$host_target":/root/libdap4 \
+        --volume "$rpmdir":/root/rpmbuild \
+        --env prefix="/root/install" \
+        --env LIBDAP_BUILD_NUMBER=$BUILD_NUMBER \
+        $image \
+        $build_script
+}
+
+
+
+###########################################################################
+# build_hyrax_dependencies_for_rh9
+function build_hyrax_dependencies_for_rh9() {
+    local prolog="build_hyrax_dependencies_for_rh9() -"
+    loggy "$HR"
+    loggy "$prolog BEGIN"
+    local branch_name="$1"
+    loggy "$prolog branch_name: $branch_name"
+
+    local clean="$2"
+    loggy "$prolog clean=$clean"
+
+    local interactive="$3"
+    loggy "$prolog interactive: $interactive"
+
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # configuration
+
+    local repo_name="hyrax-dependencies"
+    loggy "$prolog Using repo_name: $repo_name"
+
+    local top_dir
+    top_dir="$PWD"
+
+    local host_target
+    host_target="$top_dir/$repo_name"
+    loggy "$prolog Using host_target: $host_target"
+
+    local host_result_dir
+    host_result_dir="$top_dir/install"
+    loggy "$prolog Using host_result_dir: $host_result_dir"
+    mkdir -vp "$host_result_dir"
+
+    local docker_target="/root/$repo_name"
+    loggy "$prolog Using docker_target: $docker_target"
+
+    local docker_result_dir="/root/install"
+    loggy "$prolog Using docker_result_dir: $docker_result_dir"
+
+    # export image="opendap/rocky9_hyrax_builder:latest"
+    local image="opendap/rocky9_hyrax_builder:latest"
+    loggy "$prolog image: $image"
+
+    local build_script=""
+    if test -z "$interactive"
+    then
+        build_script="$docker_target/build-for-rocky9.sh"
+    fi
+    loggy "$prolog build_script (inside docker image): $build_script"
+
+    if test -n "$clean"
+    then
+        clean_and_get_repo "$repo_name" "$branch_name" "$host_target"
+    fi
+
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # Build it
+    loggy "$prolog Starting docker. Image: $image"
+    docker run -it \
+        --volume "$host_target":"$docker_target" \
+        --volume "$host_result_dir":"$docker_result_dir" \
+        --env prefix="$docker_result_dir" \
+        --env BUILD_NUMBER=666 \
+        $image $build_script
+
+    mkdir -p $host_target/package
+    tar -C $top_dir -czvf $host_target/package/hyrax-dependencies-rocky9-static.tar.gz install
+    loggy "$prolog "
+    loggy "$prolog Produced dependencies tar file: "
+    loggy "$(ls -l $host_target/package/hyrax-dependencies-rocky9-static.tar.gz)"
+    loggy "$prolog "
+    loggy "$prolog Inventory: "
+    loggy "$(tar -tf $host_target/package/hyrax-dependencies-rocky9-static.tar.gz)"
+    loggy "$prolog"
+    loggy "$prolog END"
+}
+
