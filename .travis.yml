@@ -15,6 +15,7 @@ services:
 branches:
   only:
     - master
+    - el9
 
 notifications:
   email:
