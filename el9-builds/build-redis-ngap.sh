@@ -5,7 +5,14 @@
 # downstream Travis activities (like deployment) will have all the ENV vars they
 # need to run.
 # ./build-$TARGET_OS
-
+HR0="#######################################################################"
+HR1="- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
+HR2="--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---"
+#############################################################################
+# loggy()
+function loggy(){
+    echo  "$@" | awk '{ print "# "$0;}'  >&2
+}
 prolog="$0 -"
 
 export DOCKER_NAME="${DOCKER_NAME:-"ngap"}"
@@ -94,7 +101,7 @@ loggy "$(docker image ls -a)"
 function ngap_el9_dnf_sanity_check() {
     local prolog="el9_dnf_sanity_check() -"
     set -e
-    loggy "$HR"
+    loggy "$HR0"
     if test -n "$DEBUG_BUILD"
     then
         loggy "$prolog Sanity checking installed packages..."
@@ -102,19 +109,19 @@ function ngap_el9_dnf_sanity_check() {
         loggy "$prolog openssl version: $(openssl version)"
         loggy "$(dnf -y info openssl)"
         loggy "$prolog openssl is installed."
-        loggy "$HR"
+        loggy "$HR1"
         loggy "$prolog libtirpc info:"
         loggy "$(dnf -y info libtirpc)"
         loggy "$HR2"
         loggy "$prolog rpm -ql libtirpc: "
         rpm -ql libtirpc
-        loggy "$HR"
+        loggy "$HR1"
         loggy "$prolog libtirpc-devel info:"
         dnf -y info libtirpc-devel
         loggy "$HR2"
         loggy "$prolog rpm -ql libtirpc-devel: "
         rpm -ql libtirpc-devel
-        loggy "$HR"
+        loggy "$HR1"
         loggy "$prolog libuuid info:"
         dnf -y info libuuid
         loggy "$prolog libuuid-devel info:"
@@ -123,5 +130,5 @@ function ngap_el9_dnf_sanity_check() {
     else
         loggy "$prolog Skipping Sanity Checks..."
     fi
-    loggy "$HR"
+    loggy "$HR0"
 }
