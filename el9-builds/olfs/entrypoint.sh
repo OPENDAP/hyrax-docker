@@ -60,8 +60,7 @@ fi
 export OLFS_CONF="${CATALINA_HOME}/webapps/opendap/WEB-INF/conf"
 # mv ${OLFS_CONF}/logback.xml ${OLFS_CONF}/logback.xml.OFF
 echo "Starting Tomcat..." >&2
-#systemctl start tomcat
-${CATALINA_HOME}/bin/startup.sh 2>&1 > /var/log/tomcat/console.log &
+"$CATALINA_HOME"/bin/startup.sh 2>&1 > /var/log/tomcat/console.log &
 status=$?
 tomcat_pid=$!
 if test $status -ne 0 ; then

@@ -229,9 +229,8 @@ jobs:
       script:
         - cd "$TARGET_OS-builds"
         - source "./build-$TARGET_OS"
-        - export TEST_IMAGE="opendap/hyrax:${HYRAX_VERSION}-$TARGET_OS$TEST_DEPLOYMENT"
-        - echo "Running Hyrax Regression Test Script on ${TEST_IMAGE}"
-        - ./travis/regression_test_script -i "${TEST_IMAGE}"
+        - echo "Running Hyrax Regression Test Script on $SNAPSHOT_IMAGE_TAG"
+        - ./travis/regression_test_script -i "$SNAPSHOT_IMAGE_TAG"
         - export DEPLOY_ME="false"
 
 after_script:

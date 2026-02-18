@@ -125,10 +125,10 @@ RUN set -e \
     && rm -rf /usr/share/tomcat/webapps/* >&2 \
     && mkdir -p /var/log/tomcat \
     && chown -R tomcat:tomcat /var/log/tomcat /home/tomcat
-COPY tomcat.service /etc/systemd/system/tomcat.service
-RUN set -e \
-     && which systemctl \
-   && systemctl enable tomcat
+#COPY tomcat.service /etc/systemd/system/tomcat.service
+#RUN set -e \
+#     && which systemctl \
+#     && systemctl enable tomcat
 #RUN firewall-cmd --add-port 8080/tcp --permanent
 #RUN firewall-cmd --reload
 
