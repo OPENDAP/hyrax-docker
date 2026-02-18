@@ -277,7 +277,7 @@ jobs:
         - source "./build-$TARGET_OS"
         - cd ..
         - echo "Running Hyrax Regression Test Script on $SNAPSHOT_IMAGE_TAG"
-        - ./travis/regression_test_script -i "$SNAPSHOT_IMAGE_TAG" -l "$deployed-image-regression-tests-$TRAVIS_JOB_NUMBER"
+        - ./travis/regression_test_script -i "$SNAPSHOT_IMAGE_TAG" -l "deployed-image-regression-tests-$TRAVIS_JOB_NUMBER"
         - export DEPLOY_ME="false"
 
 after_script:
@@ -286,13 +286,13 @@ after_script:
 before_deploy:
   - export DOCKER_LOGIN=`aws ecr get-login --region us-east-1 | sed "s/-e none //g"`;
   - $DOCKER_LOGIN;
-  - echo "DEPLOY_ME is ${DEPLOY_ME}"
+  - echo "# DEPLOY_ME is $DEPLOY_ME"
 
 deploy:
   - provider: script
     script: bash ${TRAVIS_BUILD_DIR}/travis/deploy_to_docker_hub.sh
     on:
-      branch: master
-      condition: ${DEPLOY_ME} = "true"
+      branch: master OR el9
+      condition: "$DEPLOY_ME" = "true"
 
 
