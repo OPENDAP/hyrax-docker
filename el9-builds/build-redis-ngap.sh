@@ -4,7 +4,7 @@
 # We must assume that the shell has sourced ./build-el9 prior (in Travis) so that
 # downstream Travis activities (like deployment) will have all the ENV vars they
 # need to run.
-# ./build-$TARGET_OS
+source  "./build-$TARGET_OS"
 HR0="#######################################################################"
 HR1="- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
 HR2="--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---"
