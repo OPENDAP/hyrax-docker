@@ -250,7 +250,7 @@ jobs:
         - export DOCKER_DIR="olfs"
         - cd "$TARGET_OS-builds"
         - source "./build-$TARGET_OS"
-        - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
+        - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "$TOMCAT_MAJOR_VERSION")
         - show_version
         - get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_VERSION}"
         - s3_get_olfs_distro
@@ -262,8 +262,8 @@ jobs:
           --build-arg RELEASE_DATE
           --build-arg HYRAX_VERSION
           --build-arg OLFS_VERSION
-          --tag "${SNAPSHOT_IMAGE_TAG}"
-          --tag "${BUILD_VERSION_TAG}" olfs
+          --tag "$SNAPSHOT_IMAGE_TAG"
+          --tag "$BUILD_VERSION_TAG" olfs
         - docker image ls -a
 
     - stage: BUILD
@@ -272,6 +272,7 @@ jobs:
         - cd "$TARGET_OS-builds"
         - export DOCKER_NAME="ngap"
         - export DOCKER_DIR="ngap"
+        - source "./build-$TARGET_OS"
         - export TEST_DEPLOYMENT="-test-deploy"
         - ./build-redis-ngap.sh
         - docker image ls -a

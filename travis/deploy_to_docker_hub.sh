@@ -22,10 +22,10 @@ loggy "$prolog Logging into Docker Hub"
 echo "$DOCKER_HUB_PSWD" | docker login -u "$DOCKER_HUB_UID" --password-stdin
 
 loggy "$HR1"
-loggy "$prolog Deploying $SNAPSHOT_IMAGE_TAG to Docker Hub"
+loggy "$prolog Deploying '$SNAPSHOT_IMAGE_TAG' to Docker Hub"
 docker push "$SNAPSHOT_IMAGE_TAG"
 loggy "$HR2"
-loggy "$prolog Deploying $BUILD_VERSION_TAG to Docker Hub"
+loggy "$prolog Deploying '$BUILD_VERSION_TAG' to Docker Hub"
 docker push "$BUILD_VERSION_TAG"
 loggy "$HR2"
 loggy "$prolog Docker Hub deployment complete."
