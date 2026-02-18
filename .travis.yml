@@ -80,7 +80,7 @@ jobs:
     #
 
 # BUILD_AND_TEST
-    - stage: disabled
+    - stage: BUILD
       name: "Build and Test opendap/hyrax"
       script:
         - export DOCKER_NAME="hyrax"
@@ -120,7 +120,7 @@ jobs:
         - echo "Running Test Script"
         - ./travis/regression_test_script -i "$SNAPSHOT_IMAGE_TAG" -l "$TESTS_LOG_BASE"
 
-    - stage: disabled
+    - stage: BUILD
       name: "Build opendap/besd"
       script:
         - export DOCKER_NAME="besd"
@@ -243,7 +243,7 @@ jobs:
           --tag "${BUILD_VERSION_TAG}" olfs
         - docker image ls -a
 
-    - stage: disabled
+    - stage: BUILD
       name: "Build opendap/olfs"
       script:
         - export DOCKER_NAME="olfs"
