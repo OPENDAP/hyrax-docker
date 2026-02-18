@@ -114,7 +114,7 @@ jobs:
         - echo "Running Test Script"
         - ./travis/regression_test_script -i "$SNAPSHOT_IMAGE_TAG" -l "$TESTS_LOG_BASE"
 
-    - stage: disabled
+    - stage: BUILD
       name: "Build opendap/besd"
       script:
         - export DOCKER_NAME="besd"
@@ -214,7 +214,7 @@ jobs:
         - docker image ls -a
 
 
-    - stage: BUILD_AND_TEST
+    - stage: BUILD
       name: "Build opendap/hyrax:ngap with reddis session manager"
       script:
         - cd "$TARGET_OS-builds"
@@ -227,8 +227,9 @@ jobs:
     - stage: TEST_DEPLOYED_IMAGE
       name: "Test Deployed Image (RH8)"
       script:
-        - source "./$TARGET_OS-builds/build-$TARGET_OS" ./${TARGET_OS}-build-recipe
-        - export TEST_IMAGE="opendap/hyrax:${HYRAX_VERSION}$TEST_DEPLOYMENT"
+        - cd "$TARGET_OS-builds"
+        - source "./build-$TARGET_OS"
+        - export TEST_IMAGE="opendap/hyrax:${HYRAX_VERSION}-$TARGET_OS$TEST_DEPLOYMENT"
         - echo "Running Hyrax Regression Test Script on ${TEST_IMAGE}"
         - ./travis/regression_test_script -i "${TEST_IMAGE}"
         - export DEPLOY_ME="false"
