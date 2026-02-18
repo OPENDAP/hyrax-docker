@@ -492,7 +492,7 @@ startup_log "Starting tomcat/olfs..."
 # mv ${OLFS_CONF_DIR}/logback.xml ${OLFS_CONF_DIR}/logback.xml.OFF
 #systemctl start tomcat
 
-${CATALINA_HOME}/bin/startup.sh 2>&1 >/var/log/tomcat/console.log &
+"$CATALINA_HOME"/bin/startup.sh 2>&1 >/var/log/tomcat/console.log &
 status=$?
 tomcat_pid=$!
 if test $status -ne 0; then

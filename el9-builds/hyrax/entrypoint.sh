@@ -189,7 +189,6 @@ loggy "$PLOG The besd is UP! [pid: $besd_pid]"
 export OLFS_CONF="${CATALINA_HOME}/webapps/opendap/WEB-INF/conf"
 # mv ${OLFS_CONF}/logback.xml ${OLFS_CONF}/logback.xml.OFF
 loggy "$PLOG Starting Tomcat..."
-#systemctl start tomcat
 "$CATALINA_HOME"/bin/startup.sh > /var/log/tomcat/console.log  2>&1 &
 status=$?
 tomcat_pid=$! # The $! is the PID of the most recently executed background command.

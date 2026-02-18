@@ -43,61 +43,61 @@ ENV HR2="#-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --"
 ENV NOW="$(date +%s)"
 ARG RELEASE_DATE
 ENV RELEASE_DATE=${RELEASE_DATE:-"${NOW}"}
-RUN echo "RELEASE_DATE: ${RELEASE_DATE}"
+RUN echo "# RELEASE_DATE: $RELEASE_DATE"
 
 ARG TOMCAT_VERSION
 ENV TOMCAT_VERSION=${TOMCAT_VERSION:-"11.0.7"}
-RUN echo "TOMCAT_VERSION: ${TOMCAT_VERSION}"
-ENV TOMCAT_DISTRO="apache-tomcat-${TOMCAT_VERSION}"
-RUN echo "Retrieving TOMCAT_DISTRO: ${TOMCAT_DISTRO}"
-COPY "${TOMCAT_DISTRO}.tar.gz" /
+RUN echo "# TOMCAT_VERSION: $TOMCAT_VERSION"
+ENV TOMCAT_DISTRO="apache-tomcat-$TOMCAT_VERSION"
+RUN echo "# Retrieving TOMCAT_DISTRO: $TOMCAT_DISTRO"
+COPY "$TOMCAT_DISTRO.tar.gz" /
 RUN ls -l /apache-tomcat-*  >&2
 
 ARG HYRAX_VERSION
 ENV HYRAX_VERSION=${HYRAX_VERSION:-"snapshot"}
-RUN echo "HYRAX_VERSION: ${HYRAX_VERSION}"
+RUN echo "# HYRAX_VERSION: $HYRAX_VERSION"
 
 ARG LIBDAP_VERSION
 ENV LIBDAP_VERSION=${LIBDAP_VERSION:-"snapshot"}
-RUN echo "LIBDAP_VERSION: ${LIBDAP_VERSION}"
+RUN echo "# LIBDAP_VERSION: $LIBDAP_VERSION"
 
 ARG LIBDAP_RPM
 ENV LIBDAP_RPM=${LIBDAP_RPM:-"libdap-${LIBDAP_VERSION}.${TARGET_OS}.x86_64.rpm"}
-RUN echo "LIBDAP_RPM: ${LIBDAP_RPM}"
-COPY ${LIBDAP_RPM} libdap-devel-* libdap-debuginfo-* /
+RUN echo "# LIBDAP_RPM: $LIBDAP_RPM"
+COPY "$LIBDAP_RPM" libdap-devel-* libdap-debuginfo-* /
 RUN ls -l /libdap-*  >&2
 
 ARG BES_VERSION
 ENV BES_VERSION=${BES_VERSION:-"snapshot"}
-RUN echo "BES_VERSION: ${BES_VERSION}"
+RUN echo "# BES_VERSION: $BES_VERSION"
 
 ARG BES_RPM
 ENV BES_RPM=${BES_RPM:-"bes-${BES_VERSION}.static.${TARGET_OS}.x86_64.rpm"}
-RUN echo "BES_RPM: ${BES_RPM}"
-COPY ${BES_RPM} bes-devel-* bes-debuginfo-* /
+RUN echo "# BES_RPM: $BES_RPM"
+COPY "$BES_RPM" bes-devel-* bes-debuginfo-* /
 RUN ls -l /bes-* >&2
 
 ARG OLFS_VERSION
-ENV OLFS_VERSION=${OLFS_VERSION:-"snapshot-${TARGET_OS}"}
-RUN echo "OLFS_VERSION: ${OLFS_VERSION}"
+ENV OLFS_VERSION=${OLFS_VERSION:-"snapshot-$TARGET_OS"}
+RUN echo "# OLFS_VERSION: $OLFS_VERSION"
 
 ARG OLFS_DISTRO
-ENV OLFS_DISTRO=${OLFS_DISTRO:-"olfs-${OLFS_VERSION}-webapp"}
-RUN echo "OLFS_DISTRO: ${OLFS_DISTRO}"
-COPY ${OLFS_DISTRO}.tgz /${OLFS_DISTRO}.tgz
+ENV OLFS_DISTRO=${OLFS_DISTRO:-"olfs-$OLFS_VERSION-webapp"}
+RUN echo "# OLFS_DISTRO: $OLFS_DISTRO"
+COPY "$OLFS_DISTRO.tgz" "/$OLFS_DISTRO.tgz"
 
 ARG ROBOTS_DISTRO
-ENV ROBOTS_DISTRO=${ROBOTS_DISTRO:-"robots-olfs-${OLFS_VERSION}-webapp"}
-RUN echo "ROBOTS_DISTRO: ${ROBOTS_DISTRO}"
-COPY ${ROBOTS_DISTRO}.tgz /${ROBOTS_DISTRO}.tgz
+ENV ROBOTS_DISTRO=${ROBOTS_DISTRO:-"robots-olfs-$OLFS_VERSION-webapp"}
+RUN echo "# ROBOTS_DISTRO: $ROBOTS_DISTRO"
+COPY "$ROBOTS_DISTRO.tgz" "/$ROBOTS_DISTRO.tgz"
 
 ARG DEPLOYMENT_CONTEXT
 ENV DEPLOYMENT_CONTEXT=${DEPLOYMENT_CONTEXT:-"opendap"}
-RUN echo "DEPLOYMENT_CONTEXT: ${DEPLOYMENT_CONTEXT}"
+RUN echo "# DEPLOYMENT_CONTEXT: $DEPLOYMENT_CONTEXT}
 
 LABEL vendor="OPeNDAP"
-LABEL org.opendap.hyrax.version=${HYRAX_VERSION}
-LABEL org.opendap.hyrax.release-date=${RELEASE_DATE}
+LABEL org.opendap.hyrax.version="$HYRAX_VERSION"
+LABEL org.opendap.hyrax.release-date="$RELEASE_DATE"
 LABEL org.opendap.hyrax.version.is-production="false"
 LABEL org.opencontainers.image.authors="support@opendap.org"
 
@@ -108,7 +108,7 @@ USER root
 # add the ncWMS application to the build.
 ARG USE_NCWMS
 ENV USE_NCWMS=${USE_NCWMS:-"false"}
-RUN if [ $USE_NCWMS = "true" ];then echo "NCWMS: ENABLED"; else echo "NCWMS: DISABLED"; fi
+RUN if [ "$USE_NCWMS" = "true" ];then echo "# NCWMS: ENABLED"; else echo "# NCWMS: DISABLED"; fi
 
 #
 # The --build-arg NCWMS_BASE can be set to the base URL for ncWMS.
@@ -117,12 +117,12 @@ RUN if [ $USE_NCWMS = "true" ];then echo "NCWMS: ENABLED"; else echo "NCWMS: DIS
 # is not in the shell from which the entrypoint.sh script is called.
 ARG NCWMS_BASE
 ENV NCWMS_BASE=${NCWMS_BASE:-"https://localhost:8080"}
-RUN if [ $USE_NCWMS = "true" ];then echo "NCWMS_BASE: {$NCWMS_BASE}"; fi
+RUN if [ "$USE_NCWMS" = "true" ];then echo "# NCWMS_BASE: $NCWMS_BASE"; fi
 
 
 ARG DEVELOPER_MODE
 ENV DEVELOPER_MODE=${DEVELOPER_MODE:-"false"}
-RUN if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else echo "DEVELOPER_MODE: DISABLED"; fi
+RUN if [ "$DEVELOPER_MODE" = "true" ];then echo "# DEVELOPER_MODE: ENABLED"; else echo "# DEVELOPER_MODE: DISABLED"; fi
 
 #Get mirrorlist before running yum
 #RUN cd /etc/yum.repos.d/
@@ -138,10 +138,10 @@ RUN if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else ec
 # however, to be run, so install them as part of this Dockerfile.
 RUN set -e && dnf update  -y
 
-RUN set -e \
-    && dnf install -y "python$python_version" \
-    && echo "Python Version: $(python3 --version)" \
-    && dnf clean all
+#RUN set -e \
+#    && dnf install -y "python$python_version" \
+#    && echo "# Python Version: $(python3 --version)" \
+#    && dnf clean all
 RUN set -e \
     && echo "$HR" \
     && echo "# Installing cURL" \
@@ -174,23 +174,24 @@ RUN set -e \
 # Install the latest libdap snapshot
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 RUN set -e \
-    && echo "Installing the libdap rpm: ${LIBDAP_RPM}" \
+    && echo "# Installing the libdap rpm: $LIBDAP_RPM" \
     && ls -l ./libdap* \
     && dnf install -y ./libdap-*.rpm \
-    && rm -f ./${LIBDAP_RPM} \
+    && rm -f "./$LIBDAP_RPM" \
     && dnf clean all \
-    && echo "libdap4 is installed."
+    && echo "# libdap4 is installed."
 
 ################################################################
 # Install the latest BES snapshot
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 RUN set -e \
-    && echo "Installing the latest BES rpm: ${BES_RPM}" \
+    && echo "# Installing the latest BES rpm: $BES_RPM" \
     && ls -l ./bes* \
     && dnf install -y ./bes-*.rpm \
-    && rm -f ./${BES_RPM} \
+    && rm -f "./$BES_RPM" \
     && dnf clean all \
-    && echo "besdaemon is here: "`which besdaemon`
+    && echo "# BES is installed" \
+    && echo "# besdaemon is here: $(which besdaemon)"
 
 ################################################################
 # Install and Setup Tomcat
@@ -209,13 +210,14 @@ RUN set -e \
     && rm -rvf /usr/share/tomcat/webapps/* >&2 \
     && mkdir -p /var/log/tomcat \
     && chown -R tomcat:tomcat /var/log/tomcat /home/tomcat \
-    && echo "Cleaning up Tomcat distribution files..." >&2 \
-    && rm -fv "/${TOMCAT_DISTRO}.tar.gz"
+    && echo "# Cleaning up Tomcat distribution files..." >&2 \
+    && rm -fv "/${TOMCAT_DISTRO}.tar.gz" \
+    && echo "# Tomcat is unpacked and ready. >&2 "
 
-COPY tomcat.service /etc/systemd/system/tomcat.service
-RUN set -e \
-    && which systemctl \
-    && systemctl enable tomcat
+#COPY tomcat.service /etc/systemd/system/tomcat.service
+#RUN set -e \
+#    && which systemctl \
+#    && systemctl enable tomcat
 
 
 #RUN firewall-cmd --add-port 8080/tcp --permanent
@@ -223,13 +225,13 @@ RUN set -e \
 
 ENV CATALINA_HOME=/usr/share/tomcat
 ENV PATH=$CATALINA_HOME/bin:$PATH
-RUN set -e && echo "CATALINA_HOME: ${CATALINA_HOME}" >&2
+RUN set -e && echo "# CATALINA_HOME: $CATALINA_HOME" >&2
 
 # Install our modified server.xml so that the server compresses responses.
 COPY tomcat11-server.xml /
 RUN set -e \
-    && mv /tomcat11-server.xml ${CATALINA_HOME}/conf/server.xml \
-    && chown -R tomcat:tomcat ${CATALINA_HOME}/conf/server.xml
+    && mv /tomcat11-server.xml "$CATALINA_HOME/conf/server.xml" \
+    && chown -R tomcat:tomcat "$CATALINA_HOME/conf/server.xml"
 
 
 ################################################################
@@ -237,33 +239,33 @@ RUN set -e \
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 ENV ROOT=/dev/shm
 
-RUN echo "Installing the latest olfs distribution (${OLFS_VERSION})." >&2
+RUN echo "# Installing the latest olfs distribution ($OLFS_VERSION)." >&2
 RUN set -e \
-    && echo "working_dir: "`pwd`  >&2 \
+    && echo "# working_dir: "`pwd`  >&2 \
     && ls -l . \
-    && tar -C ${ROOT} -xzvf ./${OLFS_DISTRO}.tgz \
-    && ls -l ${ROOT} \
-    && echo "Unpacking war file..."  >&2 \
-    && mkdir -p $(readlink -f ${CATALINA_HOME})/webapps/${DEPLOYMENT_CONTEXT}/ \
-    && unzip -o ${ROOT}/${OLFS_DISTRO}/opendap.war -d ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/ \
-    && echo "Cleaning up OLFS distribution files."  >&2 \
-    && rm -rvf ${ROOT}/${OLFS_DISTRO} ./${OLFS_DISTRO}.tgz
+    && tar -C "$ROOT" -xzvf "./$OLFS_DISTRO.tgz" \
+    && ls -l "$ROOT" \
+    && echo "# Unpacking war file..."  >&2 \
+    && mkdir -p "$(readlink -f "$CATALINA_HOME")/webapps/$DEPLOYMENT_CONTEXT/" \
+    && unzip -o "$ROOT/$OLFS_DISTRO/opendap.war" -d "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/" \
+    && echo "# Cleaning up OLFS distribution files."  >&2 \
+    && rm -rvf "$ROOT/$OLFS_DISTRO" "./$OLFS_DISTRO.tgz"
 
 RUN set -e \
-    && echo "Installing the latest dynamic robots.txt distribution (${OLFS_VERSION})."  >&2 \
+    && echo "# Installing the latest dynamic robots.txt distribution ($OLFS_VERSION)."  >&2 \
     && ls -l ./robots* \
-    && tar -C ${ROOT} -xzf ./${ROBOTS_DISTRO}.tgz \
-    && ls -l ${ROOT}/${ROBOTS_DISTRO} \
-    && echo "Unpacking dynamic robots.txt war file..."  >&2 \
-    && unzip -o ${ROOT}/${ROBOTS_DISTRO}/ROOT.war -d ${CATALINA_HOME}/webapps/ROOT/ \
-    && echo "Cleaning up dynamic robots.txt distribution files..."  >&2 \
-    && rm -rvf ${ROOT}/${ROBOTS_DISTRO} ${ROBOTS_DISTRO}.tgz
+    && tar -C "$ROOT" -xzf "./$ROBOTS_DISTRO.tgz" \
+    && ls -l "$ROOT/$ROBOTS_DISTRO" \
+    && echo "# Unpacking dynamic robots.txt war file..."  >&2 \
+    && unzip -o "$ROOT/$ROBOTS_DISTRO/ROOT.war" -d "$CATALINA_HOME/webapps/ROOT/" \
+    && echo "# Cleaning up dynamic robots.txt distribution files..."  >&2 \
+    && rm -rvf "$ROOT/$ROBOTS_DISTRO" "$ROBOTS_DISTRO.tgz"
 
 # Fix ownership and access permissions
 RUN set -e \
-    && mkdir -p ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/logs \
-    && chown -R tomcat:tomcat ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/logs \
-    && chmod 700 ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/logs
+    && mkdir -p "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/WEB-INF/conf/logs" \
+    && chown -R tomcat:tomcat "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/WEB-INF/conf/logs" \
+    && chmod 700 "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/WEB-INF/conf/logs"
 
 ################################################################
 # Clean up the Hyrax distribution binaries.
@@ -277,25 +279,25 @@ RUN set -e \
 
 ARG NCWMS_VERSION
 ENV NCWMS_VERSION=${NCWMS_VERSION:-"2.5.2"}
-RUN echo "NCWMS_VERSION: ${NCWMS_VERSION}"
-ENV NCWMS_WAR_URL="https://github.com/Reading-eScience-Centre/ncwms/releases/download/ncwms-${NCWMS_VERSION}/ncWMS2.war"
-RUN echo "NCWMS_WAR_URL: ${NCWMS_WAR_URL}"
+RUN echo "# NCWMS_VERSION: $NCWMS_VERSION"
+ENV NCWMS_WAR_URL="https://github.com/Reading-eScience-Centre/ncwms/releases/download/ncwms-$NCWMS_VERSION/ncWMS2.war"
+RUN echo "# NCWMS_WAR_URL: $NCWMS_WAR_URL"
 
-RUN if [ $USE_NCWMS = "true" ]; then \
-        echo "Installing ncWMS..."; \
-        curl -sfSL ${NCWMS_WAR_URL} -o /dev/shm/ncWMS.war; \
-        unzip -o /dev/shm/ncWMS.war -d ${CATALINA_HOME}/webapps/ncWMS2/; \
+RUN if [ "$USE_NCWMS" = "true" ]; then \
+        echo "# Installing ncWMS." \
+        curl -sfSL "$NCWMS_WAR_URL" -o "/dev/shm/ncWMS.war" \
+        unzip -o "/dev/shm/ncWMS.war" -d "$CATALINA_HOME/webapps/ncWMS2/" \
         rm -rf /dev/shm/*; \
     else \
-        echo "ncWMS will NOT be installed."; \
+        echo "# ncWMS will NOT be installed."; \
     fi
 
 # set a default ncWMS admin if DEVELOPER_MODE is enabled.
-RUN if [ ${DEVELOPER_MODE} = "true" ] && [ $USE_NCWMS = "true" ]; then \
-        echo "DEVELOPER MODE: Adding ncWMS admin credentials"; \
+RUN if [ "$DEVELOPER_MODE" = "true" ] && [ "$USE_NCWMS" = "true" ]; then \
+        echo "# DEVELOPER MODE: Adding ncWMS admin credentials"; \
         sed -i 'sX</tomcat-users>X<role rolename="ncWMS-admin"/> <user username="admin" password="admin" roles="ncWMS-admin"/> </tomcat-users>X' ${CATALINA_HOME}/conf/tomcat-users.xml; \
     else \
-        echo "No ncWMS admin credentials installed."; \
+        echo "# No ncWMS admin credentials installed."; \
     fi
     
 #
@@ -306,14 +308,14 @@ COPY ncWMS_config.xml /root/.ncWMS2/config.xml
 RUN  chmod +r /root/.ncWMS2/config.xml
 
 COPY olfs_viewers.xml /tmp/olfs_viewers.xml
-RUN if [ $USE_NCWMS = "true" ]; then \
+RUN if [ "$USE_NCWMS" = "true" ]; then \
         # If we're installing ncWMS then we copy 
         # to the server a viewers.xml which has
         # been templated so that the ncWMS host can be installed 
         # at startup.
-        mv /tmp/olfs_viewers.xml ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/viewers.xml; \
+        mv /tmp/olfs_viewers.xml "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/WEB-INF/conf/viewers.xml"; \
     else \
-        echo "Skipping OLFS/ncWMS configuration installation."; \
+        echo "# Skipping OLFS/ncWMS configuration installation."; \
     fi
 
 ################################################################
@@ -324,11 +326,11 @@ RUN if [ $USE_NCWMS = "true" ]; then \
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 ENV TEST_INSTALL_DIR="/hyrax_regression_tests"
 RUN set -e \
-    && echo "Retrieving, and building hyrax regression tests." \
-    && echo "h_r_t will be in: ${TEST_INSTALL_DIR}" \
-    && mkdir -p ${TEST_INSTALL_DIR} \
-    && git clone -v https://github.com/opendap/hyrax_regression_tests ${TEST_INSTALL_DIR} \
-    && cd ${TEST_INSTALL_DIR} \
+    && echo "# Retrieving, and building hyrax regression tests." \
+    && echo "# h_r_t will be in: $TEST_INSTALL_DIR" \
+    && mkdir -p "$TEST_INSTALL_DIR" \
+    && git clone -v https://github.com/opendap/hyrax_regression_tests "$TEST_INSTALL_DIR" \
+    && cd "$TEST_INSTALL_DIR" \
     && autoreconf -vif \
     && ./configure
 
@@ -336,9 +338,9 @@ RUN set -e \
 # "make check" But that will fail at build time so the "make check" call
 # ends up pretty tortured to avoid a build error.
 RUN set -e \
-    && cd ${TEST_INSTALL_DIR} \
+    && cd "$TEST_INSTALL_DIR" \
     && make testsuite > mk.log 2>&1 \
-    && echo "SUCCESS: hyrax_regression_tests ready!"
+    && echo "# SUCCESS: hyrax_regression_tests ready!"
 ################################################################
 
 RUN ls -l /usr/libexec/
