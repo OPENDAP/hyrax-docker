@@ -53,6 +53,7 @@ before_install:
   - if test "$TRAVIS_PULL_REQUEST" = "false" -o "$TRAVIS_BRANCH" = "el9" ; then export DEPLOY_ME="true"; else export DEPLOY_ME="false"; fi
   - echo "# travis.before_install() -           DEPLOY_ME is $DEPLOY_ME"
 
+
 install:
   - echo "print env:"
   - printenv
