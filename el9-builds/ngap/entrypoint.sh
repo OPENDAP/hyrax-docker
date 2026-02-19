@@ -530,7 +530,6 @@ start_time=$(date  "+%s")
 startup_log "Hyrax Has Arrived...(time: $start_time SLEEP_INTERVAL: $SLEEP_INTERVAL)"
 #-------------------------------------------------------------------------------
 while /bin/true; do
-  # heartbeat_log "SLEEP_INTERVAL: $SLEEP_INTERVAL"
   sleep $SLEEP_INTERVAL
 
   # Compute service_uptime in hours
