@@ -218,7 +218,7 @@ export BES_LOG_FILE="/var/log/bes/bes.log"
 startup_log "BES_LOG_FILE: ${BES_LOG_FILE}"
 
 export SLEEP_INTERVAL=${SLEEP_INTERVAL:-10}
-startup_log "SLEEP_INTERVAL: ${SLEEP_INTERVAL} seconds."
+startup_log "SLEEP_INTERVAL: $SLEEP_INTERVAL seconds."
 
 export SERVER_HELP_EMAIL=${SERVER_HELP_EMAIL:-"not_set"}
 startup_log "SERVER_HELP_EMAIL: ${SERVER_HELP_EMAIL}"
@@ -527,7 +527,7 @@ now=
 suptime=
 start_time=$(date  "+%s")
 #-------------------------------------------------------------------------------
-startup_log "Hyrax Has Arrived...(time: $start_time heart_rate: $SLEEP_INTERVAL)"
+startup_log "Hyrax Has Arrived...(time: $start_time SLEEP_INTERVAL: $SLEEP_INTERVAL)"
 #-------------------------------------------------------------------------------
 while /bin/true; do
   sleep $SLEEP_INTERVAL
