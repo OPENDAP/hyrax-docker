@@ -13,7 +13,13 @@
 # it for debugging stuff.
 #
 # Set one or more individual labels
-FROM rockylinux:8
+# Add a default base image to keep docker from complaining,
+# which is fine because if this ISN'T based on a given image tag,
+# everything downstream will fail due to lack of bes, libdap, etc.
+# TODO: try FROM ${BES_IMAGE_TAG:-"$(some script that fails!)"} thanks ndp :)
+ARG BES_IMAGE_TAG
+FROM ${BES_IMAGE_TAG:-"rockylinux:8"}
+
 ENV ARCH="x86_64"
 ENV java_version="java-11-openjdk"
 ENV python_version="3.11"
@@ -21,13 +27,13 @@ ENV python_version="3.11"
 ENV HR="###########################################################################"
 ENV HR2="# -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - --"
 
-RUN export NOW=`date +%s`
+ENV NOW="$(`date +%s`)"
 ARG RELEASE_DATE
-ENV RELEASE_DATE ${RELEASE_DATE:-"${NOW}"}
+ENV RELEASE_DATE=${RELEASE_DATE:-"${NOW}"}
 RUN echo "RELEASE_DATE: ${RELEASE_DATE}"
 
 ARG TOMCAT_VERSION
-ENV TOMCAT_VERSION ${TOMCAT_VERSION:-"9.0.64"}
+ENV TOMCAT_VERSION=${TOMCAT_VERSION:-"9.0.64"}
 RUN echo "TOMCAT_VERSION: ${TOMCAT_VERSION}"
 ENV TOMCAT_DISTRO="apache-tomcat-${TOMCAT_VERSION}"
 COPY "${TOMCAT_DISTRO}.tar.gz" /
@@ -37,25 +43,16 @@ ARG HYRAX_VERSION
 ENV HYRAX_VERSION=${HYRAX_VERSION:-"snapshot"}
 RUN echo "HYRAX_VERSION: ${HYRAX_VERSION}"
 
+# TODO: confirm that LIBDAP_VERSION and BES_VERSION match 
+# versions previously installed in base image, fail if not
+
 ARG LIBDAP_VERSION
 ENV LIBDAP_VERSION=${LIBDAP_VERSION:-"snapshot"}
 RUN echo "LIBDAP_VERSION: ${LIBDAP_VERSION}"
 
-ARG LIBDAP_RPM
-ENV LIBDAP_RPM=${LIBDAP_RPM:-"libdap-${LIBDAP_VERSION}.el8.x86_64.rpm"}
-RUN echo "LIBDAP_RPM: ${LIBDAP_RPM}"
-COPY ${LIBDAP_RPM} libdap-devel-* libdap-debuginfo-* /
-RUN ls -l /libdap-*  >&2
-
 ARG BES_VERSION
 ENV BES_VERSION=${BES_VERSION:-"snapshot"}
 RUN echo "BES_VERSION: ${BES_VERSION}"
-
-ARG BES_RPM
-ENV BES_RPM=${BES_RPM:-"bes-${BES_VERSION}.static.el8.x86_64.rpm"}
-RUN echo "BES_RPM: ${BES_RPM}"
-COPY ${BES_RPM} bes-devel-* bes-debuginfo-* /
-RUN ls -l /bes-* >&2
 
 ARG OLFS_VERSION
 ENV OLFS_VERSION=${OLFS_VERSION:-"snapshot"}
@@ -80,15 +77,16 @@ LABEL org.opendap.hyrax.version=${HYRAX_VERSION}
 LABEL org.opendap.hyrax.release-date=${RELEASE_DATE}
 LABEL org.opendap.hyrax.version.is-production="false"
 
-MAINTAINER support@opendap.org
+LABEL maintainer=support@opendap.org
 
 USER root
+WORKDIR /
 
 #
 # The --build-arg USE_NCWMS can be set to "true" in order to 
 # add the ncWMS application to the build.
 ARG USE_NCWMS
-ENV USE_NCWMS ${USE_NCWMS:-"false"}
+ENV USE_NCWMS=${USE_NCWMS:-"false"}
 RUN if [ $USE_NCWMS = "true" ];then echo "NCWMS: ENABLED"; else echo "NCWMS: DISABLED"; fi
 
 #
@@ -97,12 +95,12 @@ RUN if [ $USE_NCWMS = "true" ];then echo "NCWMS: ENABLED"; else echo "NCWMS: DIS
 # the URL: https://localhost:8080 if the environment variable NCWMS_BASE
 # is not in the shell from which the entrypoint.sh script is called.
 ARG NCWMS_BASE
-ENV NCWMS_BASE ${NCWMS_BASE:-"https://localhost:8080"}
+ENV NCWMS_BASE=${NCWMS_BASE:-"https://localhost:8080"}
 RUN if [ $USE_NCWMS = "true" ];then echo "NCWMS_BASE: {$NCWMS_BASE}"; fi
 
 
 ARG DEVELOPER_MODE
-ENV DEVELOPER_MODE ${DEVELOPER_MODE:-"false"}
+ENV DEVELOPER_MODE=${DEVELOPER_MODE:-"false"}
 RUN if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else echo "DEVELOPER_MODE: DISABLED"; fi
 
 #Get mirrorlist before running yum
@@ -163,28 +161,37 @@ RUN set -e \
     && dnf clean all
 
 ################################################################
-# Install the latest libdap snapshot
-#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
-RUN set -e \
-    && echo "Installing the libdap rpm: ${LIBDAP_RPM}" \
-    && ls -l ./libdap* \
-    && dnf -y install ./libdap-*.rpm \
-    && rm -f ./${LIBDAP_RPM} \
-    && dnf clean all
+# Set up BES
+#
+# BES is already installed on the base image, but 
+# we need to do some additional configuration (to match what was 
+# previously handled by bes RPM installation)
 
-RUN echo "libdap4 is installed."
+# Add besd service to start at boot
+RUN cp ${PREFIX}/etc/rc.d/init.d/besd /etc/rc.d/init.d/besd \
+    && chkconfig --add besd \
+    && ldconfig \
+    && chkconfig --list | grep besd \
+    && echo "whoami: "`whoami` \
+    && echo "besdaemon is here: "`which besdaemon`
 
-################################################################
-# Install the latest BES snapshot
-#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
-RUN set -e \
-    && echo "Installing the latest BES rpm: ${BES_RPM}" \
-    && ls -l ./bes* \
-    && dnf -y install ./bes-*.rpm \
-    && rm -f ./${BES_RPM} \
-    && dnf clean all
-
-RUN echo "besdaemon is here: "`which besdaemon`
+# Adapted from bes/spec.all_static.in
+# Default macros: https://docs.fedoraproject.org/en-US/packaging-guidelines/RPMMacros/
+RUN sed -i.dist \
+    -e 's:=.*/bes.log:=/var/log/bes/bes.log:' \
+    -e 's:=.*/lib/bes:='"$PREFIX"'/lib/bes:' \
+    -e 's:=.*/share/bes:='"$PREFIX"'/share/bes:' \
+    -e 's:=.*/share/hyrax:='"$PREFIX"'/share/hyrax:' \
+    # -e 's:=/full/path/to/serverside/certificate/file.pem:=/etc/pki/bes/cacerts/file.pem:' \
+    # -e 's:=/full/path/to/serverside/key/file.pem:=/etc/pki/bes/public/file.pem:' \
+    # -e 's:=/full/path/to/clientside/certificate/file.pem:=/etc/pki/bes/cacerts/file.pem:' \
+    # -e 's:=/full/path/to/clientside/key/file.pem:=/etc/pki/bes/public/file.pem:' \
+    -e 's:=user_name:='"$USER"':' \
+    -e 's:=group_name:='"$USER"':' \
+    $PREFIX/etc/bes/bes.conf \
+    && mkdir -p "/var/log/bes/" \
+    && touch "/var/log/bes/bes.log" \
+    && sudo chown -R $USER:$USER "/var/log/bes/"
 
 ################################################################
 # Install and Setup Tomcat
@@ -208,17 +215,15 @@ RUN set -e && systemctl enable tomcat
 #RUN firewall-cmd --add-port 8080/tcp --permanent
 #RUN firewall-cmd --reload
 
-ENV CATALINA_HOME /usr/share/tomcat
-ENV PATH $CATALINA_HOME/bin:$PATH
+ENV CATALINA_HOME=/usr/share/tomcat
+ENV PATH=$CATALINA_HOME/bin:$PATH
 RUN set -e && echo "CATALINA_HOME: ${CATALINA_HOME}" >&2
 
 # Install our modified server.xml so that the server compresses responses.
 COPY tomcat9-server.xml /
 RUN set -e \
     && mv /tomcat9-server.xml ${CATALINA_HOME}/conf/server.xml \
-    && chown -R tomcat:tomcat ${CATALINA_HOME}/conf/server.xml
-
-RUN set -e \
+    && chown -R tomcat:tomcat ${CATALINA_HOME}/conf/server.xml \
     && echo "Cleaning up Tomcat distribution files..." >&2 \
     && rm -fv "/${TOMCAT_DISTRO}.tar.gz"
 
@@ -231,7 +236,7 @@ RUN echo "Installing the latest olfs distribution (${OLFS_VERSION})." >&2
 RUN set -e \
     && echo "working_dir: "`pwd`  >&2 \
     && ls -l . \
-    && tar -C ${ROOT} -xzvf ./${OLFS_DISTRO}.tgz \
+    && tar -C ${ROOT} -xzvf /${OLFS_DISTRO}.tgz \
     && ls -l ${ROOT} \
     && echo "Unpacking warfile..."  >&2 \
     && mkdir -p $(readlink -f ${CATALINA_HOME})/webapps/${DEPLOYMENT_CONTEXT}/ \
@@ -247,7 +252,9 @@ RUN set -e \
     && echo "Unpacking dynamic robots.txt warfile..."  >&2 \
     && unzip -o ${ROOT}/${ROBOTS_DISTRO}/ROOT.war -d ${CATALINA_HOME}/webapps/ROOT/ \
     && echo "Cleaning up dynamic robots.txt snapshot..."  >&2 \
-    && rm -rf ${ROOT}/${ROBOTS_DISTRO} ${ROBOTS_DISTRO}.tgz
+    && rm -rf ${ROOT}/${ROBOTS_DISTRO} ${ROBOTS_DISTRO}.tgz \
+    && echo "Cleaning up the Hyrax distribution binaries..." \
+    && rm -vf /olfs*.tgz /robots*.tgz /apache*
 
 # Fix ownership and access permissions
 RUN set -e \
@@ -256,18 +263,11 @@ RUN set -e \
     && chmod 700 ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/logs
 
 ################################################################
-# Clean up the Hyrax distribution binaries.
-#
-RUN rm -vf /libdap*.rpm /bes*.rpm /olfs*.tgz /robots*.tgz /apache*
-#
-################################################################
-
-################################################################
 # retrieve and install the ncWMS web application
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 
 ARG NCWMS_VERSION
-ENV NCWMS_VERSION ${NCWMS_VERSION:-"2.5.2"}
+ENV NCWMS_VERSION=${NCWMS_VERSION:-"2.5.2"}
 RUN echo "NCWMS_VERSION: ${NCWMS_VERSION}"
 ENV NCWMS_WAR_URL="https://github.com/Reading-eScience-Centre/ncwms/releases/download/ncwms-${NCWMS_VERSION}/ncWMS2.war"
 RUN echo "NCWMS_WAR_URL: ${NCWMS_WAR_URL}"
@@ -318,7 +318,7 @@ RUN set -e \
     && echo "Retrieving, and building hyrax regression tests." \
     && echo "h_r_t will be in: ${TEST_INSTALL_DIR}" \
     && mkdir -p ${TEST_INSTALL_DIR} \
-    && git clone -v https://github.com/opendap/hyrax_regression_tests ${TEST_INSTALL_DIR} \
+    && git clone --depth 1 -v https://github.com/opendap/hyrax_regression_tests ${TEST_INSTALL_DIR} \
     && cd ${TEST_INSTALL_DIR} \
     && autoreconf -vif \
     && ./configure
@@ -354,10 +354,6 @@ EXPOSE 8443
 EXPOSE 10022
 EXPOSE 11002
 
-# can't use USER with entrypoint that needs root
-# use gosu or, as done, enable bes user write so the entrypoint does not need root
-RUN chown -R bes /etc/bes
 USER root
 
 CMD ["-"]
-
