@@ -475,7 +475,9 @@ bes_uid=$(id -u bes)
 bes_gid=$(id -g bes)
 startup_log "Launching besd [uid: ${bes_uid} gid: ${bes_gid}]"
 set -x
-/usr/bin/besctl start 2>&1 > ./besctl.log # dropped debug control -d "/dev/null,timing"  - ndp 10/12/2023
+which besctl
+which besdaemon
+/usr/bin/besctl start > ./besctl.log  2>&1 # dropped debug control -d "/dev/null,timing"  - ndp 10/12/2023
 status=$?
 set +x
 startup_log $(cat ./besctl.log)
