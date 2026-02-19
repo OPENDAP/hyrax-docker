@@ -26,9 +26,10 @@ ENV java_version="java-21-openjdk"
 ENV python_version="3.9"
 RUN echo "$HR" && echo "# Python Version: $(python3 --version) (config says we want: $python_version)" && echo "$HR"
 
-# We use jq in enterypoint.sh
-# We use awscli in entrypoint.sh
-ENV core_dnf_packages="which unzip jq awscli"
+# 'jq' is used by enterypoint.sh
+# 'awscli' is used by entrypoint.sh
+# 'ps' (aka procps) is used by besctl
+ENV core_dnf_packages="which unzip jq awscli procps"
 
 
 # The CRB (CodeReady Builder) repository has to be enabled to get the libtirpc-devel package.
