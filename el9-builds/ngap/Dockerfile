@@ -29,8 +29,8 @@ RUN echo "$HR" && echo "# Python Version: $(python3 --version) (config says we w
 # 'jq' is used by enterypoint.sh
 # 'awscli' is used by entrypoint.sh
 # 'ps' (aka procps) is used by besctl
-# 'bc' is used cleanup and entrypoint.sh and cleanup_files.sh
-ENV core_dnf_packages="which unzip jq awscli procps"
+# 'bc' is used entrypoint.sh and cleanup_files.sh
+ENV core_dnf_packages="which unzip jq awscli procps bc"
 
 
 # The CRB (CodeReady Builder) repository has to be enabled to get the libtirpc-devel package.
