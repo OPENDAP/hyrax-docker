@@ -530,6 +530,7 @@ start_time=$(date  "+%s")
 startup_log "Hyrax Has Arrived...(time: $start_time SLEEP_INTERVAL: $SLEEP_INTERVAL)"
 #-------------------------------------------------------------------------------
 while /bin/true; do
+  heartbeat_log "SLEEP_INTERVAL: $SLEEP_INTERVAL"
   sleep $SLEEP_INTERVAL
 
   # Compute service_uptime in hours
@@ -537,31 +538,31 @@ while /bin/true; do
   suptime=$(echo "scale=4; ($now - $start_time)/60/60" | bc)
 
   if test "$debug" = "true"; then
-    heartbeat_log "Checking Hyrax Operational State. service_uptime: ${suptime} hours";
+    heartbeat_log "Checking Hyrax Operational State. service_uptime: $suptime hours";
   fi
 
   besd_ps=$(ps -f $besd_pid)
   BESD_STATUS=$?
 
   if test "$debug" = "true"; then
-    heartbeat_log "besd_ps: ${besd_ps}";
+    heartbeat_log "besd_ps: $besd_ps";
   fi
   if test "$debug" = "true"; then
-    heartbeat_log "BESD_STATUS: ${BESD_STATUS}";
+    heartbeat_log "BESD_STATUS: $BESD_STATUS";
   fi
 
   if test $BESD_STATUS -ne 0; then
     error_log "BESD_STATUS: $BESD_STATUS bes_pid:$bes_pid"
-    error_log "The BES daemon appears to have died! Exiting. (service_uptime: ${suptime} hours)"
+    error_log "The BES daemon appears to have died! Exiting. (service_uptime: $suptime hours)"
     #exit $BESD_STATUS
   fi
 
-  tomcat_ps=$(ps -f "${tomcat_pid}")
+  tomcat_ps=$(ps -f "$tomcat_pid")
   TOMCAT_STATUS=$?
-  if test "$debug" = "true"; then heartbeat_log "TOMCAT_STATUS: ${TOMCAT_STATUS}"; fi
+  if test "$debug" = "true"; then heartbeat_log "TOMCAT_STATUS: $TOMCAT_STATUS"; fi
   if test $TOMCAT_STATUS -ne 0; then
     error_log "TOMCAT_STATUS: $TOMCAT_STATUS tomcat_pid:$tomcat_pid"
-    error_log "Tomcat appears to have died! Exiting.  (service_uptime: ${suptime} hours)"
+    error_log "Tomcat appears to have died! Exiting.  (service_uptime: $suptime hours)"
     # write_tomcat_logs 100 5 # [number of log lines to grab from each file] [time to sleep after sending]
     #exit $TOMCAT_STATUS
   fi
