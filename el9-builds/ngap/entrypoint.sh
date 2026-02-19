@@ -474,12 +474,8 @@ fi
 bes_uid=$(id -u bes)
 bes_gid=$(id -g bes)
 startup_log "Launching besd [uid: ${bes_uid} gid: ${bes_gid}]"
-set -x
-which besctl
-which besdaemon
 /usr/bin/besctl start > ./besctl.log  2>&1 # dropped debug control -d "/dev/null,timing"  - ndp 10/12/2023
 status=$?
-set +x
 startup_log $(cat ./besctl.log)
 if test $status -ne 0; then
   error_log "ERROR: Failed to start BES: $status"
@@ -531,10 +527,10 @@ now=
 suptime=
 start_time=$(date  "+%s")
 #-------------------------------------------------------------------------------
-startup_log "Hyrax Has Arrived...(time: $start_time)"
+startup_log "Hyrax Has Arrived...(time: $start_time heart_rate: $SLEEP_INTERVAL)"
 #-------------------------------------------------------------------------------
 while /bin/true; do
-  sleep "$SLEEP_INTERVAL"
+  sleep $SLEEP_INTERVAL
 
   # Compute service_uptime in hours
   now=$(date  "+%s")
