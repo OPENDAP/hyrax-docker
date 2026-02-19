@@ -452,8 +452,13 @@ if test "$debug" = "true"; then
   startup_log "Configuring OLFS to debug logging..."
   logback_xml="$OLFS_CONF_DIR/logback.xml"
   ngap_logback_xml="$OLFS_CONF_DIR/logback-ngap.xml"
-  cp "$ngap_logback_xml" "$logback_xml"
-  startup_log "Enabled Logback (slf4j) debug logging for NGAP."
+  if test -f "$ngap_logback_xml"
+  then
+    cp "$ngap_logback_xml" "$logback_xml"
+    startup_log "Enabled Logback (slf4j) debug logging for NGAP."
+  else
+    startup_log "Unable to locate the debug logging configuration file $ngap_logback_xml. No changes were made to logging configuration."
+  fi
   startup_log "$( cat "$logback_xml" )"
 fi
 ################################################################################
