@@ -18,7 +18,7 @@ FROM rockylinux:9
 ENV TARGET_OS="el9"
 ENV ARCH="x86_64"
 ENV core_dnf_packages="which unzip procps bc"
-ENV developer_packages="which emacs vim awscli jq"
+ENV developer_packages="emacs vim awscli jq"
 
 # rocky9 comes with python 3.9 by default, it seems to be good enough for now
 # ENV python_version="3.11"
