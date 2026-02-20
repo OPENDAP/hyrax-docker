@@ -30,13 +30,15 @@ RUN echo "$HR" && echo "# Python Version: $(python3 --version) (config says we w
 # 'awscli' is used by entrypoint.sh
 # 'ps' (aka procps) is used by besctl and entrypoint.sh
 # 'bc' is used entrypoint.sh and cleanup_files.sh
-ENV core_dnf_packages="which unzip jq awscli procps bc"
+ENV core_dnf_packages="which unzip jq procps bc"
 
 
 # The CRB (CodeReady Builder) repository has to be enabled to get the libtirpc-devel package.
-ENV developer_dnf_packages="libtirpc libtirpc-devel libuuid libuuid-devel openssl openssl-devel"
+ENV build_the_things_dnf_packages="libtirpc libtirpc-devel libuuid libuuid-devel openssl openssl-devel"
 
-#ENV developer_dnf_packages="procps diffutils curl unzip emacs vim jq procps git bc valgrind gdb"
+ENV developer_dnf_packages=""
+#ENV developer_dnf_packages="awscli diffutils emacs vim git valgrind gdb"
+
 ENV awscli_dnf_packages=""
 #ENV awscli_dnf_packages="awscli"
 
@@ -198,7 +200,7 @@ RUN set -e \
     && dnf groupinstall "Development Tools" -y \
     && echo "$HR2" >&2 \
     && echo "# Installing NGAP package lists..." >&2 \
-    && dnf install -y $core_dnf_packages $developer_dnf_packages $awscli_dnf_packages \
+    && dnf install -y $core_dnf_packages $build_the_things_dnf_packages $developer_dnf_packages $awscli_dnf_packages \
     && dnf clean all \
     && echo "$HR" >&2
 
