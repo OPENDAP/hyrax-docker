@@ -79,13 +79,22 @@ while getopts "e:sdi:k:r:" opt; do
   esac
 done
 
-aws configure list
-status=$?
-if [ $status -ne 0 ]; then
-    echo "Problem with AWS CLI!" >&2
-fi
-
+################################################################################
+echo "Checking AWS CLI: " >&2
+set +e
+aws_bin="$(which aws 2>&1)"
+ab_status=$?
 set -e
+if test $ab_status -ne 0; then
+    echo "WARNING: It appears that the AWS CLI is not installed. Not found on '$PATH' ('which' status: $ab_status, msg: $aws_bin)" >&2
+else
+    acl="$(aws configure list 2>&1)"
+    acl_status=$?
+    echo "$acl" >&2
+    if test $acl_status -ne 0; then
+      echo "WARNING: Problem with AWS CLI! ('aws' status: $acl_status msg: $acl)"  >&2
+    fi
+fi
 # echo "$@"
 
 

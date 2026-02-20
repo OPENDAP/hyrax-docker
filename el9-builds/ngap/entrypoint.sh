@@ -151,11 +151,19 @@ SYSTEM_ID=$(get_aws_instance_id)
 
 ################################################################################
 startup_log "Checking AWS CLI: "
-acl="$(aws configure list 2>&1)"
-acl_status=$?
-startup_log "$acl"
-if test $acl_status -ne 0; then
-  startup_log "WARNING: Problem with AWS CLI! (status: $acl_status)"
+set +e
+aws_bin="$(which aws 2>&1)"
+ab_status=$?
+set -e
+if test $ab_status -ne 0; then
+    startup_log "WARNING: It appears that the AWS CLI is not installed. Not found on '$PATH' ('which' status: $ab_status, msg: $aws_bin)"
+else
+    acl="$(aws configure list 2>&1)"
+    acl_status=$?
+    startup_log "$acl"
+    if test $acl_status -ne 0; then
+      startup_log "WARNING: Problem with AWS CLI! ('aws' status: $acl_status msg: $acl)"
+    fi
 fi
 
 ################################################################################

@@ -22,13 +22,13 @@ ENV HR2="-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 ENV TARGET_OS="el9"
 ENV ARCH="x86_64"
 ENV java_version="java-21-openjdk"
-# rocky9 comes with python 3.9 by default.
+# rocky9 comes with python 3.9 by default, and replacing it seems problematic at best.
 ENV python_version="3.9"
 RUN echo "$HR" && echo "# Python Version: $(python3 --version) (config says we want: $python_version)" && echo "$HR"
 
 # 'jq' is used by enterypoint.sh
 # 'awscli' is used by entrypoint.sh
-# 'ps' (aka procps) is used by besctl
+# 'ps' (aka procps) is used by besctl and entrypoint.sh
 # 'bc' is used entrypoint.sh and cleanup_files.sh
 ENV core_dnf_packages="which unzip jq awscli procps bc"
 
@@ -198,7 +198,6 @@ RUN set -e \
     && dnf groupinstall "Development Tools" -y \
     && echo "$HR2" >&2 \
     && echo "# Installing NGAP package lists..." >&2 \
-    # && dnf info  $core_dnf_packages $developer_dnf_packages $awscli_dnf_packages \
     && dnf install -y $core_dnf_packages $developer_dnf_packages $awscli_dnf_packages \
     && dnf clean all \
     && echo "$HR" >&2
