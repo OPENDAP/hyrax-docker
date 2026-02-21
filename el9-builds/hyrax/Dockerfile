@@ -140,29 +140,44 @@ RUN set -e \
     && echo "dnf install -y $dnf_developer_tools_packages" > /install-dev-tools \
     && chmod 755 /install-dev-tools
 
-#RUN set -e \
-#    && dnf install -y "python$python_version" \
-#    && echo "# Python Version: $(python3 --version)" \
-#    && dnf clean all
+######################################################################
+# Rocky9 comes with built in curl-minimal. For our puposes we want
+# want the full package (I think, probably need to verify).
+# The '--allowerasing' parameter enables dnf to erase curl-minimal
+# and then install the full package.
+#
 RUN set -e \
-    && echo "$HR" \
-    && echo "# Installing cURL" \
-    && yum install -y curl curl-devel --allowerasing \
-    && echo "# cURL version: $(curl --version)" \
-    && dnf clean all
+    && echo "$HR" >&2 \
+    && echo "# Installing cURL for developers (not minimal cURL)" >&2 \
+    && dnf install -y curl curl-devel --allowerasing \
+    && echo "# cURL version: $(curl --version)" >&2 \
+    && dnf clean all \
+    && echo "$HR" >&2
+
+######################################################################
+# We want java ac ertain way ($java_version) and
+# we want to be sure that
+# - We enable the one we want:
+#       update-alternatives --set java "$java_version.$ARCH
+# - We want to see if there are others installed java packages
+#   (we hope there are not):
+#       update-alternatives --list
+# - We're using the one we wanted:
+#       echo "# java version: $( java -version 2>&1 )"
 RUN set -e \
-    && echo "$HR" \
-    && echo "# It's Java Time Witches!" \
-    && echo "# Installing $java_version" \
-    && yum install -y "$java_version" "$java_version-devel"  \
-    && echo "$HR2" \
-    && echo "# Using $java_version" \
+    && echo "$HR" >&2 \
+    && echo "# It's Java Time Witches!" >&2 \
+    && echo "# Installing $java_version" >&2 \
+    && dnf install -y "$java_version" "$java_version-devel" \
+    && echo "$HR2" >&2 \
+    && echo "# Using $java_version" >&2 \
     && update-alternatives --set java "$java_version.$ARCH" \
-    && echo "# Enabled $java_version" \
-    && echo "# Using java version: $( java -version 2>&1 )" \
+    && echo "# Enabled $java_version" >&2 \
+    && echo "# java version: $( java -version 2>&1 )" \
     && update-alternatives --list \
-    && dnf install -y tzdata-java \
-    && dnf clean all
+    && dnf clean all \
+    && echo "$HR" >&2
+
 RUN set -e \
     && dnf install -y $dnf_runtime_packages $dnf_regression_test_packages $dnf_developer_tools_packages \
     && dnf clean all

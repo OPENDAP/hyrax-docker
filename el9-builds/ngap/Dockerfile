@@ -109,15 +109,6 @@ ARG REDIS_VERSION
 ENV REDIS_VERSION="redisson-3.50.0"
 RUN echo "# REDIS_VERSION: $REDIS_VERSION"
 
-#ARG NGAP_DISTRO
-# ENV NGAP_DISTRO="ngap-redisson-3.50.0-webapp"
-# ENV NGAP_DISTRO=${NGAP_DISTRO:-"${REDIS_VERSION}-webapp"}
-#ENV NGAP_DISTRO="${NGAP_DISTRO:-"ngap-$OLFS_VERSION-webapp"}"
-#RUN echo "NGAP_DISTRO: ${NGAP_DISTRO}"
-#COPY ${NGAP_DISTRO}.tgz /
-#COPY "${NGAP_DISTRO}.tgz" /${NGAP_DISTRO}.tgz
-#RUN tar -tf /${NGAP_DISTRO}.tgz
-
 ARG NGAP_DISTRO
 ENV NGAP_DISTRO=${NGAP_DISTRO:-"ngap-${OLFS_VERSION}-webapp"}
 RUN echo "# NGAP_DISTRO: ${NGAP_DISTRO}"
@@ -158,10 +149,13 @@ RUN set -e \
     && echo "dnf install -y $dnf_developer_tools_packages" > /install-dev-tools \
     && chmod 755 /install-dev-tools
 
-#RUN set -e && dnf install -y dnf-plugins-core \
-#    && dnf config-manager --set-enabled crb \
-#    && dnf groupinstall "Development Tools" -y
 
+######################################################################
+# Rocky9 comes with built in curl-minimal. For our puposes we want
+# want the full package (I think, probably need to verify).
+# The '--allowerasing' parameter enables dnf to erase curl-minimal
+# and then install the full package.
+#
 RUN set -e \
     && echo "$HR" >&2 \
     && echo "# Installing cURL for developers (not minimal cURL)" >&2 \
@@ -170,6 +164,16 @@ RUN set -e \
     && dnf clean all \
     && echo "$HR" >&2
 
+######################################################################
+# We want java ac ertain way ($java_version) and
+# we want to be sure that
+# - We enable the one we want:
+#       update-alternatives --set java "$java_version.$ARCH
+# - We want to see if there are others installed java packages
+#   (we hope there are not):
+#       update-alternatives --list
+# - We're using the one we wanted:
+#       echo "# java version: $( java -version 2>&1 )"
 RUN set -e \
     && echo "$HR" >&2 \
     && echo "# It's Java Time Witches!" >&2 \
@@ -184,6 +188,14 @@ RUN set -e \
     && dnf clean all \
     && echo "$HR" >&2
 
+######################################################################
+# This Dockerfile brings in the Tomcat Native APR by using the one
+# that ships in the Tomcat package that we install. The Tomcat Native
+# APR requires the regular C/C++ development sweet (make, gcc, etc)
+# to build so we install those here.
+# We also enable the CodeReady Builder repo so we can get the
+# libtirpc-devel package.
+#
 RUN set -e \
     && echo "$HR" >&2 \
     # The CRB (CodeReady Builder) repository has to be enabled to get the libtirpc-devel package.
@@ -192,11 +204,18 @@ RUN set -e \
     && dnf config-manager --set-enabled crb \
     && dnf groupinstall "Development Tools" -y \
     && echo "$HR2" >&2 \
+
+######################################################################
+# Install our runtime and build time packages.
+#
+RUN set -e \
+    && echo "$HR2" >&2 \
     && echo "# Installing NGAP package lists..." >&2 \
     && dnf install -y $dnf_runtime_packages $dnf_build_the_things_packages \
     && dnf clean all \
     && echo "$HR" >&2
 
+######################################################################
 # The follow is a sanity check so that we can see what we got.
 RUN set -e \
     && echo "$HR" >&2  \
