@@ -18,14 +18,6 @@ fi
 #
 
 ##########################################################################
-# ologgy() - The old simple loggy.
-#
-function ologgy() {
-  echo "# $*" >&2
-}
-
-
-##########################################################################
 # set_log_key_names() - Adds the LOG_KEY_PREFIX to the log key names
 #
 function set_log_key_names() {

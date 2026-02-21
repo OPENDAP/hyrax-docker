@@ -104,8 +104,6 @@ RUN set -e \
     && echo "$HR" >&2
 
 
-RUN echo "besdaemon is here: $(which besdaemon)"
-
 COPY entrypoint.sh /entrypoint.sh
 RUN  chmod +x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
