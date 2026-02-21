@@ -127,7 +127,7 @@ COPY ${NGAP_DISTRO}.tgz /${NGAP_DISTRO}.tgz
 # @TODO Do we need this?
 # @TODO Is this duplicating the compile Tomcat Native APR??
 ARG APACHE_APR_VERSION
-ENV APR_VERSION="1.7.6-1"
+ENV APACHE_APR_VERSION="${APACHE_APR_VERSION:-"1.7.6-1"}"
 RUN echo "# Apache APR version: $APACHE_APR_VERSION"
 
 ARG APACHE_APR_RPM
