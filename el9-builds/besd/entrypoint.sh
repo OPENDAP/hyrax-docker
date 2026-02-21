@@ -7,6 +7,7 @@
 # set -x # "set -o xtrace"  Print command traces before executing command.
 # set -e #  Exit on error.
 #
+export debug=false
 export HR0="###################################################################################"
 export HR1="-----------------------------------------------------------------------------------"
 export HR2="-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --"
@@ -14,6 +15,7 @@ export prolog="entrypoint.sh -"
 function loggy(){
     echo  "$@" | awk -v prolog="$prolog" '{ print "#" prolog " " $0;}'  >&2
 }
+
 loggy "############################## BESD ##################################"
 loggy "Greetings, I am $(whoami) (uid: $UID)"
 
@@ -42,7 +44,6 @@ fi
 #AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION:-<not set>}"
 #loggy "AWS_DEFAULT_REGION is ${AWS_DEFAULT_REGION}"
 
-debug=false;
 
 while getopts "e:sdi:k:r:" opt; do
   case $opt in

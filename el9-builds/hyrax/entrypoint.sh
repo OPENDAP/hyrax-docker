@@ -16,10 +16,7 @@ function loggy(){
     echo  "$@" | awk -v prolog="$prolog" '{ print "# " prolog " - " $0;}'  >&2
 }
 function debug_loggy(){
-    if test "$debug" = "true"
-    then
-        loggy "$@"
-    fi
+    if test "$debug" = "true"; then loggy "$@"; fi
 }
 
 loggy "$HR0"
@@ -172,9 +169,9 @@ loggy "PythonVersion: $( python3 --version 2>&1 )"
 #-------------------------------------------------------------------------------
 # Start the BES daemon process
 # /usr/bin/besdaemon -i /usr -c /etc/bes/bes.conf -r /var/run/bes.pid
-bes_uid=$(id -u bes)
+bes_uid="$(id -u bes)"
 loggy "bes_uid: $bes_uid"
-bes_gid=$(id -g bes)
+bes_gid="$(id -g bes)"
 loggy "bes_gid: $bes_gid"
 
 loggy "Launching besd..."
@@ -184,7 +181,7 @@ if test $status -ne 0 ; then
     loggy "ERROR: Failed to start BES: $status"
     exit $status
 fi
-besd_pid=$(ps aux | grep "/usr/bin/besdaemon" | grep -v grep | awk '{print $2;}' - )
+besd_pid="$(ps aux | grep "/usr/bin/besdaemon" | grep -v grep | awk '{print $2;}' - )"
 loggy "The besd is UP! [pid: $besd_pid]"
 
 #-------------------------------------------------------------------------------
@@ -202,14 +199,14 @@ if test $status -ne 0 ; then
 fi
 # When we launch tomcat the initial pid gets "retired" because it spawns a
 # secondary processes.
-initial_pid=$tomcat_pid
+initial_pid="$tomcat_pid"
 loggy "Tomcat started, initial pid: $initial_pid"
-while test $initial_pid -eq $tomcat_pid
+while test "$initial_pid" -eq "$tomcat_pid"
 do
     sleep 1
-    tomcat_ps=$(ps aux | grep tomcat | grep -v grep)
+    tomcat_ps="$(ps aux | grep tomcat | grep -v grep)"
     loggy "tomcat_ps: $tomcat_ps"
-    tomcat_pid=$(echo "$tomcat_ps" | awk '{print $2}')
+    tomcat_pid="$(echo "$tomcat_ps" | awk '{print $2}')"
     loggy "tomcat_pid: $tomcat_pid"
 done
 # New pid and we should be good to go.
@@ -257,12 +254,10 @@ while /bin/true; do
         exit 2
     fi
     
-    if test "$debug" = "true" ; then
-        loggy "-------------------------------------------------------------------"
-        loggy "$(date)"
-        loggy "  BESD_STATUS: $BESD_STATUS     besd_pid:$besd_pid"
-        loggy "TOMCAT_STATUS: $TOMCAT_STATUS tomcat_pid:$tomcat_pid"
-    fi
+    debug_loggy "-------------------------------------------------------------------"
+    debug_loggy "$(date)"
+    debug_loggy "  BESD_STATUS: $BESD_STATUS     besd_pid:$besd_pid"
+    debug_loggy "TOMCAT_STATUS: $TOMCAT_STATUS tomcat_pid:$tomcat_pid"
 done
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
