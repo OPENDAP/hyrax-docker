@@ -124,10 +124,12 @@ jobs:
       name: "Build opendap/besd"
       script:
         - export DOCKER_NAME="besd"
-        - echo "RELEASE_DATE '$RELEASE_DATE'"
+        - echo "# RELEASE_DATE '$RELEASE_DATE'"
         - cd "$TARGET_OS-builds"
         - source "./build-$TARGET_OS"
         - show_version
+        - export BES_VERSION_TAG="${BUILD_VERSION_TAG:-"opendap/$DOCKER_NAME:$BES_VERSION-$TARGET_OS$TEST_DEPLOYMENT"}"
+        - echo "# BES_VERSION_TAG '$BES_VERSION_TAG'"
         - s3_get_besd_distro
           "$S3_BUILD_BUCKET"
           "$DOCKER_NAME"
@@ -140,7 +142,7 @@ jobs:
           --build-arg LIBDAP_VERSION
           --build-arg BES_VERSION
           --tag "$SNAPSHOT_IMAGE_TAG"
-          --tag "$BUILD_VERSION_TAG"
+          --tag "$BES_VERSION_TAG"
           "$DOCKER_NAME"
         - docker image ls -a
 
