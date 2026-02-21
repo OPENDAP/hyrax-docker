@@ -15,71 +15,95 @@
 # Set one or more individual labels
 #
 FROM rockylinux:9
+ENV HR="###############################################################################################################"
+ENV HR2="-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --"
 ENV TARGET_OS="el9"
 ENV ARCH="x86_64"
-ENV core_dnf_packages="which unzip procps bc"
-ENV developer_packages="emacs vim awscli jq"
 
-# rocky9 comes with python 3.9 by default, it seems to be good enough for now
-# ENV python_version="3.11"
-RUN echo "Python Version: $(python3 --version) (config says we want: $python_version)"
+RUN echo "$HR"
+RUN echo "# BEGIN - besd docker build"
+# rocky9 comes with python 3.9 by default, and replacing it seems problematic at best.
+RUN echo "# Python Version: $(python3 --version)"
 
+ENV dnf_runtime_packages="which unzip procps bc"
+RUN echo "# dnf_runtime_packages: $dnf_runtime_packages"
+
+ENV dnf_developer_tools_packages="emacs vim awscli jq gdb valgrind"
+RUN echo "# dnf_developer_tools_packages: $dnf_developer_tools_packages"
 
 ARG RELEASE_DATE
-ENV RELEASE_DATE ${RELEASE_DATE:-"unknown"}
-RUN echo "RELEASE_DATE: ${RELEASE_DATE}"
+ENV RELEASE_DATE="${RELEASE_DATE:-$(date +%s)}"
+RUN echo "RELEASE_DATE: $RELEASE_DATE"
 
 ARG LIBDAP_VERSION
-ENV LIBDAP_VERSION=${LIBDAP_VERSION:-"snapshot"}
-RUN echo "LIBDAP_VERSION: ${LIBDAP_VERSION}"
+ENV LIBDAP_VERSION=${LIBDAP_VERSION:-"snapshot-$TARGET_OS"}
+RUN echo "LIBDAP_VERSION: $LIBDAP_VERSION"
 
 ARG LIBDAP_RPM
-ENV LIBDAP_RPM=${LIBDAP_RPM:-"libdap-${LIBDAP_VERSION}.${TARGET_OS}.x86_64.rpm"}
-RUN echo "LIBDAP_RPM: ${LIBDAP_RPM}"
-COPY ${LIBDAP_RPM} /${LIBDAP_RPM}
+ENV LIBDAP_RPM=${LIBDAP_RPM:-"libdap-$LIBDAP_VERSION.$TARGET_OS.x86_64.rpm"}
+RUN echo "LIBDAP_RPM: $LIBDAP_RPM"
+COPY "$LIBDAP_RPM" "/$LIBDAP_RPM"
 
 ARG BES_VERSION
-ENV BES_VERSION=${BES_VERSION:-"snapshot"}
-RUN echo "BES_VERSION: ${BES_VERSION}"
+ENV BES_VERSION=${BES_VERSION:-"snapshot-$TARGET_OS"}
+RUN echo "BES_VERSION: $BES_VERSION"
 
 ARG BES_RPM
-ENV BES_RPM=${BES_RPM:-"bes-${BES_VERSION}.static.${TARGET_OS}.x86_64.rpm"}
-RUN echo "BES_RPM: ${BES_RPM}"
-COPY ${BES_RPM} /${BES_RPM}
+ENV BES_RPM=${BES_RPM:-"bes-$BES_VERSION.static.$TARGET_OS.x86_64.rpm"}
+RUN echo "BES_RPM: $BES_RPM"
+COPY "$BES_RPM" "/$BES_RPM"
 
 
 LABEL vendor="OPeNDAP Incorporated"
-LABEL org.opendap.besdaemon.version=${BES_VERSION}
-LABEL org.opendap.besdaemon.release-date=RELEASE_DATE
+LABEL org.opendap.besdaemon.version="$BES_VERSION"
+LABEL org.opendap.besdaemon.release-date="$RELEASE_DATE"
 LABEL org.opendap.hyrax.version.is-production="false"
 LABEL org.opencontainers.image.authors="support@opendap.org"
 
 USER root
 
+######################################################################
+# Update the OS and create a handy executable shell scipt to simplify
+# the installation of the (not as yet installed) but super useful
+# developer tools packages :) ndp
 RUN set -e \
     && dnf update -y \
-    && echo "dnf install -y $developer_packages" > /load-dev-tools \
-    && chmod 755 /load-dev-tools \
-    && dnf clean all
+    && echo "#!/bin/bash" > /install-dev-tools \
+    && echo "dnf install -y $dnf_developer_tools_packages" > /install-dev-tools \
+    && chmod 755 /install-dev-tools
 
-###############################################################
-# Retrieve and install the latest libdap snapshot
+################################################################
+# Install the libdap rpm
+#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 RUN set -e \
-    && echo "Installing libdap snapshot rpm. ${LIBDAP_RPM}" \
+    && echo "$HR" >&2 \
+    && echo "# Installing the libdap rpm: $LIBDAP_RPM" >&2 \
     && ls -l ./libdap* \
-    && dnf -y install ./${LIBDAP_RPM} \
-    && rm -f ./${LIBDAP_RPM}
+    && dnf -y install ./libdap-*.rpm \
+    && echo "# The 'dnf install' command exited with status: $?" >&2 \
+    && rm -f "./$LIBDAP_RPM" \
+    && dnf clean all \
+    && echo "# libdap4 is installed." >&2 \
+    && echo "$HR" >&2
 
-###############################################################
-# Retrieve and install the latest BES snapshot
+################################################################
+# Install the the BES
+# besd, besdaemon, beslistener, besctl, besstandalone, bescmdline
+#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 RUN set -e \
-    && echo "Install the besd rpm ${BES_RPM} " \
+    && echo "$HR" >&2 \
+    && echo "# Installing the BES rpm: $BES_RPM" >&2 \
     && ls -l ./bes* \
-    && dnf -y install ./${BES_RPM} \
-    && rm -f ./${BES_RPM}
+    && dnf -y install ./bes-*.rpm \
+    && echo "# The 'dnf install' command exited with status: $?" >&2 \
+    && rm -f "./$BES_RPM" \
+    && dnf clean all \
+    && echo "# besdaemon is here: $(which besdaemon)" >&2 \
+    && echo "#      besdaemon -v: '$(besdaemon -v)'" >&2 \
+    && echo "$HR" >&2
 
 
-RUN echo "besdaemon is here: "`which besdaemon`
+RUN echo "besdaemon is here: $(which besdaemon)"
 
 COPY entrypoint.sh /entrypoint.sh
 RUN  chmod +x /entrypoint.sh

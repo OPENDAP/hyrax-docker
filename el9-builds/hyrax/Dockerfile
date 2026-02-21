@@ -14,35 +14,36 @@
 #
 # Set one or more individual labels
 FROM rockylinux:9
+ENV HR="###############################################################################################################"
+ENV HR2="-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --"
 ENV TARGET_OS="el9"
 ENV ARCH="x86_64"
 ENV java_version="java-21-openjdk"
 # rocky9 comes with python 3.9 by default.
-ENV python_version="3.9"
-RUN echo "Python Version: $(python3 --version) (config says we want: $python_version)"
+RUN echo "$HR"
+RUN echo "# BEGIN - hyrax docker build"
+RUN echo "# Python Version: $(python3 --version)"
 
-ENV core_dnf_packages="which unzip procps bc"
-# We install:
+################################################################################
+# Stuff we need to run the service:
+#  which - Because this build likes to say where installed things be livin.
 #  unzip - to unpack stuff we install
 # procps - so we can use 'ps' to track the bes and tomcat processes.
-#     bc - is used by the cleanup_files.sh script to compute time stuff for orphaned files.
+#     bc - is used by the cleanup_files.sh script to compute time stuff for
+#          orphaned files.
+ENV dnf_runtime_packages="which unzip procps bc"
+RUN echo "# dnf_runtime_packages: $dnf_runtime_packages"
 
-# Stuff we need for hyrax_regression_tests
-ENV regression_test_dnf_packages="git make autoconf automake diffutils"
+# Stuff we need to build the hyrax_regression_tests
+ENV dnf_regression_test_packages="git make autoconf automake diffutils"
+RUN echo "# dnf_regression_test_packages: $dnf_regression_test_packages"
 
-ENV developer_dnf_packages=""
-#ENV developer_dnf_packages="diffutils curl emacs vim jq git valgrind gdb"
-ENV awscli_dnf_packages=""
-#ENV awscli_dnf_packages="awscli"
+ENV dnf_developer_tools_packages="diffutils curl emacs vim jq git valgrind gdb awscli"
+RUN echo "# dnf_developer_tools_packages: $dnf_developer_tools_packages"
 
 
-#
-ENV  HR="######################################################"
-ENV HR2="#-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --"
-
-ENV NOW="$(date +%s)"
 ARG RELEASE_DATE
-ENV RELEASE_DATE=${RELEASE_DATE:-"${NOW}"}
+ENV RELEASE_DATE="${RELEASE_DATE:-$(date +%s)}"
 RUN echo "# RELEASE_DATE: $RELEASE_DATE"
 
 ARG TOMCAT_VERSION
@@ -54,25 +55,25 @@ COPY "$TOMCAT_DISTRO.tar.gz" /
 RUN ls -l /apache-tomcat-*  >&2
 
 ARG HYRAX_VERSION
-ENV HYRAX_VERSION=${HYRAX_VERSION:-"snapshot"}
+ENV HYRAX_VERSION=${HYRAX_VERSION:-"snapshot-$TARGET_OS"}
 RUN echo "# HYRAX_VERSION: $HYRAX_VERSION"
 
 ARG LIBDAP_VERSION
-ENV LIBDAP_VERSION=${LIBDAP_VERSION:-"snapshot"}
+ENV LIBDAP_VERSION=${LIBDAP_VERSION:-"snapshot-$TARGET_OS"}
 RUN echo "# LIBDAP_VERSION: $LIBDAP_VERSION"
 
 ARG LIBDAP_RPM
-ENV LIBDAP_RPM=${LIBDAP_RPM:-"libdap-${LIBDAP_VERSION}.${TARGET_OS}.x86_64.rpm"}
+ENV LIBDAP_RPM=${LIBDAP_RPM:-"libdap-$LIBDAP_VERSION.$TARGET_OS.x86_64.rpm"}
 RUN echo "# LIBDAP_RPM: $LIBDAP_RPM"
 COPY "$LIBDAP_RPM" libdap-devel-* libdap-debuginfo-* /
 RUN ls -l /libdap-*  >&2
 
 ARG BES_VERSION
-ENV BES_VERSION=${BES_VERSION:-"snapshot"}
+ENV BES_VERSION=${BES_VERSION:-"snapshot-$TARGET_OS"}
 RUN echo "# BES_VERSION: $BES_VERSION"
 
 ARG BES_RPM
-ENV BES_RPM=${BES_RPM:-"bes-${BES_VERSION}.static.${TARGET_OS}.x86_64.rpm"}
+ENV BES_RPM=${BES_RPM:-"bes-$BES_VERSION.static.$TARGET_OS.x86_64.rpm"}
 RUN echo "# BES_RPM: $BES_RPM"
 COPY "$BES_RPM" bes-devel-* bes-debuginfo-* /
 RUN ls -l /bes-* >&2
@@ -129,14 +130,15 @@ RUN if [ "$DEVELOPER_MODE" = "true" ];then echo "# DEVELOPER_MODE: ENABLED"; els
 #RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
 #RUN sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
 
-################################################################
-# Update and install the needful.
-#
-# Installing autoconf automake git bc for the tests install. The tests
-# are installed in the container but not run until a later stage of the
-# Travis build (or at a later time). They need to be part of the container,
-# however, to be run, so install them as part of this Dockerfile.
-RUN set -e && dnf update  -y
+######################################################################
+# Update the OS and create a handy executable shell scipt to simplify
+# the installation of the (not as yet installed) but super useful
+# developer tools packages :) ndp
+RUN set -e \
+    && dnf update -y \
+    && echo "#!/bin/bash" > /install-dev-tools \
+    && echo "dnf install -y $dnf_developer_tools_packages" > /install-dev-tools \
+    && chmod 755 /install-dev-tools
 
 #RUN set -e \
 #    && dnf install -y "python$python_version" \
@@ -157,41 +159,46 @@ RUN set -e \
     && echo "# Using $java_version" \
     && update-alternatives --set java "$java_version.$ARCH" \
     && echo "# Enabled $java_version" \
-    && echo "# java version: $( java -version 2>&1 )" \
+    && echo "# Using java version: $( java -version 2>&1 )" \
     && update-alternatives --list \
     && dnf install -y tzdata-java \
     && dnf clean all
 RUN set -e \
-    && dnf install -y $core_dnf_packages $regression_test_dnf_packages $developer_dnf_packages \
+    && dnf install -y $dnf_runtime_packages $dnf_regression_test_packages $dnf_developer_tools_packages \
     && dnf clean all
 #
 # RUN set -e && which diff
 #
 
-
-
 ################################################################
-# Install the latest libdap snapshot
+# Install the libdap rpm
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 RUN set -e \
-    && echo "# Installing the libdap rpm: $LIBDAP_RPM" \
+    && echo "$HR" >&2 \
+    && echo "# Installing the libdap rpm: $LIBDAP_RPM" >&2 \
     && ls -l ./libdap* \
-    && dnf install -y ./libdap-*.rpm \
+    && dnf -y install ./libdap-*.rpm \
+    && echo "# The 'dnf install' command exited with status: $?" >&2 \
     && rm -f "./$LIBDAP_RPM" \
     && dnf clean all \
-    && echo "# libdap4 is installed."
+    && echo "# libdap4 is installed." >&2 \
+    && echo "$HR" >&2
 
 ################################################################
-# Install the latest BES snapshot
+# Install the the BES
+# besd, besdaemon, beslistener, besctl, besstandalone, bescmdline
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 RUN set -e \
-    && echo "# Installing the latest BES rpm: $BES_RPM" \
+    && echo "$HR" >&2 \
+    && echo "# Installing the BES rpm: $BES_RPM" >&2 \
     && ls -l ./bes* \
-    && dnf install -y ./bes-*.rpm \
+    && dnf -y install ./bes-*.rpm \
+    && echo "# The 'dnf install' command exited with status: $?" >&2 \
     && rm -f "./$BES_RPM" \
     && dnf clean all \
-    && echo "# BES is installed" \
-    && echo "# besdaemon is here: $(which besdaemon)"
+    && echo "# besdaemon is here: $(which besdaemon)" >&2 \
+    && echo "#      besdaemon -v: '$(besdaemon -v)'" >&2 \
+    && echo "$HR" >&2
 
 ################################################################
 # Install and Setup Tomcat
@@ -204,22 +211,21 @@ RUN set -e && useradd -m -U -d /home/tomcat -s /bin/false tomcat
 # the root directory prior to this layer.
 #
 RUN set -e \
-    && tar -xvf "/${TOMCAT_DISTRO}.tar.gz" -C /home/tomcat >&2 \
-    && ln -s /home/tomcat/${TOMCAT_DISTRO} /usr/share/tomcat >&2 \
-    && ln -s /home/tomcat/${TOMCAT_DISTRO} /tomcat >&2 \
+    && tar -xvf "/$TOMCAT_DISTRO.tar.gz" -C "/home/tomcat" >&2 \
+    && ln -s "/home/tomcat/$TOMCAT_DISTRO" "/usr/share/tomcat" >&2 \
+    && ln -s "/home/tomcat/$TOMCAT_DISTRO" "/tomcat" >&2 \
     && rm -rvf /usr/share/tomcat/webapps/* >&2 \
     && mkdir -p /var/log/tomcat \
     && chown -R tomcat:tomcat /var/log/tomcat /home/tomcat \
     && echo "# Cleaning up Tomcat distribution files..." >&2 \
-    && rm -fv "/${TOMCAT_DISTRO}.tar.gz" \
+    && rm -fv "/$TOMCAT_DISTRO.tar.gz" \
     && echo "# Tomcat is unpacked and ready. >&2 "
 
+# @TODO REMOVE THIS COMMENTED OUT CODE BEFORE MERGE
 #COPY tomcat.service /etc/systemd/system/tomcat.service
 #RUN set -e \
 #    && which systemctl \
 #    && systemctl enable tomcat
-
-
 #RUN firewall-cmd --add-port 8080/tcp --permanent
 #RUN firewall-cmd --reload
 
@@ -295,7 +301,7 @@ RUN if [ "$USE_NCWMS" = "true" ]; then \
 # set a default ncWMS admin if DEVELOPER_MODE is enabled.
 RUN if [ "$DEVELOPER_MODE" = "true" ] && [ "$USE_NCWMS" = "true" ]; then \
         echo "# DEVELOPER MODE: Adding ncWMS admin credentials"; \
-        sed -i 'sX</tomcat-users>X<role rolename="ncWMS-admin"/> <user username="admin" password="admin" roles="ncWMS-admin"/> </tomcat-users>X' ${CATALINA_HOME}/conf/tomcat-users.xml; \
+        sed -i 'sX</tomcat-users>X<role rolename="ncWMS-admin"/> <user username="admin" password="admin" roles="ncWMS-admin"/> </tomcat-users>X' $CATALINA_HOME/conf/tomcat-users.xml; \
     else \
         echo "# No ncWMS admin credentials installed."; \
     fi

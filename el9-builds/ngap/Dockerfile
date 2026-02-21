@@ -22,27 +22,37 @@ ENV HR2="-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 ENV TARGET_OS="el9"
 ENV ARCH="x86_64"
 ENV java_version="java-21-openjdk"
-# rocky9 comes with python 3.9 by default, and replacing it seems problematic at best.
-ENV python_version="3.9"
-RUN echo "$HR" && echo "# Python Version: $(python3 --version) (config says we want: $python_version)" && echo "$HR"
 
+#####################################################
+# Runtime packages needed by the service.
 # 'jq' is used by enterypoint.sh
 # 'awscli' is used by entrypoint.sh
 # 'ps' (aka procps) is used by besctl and entrypoint.sh
 # 'bc' is used entrypoint.sh and cleanup_files.sh
-ENV core_dnf_packages="which unzip jq procps bc"
+ENV dnf_runtime_packages="which unzip jq procps bc"
+RUN echo "# dnf_runtime_packages: $dnf_runtime_packages"
 
 
-# The CRB (CodeReady Builder) repository has to be enabled to get the libtirpc-devel package.
-ENV build_the_things_dnf_packages="libtirpc libtirpc-devel libuuid libuuid-devel openssl openssl-devel"
+#####################################################
+# Packages needed to compile the Tomcat Native APR
+# that we locate in the tomcat distribution after
+# we have unpacked/installed it.
+# @TODO Build the Tomcat Native APR outside of this Dockerfile and bring in the compiled result.
+# The CRB (CodeReady Builder) repository has to be
+# enabled to get the libtirpc-devel package.
+ENV dnf_build_the_things_packages="libtirpc libtirpc-devel libuuid libuuid-devel openssl openssl-devel"
+RUN echo "# dnf_build_the_things_packages: $dnf_build_the_things_packages"
 
-ENV developer_dnf_packages=""
-#ENV developer_dnf_packages="awscli diffutils emacs vim git valgrind gdb"
+#####################################################
+#
+ENV dnf_developer_tools_packages="diffutils emacs vim git valgrind gdb awscli"
+RUN echo "# dnf_developer_tools_packages: $dnf_developer_tools_packages"
 
-ENV awscli_dnf_packages=""
-#ENV awscli_dnf_packages="awscli"
 
-
+RUN echo "$HR"
+RUN echo "# BEGIN - ngap docker build"
+# rocky9 comes with python 3.9 by default, and replacing it seems problematic at best.
+RUN echo "# Python Version: $(python3 --version)"
 
 
 # ENV DEPLOYMENT_CONTEXT="ROOT"
@@ -52,13 +62,13 @@ ARG DEPLOYMENT_CONTEXT
 ENV DEPLOYMENT_CONTEXT="${DEPLOYMENT_CONTEXT:-"ROOT"}"
 RUN echo "# DEPLOYMENT_CONTEXT: $DEPLOYMENT_CONTEXT"
 
-#
-# Hyrax Components Version Negotiation
-#
 ARG RELEASE_DATE
 ENV RELEASE_DATE="${RELEASE_DATE:-$(date +%s)}"
 RUN echo "# RELEASE_DATE: $RELEASE_DATE"
 
+#
+# Hyrax Components Version Negotiation
+#
 ARG TOMCAT_VERSION
 ENV TOMCAT_VERSION="${TOMCAT_VERSION:-"11.0.7"}"
 RUN echo "# TOMCAT_VERSION: $TOMCAT_VERSION"
@@ -68,7 +78,7 @@ COPY "${TOMCAT_DISTRO}.tar.gz" /
 RUN ls -l /apache-tomcat-*  >&2
 
 ARG HYRAX_VERSION
-ENV HYRAX_VERSION=${HYRAX_VERSION:-"snapshot"}
+ENV HYRAX_VERSION=${HYRAX_VERSION:-"snapshot-$TARGET_OS"}
 RUN echo "# HYRAX_VERSION: ${HYRAX_VERSION}"
 
 ARG LIBDAP_VERSION
@@ -82,7 +92,7 @@ COPY ${LIBDAP_RPM} libdap-devel-* libdap-debuginfo-* /
 RUN ls -l /libdap-*  >&2
 
 ARG BES_VERSION
-ENV BES_VERSION="${BES_VERSION:-"snapshot"}"
+ENV BES_VERSION="${BES_VERSION:-"snapshot-$TARGET_OS"}"
 RUN echo "# BES_VERSION: $BES_VERSION"
 
 ARG BES_RPM
@@ -113,25 +123,15 @@ ENV NGAP_DISTRO=${NGAP_DISTRO:-"ngap-${OLFS_VERSION}-webapp"}
 RUN echo "# NGAP_DISTRO: ${NGAP_DISTRO}"
 COPY ${NGAP_DISTRO}.tgz /${NGAP_DISTRO}.tgz
 
-
-#ARG OPENSSL_VERSION
-#ENV OPENSSL_RPM="openssl-$OPENSSL_VERSION.$TARGET_OS.x86_64.rpm"
-#RUN echo "#       OPENSSL_RPM: $OPENSSL_RPM"
-#COPY "$OPENSSL_RPM" /
-#ENV OPENSSL_LIBS_RPM="openssl-libs-$OPENSSL_VERSION.$TARGET_OS.x86_64.rpm"
-#RUN echo "#  OPENSSL_LIBS_RPM: $OPENSSL_LIBS_RPM"
-#COPY "$OPENSSL_LIBS_RPM" /
-#ENV OPENSSL_DEVEL_RPM="openssl-devel-$OPENSSL_VERSION.$TARGET_OS.x86_64.rpm"
-#RUN echo "# OPENSSL_DEVEL_RPM: $OPENSSL_DEVEL_RPM"
-#COPY "$OPENSSL_DEVEL_RPM" /
-#RUN ls -l /openssl-* >&2
-
-ARG APR_VERSION
+############################################################
+# @TODO Do we need this?
+# @TODO Is this duplicating the compile Tomcat Native APR??
+ARG APACHE_APR_VERSION
 ENV APR_VERSION="1.7.6-1"
-RUN echo "# Apache APR version: $APR_VERSION"
+RUN echo "# Apache APR version: $APACHE_APR_VERSION"
 
 ARG APACHE_APR_RPM
-ENV APACHE_APR_RPM="${APACHE_APR_RPM:-"apr-$APR_VERSION.x86_64.rpm"}"
+ENV APACHE_APR_RPM="${APACHE_APR_RPM:-"apr-$APACHE_APR_VERSION.x86_64.rpm"}"
 RUN echo "# APACHE_APR_RPM: $APACHE_APR_RPM"
 COPY "$APACHE_APR_RPM" apr-devel-* apr-debuginfo-* /
 RUN ls -l /apr-* >&2
@@ -141,27 +141,22 @@ ENV TOMCAT_CONNECTION_TIMEOUT_MS="${TOMCAT_CONNECTION_TIMEOUT_MS:-"1000000"}"
 RUN echo "# TOMCAT_CONNECTION_TIMEOUT_MS: $TOMCAT_CONNECTION_TIMEOUT_MS"
 
 LABEL vendor="OPeNDAP"
-LABEL org.opendap.hyrax.version=${HYRAX_VERSION}
-LABEL org.opendap.hyrax.release-date=${RELEASE_DATE}
+LABEL org.opendap.hyrax.ngap.version=${HYRAX_VERSION}
+LABEL org.opendap.hyrax.ngap.release-date=${RELEASE_DATE}
 LABEL org.opendap.hyrax.version.is-production="false"
 LABEL org.opencontainers.image.authors="support@opendap.org"
 
 USER root
 
-ARG DEVELOPER_MODE
-ENV DEVELOPER_MODE="${DEVELOPER_MODE:-"false"}"
-RUN set -e && \
-    if [ $DEVELOPER_MODE = "true" ];then echo "# DEVELOPER_MODE: ENABLED"; else echo "# DEVELOPER_MODE: DISABLED"; fi
-
-################################################################
-# Update and install the needful.
-# Installing autoconf automake git bc for the tests install. The tests
-# are installed in the container but not run until a later stage of the
-# Travis build (or at a later time). They need to be part of the container,
-# however, to be run, so install them as part of this Dockerfile.
+######################################################################
+# Update the OS and create a handy executable shell scipt to simplify
+# the installation of the (not as yet installed) but super useful
+# developer tools packages :) ndp
 RUN set -e \
-    && dnf update  -y \
-    && dnf clean all
+    && dnf update -y \
+    && echo "#!/bin/bash" > /install-dev-tools \
+    && echo "dnf install -y $dnf_developer_tools_packages" > /install-dev-tools \
+    && chmod 755 /install-dev-tools
 
 #RUN set -e && dnf install -y dnf-plugins-core \
 #    && dnf config-manager --set-enabled crb \
@@ -179,7 +174,6 @@ RUN set -e \
     && echo "$HR" >&2 \
     && echo "# It's Java Time Witches!" >&2 \
     && echo "# Installing $java_version" >&2 \
- #    && dnf install -y "$java_version" "$java_version-devel"  \
     && dnf install -y "$java_version" "$java_version-devel" \
     && echo "$HR2" >&2 \
     && echo "# Using $java_version" >&2 \
@@ -187,7 +181,6 @@ RUN set -e \
     && echo "# Enabled $java_version" >&2 \
     && echo "# java version: $( java -version 2>&1 )" \
     && update-alternatives --list \
-#    && dnf install -y tzdata-java \
     && dnf clean all \
     && echo "$HR" >&2
 
@@ -200,7 +193,7 @@ RUN set -e \
     && dnf groupinstall "Development Tools" -y \
     && echo "$HR2" >&2 \
     && echo "# Installing NGAP package lists..." >&2 \
-    && dnf install -y $core_dnf_packages $build_the_things_dnf_packages $developer_dnf_packages $awscli_dnf_packages \
+    && dnf install -y $dnf_runtime_packages $dnf_build_the_things_packages \
     && dnf clean all \
     && echo "$HR" >&2
 
@@ -235,23 +228,12 @@ RUN set -e \
     && echo "$HR" >&2
 
 
-#RUN set -e && dnf install -y make curl unzip which autoconf automake emacs vim jq \
-#    && dnf install -y libtirpc libtirpc-devel \
-#    && dnf install -y libuuid libuuid-devel \
-#    && dnf install -y jq \
-#    && dnf install -y diffutils \
-#    && dnf install -y procps \
-#    && dnf install -y git bc valgrind gdb \
-#    && dnf install -y java-17-openjdk-devel \
-#    && dnf install -y redhat-rpm-config
-#    && dnf install -y openssl-devel
-
 ################################################################
-# Install the latest libdap snapshot
+# Install the libdap rpm
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 RUN set -e \
     && echo "$HR" >&2 \
-    && echo "# Installing the libdap rpm: ${LIBDAP_RPM}" >&2 \
+    && echo "# Installing the libdap rpm: $LIBDAP_RPM" >&2 \
     && ls -l ./libdap* \
     && dnf -y install ./libdap-*.rpm \
     && echo "# The 'dnf install' command exited with status: $?" >&2 \
@@ -261,7 +243,8 @@ RUN set -e \
     && echo "$HR" >&2
 
 ################################################################
-# Install the latest BES snapshot
+# Install the the BES
+# besd, besdaemon, beslistener, besctl, besstandalone, bescmdline
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 RUN set -e \
     && echo "$HR" >&2 \
@@ -281,7 +264,7 @@ RUN set -e \
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 RUN set -e \
     && echo "$HR" >&2 \
-    && echo "Installing the Apache APR rpm: ${APACHE_APR_RPM}" >&2 \
+    && echo "Installing the Apache APR rpm: $APACHE_APR_RPM" >&2 \
     && ls -l ./apr*  >&2\
     && dnf -y install ./apr-*.rpm  >&2\
     && echo "# The 'dnf install' command exited with status: $?" >&2 \
@@ -314,6 +297,8 @@ RUN set -e \
     && mkdir -p /var/log/tomcat \
     && chown -R tomcat:tomcat /var/log/tomcat /home/tomcat \
     && echo "# Tomcat is unpacked and ready. >&2 "
+
+# @TODO REMOVE THIS FOLLOWING COMMENTED OUT CODE BEFORE MERGE
 #COPY tomcat.service /etc/systemd/system/tomcat.service
 #RUN set -e \
 #    && echo "$HR2" >&2 \
@@ -461,7 +446,7 @@ RUN set -e \
 # Grab the cleanup files script for managing orphaned files
 # from fileout_netcdf
 COPY cleanup_files.sh /
-RUN chmod +x /cleanup_files.sh
+RUN set -e && chmod +x /cleanup_files.sh
 # TEMPORARY
 ################################################################
 
