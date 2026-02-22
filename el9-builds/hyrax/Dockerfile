@@ -179,7 +179,7 @@ RUN set -e \
     && echo "$HR" >&2
 
 RUN set -e \
-    && dnf install -y $dnf_runtime_packages $dnf_regression_test_packages $dnf_developer_tools_packages \
+    && dnf install -y $dnf_runtime_packages $dnf_regression_test_packages \
     && dnf clean all
 #
 # RUN set -e && which diff

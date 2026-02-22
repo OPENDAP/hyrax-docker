@@ -18,10 +18,8 @@ RUN echo "$HR" && echo "# Python Version: $(python3 --version) (config says we w
 ENV dnf_runtime_packages="which unzip procps bc"
 RUN echo "# dnf_runtime_packages: $dnf_runtime_packages"
 
-ENV developer_dnf_packages=""
-#ENV developer_dnf_packages="procps diffutils curl unzip emacs vim jq procps git bc valgrind gdb"
-ENV awscli_dnf_packages=""
-#ENV awscli_dnf_packages="awscli"
+ENV dnf_developer_tools_packages="diffutils emacs vim jq git bc valgrind gdb awscli"
+RUN echo "# dnf_developer_tools_packages: $dnf_developer_tools_packages"
 
 
 
@@ -84,11 +82,20 @@ RUN set -e && \
 # Installing utils for debugging convenience.
 #
 RUN set -e \
+    && dnf update -y \
+    && echo "#!/bin/bash" > /install-dev-tools \
+    && echo "dnf install -y $dnf_developer_tools_packages" > /install-dev-tools \
+    && chmod 755 /install-dev-tools \
+    && dnf clean all
+
+
+RUN set -e \
     && echo "$HR" \
     && echo "# Installing cURL" \
     && yum install -y curl curl-devel --allowerasing \
     && echo "# cURL version: $(curl --version)" \
     && dnf clean all
+
 RUN set -e \
     && echo "$HR" \
     && echo "# It's Java Time Witches!" \
@@ -103,8 +110,9 @@ RUN set -e \
     && dnf install -y tzdata-java \
     && dnf clean all \
     && echo "$HR"
+
 RUN set -e \
-    && dnf install -y $dnf_runtime_packages $developer_dnf_packages $awscli_dnf_packages\
+    && dnf install -y $dnf_runtime_packages \
     && dnf clean all
 
 
