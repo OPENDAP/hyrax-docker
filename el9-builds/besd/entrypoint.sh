@@ -33,6 +33,9 @@ else
     loggy "FOLLOW_SYMLINKS is $FOLLOW_SYMLINKS"
 fi
 
+export SLEEP_INTERVAL="${SLEEP_INTERVAL:-60}"
+startup_log "SLEEP_INTERVAL: $SLEEP_INTERVAL seconds."
+
 #AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:-<not set>}"
 #loggy "AWS_SECRET_ACCESS_KEY is ${AWS_SECRET_ACCESS_KEY}"
 #
@@ -126,7 +129,9 @@ fi
 
 besd_pid="$(ps aux | grep /usr/bin/besdaemon | grep -v grep | awk '{print $2;}' - )"
 loggy "The besdaemon is UP! pid: $besd_pid"
-loggy "BES Has Arrived..."
+start_time=
+start_time="$(date  "+%s")"
+startup_log "BES Has Arrived...(time: $start_time, SLEEP_INTERVAL: $SLEEP_INTERVAL)"
 
 while /bin/true; do
     sleep $SLEEP_INTERVAL
