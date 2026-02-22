@@ -15,6 +15,7 @@ function loggy(){
     echo  "$@" | awk -v prolog="$prolog" '{ print "# " prolog " - " $0;}' >&2
 }
 
+loggy "$HR0"
 loggy "############################## OLFS ##################################"
 loggy "Greetings, I am $(whoami)."
 set -e
@@ -34,7 +35,7 @@ while getopts "n:d" opt; do
       loggy "Using commandline NCWMS_BASE: $NCWMS_BASE"
       ;;
     d)
-      debug=true;
+      debug="true";
       loggy "Debug is enabled";
       ;;
     \?)
@@ -85,15 +86,16 @@ do
     loggy "tomcat_pid: $tomcat_pid"
 done
 # New pid and we should be good to go.
+loggy "$HR2"
 loggy "Tomcat is UP! pid: $tomcat_pid"
-
-
+loggy "$HR0"
+loggy "$HR0"
 while /bin/true; do
     sleep $SLEEP_INTERVAL
-    loggy "Checking Hyrax Operational State..."
+    if test "$debug" = "true" ; then loggy "Checking Hyrax Operational State..."; fi
     tomcat_ps="$(ps -f "$tomcat_pid")"
     TOMCAT_STATUS=$?
-    loggy "TOMCAT_STATUS: ${TOMCAT_STATUS}"
+    if test "$debug" = "true" ; then loggy "TOMCAT_STATUS: ${TOMCAT_STATUS}"; fi
 
     TOMCAT_STATUS=$?
     if test $TOMCAT_STATUS -ne 0 ; then
@@ -104,7 +106,7 @@ while /bin/true; do
         loggy "Tomcat Console Log [END]"
         exit 2
     fi
-    if test "$debug" = true ; then
+    if test "$debug" = "true" ; then
         loggy "-------------------------------------------------------------------"
         date
         loggy "TOMCAT_STATUS: $TOMCAT_STATUS  tomcat_pid:$tomcat_pid"
