@@ -103,7 +103,7 @@ while /bin/true; do
         exit 2
     fi
     if test "$debug" = "true" ; then
-        loggy "$(date) TOMCAT_STATUS: $TOMCAT_STATUS  tomcat_pid:$tomcat_pid"
+        loggy "$(date) SLEEP_INTERVAL: $SLEEP_INTERVAL TOMCAT_STATUS: $TOMCAT_STATUS  tomcat_pid:$tomcat_pid "
     fi
 done
 
