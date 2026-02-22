@@ -131,14 +131,14 @@ besd_pid="$(ps aux | grep /usr/bin/besdaemon | grep -v grep | awk '{print $2;}' 
 loggy "The besdaemon is UP! pid: $besd_pid"
 start_time=
 start_time="$(date  "+%s")"
-loggy "BES Has Arrived...(time: $start_time, SLEEP_INTERVAL: $SLEEP_INTERVAL)"
+loggy "The BES Has Arrived...(time: $start_time, SLEEP_INTERVAL: $SLEEP_INTERVAL)"
 while /bin/true; do
     sleep $SLEEP_INTERVAL
     besd_ps="$(ps -f "$besd_pid")";
     BESD_STATUS=$?
     if test $BESD_STATUS -ne 0
     then
-        loggy "BESD_STATUS: $BESD_STATUS bes_pid:$bes_pid"
+        loggy "BESD_STATUS: $BESD_STATUS bes_pid: $bes_pid"
         loggy "The BES daemon appears to have died! Exiting."
         exit 1;
     else
@@ -146,8 +146,6 @@ while /bin/true; do
     fi
     if test "$debug" = "true";
     then
-        loggy "$HR1"
-        loggy "$(date)"
-        loggy "BESD_STATUS: $BESD_STATUS  besd_pid: $besd_pid"
+        loggy "$(date) BESD_STATUS: $BESD_STATUS  besd_pid: $besd_pid"
     fi
 done 

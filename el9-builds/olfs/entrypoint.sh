@@ -88,6 +88,7 @@ done
 # New pid and we should be good to go.
 loggy "$HR2"
 loggy "Tomcat is UP! pid: $tomcat_pid"
+loggy "The OLFS Has Arrived. SLEEP_INTERVAL: $SLEEP_INTERVAL"
 loggy "$HR0"
 while /bin/true; do
     sleep $SLEEP_INTERVAL
