@@ -132,7 +132,6 @@ loggy "The besdaemon is UP! pid: $besd_pid"
 start_time=
 start_time="$(date  "+%s")"
 loggy "BES Has Arrived...(time: $start_time, SLEEP_INTERVAL: $SLEEP_INTERVAL)"
-
 while /bin/true; do
     sleep $SLEEP_INTERVAL
     besd_ps="$(ps -f "$besd_pid")";
