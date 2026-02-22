@@ -220,7 +220,7 @@ loggy "Tomcat is UP! pid: $tomcat_pid"
 #-------------------------------------------------------------------------------
 loggy "$HR1"
 loggy "Hyrax Has Arrived..."
-loggy "$HR2"
+loggy "$HR0"
 while /bin/true; do
     sleep $SLEEP_INTERVAL
     # debug_loggy "Checking Hyrax Operational State."
@@ -252,7 +252,7 @@ while /bin/true; do
         exit 2
     fi
     debug_loggy "$HR2"
-    debug_loggy "$(date) SLEEP_INTERVAL: $SLEEP_INTERVAL BESD_STATUS: $BESD_STATUS besd_pid: $besd_pid TOMCAT_STATUS: $TOMCAT_STATUS tomcat_pid: $tomcat_pid"
+    debug_loggy "$(date) SLEEP_INTERVAL:$SLEEP_INTERVAL, BESD_STATUS:$BESD_STATUS, besd_pid:$besd_pid, TOMCAT_STATUS:$TOMCAT_STATUS, tomcat_pid:$tomcat_pid"
 done
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
