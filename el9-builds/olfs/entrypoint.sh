@@ -76,7 +76,7 @@ fi
 # secondary processes.
 initial_pid="$tomcat_pid"
 loggy "Tomcat started, initial pid: $initial_pid"
-while test $initial_pid -eq $tomcat_pid
+while test "$initial_pid" -eq "$tomcat_pid"
 do
     sleep 1
     tomcat_ps="$(ps aux | grep tomcat | grep -v grep)"
