@@ -222,16 +222,15 @@ loggy "$HR1"
 loggy "Hyrax Has Arrived..."
 loggy "$HR2"
 while /bin/true; do
-    debug_loggy "Hyrax Monitor (SLEEP_INTERVAL: '$SLEEP_INTERVAL')"
     sleep $SLEEP_INTERVAL
-    debug_loggy "Checking Hyrax Operational State."
+    # debug_loggy "Checking Hyrax Operational State."
     besd_ps="$(ps -f "$besd_pid")"
     BESD_STATUS=$?
-    debug_loggy "BESD_STATUS: $BESD_STATUS"
+    # debug_loggy "BESD_STATUS: $BESD_STATUS"
 
     tomcat_ps="$(ps -f "${tomcat_pid}")"
     TOMCAT_STATUS=$?
-    debug_loggy "TOMCAT_STATUS: $TOMCAT_STATUS"
+    # debug_loggy "TOMCAT_STATUS: $TOMCAT_STATUS"
 
     if test $BESD_STATUS -ne 0 ; then
         loggy "BESD_STATUS: $BESD_STATUS besd_ps:$besd_ps"
@@ -252,11 +251,8 @@ while /bin/true; do
         loggy "localhost.log [END]"
         exit 2
     fi
-    
-    debug_loggy "-------------------------------------------------------------------"
-    debug_loggy "$(date)"
-    debug_loggy "  BESD_STATUS: $BESD_STATUS     besd_pid:$besd_pid"
-    debug_loggy "TOMCAT_STATUS: $TOMCAT_STATUS tomcat_pid:$tomcat_pid"
+    debug_loggy "$HR2"
+    debug_loggy "$(date) SLEEP_INTERVAL: $SLEEP_INTERVAL BESD_STATUS: $BESD_STATUS besd_pid: $besd_pid TOMCAT_STATUS: $TOMCAT_STATUS tomcat_pid: $tomcat_pid"
 done
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
