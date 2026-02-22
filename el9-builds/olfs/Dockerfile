@@ -15,7 +15,8 @@ ENV java_version="java-21-openjdk"
 ENV python_version="3.9"
 RUN echo "$HR" && echo "# Python Version: $(python3 --version) (config says we want: $python_version)" && echo "$HR"
 
-ENV core_dnf_packages="which unzip"
+ENV dnf_runtime_packages="which unzip procps bc"
+RUN echo "# dnf_runtime_packages: $dnf_runtime_packages"
 
 ENV developer_dnf_packages=""
 #ENV developer_dnf_packages="procps diffutils curl unzip emacs vim jq procps git bc valgrind gdb"
@@ -103,7 +104,7 @@ RUN set -e \
     && dnf clean all \
     && echo "$HR"
 RUN set -e \
-    && dnf install -y $core_dnf_packages $developer_dnf_packages $awscli_dnf_packages\
+    && dnf install -y $dnf_runtime_packages $developer_dnf_packages $awscli_dnf_packages\
     && dnf clean all
 
 
