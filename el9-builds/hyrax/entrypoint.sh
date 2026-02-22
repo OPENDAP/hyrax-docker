@@ -251,7 +251,7 @@ while /bin/true; do
         loggy "localhost.log [END]"
         exit 2
     fi
-    debug_loggy "$HR2"
+    # debug_loggy "$HR2"
     debug_loggy "$(date) SLEEP_INTERVAL:$SLEEP_INTERVAL, BESD_STATUS:$BESD_STATUS, besd_pid:$besd_pid, TOMCAT_STATUS:$TOMCAT_STATUS, tomcat_pid:$tomcat_pid"
 done
 #-------------------------------------------------------------------------------
