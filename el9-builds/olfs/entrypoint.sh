@@ -92,7 +92,6 @@ loggy "The OLFS Has Arrived. SLEEP_INTERVAL: $SLEEP_INTERVAL"
 loggy "$HR0"
 while /bin/true; do
     sleep $SLEEP_INTERVAL
-    if test "$debug" = "true" ; then loggy "$HR1"; loggy "Checking Hyrax Operational State..."; fi
     tomcat_ps="$(ps -f "$tomcat_pid")"
     TOMCAT_STATUS=$?
     if test $TOMCAT_STATUS -ne 0 ; then
