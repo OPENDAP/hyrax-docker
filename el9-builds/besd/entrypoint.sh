@@ -18,8 +18,6 @@ function loggy(){
 
 loggy "############################## BESD ##################################"
 loggy "Greetings, I am $(whoami) (uid: $UID)"
-
-
 loggy "PythonVersion: $(python3 --version)"
 
 if [ "$SERVER_HELP_EMAIL" ] && [ -n "$SERVER_HELP_EMAIL" ] ; then
@@ -126,7 +124,7 @@ if [ $status -ne 0 ]; then
     exit $status
 fi
 
-besd_pid=$(ps aux | grep /usr/bin/besdaemon | grep -v grep | awk '{print $2;}' - );
+besd_pid="$(ps aux | grep /usr/bin/besdaemon | grep -v grep | awk '{print $2;}' - )"
 loggy "The besdaemon is UP! pid: $besd_pid"
 loggy "BES Has Arrived..."
 

@@ -53,7 +53,7 @@ function startup_log() {
 function heartbeat_log() {
   echo "{ \"$TIME_KEY\": $(date "+%s"), " \
         "\"$INSTANCE_ID_KEY\": \"$SYSTEM_ID\", " \
-        "\"$PID_KEY\": $(echo $$), " \
+        "\"$PID_KEY\": $$, " \
         "\"$TYPE_KEY\": \"heartbeat\", " \
         "\"$MESSAGE_KEY\": $(echo -n "$*" | jq -Rsa '.')" \
         "}" >&2
@@ -62,7 +62,7 @@ function heartbeat_log() {
 function error_log() {
   echo "{ \"$TIME_KEY\": $(date "+%s"),"\
         "\"$INSTANCE_ID_KEY\": \"$SYSTEM_ID\"," \
-        "\"$PID_KEY\": $(echo $$)," \
+        "\"$PID_KEY\": $$," \
         "\"$TYPE_KEY\": \"error\"," \
         "\"$MESSAGE_KEY\": $(echo -n "$*" | jq -Rsa '.')" \
         "}" >&2
@@ -84,7 +84,7 @@ function get_aws_instance_id() {
   startup_log "Checking for AWS instance-id by requesting: $aws_instance_id_url"
 
   set +e # This cURL command may fail, and that's ok.
-  http_status=$(curl -s -w "%{http_code}" --max-time 5 -o "$id_file" -L "$aws_instance_id_url")
+  http_status"=$(curl -s -w "%{http_code}" --max-time 5 -o "$id_file" -L "$aws_instance_id_url")"
   curl_status=$?
   set -e
 
@@ -93,9 +93,9 @@ function get_aws_instance_id() {
   if test $curl_status -ne 0 || test "$http_status" -gt 400; then
     startup_log "WARNING! Failed to determine the AWS instance-d by requesting: $aws_instance_id_url (curl_status: $curl_status http_status: $http_status)"
     startup_log "Inventing a random instance-id value."
-    instance_id="h-"$(python3 -c 'import uuid; print(str(uuid.uuid4()))')
+    instance_id="h-$(python3 -c 'import uuid; print(str(uuid.uuid4()))')"
   else
-    instance_id=$(cat $id_file)
+    instance_id="$(cat $id_file)"
   fi
   startup_log "Using instance_id: $instance_id"
   echo "$instance_id"
@@ -139,7 +139,7 @@ set -e
 startup_log "PythonVersion: $(python3 --version)"
 
 ################################################################################
-SYSTEM_ID=$(get_aws_instance_id)
+SYSTEM_ID="$(get_aws_instance_id)"
 
 ################################################################################
 startup_log "Checking AWS CLI: "
@@ -480,8 +480,8 @@ fi
 #-------------------------------------------------------------------------------
 # Start the BES daemon process
 # /usr/bin/besdaemon -i /usr -c /etc/bes/bes.conf -r /var/run/bes.pid
-bes_uid=$(id -u bes)
-bes_gid=$(id -g bes)
+bes_uid="$(id -u bes)"
+bes_gid="$(id -g bes)"
 startup_log "Launching besd [uid: $bes_uid gid: $bes_gid]"
 /usr/bin/besctl start > ./besctl.log  2>&1 # dropped debug control -d "/dev/null,timing"  - ndp 10/12/2023
 status=$?
@@ -533,7 +533,7 @@ tail -f "$BES_LOG_FILE" | beslog2json.py --prefix "$LOG_KEY_PREFIX" &
 start_time=
 now=
 suptime=
-start_time=$(date  "+%s")
+start_time="$(date  "+%s")"
 #-------------------------------------------------------------------------------
 startup_log "Hyrax Has Arrived...(time: $start_time SLEEP_INTERVAL: $SLEEP_INTERVAL)"
 #-------------------------------------------------------------------------------
@@ -541,14 +541,14 @@ while /bin/true; do
   sleep $SLEEP_INTERVAL
 
   # Compute service_uptime in hours
-  now=$(date  "+%s")
-  suptime=$(echo "scale=4; ($now - $start_time)/60/60" | bc)
+  now="$(date  "+%s")"
+  suptime="$(echo "scale=4; ($now - $start_time)/60/60" | bc)"
 
   if test "$debug" = "true"; then
     heartbeat_log "Checking Hyrax Operational State. service_uptime: $suptime hours";
   fi
 
-  besd_ps=$(ps -f "$besd_pid")
+  besd_ps="$(ps -f "$besd_pid")"
   BESD_STATUS=$?
 
   if test "$debug" = "true"; then
@@ -564,7 +564,7 @@ while /bin/true; do
     #exit $BESD_STATUS
   fi
 
-  tomcat_ps=$(ps -f "$tomcat_pid")
+  tomcat_ps="$(ps -f "$tomcat_pid")"
   TOMCAT_STATUS=$?
   if test "$debug" = "true"; then heartbeat_log "TOMCAT_STATUS: $TOMCAT_STATUS"; fi
   if test $TOMCAT_STATUS -ne 0; then

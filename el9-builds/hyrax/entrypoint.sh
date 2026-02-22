@@ -25,7 +25,6 @@ loggy "Greetings, I am $(whoami) (uid: $UID)"
 # set -e
 # set -x
 
-loggy "                PLOG: '$PLOG'"
 loggy "       PythonVersion: $(python3 --version)"
 
 export JAVA_HOME=${JAVA_HOME:-"/etc/alternatives/jre"}
@@ -150,7 +149,7 @@ loggy "JAVA VERSION: $( java -version 2>&1 )"
 
 loggy "Checking for awscli"
 set +e
-which_output=$(eval "which aws" 2>&1)
+which_output="$(eval "which aws" 2>&1)"
 status=$?
 set -e
 loggy "$which_output"
@@ -165,7 +164,7 @@ else
     fi
 fi
 
-loggy "PythonVersion: $( python3 --version 2>&1 )"
+loggy "PythonVersion (again): $( python3 --version 2>&1 )"
 #-------------------------------------------------------------------------------
 # Start the BES daemon process
 # /usr/bin/besdaemon -i /usr -c /etc/bes/bes.conf -r /var/run/bes.pid

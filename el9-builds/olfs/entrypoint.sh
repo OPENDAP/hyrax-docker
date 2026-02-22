@@ -91,7 +91,7 @@ loggy "Tomcat is UP! pid: $tomcat_pid"
 while /bin/true; do
     sleep $SLEEP_INTERVAL
     loggy "Checking Hyrax Operational State..."
-    tomcat_ps=$(ps -f "$tomcat_pid")
+    tomcat_ps="$(ps -f "$tomcat_pid")"
     TOMCAT_STATUS=$?
     loggy "TOMCAT_STATUS: ${TOMCAT_STATUS}"
 
@@ -102,7 +102,7 @@ while /bin/true; do
         loggy "Tomcat Console Log [BEGIN]"
         cat /usr/local/tomcat/logs/catalina.out
         loggy "Tomcat Console Log [END]"
-        exit -2
+        exit 2
     fi
     if test "$debug" = true ; then
         loggy "-------------------------------------------------------------------"
