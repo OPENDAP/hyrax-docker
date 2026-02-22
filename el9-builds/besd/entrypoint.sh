@@ -13,7 +13,7 @@ export HR1="--------------------------------------------------------------------
 export HR2="-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --"
 export prolog="entrypoint.sh -"
 function loggy(){
-    echo  "$@" | awk -v prolog="$prolog" '{ print "#" prolog " " $0;}'  >&2
+    echo  "$@" | awk -v prolog="$prolog" '{ print "# " prolog " " $0;}'  >&2
 }
 
 loggy "############################## BESD ##################################"
@@ -120,7 +120,8 @@ fi
 
 # Start the BES daemon process
 # /usr/bin/besdaemon -i /usr -c /etc/bes/bes.conf -r /var/run/bes.pid
-/usr/bin/besctl start; 
+loggy "Calling 'besctl start'"
+/usr/bin/besctl start
 status=$?
 if [ $status -ne 0 ]; then
     loggy "ERROR: Failed to start BES: $status"
