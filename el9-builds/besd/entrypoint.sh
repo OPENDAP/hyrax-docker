@@ -137,16 +137,18 @@ while /bin/true; do
     sleep $SLEEP_INTERVAL
     besd_ps="$(ps -f "$besd_pid")";
     BESD_STATUS=$?
-    if [ $BESD_STATUS -ne 0 ]; then
+    if test $BESD_STATUS -ne 0
+    then
         loggy "BESD_STATUS: $BESD_STATUS bes_pid:$bes_pid"
         loggy "The BES daemon appears to have died! Exiting."
         exit 1;
     else
-        loggy "Found besd: $besd_ps"
+        if test "$debug" = "true"; then loggy "Found besd: $besd_ps"; fi
     fi
-    if [ $debug = true ];then 
+    if test "$debug" = "true";
+    then
         loggy "$HR1"
         loggy "$(date)"
-        loggy "BESD_STATUS: $BESD_STATUS  besd_pid:$besd_pid"
+        loggy "BESD_STATUS: $BESD_STATUS  besd_pid: $besd_pid"
     fi
 done 
