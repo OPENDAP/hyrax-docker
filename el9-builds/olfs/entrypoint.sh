@@ -76,12 +76,12 @@ fi
 # secondary processes.
 initial_pid="$tomcat_pid"
 loggy "Tomcat started, initial pid: $initial_pid"
-while test "$initial_pid" -eq "$tomcat_pid"
+while test $initial_pid -eq $tomcat_pid
 do
     sleep 1
     tomcat_ps="$(ps aux | grep tomcat | grep -v grep)"
     loggy "tomcat_ps: $tomcat_ps"
-    tomcat_pid="$(loggy $tomcat_ps | awk '{print $2}')"
+    tomcat_pid="$(echo $tomcat_ps | awk '{print $2}')"
     loggy "tomcat_pid: $tomcat_pid"
 done
 # New pid and we should be good to go.
