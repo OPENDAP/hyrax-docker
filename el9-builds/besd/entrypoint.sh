@@ -117,6 +117,13 @@ if [ "$FOLLOW_SYMLINKS" != "not_set" ]; then
     sed -i "s/^BES.Catalog.catalog.FollowSymLinks=No/BES.Catalog.catalog.FollowSymLinks=Yes/" /etc/bes/bes.conf
 fi
 
+#-------------------------------------------------------------------------------
+# We use 'echo' in the following because downstream code is expecting this
+# output to be a key value pair, so none of that loggy() stuff
+bes_uid="$(id -u bes)"
+echo "bes_uid: $bes_uid"
+bes_gid="$(id -g bes)"
+echo "bes_gid: $bes_gid"
 
 # Start the BES daemon process
 # /usr/bin/besdaemon -i /usr -c /etc/bes/bes.conf -r /var/run/bes.pid

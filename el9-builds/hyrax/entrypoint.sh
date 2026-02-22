@@ -165,14 +165,18 @@ else
 fi
 
 loggy "PythonVersion (again): $( python3 --version 2>&1 )"
+
+#-------------------------------------------------------------------------------
+# We use 'echo' in the following because downstream code is expecting this
+# output to be a key value pair, so none of that loggy() stuff
+bes_uid="$(id -u bes)"
+echo "bes_uid: $bes_uid"
+bes_gid="$(id -g bes)"
+echo "bes_gid: $bes_gid"
+
 #-------------------------------------------------------------------------------
 # Start the BES daemon process
-# /usr/bin/besdaemon -i /usr -c /etc/bes/bes.conf -r /var/run/bes.pid
-bes_uid="$(id -u bes)"
-loggy "bes_uid: $bes_uid"
-bes_gid="$(id -g bes)"
-loggy "bes_gid: $bes_gid"
-
+# /usr/bin/besdaemon -i /usr -c /etc/bes/bes.conf -r /var/run/bes.pid (old way)
 loggy "Launching besd..."
 /usr/bin/besctl start
 status=$?
