@@ -12,6 +12,10 @@ end_point="${default_endpoint}"
 netrc_file=""
 tests=""
 
+# Must be identical to Dockerfile; initially set in opendap/bes_core, based
+# on hyrax-dependencies prefix path
+BES_PREFIX="/root/install"
+
 while getopts "ht:i:e:n:" OPTION; do
     case $OPTION in
     h)
@@ -119,7 +123,7 @@ echo "# Python Version: '$(python3 --version)'"
 echo "# Acquiring bes.log from docker image."
 docker cp hyrax:/var/log/bes/bes.log .
 echo "# Acquiring beslog2json.py from docker image."
-docker cp hyrax:/usr/bin/beslog2json.py $(pwd)/beslog2json.py
+docker cp hyrax:$BES_PREFIX/bin/beslog2json.py $(pwd)/beslog2json.py
 ls -l ./beslog2json.py
 echo "############################################################################"
 echo "# head ./bes.log"

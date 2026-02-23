@@ -13,7 +13,15 @@
 # it for debugging stuff.
 #
 # Set one or more individual labels
-FROM rockylinux:8
+ARG BES_IMAGE_TAG
+FROM ${BES_IMAGE_TAG:-"rockylinux:8"}
+
+ARG BES_IMAGE_TAG
+RUN if [ -z "$BES_IMAGE_TAG" ]; then \
+        echo "Error: Non-empty `BES_IMAGE_TAG` must be specified. Exiting."; \
+        exit 1; \
+    fi
+
 ENV ARCH="x86_64"
 ENV java_version="java-11-openjdk"
 ENV python_version="3.11"
@@ -37,25 +45,31 @@ ARG HYRAX_VERSION
 ENV HYRAX_VERSION=${HYRAX_VERSION:-"snapshot"}
 RUN echo "HYRAX_VERSION: ${HYRAX_VERSION}"
 
-ARG LIBDAP_VERSION
-ENV LIBDAP_VERSION=${LIBDAP_VERSION:-"snapshot"}
-RUN echo "LIBDAP_VERSION: ${LIBDAP_VERSION}"
-
-ARG LIBDAP_RPM
-ENV LIBDAP_RPM=${LIBDAP_RPM:-"libdap-${LIBDAP_VERSION}.el8.x86_64.rpm"}
-RUN echo "LIBDAP_RPM: ${LIBDAP_RPM}"
-COPY ${LIBDAP_RPM} libdap-devel-* libdap-debuginfo-* /
-RUN ls -l /libdap-*  >&2
-
+# Confirm that LIBDAP_VERSION and BES_VERSION match expected
+# versions previously installed in base image; fail if not
 ARG BES_VERSION
-ENV BES_VERSION=${BES_VERSION:-"snapshot"}
-RUN echo "BES_VERSION: ${BES_VERSION}"
+RUN BES_VERSION_FOUND=$(cat bes_VERSION); \
+    echo "FOO $BES_VERSION_FOUND"; \
+    pwd; \
+    ls; \
+    cat bes_VERSION; \
+    if [ "${BES_VERSION_FOUND}" == "${BES_VERSION:-missing}" ]; then \
+        echo "BES Version: ${BES_VERSION}"; \
+    else \
+        echo "Error: Expected BES_VERSION \"${BES_VERSION}\", found version \"${BES_VERSION_FOUND}\". Exiting."; \
+        exit 1; \
+    fi
 
-ARG BES_RPM
-ENV BES_RPM=${BES_RPM:-"bes-${BES_VERSION}.static.el8.x86_64.rpm"}
-RUN echo "BES_RPM: ${BES_RPM}"
-COPY ${BES_RPM} bes-devel-* bes-debuginfo-* /
-RUN ls -l /bes-* >&2
+# TODO: enable when supported by bes_core image
+ARG LIBDAP_VERSION
+# RUN if [[ "$(cat libdap_VERSION)" == "${LIBDAP_VERSION}" ]]; then \
+#         echo "LIBDAP Version: ${LIBDAP_VERSION}"; \
+#     else
+#         echo "Error: Expected LIBDAP_VERSION `${LIBDAP_VERSION}`, found version `$(cat libdap_VERSION)`. Exiting."; \
+#         exit 1; \
+#     fi
+RUN echo "Expected LIBDAP_VERSION: ${LIBDAP_VERSION}."
+
 
 ARG OLFS_VERSION
 ENV OLFS_VERSION=${OLFS_VERSION:-"snapshot"}
@@ -83,6 +97,7 @@ LABEL org.opendap.hyrax.version.is-production="false"
 MAINTAINER support@opendap.org
 
 USER root
+WORKDIR /
 
 #
 # The --build-arg USE_NCWMS can be set to "true" in order to 
@@ -121,17 +136,17 @@ RUN set -e  \
     && echo "$HR" \
     && echo "# It's dnf update Time!" \
     && dnf update -y \
-    && dnf clean all
+#     && dnf clean all
 
-RUN set -e \
+# RUN set -e \
     && echo "$HR" \
     && echo "# Installing command line tools and libraries." \
     && dnf install -y make curl unzip which autoconf automake emacs vim jq \
     && dnf install -y diffutils procps git bc valgrind gdb \
     && echo "# The diff executable is here: $(which diff)" \
-    && dnf clean all
+#     && dnf clean all
 
-RUN set -e \
+# RUN set -e \
     && echo "$HR" \
     && echo "# It's Java Time Witches!" \
     && echo "# Installing $java_version and ant." \
@@ -146,9 +161,9 @@ RUN set -e \
     && update-alternatives --list \
     && echo "$HR2" \
     && dnf install -y tzdata-java \
-    && dnf clean all
+#     && dnf clean all
 
-RUN set -e \
+# RUN set -e \
     && echo "$HR" \
     && echo "# It's AWS CLI Time People!" \
     && echo "# Installing Python $python_version" \
@@ -163,28 +178,37 @@ RUN set -e \
     && dnf clean all
 
 ################################################################
-# Install the latest libdap snapshot
-#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
-RUN set -e \
-    && echo "Installing the libdap rpm: ${LIBDAP_RPM}" \
-    && ls -l ./libdap* \
-    && dnf -y install ./libdap-*.rpm \
-    && rm -f ./${LIBDAP_RPM} \
-    && dnf clean all
+# Set up BES
+#
+# BES is already installed on the base image, but
+# we need to do some additional configuration (to match what was
+# previously handled by bes RPM installation)
 
-RUN echo "libdap4 is installed."
+# Add besd service to start at boot
+RUN cp ${PREFIX}/etc/rc.d/init.d/besd /etc/rc.d/init.d/besd \
+    && chkconfig --add besd \
+    && ldconfig \
+    && chkconfig --list | grep besd \
+    && echo "whoami: "`whoami` \
+    && echo "besdaemon is here: "`which besdaemon`
 
-################################################################
-# Install the latest BES snapshot
-#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
-RUN set -e \
-    && echo "Installing the latest BES rpm: ${BES_RPM}" \
-    && ls -l ./bes* \
-    && dnf -y install ./bes-*.rpm \
-    && rm -f ./${BES_RPM} \
-    && dnf clean all
-
-RUN echo "besdaemon is here: "`which besdaemon`
+# Adapted from bes/spec.all_static.in
+# Default macros: https://docs.fedoraproject.org/en-US/packaging-guidelines/RPMMacros/
+RUN sed -i.dist \
+    -e 's:=.*/bes.log:=/var/log/bes/bes.log:' \
+    -e 's:=.*/lib/bes:='"$PREFIX"'/lib/bes:' \
+    -e 's:=.*/share/bes:='"$PREFIX"'/share/bes:' \
+    -e 's:=.*/share/hyrax:='"$PREFIX"'/share/hyrax:' \
+    # -e 's:=/full/path/to/serverside/certificate/file.pem:=/etc/pki/bes/cacerts/file.pem:' \
+    # -e 's:=/full/path/to/serverside/key/file.pem:=/etc/pki/bes/public/file.pem:' \
+    # -e 's:=/full/path/to/clientside/certificate/file.pem:=/etc/pki/bes/cacerts/file.pem:' \
+    # -e 's:=/full/path/to/clientside/key/file.pem:=/etc/pki/bes/public/file.pem:' \
+    -e 's:=user_name:='"$USER"':' \
+    -e 's:=group_name:='"$USER"':' \
+    $PREFIX/etc/bes/bes.conf \
+    && mkdir -p "/var/log/bes/" \
+    && touch "/var/log/bes/bes.log" \
+    && sudo chown -R $USER:$USER "/var/log/bes/"
 
 ################################################################
 # Install and Setup Tomcat
@@ -231,7 +255,7 @@ RUN echo "Installing the latest olfs distribution (${OLFS_VERSION})." >&2
 RUN set -e \
     && echo "working_dir: "`pwd`  >&2 \
     && ls -l . \
-    && tar -C ${ROOT} -xzvf ./${OLFS_DISTRO}.tgz \
+    && tar -C ${ROOT} -xzvf /${OLFS_DISTRO}.tgz \
     && ls -l ${ROOT} \
     && echo "Unpacking warfile..."  >&2 \
     && mkdir -p $(readlink -f ${CATALINA_HOME})/webapps/${DEPLOYMENT_CONTEXT}/ \
@@ -258,7 +282,7 @@ RUN set -e \
 ################################################################
 # Clean up the Hyrax distribution binaries.
 #
-RUN rm -vf /libdap*.rpm /bes*.rpm /olfs*.tgz /robots*.tgz /apache*
+RUN rm -vf /olfs*.tgz /robots*.tgz /apache*
 #
 ################################################################
 
@@ -354,10 +378,6 @@ EXPOSE 8443
 EXPOSE 10022
 EXPOSE 11002
 
-# can't use USER with entrypoint that needs root
-# use gosu or, as done, enable bes user write so the entrypoint does not need root
-RUN chown -R bes /etc/bes
 USER root
 
 CMD ["-"]
-
