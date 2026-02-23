@@ -94,24 +94,24 @@ set -e
 #
 if [ $SERVER_HELP_EMAIL != "not_set" ]; then
     echo "Setting Admin Contact To: $SERVER_HELP_EMAIL" >&2
-    sed -i "s/admin.email.address@your.domain.name/$SERVER_HELP_EMAIL/" /etc/bes/bes.conf
+    sed -i "s/admin.email.address@your.domain.name/$SERVER_HELP_EMAIL/" $PREFIX/etc/bes/bes.conf
 fi
 if [ $FOLLOW_SYMLINKS != "not_set" ]; then
     echo "Setting BES FollowSymLinks to YES." >&2
-    sed -i "s/^BES.Catalog.catalog.FollowSymLinks=No/BES.Catalog.catalog.FollowSymLinks=Yes/" /etc/bes/bes.conf
+    sed -i "s/^BES.Catalog.catalog.FollowSymLinks=No/BES.Catalog.catalog.FollowSymLinks=Yes/" $PREFIX/etc/bes/bes.conf
 fi
 
 
 # Start the BES daemon process
 # /usr/bin/besdaemon -i /usr -c /etc/bes/bes.conf -r /var/run/bes.pid
-/usr/bin/besctl start; 
+$PREFIX/usr/bin/besctl start;
 status=$?
 if [ $status -ne 0 ]; then
     echo "Failed to start BES: $status" >&2
     exit $status
 fi
 
-besd_pid=`ps aux | grep /usr/bin/besdaemon | grep -v grep | awk '{print $2;}' - `;
+besd_pid=`ps aux | grep $PREFIX/usr/bin/besdaemon | grep -v grep | awk '{print $2;}' - `;
 echo "The besdaemon is UP! pid: $besd_pid"  >&2
 
 echo "BES Has Arrived..."  >&2
