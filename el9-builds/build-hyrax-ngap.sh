@@ -10,30 +10,32 @@ HR1="- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
 HR2="--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---"
 #############################################################################
 # loggy()
+prolog="build-hyrax-ngap.sh"
 function loggy(){
-    echo  "$@" | awk '{ print "# "$0;}'  >&2
+    echo  "$@" | awk -v prolog="$prolog" '{ print "# " prolog " - " $0;}' >&2
 }
-prolog="$0 -"
+loggy "$HR0"
+loggy "BEGIN"
 
 export DOCKER_NAME="${DOCKER_NAME:-"ngap"}"
-loggy "$prolog DOCKER_NAME: $DOCKER_NAME"
+loggy "DOCKER_NAME: $DOCKER_NAME"
 
 ###############################################################################################
 #export SNAPSHOT_IMAGE_TAG="${SNAPSHOT_IMAGE_TAG:-"opendap/hyrax:$DOCKER_NAME-snapshot-$TARGET_OS$TEST_DEPLOYMENT"}"
-loggy "$prolog SNAPSHOT_IMAGE_TAG: $SNAPSHOT_IMAGE_TAG" >&2
+loggy "SNAPSHOT_IMAGE_TAG: $SNAPSHOT_IMAGE_TAG" >&2
 #
 #export BUILD_VERSION_TAG="${BUILD_VERSION_TAG:-"opendap/hyrax:$DOCKER_NAME-$HYRAX_VERSION-$TARGET_OS$TEST_DEPLOYMENT"}"
-loggy "$prolog BUILD_VERSION_TAG: $BUILD_VERSION_TAG" >&2
+loggy "BUILD_VERSION_TAG: $BUILD_VERSION_TAG" >&2
 ###############################################################################################
 
 
-loggy "$prolog TOMCAT_MAJOR_VERSION: $TOMCAT_MAJOR_VERSION" >&2
+loggy "TOMCAT_MAJOR_VERSION: $TOMCAT_MAJOR_VERSION" >&2
 export TOMCAT_VERSION=
-TOMCAT_VERSION="$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")"
-loggy "$prolog TOMCAT_VERSION: $TOMCAT_VERSION" >&2
+TOMCAT_VERSION="$(get_latest_tomcat_version_number "$TOMCAT_MAJOR_VERSION")"
+loggy "TOMCAT_VERSION: $TOMCAT_VERSION" >&2
 #
 export APACHE_APR_VERSION="${APACHE_APR_VERSION:-"1.7.6-1"}"
-loggy "$prolog APACHE_APR_VERSION: $APACHE_APR_VERSION"
+loggy "APACHE_APR_VERSION: $APACHE_APR_VERSION"
 #
 #export OPENSSL_VERSION="3.5.0-4"
 #loggy "OPENSSL_VERSION: $OPENSSL_VERSION"
@@ -84,11 +86,11 @@ docker build \
 #
 set +e
 
-loggy "$prolog docker image ls -a: "
+loggy "docker image ls -a: "
 loggy "$(docker image ls -a)"
 
 function ngap_el9_dnf_sanity_check() {
-    local prolog="el9_dnf_sanity_check() -"
+    local prolog="ngap_el9_dnf_sanity_check() -"
     set -e
     loggy "$HR0"
     if test -n "$DEBUG_BUILD"
