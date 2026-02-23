@@ -113,7 +113,7 @@ jobs:
         - export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}:snapshot$TEST_DEPLOYMENT"
         - export BUILD_VERSION_TAG="opendap/${DOCKER_NAME}:${HYRAX_VERSION}$TEST_DEPLOYMENT"
         - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
-        - export BES_IMAGE_TAG="opendap/bes_core:${BES_VERSION}-el8
+        - export BES_IMAGE_TAG="opendap/bes_core:${BES_VERSION}-el8"
         - show_version
         - get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_VERSION}"
         - s3_get_olfs_distro

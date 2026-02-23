@@ -18,7 +18,7 @@ FROM ${BES_IMAGE_TAG:-"rockylinux:8"}
 
 ARG BES_IMAGE_TAG
 RUN if [ -z "$BES_IMAGE_TAG" ]; then \
-        echo "Error: Non-empty `BES_IMAGE_TAG` must be specified. Exiting."; \
+        echo "Error: Non-empty BES_IMAGE_TAG must be specified. Exiting."; \
         exit 1; \
     fi
 
