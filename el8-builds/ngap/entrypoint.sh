@@ -12,6 +12,12 @@ export LOG_KEY_PREFIX=${LOG_KEY_PREFIX:-"hyrax-"}
 if [[ "$LOG_KEY_PREFIX" != *"-" ]]; then
     LOG_KEY_PREFIX="${LOG_KEY_PREFIX}-"
 fi
+
+# Defined upstream in docker image base `bes_core`,
+# reiterated here for legibility
+export PREFIX=${PREFIX:-"/root/install"}
+export USER=${USER:-"bes_user"}
+
 ##########################################################################
 #
 # Functions
@@ -205,10 +211,10 @@ export NGAP_CERTIFICATE_KEY_FILE="/usr/share/tomcat/conf/NGAP-CA-certificate.key
 startup_log "NGAP_CERTIFICATE_KEY_FILE: ${NGAP_CERTIFICATE_KEY_FILE}"
 
 ################################################################################
-export NETRC_FILE="/etc/bes/ngap_netrc"
+export NETRC_FILE="$PREFIX/etc/bes/ngap_netrc"
 startup_log "NETRC_FILE: ${NETRC_FILE}"
 
-export BES_SITE_CONF_FILE="/etc/bes/site.conf"
+export BES_SITE_CONF_FILE="$PREFIX/etc/bes/site.conf"
 startup_log "BES_SITE_CONF_FILE: ${BES_SITE_CONF_FILE}"
 
 export BES_LOG_FILE="/var/log/bes/bes.log"
@@ -233,7 +239,7 @@ if test -n "${HOST}" && test -n "${USERNAME}" && test -n "${PASSWORD}"; then
   echo "machine ${HOST}" | sed -e "s_https:__g" -e "s_http:__g" -e "s+/++g" >>"${NETRC_FILE}"
   echo "    login ${USERNAME}" >> "${NETRC_FILE}"
   echo "    password ${PASSWORD}" >> "${NETRC_FILE}"
-  chown bes:bes "${NETRC_FILE}"
+  chown $USER:$USER "${NETRC_FILE}"
   chmod 400 "${NETRC_FILE}"
   startup_log " "$(ls -l "${NETRC_FILE}")
   # loggy $( cat "${NETRC_FILE}" )
@@ -443,28 +449,29 @@ fi
 #
 if test "${SERVER_HELP_EMAIL}" != "not_set"; then
   startup_log "Setting Admin Contact To: $SERVER_HELP_EMAIL"
-  sed -i "s/admin.email.address@your.domain.name/$SERVER_HELP_EMAIL/" /etc/bes/bes.conf
+  sed -i "s/admin.email.address@your.domain.name/$SERVER_HELP_EMAIL/" $PREFIX/etc/bes/bes.conf
 fi
 if test "${FOLLOW_SYMLINKS}" != "not_set"; then
   startup_log "Setting BES FollowSymLinks to YES."
-  sed -i "s/^BES.Catalog.catalog.FollowSymLinks=No/BES.Catalog.catalog.FollowSymLinks=Yes/" /etc/bes/bes.conf
+  sed -i "s/^BES.Catalog.catalog.FollowSymLinks=No/BES.Catalog.catalog.FollowSymLinks=Yes/" $PREFIX/etc/bes/bes.conf
 fi
 ################################################################################
 
 #-------------------------------------------------------------------------------
 # Start the BES daemon process
-# /usr/bin/besdaemon -i /usr -c /etc/bes/bes.conf -r /var/run/bes.pid
-bes_uid=$(id -u bes)
-bes_gid=$(id -g bes)
+# /usr/bin/besdaemon -i /usr -c $PREFIX/etc/bes/bes.conf -r /var/run/bes.pid
+bes_username=$USER
+bes_uid=$(id -u ${bes_username})
+bes_gid=$(id -g ${bes_username})
 startup_log "Launching besd [uid: ${bes_uid} gid: ${bes_gid}]"
-/usr/bin/besctl start 2>&1 > ./besctl.log # dropped debug control -d "/dev/null,timing"  - ndp 10/12/2023
+$PREFIX/bin/besctl start 2>&1 > ./besctl.log # dropped debug control -d "/dev/null,timing"  - ndp 10/12/2023
 status=$?
 startup_log $(cat ./besctl.log)
 if test $status -ne 0; then
   error_log "ERROR: Failed to start BES: $status"
   exit $status
 fi
-besd_pid=$(ps aux | grep /usr/bin/besdaemon | grep -v grep | awk '{print $2;}' -)
+besd_pid=$(ps aux | grep $PREFIX/bin/besdaemon | grep -v grep | awk '{print $2;}' -)
 startup_log "The besd is UP! [pid: ${besd_pid}]"
 
 #-------------------------------------------------------------------------------
