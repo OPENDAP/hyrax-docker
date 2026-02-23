@@ -22,10 +22,12 @@ loggy "DOCKER_NAME: $DOCKER_NAME"
 
 ###############################################################################################
 #export SNAPSHOT_IMAGE_TAG="${SNAPSHOT_IMAGE_TAG:-"opendap/hyrax:$DOCKER_NAME-snapshot-$TARGET_OS$TEST_DEPLOYMENT"}"
-loggy "SNAPSHOT_IMAGE_TAG: $SNAPSHOT_IMAGE_TAG" >&2
+loggy "   SNAPSHOT_IMAGE_TAG: '$SNAPSHOT_IMAGE_TAG'" >&2
+loggy "OS_SNAPSHOT_IMAGE_TAG: '$OS_SNAPSHOT_IMAGE_TAG'" >&2
 #
 #export BUILD_VERSION_TAG="${BUILD_VERSION_TAG:-"opendap/hyrax:$DOCKER_NAME-$HYRAX_VERSION-$TARGET_OS$TEST_DEPLOYMENT"}"
-loggy "BUILD_VERSION_TAG: $BUILD_VERSION_TAG" >&2
+loggy "   BUILD_VERSION_TAG: '$OS_BUILD_VERSION_TAG'" >&2
+loggy "OS_BUILD_VERSION_TAG: '$OS_BUILD_VERSION_TAG'" >&2
 ###############################################################################################
 
 
@@ -80,8 +82,8 @@ docker build \
        --build-arg BES_VERSION \
        --build-arg OLFS_VERSION \
        --build-arg OPENSSL_VERSION \
-       --tag "${SNAPSHOT_IMAGE_TAG}" \
-       --tag "${BUILD_VERSION_TAG}" \
+       --tag "${OS_SNAPSHOT_IMAGE_TAG}" \
+       --tag "${OS_BUILD_VERSION_TAG}" \
        "${DOCKER_NAME}"
 #
 set +e
