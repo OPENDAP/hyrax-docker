@@ -268,21 +268,32 @@ jobs:
           --tag "$BUILD_VERSION_TAG" olfs
         - docker image ls -a
 
+    ###############################################################################################
+    # We make special SNAPSHOT_IMAGE_TAG and BUILD_VERSION_TAG variables because the ngap product
+    # gets tagged differently than the products from our other repos.
+    # Specifically, we use the opendap/hyrax repo since the ngap product is just a specialization
+    # of hyrax, at least for now. So we use a fixed opendap/hyrax project, and we add the
+    # $DOCKER_NAME ("ngap" in this case) to the image tag:
+    # Examples:
+    #     opendap/hyrax:ngap-snapshot-el9
+    #     opendap/hyrax:ngap-1.17.1-846-el9
+    #     opendap/hyrax:ngap-snapshot-el9-test-deploy
+    #     opendap/hyrax:ngap--1.17.1-846-el9-test-deploy
+    #
     - stage: BUILD
-      name: "Build opendap/hyrax:ngap with reddis session manager"
+      name: "Build opendap/hyrax:ngap"
       script:
         - cd "$TARGET_OS-builds"
         - export DOCKER_NAME="ngap"
         - export DOCKER_DIR="ngap"
         - source "./build-$TARGET_OS"
-#        - export TEST_DEPLOYMENT="-test-deploy"
         - export SNAPSHOT_IMAGE_TAG="opendap/hyrax:$DOCKER_NAME-snapshot-$TARGET_OS$TEST_DEPLOYMENT"
         - echo "SNAPSHOT_IMAGE_TAG is $SNAPSHOT_IMAGE_TAG"
         - export BUILD_VERSION_TAG="opendap/hyrax:$DOCKER_NAME-$HYRAX_VERSION-$TARGET_OS$TEST_DEPLOYMENT"
         - echo "BUILD_VERSION_TAG is $BUILD_VERSION_TAG"
-        - ./build-redis-ngap.sh
+        - ./build-hyrax-ngap.sh
         - docker image ls -a
-        -
+
     - stage: TEST_DEPLOYED_IMAGE
       name: "Test Deployed Image"
       script:
