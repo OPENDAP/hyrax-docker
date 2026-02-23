@@ -32,6 +32,11 @@ function read_build_recipe() {
     export BES_VERSION=""
     export BUILD_DMRPP_VERSION=""
     export LIBDAP_VERSION=""
+    export SNAPSHOT_IMAGE_TAG=""
+    export BUILD_VERSION_TAG=""
+    export OS_SNAPSHOT_IMAGE_TAG=""
+    export OS_BUILD_VERSION_TAG=""
+
     RELEASE_DATE=${RELEASE_DATE:-$(echo "${build_recipe}" | grep hyrax | awk '{print $2;}')}
     HYRAX_VERSION=${HYRAX_VERSION:-$(echo "${build_recipe}" | grep hyrax | awk '{print $1;}' | sed "s/hyrax-//g" )}
     OLFS_VERSION=${OLFS_VERSION:-$(echo "${build_recipe}" | grep olfs | sed "s/olfs-//g" | awk '{print $1;}')}
@@ -54,12 +59,22 @@ function read_build_recipe() {
             TEST_DEPLOYMENT="$td_value"
         fi
     fi
+
+    SNAPSHOT_IMAGE_TAG="${SNAPSHOT_IMAGE_TAG:-"opendap/$DOCKER_NAME:snapshot"}"
+    BUILD_VERSION_TAG="${BUILD_VERSION_TAG:-"opendap/${DOCKER_NAME}:$HYRAX_VERSION"}"
+
+    OS_SNAPSHOT_IMAGE_TAG="${OS_SNAPSHOT_IMAGE_TAG:-"opendap/$DOCKER_NAME:snapshot-$TARGET_OS$TEST_DEPLOYMENT"}"
+    OS_BUILD_VERSION_TAG="${OS_BUILD_VERSION_TAG:-"opendap/$DOCKER_NAME:$HYRAX_VERSION-$TARGET_OS$TEST_DEPLOYMENT"}"
+
+
 }
 read_build_recipe "${BUILD_RECIPE_FILE}"
 
 
-export SNAPSHOT_IMAGE_TAG=${SNAPSHOT_IMAGE_TAG:-"opendap/${DOCKER_NAME}:snapshot"}
-export BUILD_VERSION_TAG=${BUILD_VERSION_TAG:-"opendap/${DOCKER_NAME}:${HYRAX_VERSION}"}
+
+
+
+
 
 export RELEASE_HOST=${RELEASE_HOST:-"https://www.opendap.org"}
 

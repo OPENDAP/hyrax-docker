@@ -110,8 +110,8 @@ jobs:
           --build-arg LIBDAP_VERSION
           --build-arg BES_VERSION
           --build-arg OLFS_VERSION
-          --tag "$SNAPSHOT_IMAGE_TAG"
-          --tag "$BUILD_VERSION_TAG"
+          --tag "$OS_SNAPSHOT_IMAGE_TAG"
+          --tag "$OS_BUILD_VERSION_TAG"
           "$DOCKER_NAME"
         - docker image ls -a
         - cd ..
@@ -139,8 +139,8 @@ jobs:
           --build-arg HYRAX_VERSION
           --build-arg LIBDAP_VERSION
           --build-arg BES_VERSION
-          --tag "$SNAPSHOT_IMAGE_TAG"
-          --tag "$BES_VERSION_TAG"
+          --tag "$OS_SNAPSHOT_IMAGE_TAG"
+          --tag "$OS_BES_VERSION_TAG"
           "$DOCKER_NAME"
         - docker image ls -a
 
@@ -174,8 +174,8 @@ jobs:
           --build-arg BES_VERSION
           --build-arg OLFS_VERSION
           --build-arg USE_NCWMS=true
-          --tag "$SNAPSHOT_IMAGE_TAG"
-          --tag "$BUILD_VERSION_TAG"
+          --tag "OS_$SNAPSHOT_IMAGE_TAG"
+          --tag "$OS_BUILD_VERSION_TAG"
           "$DOCKER_DIR"
         - docker image ls -a
 
@@ -199,8 +199,8 @@ jobs:
           --build-arg RELEASE_DATE
           --build-arg HYRAX_VERSION
           --build-arg OLFS_VERSION
-          --tag "$SNAPSHOT_IMAGE_TAG"
-          --tag "$BUILD_VERSION_TAG" olfs
+          --tag "$OS_SNAPSHOT_IMAGE_TAG"
+          --tag "$OS_BUILD_VERSION_TAG" olfs
         - docker image ls -a
 
     ###############################################################################################
@@ -223,10 +223,10 @@ jobs:
         - export DOCKER_NAME="ngap"
         - export DOCKER_DIR="ngap"
         - source "./build-$TARGET_OS"
-        - export SNAPSHOT_IMAGE_TAG="opendap/hyrax:$DOCKER_NAME-snapshot-$TARGET_OS$TEST_DEPLOYMENT"
-        - echo "SNAPSHOT_IMAGE_TAG is $SNAPSHOT_IMAGE_TAG"
-        - export BUILD_VERSION_TAG="opendap/hyrax:$DOCKER_NAME-$HYRAX_VERSION-$TARGET_OS$TEST_DEPLOYMENT"
-        - echo "BUILD_VERSION_TAG is $BUILD_VERSION_TAG"
+        - export OS_SNAPSHOT_IMAGE_TAG="opendap/hyrax:$DOCKER_NAME-snapshot-$TARGET_OS$TEST_DEPLOYMENT"
+        - echo "OS_SNAPSHOT_IMAGE_TAG is $OS_SNAPSHOT_IMAGE_TAG"
+        - export OS_BUILD_VERSION_TAG="opendap/hyrax:$DOCKER_NAME-$HYRAX_VERSION-$TARGET_OS$TEST_DEPLOYMENT"
+        - echo "OS_BUILD_VERSION_TAG is $OS_BUILD_VERSION_TAG"
         - ./build-hyrax-ngap.sh
         - docker image ls -a
 

@@ -18,16 +18,39 @@ set -e
 
 loggy "Logging into Docker Hub"
 echo "$DOCKER_HUB_PSWD" | docker login -u "$DOCKER_HUB_UID" --password-stdin
-
 loggy "$HR1"
-loggy "Deploying '$SNAPSHOT_IMAGE_TAG' to Docker Hub"
-docker push "$SNAPSHOT_IMAGE_TAG"
+
+
+loggy "Deploying '$OS_SNAPSHOT_IMAGE_TAG' to Docker Hub"
+docker push "$OS_SNAPSHOT_IMAGE_TAG"
 loggy "$HR2"
-loggy "Deploying '$BUILD_VERSION_TAG' to Docker Hub"
-docker push "$BUILD_VERSION_TAG"
+
+if test -n "$SNAPSHOT_IMAGE_TAG"
+then
+    loggy "Tagging $OS_SNAPSHOT_IMAGE_TAG as $SNAPSHOT_IMAGE_TAG"
+    docker tag "$OS_SNAPSHOT_IMAGE_TAG" "$SNAPSHOT_IMAGE_TAG"
+    loggy "Deploying '$SNAPSHOT_IMAGE_TAG' to Docker Hub"
+    docker push "$SNAPSHOT_IMAGE_TAG"
+    loggy "$HR2"
+fi
+
+loggy "Deploying '$OS_BUILD_VERSION_TAG' to Docker Hub"
+docker push "$OS_BUILD_VERSION_TAG"
 loggy "$HR2"
+
+if test -n "$BUILD_VERSION_TAG"
+then
+    loggy "Tagging $OS_BUILD_VERSION_TAG as $BUILD_VERSION_TAG"
+    docker tag "$OS_BUILD_VERSION_TAG" "$BUILD_VERSION_TAG"
+    loggy "Deploying '$BUILD_VERSION_TAG' to Docker Hub"
+    docker push "$BUILD_VERSION_TAG"
+    loggy "$HR2"
+fi
+
 loggy "Docker Hub deployment complete."
 loggy "$HR1"
+
+
 
 loggy "AWS configuration: "
 loggy "$(aws configure list)"

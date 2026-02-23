@@ -81,8 +81,8 @@ function read_build_recipe() {
     export HYRAX_VERSION
     export RELEASE_DATE
     # export APR_VERSION
-    export SNAPSHOT_IMAGE_TAG
-    export BUILD_VERSION_TAG
+    export OS_SNAPSHOT_IMAGE_TAG
+    export OS_BUILD_VERSION_TAG
     export TEST_DEPLOYMENT
 
 
@@ -97,12 +97,15 @@ function read_build_recipe() {
     #APR_VERSION=${APR_VERSION:-$(echo "${build_recipe}" | grep apr | sed "s/apr-//g" | awk '{print $1;}')}
     TEST_DEPLOYMENT="${TEST_DEPLOYMENT:-"$(get_test_deployment_tag "$build_recipe_file")"}"
 
-    SNAPSHOT_IMAGE_TAG=${SNAPSHOT_IMAGE_TAG:-"opendap/$DOCKER_NAME:snapshot-$TARGET_OS$TEST_DEPLOYMENT"}
-    # loggy "$prolog SNAPSHOT_IMAGE_TAG: $SNAPSHOT_IMAGE_TAG"
+    OS_SNAPSHOT_IMAGE_TAG=${OS_SNAPSHOT_IMAGE_TAG:-"opendap/$DOCKER_NAME:snapshot-$TARGET_OS$TEST_DEPLOYMENT"}
+    # loggy "$prolog OS_SNAPSHOT_IMAGE_TAG: $OS_SNAPSHOT_IMAGE_TAG"
 
-    BUILD_VERSION_TAG=${BUILD_VERSION_TAG:-"opendap/$DOCKER_NAME:$HYRAX_VERSION-$TARGET_OS$TEST_DEPLOYMENT"}
-    # loggy "$prolog BUILD_VERSION_TAG: $BUILD_VERSION_TAG"
+    OS_BUILD_VERSION_TAG=${OS_BUILD_VERSION_TAG:-"opendap/$DOCKER_NAME:$HYRAX_VERSION-$TARGET_OS$TEST_DEPLOYMENT"}
+    # loggy "$prolog OS_BUILD_VERSION_TAG: $OS_BUILD_VERSION_TAG"
 
+    # We unset these so they are surely not set when we deploy
+    unset SNAPSHOT_IMAGE_TAG
+    unset BUILD_VERSION_TAG
 }
 read_build_recipe "${BUILD_RECIPE}"
 
@@ -113,25 +116,25 @@ function show_version(){
     local prolog="show_version() -"
     loggy "${HR}"
     loggy "$prolog BEGIN"
-    loggy "$prolog         RELEASE_DATE: $RELEASE_DATE"
-    loggy "$prolog            TARGET_OS: $TARGET_OS"
-    loggy "$prolog      TEST_DEPLOYMENT: $TEST_DEPLOYMENT"
-    loggy "$prolog       LIBDAP_VERSION: $LIBDAP_VERSION"
-    loggy "$prolog          BES_VERSION: $BES_VERSION"
-    loggy "$prolog         OLFS_VERSION: $OLFS_VERSION"
-    loggy "$prolog        HYRAX_VERSION: $HYRAX_VERSION"
-    loggy "$prolog          DOCKER_NAME: $DOCKER_NAME"
-    loggy "$prolog      S3_BUILD_BUCKET: $S3_BUILD_BUCKET"
-    loggy "$prolog       SLEEP_INTERVAL: $SLEEP_INTERVAL"
+    loggy "$prolog          RELEASE_DATE: $RELEASE_DATE"
+    loggy "$prolog             TARGET_OS: $TARGET_OS"
+    loggy "$prolog       TEST_DEPLOYMENT: $TEST_DEPLOYMENT"
+    loggy "$prolog        LIBDAP_VERSION: $LIBDAP_VERSION"
+    loggy "$prolog           BES_VERSION: $BES_VERSION"
+    loggy "$prolog          OLFS_VERSION: $OLFS_VERSION"
+    loggy "$prolog         HYRAX_VERSION: $HYRAX_VERSION"
+    loggy "$prolog           DOCKER_NAME: $DOCKER_NAME"
+    loggy "$prolog       S3_BUILD_BUCKET: $S3_BUILD_BUCKET"
+    loggy "$prolog        SLEEP_INTERVAL: $SLEEP_INTERVAL"
     loggy "$prolog"
-    loggy "$prolog    BUILD_VERSION_TAG: $BUILD_VERSION_TAG"
-    loggy "$prolog   SNAPSHOT_IMAGE_TAG: $SNAPSHOT_IMAGE_TAG"
+    loggy "$prolog  OS_BUILD_VERSION_TAG: $OS_BUILD_VERSION_TAG"
+    loggy "$prolog OS_SNAPSHOT_IMAGE_TAG: $OS_SNAPSHOT_IMAGE_TAG"
     loggy "$prolog"
-    loggy "$prolog TOMCAT_MAJOR_VERSION: $TOMCAT_MAJOR_VERSION"
-    loggy "$prolog       TOMCAT_VERSION: $TOMCAT_VERSION"
-    loggy "$prolog   APACHE_APR_VERSION: $APACHE_APR_VERSION"
+    loggy "$prolog  TOMCAT_MAJOR_VERSION: $TOMCAT_MAJOR_VERSION"
+    loggy "$prolog        TOMCAT_VERSION: $TOMCAT_VERSION"
+    loggy "$prolog    APACHE_APR_VERSION: $APACHE_APR_VERSION"
     loggy "$prolog"
-    loggy "$prolog             NO_CACHE: '$NO_CACHE'"
+    loggy "$prolog              NO_CACHE: '$NO_CACHE'"
     loggy "$prolog END"
     loggy "$HR"
 }
@@ -904,52 +907,13 @@ function build_hyrax_docker() {
         --build-arg LIBDAP_VERSION \
         --build-arg BES_VERSION \
         --build-arg OLFS_VERSION \
-        --tag "${BUILD_VERSION_TAG}" \
-        --tag "${SNAPSHOT_IMAGE_TAG}" \
+        --tag "${OS_BUILD_VERSION_TAG}" \
+        --tag "${OS_SNAPSHOT_IMAGE_TAG}" \
         ${docker_name}
     loggy ""
     loggy ""
 }
 
-
-
-
-#- docker build
-#  --build-arg TOMCAT_VERSION
-#  --build-arg RELEASE_DATE
-#  --build-arg HYRAX_VERSION
-#  --build-arg LIBDAP_VERSION
-#  --build-arg BES_VERSION
-#  --build-arg BUILD_DMRPP_VERSION
-#  --tag "${SNAPSHOT_IMAGE_TAG}"
-#  --tag "${BUILD_VERSION_TAG}"
-#  "${DOCKER_NAME}"
-
-################################################################################
-#
-#
-function build_dmrpp_service_docker() {
-    local docker_name="${1}"
-    export DEPLOYMENT_CONTEXT="${2:-"build_dmrpp"}"
-    show_version
-
-    loggy "${HR}"
-    loggy "TASK: build_dmrpp_service_docker()"
-        docker build ${NO_CACHE} \
-        --platform linux/amd64 \
-        --build-arg TOMCAT_VERSION \
-        --build-arg RELEASE_DATE \
-        --build-arg HYRAX_VERSION \
-        --build-arg LIBDAP_VERSION \
-        --build-arg BES_VERSION \
-        --build-arg BUILD_DMRPP_VERSION \
-        --build-arg DEPLOYMENT_CONTEXT \
-        --tag "${BUILD_VERSION_TAG}" \
-        --tag "${SNAPSHOT_IMAGE_TAG}" \
-        ${docker_name}
-    loggy ""
-    loggy ""
-}
 
 
 ################################################################################
@@ -1090,8 +1054,8 @@ function docker_build_ngap() {
         --build-arg LIBDAP_VERSION \
         --build-arg BES_VERSION \
         --build-arg OLFS_VERSION \
-        --tag "${BUILD_VERSION_TAG}" \
-        --tag "${SNAPSHOT_IMAGE_TAG}" \
+        --tag "${OS_BUILD_VERSION_TAG}" \
+        --tag "${OS_SNAPSHOT_IMAGE_TAG}" \
         ${DOCKER_NAME}
     loggy ""
     loggy ""
@@ -1145,8 +1109,8 @@ function build_olfs_docker() {
         --build-arg RELEASE_DATE \
         --build-arg HYRAX_VERSION \
         --build-arg OLFS_VERSION \
-        --tag "${BUILD_VERSION_TAG}" \
-        --tag "${SNAPSHOT_IMAGE_TAG}" \
+        --tag "${OS_BUILD_VERSION_TAG}" \
+        --tag "${OS_SNAPSHOT_IMAGE_TAG}" \
         ${DOCKER_NAME}
     loggy ""
     loggy ""
@@ -1189,8 +1153,8 @@ function build_besd_docker() {
         --build-arg RELEASE_DATE \
         --build-arg LIBDAP_VERSION \
         --build-arg BES_VERSION \
-        --tag "${BUILD_VERSION_TAG}" \
-        --tag "${SNAPSHOT_IMAGE_TAG}" \
+        --tag "${OS_BUILD_VERSION_TAG}" \
+        --tag "${OS_SNAPSHOT_IMAGE_TAG}" \
         ${DOCKER_NAME}
     loggy ""
     loggy ""
@@ -1340,8 +1304,8 @@ function travis_hyrax() {
         loggy "There is a problem with the AWS configuration. Fix it and try again"
         return $status
     fi
-    export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}:snapshot-$TARGET_OS$TEST_DEPLOYMENT"
-    export BUILD_VERSION_TAG="opendap/${DOCKER_NAME}:${HYRAX_VERSION}-$TARGET_OS$TEST_DEPLOYMENT"
+    export OS_SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}:snapshot-$TARGET_OS$TEST_DEPLOYMENT"
+    export OS_BUILD_VERSION_TAG="opendap/${DOCKER_NAME}:${HYRAX_VERSION}-$TARGET_OS$TEST_DEPLOYMENT"
     export TOMCAT_VERSION
     TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
 
@@ -1368,8 +1332,8 @@ function travis_hyrax() {
         --build-arg LIBDAP_VERSION \
         --build-arg BES_VERSION \
         --build-arg OLFS_VERSION \
-        --tag "${SNAPSHOT_IMAGE_TAG}" \
-        --tag "${BUILD_VERSION_TAG}" \
+        --tag "${OS_SNAPSHOT_IMAGE_TAG}" \
+        --tag "${OS_BUILD_VERSION_TAG}" \
         "${DOCKER_NAME}"
 
     docker image ls -a
