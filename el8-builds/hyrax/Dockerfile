@@ -21,9 +21,8 @@ ENV python_version="3.11"
 ENV HR="###########################################################################"
 ENV HR2="# -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - --"
 
-ENV NOW="$(`date +%s`)"
 ARG RELEASE_DATE
-ENV RELEASE_DATE=${RELEASE_DATE:-"${NOW}"}
+ENV RELEASE_DATE="${RELEASE_DATE:-$(date +%s)}"
 RUN echo "RELEASE_DATE: ${RELEASE_DATE}"
 
 ARG TOMCAT_VERSION
