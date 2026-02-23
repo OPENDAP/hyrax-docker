@@ -158,39 +158,35 @@ jobs:
           "${DOCKER_NAME}"
         - docker image ls -a
 
-    # - stage: BUILD
-    #   name: "Build opendap/hyrax_ncwms:snapshot (RH8)"
-    #   script:
-    #     - cd "${TARGET_OS}-builds"
-    #     - export DOCKER_NAME="hyrax"
-    #     - source ./build-rh8
-    #     - export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}_ncwms:snapshot$TEST_DEPLOYMENT"
-    #     - export BUILD_VERSION_TAG="opendap/${DOCKER_NAME}_ncwms:${HYRAX_VERSION}$TEST_DEPLOYMENT"
-    #     - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
-    #     - show_version
-    #     - get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_VERSION}"
-    #     - s3_get_besd_distro
-    #       "${S3_BUILD_BUCKET}"
-    #       "${DOCKER_NAME}"
-    #       "el8"
-    #       "${LIBDAP_VERSION}"
-    #       "${BES_VERSION}" "${ADD_DEBUG_RPMS}" 2>&1
-    #     - s3_get_olfs_distro
-    #       "${S3_BUILD_BUCKET}"
-    #       "${DOCKER_NAME}"
-    #       "${OLFS_VERSION}" 2>&1
-    #     - docker build
-    #       --build-arg TOMCAT_VERSION
-    #       --build-arg RELEASE_DATE
-    #       --build-arg HYRAX_VERSION
-    #       --build-arg LIBDAP_VERSION
-    #       --build-arg BES_VERSION
-    #       --build-arg OLFS_VERSION
-    #       --build-arg USE_NCWMS=true
-    #       --tag "${SNAPSHOT_IMAGE_TAG}"
-    #       --tag "${BUILD_VERSION_TAG}"
-    #       "${DOCKER_NAME}"
-    #     - docker image ls -a
+    - stage: BUILD
+      name: "Build opendap/hyrax_ncwms:snapshot (RH8)"
+      script:
+        - cd "${TARGET_OS}-builds"
+        - export DOCKER_NAME="hyrax"
+        - source ./build-rh8
+        - export BES_IMAGE_TAG="opendap/bes_core:${BES_VERSION}-el8"
+        - export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}_ncwms:snapshot$TEST_DEPLOYMENT"
+        - export BUILD_VERSION_TAG="opendap/${DOCKER_NAME}_ncwms:${HYRAX_VERSION}$TEST_DEPLOYMENT"
+        - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
+        - show_version
+        - get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_VERSION}"
+        - s3_get_olfs_distro
+          "${S3_BUILD_BUCKET}"
+          "${DOCKER_NAME}"
+          "${OLFS_VERSION}" 2>&1
+        - docker build
+          --build-arg TOMCAT_VERSION
+          --build-arg RELEASE_DATE
+          --build-arg HYRAX_VERSION
+          --build-arg LIBDAP_VERSION
+          --build-arg BES_VERSION
+          --build-arg BES_IMAGE_TAG
+          --build-arg OLFS_VERSION
+          --build-arg USE_NCWMS=true
+          --tag "${SNAPSHOT_IMAGE_TAG}"
+          --tag "${BUILD_VERSION_TAG}"
+          "${DOCKER_NAME}"
+        - docker image ls -a
 
     # - stage: BUILD
     #   name: "Build opendap/hyrax:ngap-snapshot (RH8)"
