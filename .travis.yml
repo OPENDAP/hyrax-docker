@@ -116,7 +116,7 @@ jobs:
         - docker image ls -a
         - cd ..
         - echo "Running Test Script"
-        - ./travis/regression_test_script -i "$SNAPSHOT_IMAGE_TAG" -l "$TESTS_LOG_BASE"
+        - ./travis/regression_test_script -i "$OS_SNAPSHOT_IMAGE_TAG" -l "$TESTS_LOG_BASE"
 
     - stage: BUILD
       name: "Build opendap/besd"
@@ -236,8 +236,8 @@ jobs:
         - cd "$TARGET_OS-builds"
         - source "./build-$TARGET_OS"
         - cd ..
-        - echo "Running Hyrax Regression Test Script on $SNAPSHOT_IMAGE_TAG"
-        - ./travis/regression_test_script -i "$SNAPSHOT_IMAGE_TAG" -l "deployed-image-regression-tests-$TRAVIS_JOB_NUMBER"
+        - echo "Running Hyrax Regression Test Script on $OS_SNAPSHOT_IMAGE_TAG"
+        - ./travis/regression_test_script -i "$OS_SNAPSHOT_IMAGE_TAG" -l "deployed-image-regression-tests-$TRAVIS_JOB_NUMBER"
         - export DEPLOY_ME="false"
 
 after_script:
