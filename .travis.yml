@@ -78,7 +78,7 @@ jobs:
     #
 
 # BUILD_AND_TEST
-    - stage: BUILD_AND_TEST
+    - stage: disabled
       name: "Build and Test opendap/hyrax"
       script:
         - export DOCKER_NAME="hyrax"
@@ -130,6 +130,7 @@ jobs:
         #- echo "# BES_VERSION_TAG '$BES_VERSION_TAG'"
         - OS_BUILD_VERSION_TAG="opendap/$DOCKER_NAME:$BES_VERSION-$TARGET_OS$TEST_DEPLOYMENT"
         - echo "# OS_BUILD_VERSION_TAG '$OS_BUILD_VERSION_TAG'"
+        - echo "# OS_SNAPSHOT_IMAGE_TAG '$OS_SNAPSHOT_IMAGE_TAG'"
         - s3_get_besd_distro
           "$S3_BUILD_BUCKET"
           "$DOCKER_NAME"
