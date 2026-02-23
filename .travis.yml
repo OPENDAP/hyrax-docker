@@ -88,8 +88,6 @@ install:
   - ls -l ./builds
 
 stages:
-  - name: OLFS
-    if: branch = master
   - name: BUILD_AND_TEST
     if:  branch = master
   - name: BUILD

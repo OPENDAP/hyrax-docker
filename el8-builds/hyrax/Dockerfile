@@ -29,13 +29,12 @@ ENV python_version="3.11"
 ENV HR="###########################################################################"
 ENV HR2="# -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - --"
 
-RUN export NOW=`date +%s`
 ARG RELEASE_DATE
-ENV RELEASE_DATE ${RELEASE_DATE:-"${NOW}"}
+ENV RELEASE_DATE="${RELEASE_DATE:-$(date +%s)}"
 RUN echo "RELEASE_DATE: ${RELEASE_DATE}"
 
 ARG TOMCAT_VERSION
-ENV TOMCAT_VERSION ${TOMCAT_VERSION:-"9.0.64"}
+ENV TOMCAT_VERSION=${TOMCAT_VERSION:-"9.0.64"}
 RUN echo "TOMCAT_VERSION: ${TOMCAT_VERSION}"
 ENV TOMCAT_DISTRO="apache-tomcat-${TOMCAT_VERSION}"
 COPY "${TOMCAT_DISTRO}.tar.gz" /
@@ -45,14 +44,9 @@ ARG HYRAX_VERSION
 ENV HYRAX_VERSION=${HYRAX_VERSION:-"snapshot"}
 RUN echo "HYRAX_VERSION: ${HYRAX_VERSION}"
 
-# Confirm that LIBDAP_VERSION and BES_VERSION match expected
-# versions previously installed in base image; fail if not
+# Fail if requested LIBDAP_VERSION or BES_VERSION do not match installations in base image
 ARG BES_VERSION
 RUN BES_VERSION_FOUND=$(cat bes_VERSION); \
-    echo "FOO $BES_VERSION_FOUND"; \
-    pwd; \
-    ls; \
-    cat bes_VERSION; \
     if [ "${BES_VERSION_FOUND}" == "${BES_VERSION:-missing}" ]; then \
         echo "BES Version: ${BES_VERSION}"; \
     else \
@@ -60,16 +54,14 @@ RUN BES_VERSION_FOUND=$(cat bes_VERSION); \
         exit 1; \
     fi
 
-# TODO: enable when supported by bes_core image
 ARG LIBDAP_VERSION
-# RUN if [[ "$(cat libdap_VERSION)" == "${LIBDAP_VERSION}" ]]; then \
-#         echo "LIBDAP Version: ${LIBDAP_VERSION}"; \
-#     else
-#         echo "Error: Expected LIBDAP_VERSION `${LIBDAP_VERSION}`, found version `$(cat libdap_VERSION)`. Exiting."; \
-#         exit 1; \
-#     fi
-RUN echo "Expected LIBDAP_VERSION: ${LIBDAP_VERSION}."
-
+RUN LIBDAP_VERSION_FOUND=$(cat libdap_VERSION); \
+    if [ "${LIBDAP_VERSION_FOUND}" == "${LIBDAP_VERSION:-missing}" ]; then \
+        echo "LIBDAP Version: ${LIBDAP_VERSION}"; \
+    else \
+        echo "Error: Expected LIBDAP_VERSION `${LIBDAP_VERSION}`, found version `${LIBDAP_VERSION_FOUND}`. Exiting."; \
+        exit 1; \
+    fi
 
 ARG OLFS_VERSION
 ENV OLFS_VERSION=${OLFS_VERSION:-"snapshot"}
@@ -94,7 +86,7 @@ LABEL org.opendap.hyrax.version=${HYRAX_VERSION}
 LABEL org.opendap.hyrax.release-date=${RELEASE_DATE}
 LABEL org.opendap.hyrax.version.is-production="false"
 
-MAINTAINER support@opendap.org
+LABEL maintainer=support@opendap.org
 
 USER root
 WORKDIR /
@@ -103,7 +95,7 @@ WORKDIR /
 # The --build-arg USE_NCWMS can be set to "true" in order to 
 # add the ncWMS application to the build.
 ARG USE_NCWMS
-ENV USE_NCWMS ${USE_NCWMS:-"false"}
+ENV USE_NCWMS=${USE_NCWMS:-"false"}
 RUN if [ $USE_NCWMS = "true" ];then echo "NCWMS: ENABLED"; else echo "NCWMS: DISABLED"; fi
 
 #
@@ -112,12 +104,12 @@ RUN if [ $USE_NCWMS = "true" ];then echo "NCWMS: ENABLED"; else echo "NCWMS: DIS
 # the URL: https://localhost:8080 if the environment variable NCWMS_BASE
 # is not in the shell from which the entrypoint.sh script is called.
 ARG NCWMS_BASE
-ENV NCWMS_BASE ${NCWMS_BASE:-"https://localhost:8080"}
+ENV NCWMS_BASE=${NCWMS_BASE:-"https://localhost:8080"}
 RUN if [ $USE_NCWMS = "true" ];then echo "NCWMS_BASE: {$NCWMS_BASE}"; fi
 
 
 ARG DEVELOPER_MODE
-ENV DEVELOPER_MODE ${DEVELOPER_MODE:-"false"}
+ENV DEVELOPER_MODE=${DEVELOPER_MODE:-"false"}
 RUN if [ $DEVELOPER_MODE = "true" ];then echo "DEVELOPER_MODE: ENABLED"; else echo "DEVELOPER_MODE: DISABLED"; fi
 
 #Get mirrorlist before running yum
@@ -232,8 +224,8 @@ RUN set -e && systemctl enable tomcat
 #RUN firewall-cmd --add-port 8080/tcp --permanent
 #RUN firewall-cmd --reload
 
-ENV CATALINA_HOME /usr/share/tomcat
-ENV PATH $CATALINA_HOME/bin:$PATH
+ENV CATALINA_HOME=/usr/share/tomcat
+ENV PATH=$CATALINA_HOME/bin:$PATH
 RUN set -e && echo "CATALINA_HOME: ${CATALINA_HOME}" >&2
 
 # Install our modified server.xml so that the server compresses responses.
@@ -291,7 +283,7 @@ RUN rm -vf /olfs*.tgz /robots*.tgz /apache*
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 
 ARG NCWMS_VERSION
-ENV NCWMS_VERSION ${NCWMS_VERSION:-"2.5.2"}
+ENV NCWMS_VERSION=${NCWMS_VERSION:-"2.5.2"}
 RUN echo "NCWMS_VERSION: ${NCWMS_VERSION}"
 ENV NCWMS_WAR_URL="https://github.com/Reading-eScience-Centre/ncwms/releases/download/ncwms-${NCWMS_VERSION}/ncWMS2.war"
 RUN echo "NCWMS_WAR_URL: ${NCWMS_WAR_URL}"
