@@ -60,8 +60,6 @@ install:
   - echo $DOCKER_HUB_PSWD | docker login -u $DOCKER_HUB_UID --password-stdin
 
 stages:
-  - name: OLFS
-    if: branch = master OR branch = el9
   - name: BUILD_AND_TEST
     if:  branch = master OR branch = el9
   - name: BUILD
