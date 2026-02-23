@@ -129,7 +129,7 @@ jobs:
         #- export BES_VERSION_TAG="opendap/$DOCKER_NAME:$BES_VERSION-$TEST_DEPLOYMENT"
         #- echo "# BES_VERSION_TAG '$BES_VERSION_TAG'"
         - OS_BUILD_VERSION_TAG="opendap/$DOCKER_NAME:$BES_VERSION-$TARGET_OS$TEST_DEPLOYMENT"
-        - echo "# OS_BUILD_VERSION_TAG '$OS_BUILD_VERSION_TAG'"
+        - echo "#  OS_BUILD_VERSION_TAG '$OS_BUILD_VERSION_TAG'"
         - echo "# OS_SNAPSHOT_IMAGE_TAG '$OS_SNAPSHOT_IMAGE_TAG'"
         - s3_get_besd_distro
           "$S3_BUILD_BUCKET"
@@ -143,7 +143,7 @@ jobs:
           --build-arg LIBDAP_VERSION
           --build-arg BES_VERSION
           --tag "$OS_SNAPSHOT_IMAGE_TAG"
-          --tag "$OS_BES_VERSION_TAG"
+          --tag "$OS_BUILD_VERSION_TAG"
           "$DOCKER_NAME"
         - docker image ls -a
 
