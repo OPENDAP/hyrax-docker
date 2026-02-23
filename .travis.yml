@@ -78,7 +78,7 @@ jobs:
     #
 
 # BUILD_AND_TEST
-    - stage: disabled
+    - stage: BUILD_AND_TEST
       name: "Build and Test opendap/hyrax"
       script:
         - export DOCKER_NAME="hyrax"
