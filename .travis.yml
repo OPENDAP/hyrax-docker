@@ -209,19 +209,6 @@ jobs:
           --tag "$OS_BUILD_VERSION_TAG" olfs
         - docker image ls -a
 
-    ###############################################################################################
-    # For the ngap distribution we make special SNAPSHOT_IMAGE_TAG and BUILD_VERSION_TAG values
-    # because the ngap product gets tagged differently than the products from our other repos.
-    # Specifically, we use the opendap/hyrax repo since the ngap product is just a specialization
-    # of hyrax, at least for now. So we use the opendap/hyrax project identifier, and we add the
-    # $DOCKER_NAME ("ngap" in this case) to the image tag:
-    # Examples:
-    #     opendap/hyrax:ngap-snapshot-el9
-    #     opendap/hyrax:ngap-1.17.1-846-el9
-    #     opendap/hyrax:ngap-snapshot-el9-test-deploy
-    #     opendap/hyrax:ngap--1.17.1-846-el9-test-deploy
-    # We set (and replace) these values here, in the stage, so that they can be accessed by the
-    # travis/deploy_to_docker_hub.sh script used by the Travis deploy operation below.
     - stage: BUILD
       name: "Build opendap/hyrax:ngap"
       script:
@@ -230,10 +217,6 @@ jobs:
         - export DOCKER_DIR="ngap"
         - source "./build-$TARGET_OS"
         - show_version
-        #- export OS_SNAPSHOT_IMAGE_TAG="opendap/hyrax:$DOCKER_NAME-snapshot-$TARGET_OS$TEST_DEPLOYMENT"
-        #- echo "OS_SNAPSHOT_IMAGE_TAG is $OS_SNAPSHOT_IMAGE_TAG"
-        #- export OS_BUILD_VERSION_TAG="opendap/hyrax:$DOCKER_NAME-$HYRAX_VERSION-$TARGET_OS$TEST_DEPLOYMENT"
-        #- echo "OS_BUILD_VERSION_TAG is $OS_BUILD_VERSION_TAG"
         - ./build-hyrax-ngap.sh
         - docker image ls -a
 
