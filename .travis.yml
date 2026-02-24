@@ -67,7 +67,8 @@ stages:
   - name: BUILD
     if:  branch = master OR branch = el9
   - name: TEST_DEPLOYED_IMAGE
-    if: branch = master OR branch = el9
+    # if: branch = master OR branch = el9
+    if: (branch = master) and (type != pull_request)
   - name: disabled
     if: branch = disabled
 
