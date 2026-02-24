@@ -28,8 +28,6 @@ ARG DEPLOYMENT_CONTEXT
 ENV DEPLOYMENT_CONTEXT="${DEPLOYMENT_CONTEXT:-"ROOT"}"
 RUN echo "DEPLOYMENT_CONTEXT: ${DEPLOYMENT_CONTEXT}"
 
-RUN export NOW=`date +%s`
-
 #
 # Hyrax Components Version Negotiation
 #
