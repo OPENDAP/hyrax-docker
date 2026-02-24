@@ -78,7 +78,7 @@ jobs:
     #
 
 # BUILD_AND_TEST
-    - stage: BUILD_AND_TEST
+    - stage: disabled
       name: "Build and Test opendap/hyrax"
       script:
         - export DOCKER_NAME="hyrax"
@@ -118,7 +118,8 @@ jobs:
         - echo "Running Test Script"
         - ./travis/regression_test_script -i "$OS_SNAPSHOT_IMAGE_TAG" -l "$TESTS_LOG_BASE"
 
-    - stage: BUILD
+# BUILD
+    - stage: disabled
       name: "Build opendap/besd"
       script:
         - export DOCKER_NAME="besd"
@@ -147,6 +148,7 @@ jobs:
           "$DOCKER_NAME"
         - docker image ls -a
 
+# DISABLED PERMANENTLY??
     - stage: disabled
       name: "Build opendap/hyrax_ncwms"
       script:
@@ -183,7 +185,8 @@ jobs:
         - docker image ls -a
 
 
-    - stage: BUILD
+# BUILD
+    - stage: disabled
       name: "Build opendap/olfs"
       script:
         - export DOCKER_NAME="olfs"
