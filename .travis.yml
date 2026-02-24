@@ -78,7 +78,7 @@ jobs:
     #
 
 # BUILD_AND_TEST
-    - stage: disabled
+    - stage: BUILD_AND_TEST
       name: "Build and Test opendap/hyrax"
       script:
         - export DOCKER_NAME="hyrax"
@@ -119,7 +119,7 @@ jobs:
         - ./travis/regression_test_script -i "$OS_SNAPSHOT_IMAGE_TAG" -l "$TESTS_LOG_BASE"
 
 # BUILD
-    - stage: disabled
+    - stage: BUILD
       name: "Build opendap/besd"
       script:
         - export DOCKER_NAME="besd"
@@ -186,7 +186,7 @@ jobs:
 
 
 # BUILD
-    - stage: disabled
+    - stage: BUILD
       name: "Build opendap/olfs"
       script:
         - export DOCKER_NAME="olfs"
@@ -229,10 +229,11 @@ jobs:
         - export DOCKER_NAME="ngap"
         - export DOCKER_DIR="ngap"
         - source "./build-$TARGET_OS"
-        - export OS_SNAPSHOT_IMAGE_TAG="opendap/hyrax:$DOCKER_NAME-snapshot-$TARGET_OS$TEST_DEPLOYMENT"
-        - echo "OS_SNAPSHOT_IMAGE_TAG is $OS_SNAPSHOT_IMAGE_TAG"
-        - export OS_BUILD_VERSION_TAG="opendap/hyrax:$DOCKER_NAME-$HYRAX_VERSION-$TARGET_OS$TEST_DEPLOYMENT"
-        - echo "OS_BUILD_VERSION_TAG is $OS_BUILD_VERSION_TAG"
+        - show_version
+        #- export OS_SNAPSHOT_IMAGE_TAG="opendap/hyrax:$DOCKER_NAME-snapshot-$TARGET_OS$TEST_DEPLOYMENT"
+        #- echo "OS_SNAPSHOT_IMAGE_TAG is $OS_SNAPSHOT_IMAGE_TAG"
+        #- export OS_BUILD_VERSION_TAG="opendap/hyrax:$DOCKER_NAME-$HYRAX_VERSION-$TARGET_OS$TEST_DEPLOYMENT"
+        #- echo "OS_BUILD_VERSION_TAG is $OS_BUILD_VERSION_TAG"
         - ./build-hyrax-ngap.sh
         - docker image ls -a
 

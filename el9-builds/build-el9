@@ -97,11 +97,28 @@ function read_build_recipe() {
     #APR_VERSION=${APR_VERSION:-$(echo "${build_recipe}" | grep apr | sed "s/apr-//g" | awk '{print $1;}')}
     TEST_DEPLOYMENT="${TEST_DEPLOYMENT:-"$(get_test_deployment_tag "$build_recipe_file")"}"
 
-    OS_SNAPSHOT_IMAGE_TAG=${OS_SNAPSHOT_IMAGE_TAG:-"opendap/$DOCKER_NAME:snapshot-$TARGET_OS$TEST_DEPLOYMENT"}
-    # loggy "$prolog OS_SNAPSHOT_IMAGE_TAG: $OS_SNAPSHOT_IMAGE_TAG"
+    ###############################################################################################
+    # For the ngap distribution we make special SNAPSHOT_IMAGE_TAG and BUILD_VERSION_TAG values
+    # because the ngap product gets tagged differently than the products from our other repos.
+    # Specifically, we use the opendap/hyrax repo since the ngap product is just a specialization
+    # of hyrax, at least for now. So we use the opendap/hyrax project identifier, and we add the
+    # $DOCKER_NAME ("ngap" in this case) to the image tag:
+    # Examples:
+    #     opendap/hyrax:ngap-snapshot-el9
+    #     opendap/hyrax:ngap-1.17.1-846-el9
+    #     opendap/hyrax:ngap-snapshot-el9-test-deploy
+    #     opendap/hyrax:ngap--1.17.1-846-el9-test-deploy
+    # We set (and replace) these values here, in the stage, so that they can be accessed by the
+    # travis/deploy_to_docker_hub.sh script used by the Travis deploy operation below.
+    if test "$DOCKER_NAME" != "ngap"
+    then
+        OS_SNAPSHOT_IMAGE_TAG="${OS_SNAPSHOT_IMAGE_TAG:-"opendap/$DOCKER_NAME:snapshot-$TARGET_OS$TEST_DEPLOYMENT"}"
+        OS_BUILD_VERSION_TAG="${OS_BUILD_VERSION_TAG:-"opendap/$DOCKER_NAME:$HYRAX_VERSION-$TARGET_OS$TEST_DEPLOYMENT"}"
+    else
+        OS_SNAPSHOT_IMAGE_TAG="${OS_SNAPSHOT_IMAGE_TAG:-"opendap/hyrax:$DOCKER_NAME-snapshot-$TARGET_OS$TEST_DEPLOYMENT"}"
+        OS_BUILD_VERSION_TAG="${OS_BUILD_VERSION_TAG:-"opendap/hyrax:$DOCKER_NAME-$HYRAX_VERSION-$TARGET_OS$TEST_DEPLOYMENT"}"
+    fi
 
-    OS_BUILD_VERSION_TAG=${OS_BUILD_VERSION_TAG:-"opendap/$DOCKER_NAME:$HYRAX_VERSION-$TARGET_OS$TEST_DEPLOYMENT"}
-    # loggy "$prolog OS_BUILD_VERSION_TAG: $OS_BUILD_VERSION_TAG"
 
     # We unset these so they are surely not set when we deploy
     unset SNAPSHOT_IMAGE_TAG
