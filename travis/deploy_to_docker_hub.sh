@@ -56,13 +56,15 @@ loggy "$HR1"
 
 
 
-loggy "AWS configuration: "
-loggy "$(aws configure list)"
-#loggy "Deploying ${SNAPSHOT_IMAGE_TAG} to AWS ECR"
-#docker tag "$SNAPSHOT_IMAGE_TAG" "$OPENDAP_AWS_ACCOUNT.dkr.ecr.us-east-1.amazonaws.com/$SNAPSHOT_IMAGE_TAG"
-#docker push "$OPENDAP_AWS_ACCOUNT.dkr.ecr.us-east-1.amazonaws.com/$SNAPSHOT_IMAGE_TAG"
-#loggy "AWS ECR deployment complete."
-
+if test -n "$SNAPSHOT_IMAGE_TAG"
+then
+    loggy "AWS configuration: "
+    loggy "$(aws configure list)"
+    loggy "Deploying ${SNAPSHOT_IMAGE_TAG} to AWS ECR"
+    docker tag "$SNAPSHOT_IMAGE_TAG" "$OPENDAP_AWS_ACCOUNT.dkr.ecr.us-east-1.amazonaws.com/$SNAPSHOT_IMAGE_TAG"
+    docker push "$OPENDAP_AWS_ACCOUNT.dkr.ecr.us-east-1.amazonaws.com/$SNAPSHOT_IMAGE_TAG"
+    loggy "AWS ECR deployment complete."
+fi
 
 loggy "END"
 loggy "$HR0"
