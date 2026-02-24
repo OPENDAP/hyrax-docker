@@ -247,7 +247,7 @@ RUN echo "Installing the latest olfs distribution (${OLFS_VERSION})." >&2
 RUN set -e \
     && echo "working_dir: "`pwd`  >&2 \
     && ls -l . \
-    && tar -C ${ROOT} -xzvf /${OLFS_DISTRO}.tgz \
+    && tar -C ${ROOT} -xzvf ./${OLFS_DISTRO}.tgz \
     && ls -l ${ROOT} \
     && echo "Unpacking warfile..."  >&2 \
     && mkdir -p $(readlink -f ${CATALINA_HOME})/webapps/${DEPLOYMENT_CONTEXT}/ \
