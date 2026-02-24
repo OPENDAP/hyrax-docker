@@ -26,6 +26,7 @@ ARG RELEASE_DATE
 ENV RELEASE_DATE ${RELEASE_DATE:-"unknown"}
 RUN echo "RELEASE_DATE: ${RELEASE_DATE}"
 
+ARG BES_VERSION
 RUN BES_VERSION_FOUND=$(cat bes_VERSION); \
     if [ "${BES_VERSION_FOUND}" == "${BES_VERSION:-missing}" ]; then \
         echo "BES Version: ${BES_VERSION}"; \
