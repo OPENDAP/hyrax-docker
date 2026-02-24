@@ -20,6 +20,10 @@ loggy "Logging into Docker Hub"
 echo "$DOCKER_HUB_PSWD" | docker login -u "$DOCKER_HUB_UID" --password-stdin
 loggy "$HR1"
 
+loggy "Running 'docker image ls -a'"
+loggy "$(docker image ls -a)"
+loggy "$HR2"
+
 
 loggy "Deploying '$OS_SNAPSHOT_IMAGE_TAG' to Docker Hub"
 docker push "$OS_SNAPSHOT_IMAGE_TAG"
