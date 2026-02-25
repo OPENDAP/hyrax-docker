@@ -70,7 +70,9 @@ stages:
     if: ((branch = master) and (type != pull_request)) or (branch = el9)
   - name: disabled
     if: branch = disabled
-
+  - name: BUILD_EL8_ONLY
+    if: branch = master
+    env: TARGET_OS="el8"
 jobs:
   include:
 
@@ -150,8 +152,8 @@ jobs:
           "$DOCKER_NAME"
         - docker image ls -a
 
-# DISABLED PERMANENTLY??
-    - stage: disabled
+# DISABLE PERMANENTLY??
+    - stage: BUILD_EL8_ONLY
       name: "Build opendap/hyrax_ncwms"
       script:
         - export DOCKER_NAME="hyrax_ncwms"
