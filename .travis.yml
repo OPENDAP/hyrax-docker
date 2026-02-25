@@ -72,8 +72,7 @@ stages:
     if: ((branch = master) and (type != pull_request)) or (branch = el9)
   - name: disabled
     if: branch = disabled
-#  - name: BUILD_EL8_ONLY
-#    if: branch = master and TARGET_OS="el8"
+
 
 jobs:
   include:
@@ -84,7 +83,7 @@ jobs:
     #
 
 # BUILD_AND_TEST
-    - stage: BUILD_AND_TEST
+    - stage: disabled
       name: "Build and Test opendap/hyrax"
       script:
         - export DOCKER_NAME="hyrax"
@@ -126,7 +125,7 @@ jobs:
         - ./travis/regression_test_script -i "$OS_SNAPSHOT_IMAGE_TAG" -l "$TESTS_LOG_BASE"
 
 # BUILD
-    - stage: disabled
+    - stage: BUILD
       name: "Build opendap/besd"
       script:
         - export DOCKER_NAME="besd"
@@ -156,9 +155,8 @@ jobs:
         - docker image ls -a
 
 # DISABLE PERMANENTLY??
-    - stage: BUILD_AND_TEST
+    - stage: BUILD
       name: "Build opendap/hyrax_ncwms"
-      if: env(TARGET_OS) = el8
       script:
         - export DOCKER_NAME="hyrax_ncwms"
         - export DOCKER_DIR="hyrax"
