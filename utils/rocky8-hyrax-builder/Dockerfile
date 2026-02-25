@@ -44,6 +44,7 @@ RUN set -e \
 #    && dnf config-manager --set-enabled "crb"
     # Set up our friends dnf-plugins-code, epel, and codeready-builder-for-rhel-9
     && dnf install -y dnf-plugins-core epel-release \
+    && update-alternatives --list \
 #    && yum clean all
 #
 #RUN set -e \
@@ -91,7 +92,7 @@ RUN set -e \
     && echo "# Switching to  java version: $java_version.$ARCH" \
     && update-alternatives --set java "$java_version.$ARCH" \
     && echo "# java version: $(java -version 2>&1)" \
-    && java -version \
+#    && java -version \
 #    && yum clean all
 #RUN set -e  \
 #    && yum install -y openjpeg2-devel jasper-devel
@@ -107,7 +108,10 @@ RUN set -e \
     && echo "# It's AWS CLI Time People!" \
     && echo "# Installing Python $python_version" \
     && dnf install -y python$python_version \
+    && echo "$HR" \
+    && update-alternatives --list \
     && echo "# Python version is: $(python3 --version)" \
+    && echo "$HR" \
     && echo "# Updating pip" \
     && curl -sS https://bootstrap.pypa.io/get-pip.py | python3 \
     && python3 -m pip install --upgrade pip \

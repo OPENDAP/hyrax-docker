@@ -1,17 +1,16 @@
 # paste config here
-
-# Initial Travic-CI control file. 6.11.15 jhrg
+#
+# Initial Travis-CI control file. 6.11.15 jhrg
 # Added sonar scan 3.12.19 jhrg 
-
-dist: xenial
+#
+#
+#
+dist: jammy
 
 language: python
 python:
-  - "3.9.7"
+  - "3.12"
 
-# command to install dependencies
-install:
-  - pip install -r requirements.txt
 
 services:
   - docker
@@ -19,6 +18,7 @@ services:
 branches:
   only:
     - master
+    - el9
 
 notifications:
   email:
@@ -41,73 +41,70 @@ env:
     - secure: "SpCKRpuU9nIHayBZCQVoUIEK/2niy1Lw0fub/O/mAvzq33/VQa1K4WZcAJjl95KS/mrFjj3e5Gp35jXRNeViB8D3DKE9oZ3R5WDk1V66qDpmxYCSW/6iR2Zm6rjBB4wV6wWPZ1WYBg3Hg6oVZD1X8c5ABqJk7PE59L1IRF8Ocf3p8K0EUYDGINakXZ/RJHe6HtA4++oMhq54dPUTAa6xUrkCw3KNC1UXkoofzS3r/KBAZ+MPtzZkR8/dK8qPQ8hiOuH4Blj4T+d4oHPzcbmz5Nze10wZAhAm6+KwLLBSCs7Morverb1acdKPyye/t1dhzhT3/wiaP75vxDF/STdBYH6GX9HuV9JWXC8bJZxrkZcxyuVsreq/ClpLOhOk0Yfd6pTEa/QZZ+U6hyxcNbu6rROAAZpgsjPAiH3vVC9OdFo11p7bZMpBGyqUeiS82XlZ/3Svj//tiUFji2xwua1SHiM3wmgrLjII2iw8eSYuCEjqtoV6jPT0LfKzLSzuCt1S77SzaujkwBiQ1mSIJuE9SNvpXyJEQ4BInVFn+jOxCxQf6sT7ZnW7mxfK1MmgSKpzoBp8WlIAQAIewTJeaU59ws1nYbha84b80vEXp839Eesfpsf5C44dlnFSCa7sZFJ2tRjPaHv7Swt0dyJ2AmL0EHCfecX3e5sSKQAtxLN9+1E="
     # DOCKER_HUB_PSWD for our DockerHub account
     - secure: "TwtIaxZhEc+THFGe7qcOTmgeXG37tG9Hqmx0/JQS4UBYmbM+n/RbxV0IK5WjTBsvV/UBPVPdYLb0EOgsZDWjrFR7kyemd1dLc4fgb7EnHEyl17GUK3CR+ZtnRNAn+u10CJ3lq1d+ttda0GrEOpGT9e2nqPo19BxQ4vlhuFq8TAb4lKfBz3y89sY0Py+3htDtqNrIcZ1Ca0cyKmkU90/42Hx5kmBJPcFAIIrxy46cF4iNyQ8cS5TAmY/vQ+ZcoiO5yCA6ACqKWqFH2i7qUZhVsBWI6VWgQTbuRKOJ4RdOv2QtHb3QGO+PdxxitpQvw2aYam4nI7WapqNk84hu+oXoavDSR0kN21vlpfvcyfIi9JuEGGmVb7irbCCVo27kLHrRrntByKJ7GpR5Wf9s8frWd53iri9k0DSwxvKGZBIaFPodnYsJKF1Ck16IrJrr6AgPZvTKN4vBesFiRvI6sIJrZL6gD62cW2s196zKaSzcT0DccUKCaG6/javNazMo+sk74tOgqaeX0r/whXv8Rc/oobdUFI0AkGGOTzp4+QHVKX1swPEVEjP00ewOyurQinG1yhkqOgQU7s6f5dXabepmnFtH5j5W8AjDL6kISk1w/UIfMwGkUDXyxSGZWLaLag2oDxb+0Xe4CC+9m6SxtnRSzUjXDzOL4QBB8ri0VBSMA2E="
-    - TARGET_OS="el8"
-    - RELEASE_DATE=`date +%s`
-    - VERSION_FILE="${TARGET_OS}-build-recipe"
-    - LIBDAP_VERSION=$(grep "libdap4-" ${VERSION_FILE} | awk '{print $1;}' - | sed "s/libdap4-//g")
-    - BES_VERSION=$(grep "bes-" ${VERSION_FILE} | awk '{print $1;}' - | sed "s/bes-//g")
-    - HYRAX_VERSION=$(grep "hyrax-" ${VERSION_FILE} | awk '{print $1;}' - | sed "s/hyrax-//g")
-    - OLFS_VERSION=$(grep "olfs-" ${VERSION_FILE} | awk '{print $1;}' - | sed "s/olfs-//g")
-    - OLFS_DISTRO="olfs-${OLFS_VERSION}-webapp.tgz"
-    - OLFS_DISTRO_URL="s3://opendap.travis.build/${OLFS_DISTRO}"
-    - NGAP_DISTRO="ngap-${OLFS_VERSION}-webapp.tgz"
-    - NGAP_DISTRO_URL="s3://opendap.travis.build/${NGAP_DISTRO}"
-    - ROBOTS_DISTRO="robots-olfs-${OLFS_VERSION}-webapp.tgz"
-    - ROBOTS_DISTRO_URL="s3://opendap.travis.build/${ROBOTS_DISTRO}"
-    - TOMCAT_MAJOR_VERSION=9
+    - BUILD_RECIPE="travis-build-recipe"
+    - TARGET_OS=$( grep "TARGET_OS" "$BUILD_RECIPE" | awk '{print $2;}' )
+    - RELEASE_DATE="$(date +%s)"
     - S3_BUILD_BUCKET="opendap.travis.build"
     - ADD_DEBUG_RPMS=""
 
 before_install:
-  - python3 --version
+  - echo "# travis.before_install() - BUILD_RECIPE is $BUILD_RECIPE"
+  - echo "# travis.before_install() - TARGET_OS is $TARGET_OS"
+  - echo "# travis.before_install() - PythonVersion is $(python3 --version)"
+  - echo "# travis.before_install() - Using pip3 to install awscli"
   - pip3 install awscli
-  - if test "${TRAVIS_PULL_REQUEST}" = "false"; then export DEPLOY_ME="true"; else export DEPLOY_ME="false"; fi
+  - echo "# travis.before_install() - TRAVIS_PULL_REQUEST is $TRAVIS_PULL_REQUEST"
+  - echo "# travis.before_install() -       TRAVIS_BRANCH is $TRAVIS_BRANCH"
+  - if test "$TRAVIS_PULL_REQUEST" = "false" -o "$TRAVIS_BRANCH" = "el9" ; then export DEPLOY_ME="true"; else export DEPLOY_ME="false"; fi
+  - echo "# travis.before_install() -           DEPLOY_ME is $DEPLOY_ME"
+
 
 install:
   - echo "print env:"
   - printenv
   - echo $DOCKER_HUB_PSWD | docker login -u $DOCKER_HUB_UID --password-stdin
-  - echo "Retrieving OLFS Distribution file ${OLFS_DISTRO}"
-  - aws --region=us-east-1 s3 cp ${OLFS_DISTRO_URL} ./builds/${OLFS_DISTRO}
-  - echo "Retrieving ROBOTS Distribution file ${ROBOTS_DISTRO}"
-  - aws --region=us-east-1 s3 cp ${ROBOTS_DISTRO_URL} ./builds/${ROBOTS_DISTRO}
-  - echo "Retrieving NGAP Distribution file ${NGAP_DISTRO}"
-  - aws --region=us-east-1 s3 cp ${NGAP_DISTRO_URL} ./builds/${NGAP_DISTRO}
-  - ls -l ./builds
 
 stages:
   - name: BUILD_AND_TEST
-    if:  branch = master
+    if:  branch = master OR branch = el9
   - name: BUILD
-    if:  branch = master
+    if:  branch = master OR branch = el9
   - name: TEST_DEPLOYED_IMAGE
-    if: (branch = master) and (type != pull_request)
+    if: ((branch = master) and (type != pull_request)) or (branch = el9)
   - name: disabled
     if: branch = disabled
+
 
 jobs:
   include:
 
     ############################################################################
     #
-    # RH8 Builds
+    # RHEL Builds
     #
+
+# BUILD_AND_TEST
     - stage: BUILD_AND_TEST
-      name: "Build and Test opendap/hyrax:snapshot (RH8)"
+      name: "Build and Test opendap/hyrax"
       script:
-        - cd "${TARGET_OS}-builds"
         - export DOCKER_NAME="hyrax"
-        - source ./build-rh8
-        - export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}:snapshot$TEST_DEPLOYMENT"
-        - export BUILD_VERSION_TAG="opendap/${DOCKER_NAME}:${HYRAX_VERSION}$TEST_DEPLOYMENT"
-        - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
+        - export DOCKER_DIR="$DOCKER_NAME"
+        - echo "DOCKER_NAME '$DOCKER_NAME'"
+        - echo "RELEASE_DATE '$RELEASE_DATE'"
+        - echo "BUILDING FOR $TARGET_OS"
         - export BES_IMAGE_TAG="opendap/bes_core:${BES_VERSION}-el8"
+        - cd "$TARGET_OS-builds"
+        - source "./build-$TARGET_OS"
         - show_version
-        - get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_VERSION}"
+        - echo "USING TOMCAT MAJOR VERSION '$TOMCAT_MAJOR_VERSION'"
+        - export TESTS_LOG_BASE="$DOCKER_NAME-regression-tests-$TRAVIS_JOB_NUMBER"
+        - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "$TOMCAT_MAJOR_VERSION")
+        - show_version
+        - get_tomcat_distro "$DOCKER_NAME" "$TOMCAT_VERSION"
         - s3_get_olfs_distro
-          "${S3_BUILD_BUCKET}"
-          "${DOCKER_NAME}"
-          "${OLFS_VERSION}" 2>&1
+          "$S3_BUILD_BUCKET"
+          "$DOCKER_NAME"
+          "$OLFS_VERSION" 2>&1
         - set -e # Don't keep going if the docker build fails....
         - docker build
           --build-arg TOMCAT_VERSION
@@ -117,51 +114,57 @@ jobs:
           --build-arg BES_VERSION
           --build-arg BES_IMAGE_TAG
           --build-arg OLFS_VERSION
-          --tag "${SNAPSHOT_IMAGE_TAG}"
-          --tag "${BUILD_VERSION_TAG}"
-          "${DOCKER_NAME}"
+          --tag "$OS_SNAPSHOT_IMAGE_TAG"
+          --tag "$OS_BUILD_VERSION_TAG"
+          "$DOCKER_NAME"
         - docker image ls -a
         - cd ..
         - echo "Running Test Script"
-        - ./travis/regression_test_script -i ${SNAPSHOT_IMAGE_TAG}
+        - ./travis/regression_test_script -i "$OS_SNAPSHOT_IMAGE_TAG" -l "$TESTS_LOG_BASE"
 
+# BUILD
     - stage: BUILD
-      name: "Build opendap/besd:snapshot (RH8)"
+      name: "Build opendap/besd"
       script:
-        - cd "${TARGET_OS}-builds"
         - export DOCKER_NAME="besd"
-        - source ./build-rh8
         - export BES_IMAGE_TAG="opendap/bes_core:${BES_VERSION}-el8"
-        - export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}:snapshot$TEST_DEPLOYMENT"
-        - export BUILD_VERSION_TAG="opendap/${DOCKER_NAME}:${BES_VERSION}$TEST_DEPLOYMENT"
+        - echo "# RELEASE_DATE '$RELEASE_DATE'"
+        - cd "$TARGET_OS-builds"
+        - source "./build-$TARGET_OS"
         - show_version
+        #- export BES_VERSION_TAG="opendap/$DOCKER_NAME:$BES_VERSION-$TEST_DEPLOYMENT"
+        #- echo "# BES_VERSION_TAG '$BES_VERSION_TAG'"
+        - OS_BUILD_VERSION_TAG="opendap/$DOCKER_NAME:$BES_VERSION-$TARGET_OS$TEST_DEPLOYMENT"
+        - echo "#  OS_BUILD_VERSION_TAG '$OS_BUILD_VERSION_TAG'"
+        - echo "# OS_SNAPSHOT_IMAGE_TAG '$OS_SNAPSHOT_IMAGE_TAG'"
         - docker build
           --build-arg RELEASE_DATE
           --build-arg HYRAX_VERSION
           --build-arg LIBDAP_VERSION
           --build-arg BES_VERSION
           --build-arg BES_IMAGE_TAG
-          --tag "${SNAPSHOT_IMAGE_TAG}"
-          --tag "${BUILD_VERSION_TAG}"
-          "${DOCKER_NAME}"
+          --tag "$OS_SNAPSHOT_IMAGE_TAG"
+          --tag "$OS_BUILD_VERSION_TAG"
+          "$DOCKER_NAME"
         - docker image ls -a
 
     - stage: BUILD
-      name: "Build opendap/hyrax_ncwms:snapshot (RH8)"
+      name: "Build opendap/hyrax_ncwms"
       script:
-        - cd "${TARGET_OS}-builds"
-        - export DOCKER_NAME="hyrax"
-        - source ./build-rh8
+        - export DOCKER_NAME="hyrax_ncwms"
+        - export DOCKER_DIR="hyrax"
         - export BES_IMAGE_TAG="opendap/bes_core:${BES_VERSION}-el8"
-        - export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}_ncwms:snapshot$TEST_DEPLOYMENT"
-        - export BUILD_VERSION_TAG="opendap/${DOCKER_NAME}_ncwms:${HYRAX_VERSION}$TEST_DEPLOYMENT"
-        - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
+        - cd "$TARGET_OS-builds"
+        - source "./build-$TARGET_OS"
+        - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "$TOMCAT_MAJOR_VERSION")
         - show_version
-        - get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_VERSION}"
+        - get_tomcat_distro "$DOCKER_DIR" "$TOMCAT_VERSION"
+        - ls -l "$DOCKER_DIR"/*.rpm
         - s3_get_olfs_distro
-          "${S3_BUILD_BUCKET}"
-          "${DOCKER_NAME}"
-          "${OLFS_VERSION}" 2>&1
+          "$S3_BUILD_BUCKET"
+          "$DOCKER_DIR"
+          "$OLFS_VERSION" 2>&1
+        - ls -l "$DOCKER_DIR"/*.tar.gz
         - docker build
           --build-arg TOMCAT_VERSION
           --build-arg RELEASE_DATE
@@ -171,49 +174,21 @@ jobs:
           --build-arg BES_IMAGE_TAG
           --build-arg OLFS_VERSION
           --build-arg USE_NCWMS=true
-          --tag "${SNAPSHOT_IMAGE_TAG}"
-          --tag "${BUILD_VERSION_TAG}"
-          "${DOCKER_NAME}"
+          --tag "$OS_SNAPSHOT_IMAGE_TAG"
+          --tag "$OS_BUILD_VERSION_TAG"
+          "$DOCKER_DIR"
         - docker image ls -a
 
-    - stage: BUILD
-      name: "Build opendap/hyrax:ngap-snapshot (RH8)"
-      script:
-        - cd "${TARGET_OS}-builds"
-        - export DOCKER_NAME="ngap"
-        - source ./build-rh8
-        - export BES_IMAGE_TAG="opendap/bes_core:${BES_VERSION}-el8"
-        - export SNAPSHOT_IMAGE_TAG="opendap/hyrax:${DOCKER_NAME}-snapshot$TEST_DEPLOYMENT"
-        - export BUILD_VERSION_TAG="opendap/hyrax:${DOCKER_NAME}-${HYRAX_VERSION}$TEST_DEPLOYMENT"
-        - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
-        - show_version
-        - get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_VERSION}"
-        - get_ngap_olfs_distro
-          "${S3_BUILD_BUCKET}"
-          "${DOCKER_NAME}"
-          "${OLFS_VERSION}" 2>&1
-        - docker build
-          --build-arg TOMCAT_VERSION
-          --build-arg RELEASE_DATE
-          --build-arg HYRAX_VERSION
-          --build-arg LIBDAP_VERSION
-          --build-arg BES_VERSION
-          --build-arg BES_IMAGE_TAG
-          --build-arg OLFS_VERSION
-          --tag "${SNAPSHOT_IMAGE_TAG}"
-          --tag "${BUILD_VERSION_TAG}"
-          "${DOCKER_NAME}"
-        - docker image ls -a
 
+# BUILD
     - stage: BUILD
-      name: "Build opendap/olfs:snapshot"
+      name: "Build opendap/olfs"
       script:
-        - cd "${TARGET_OS}-builds"
         - export DOCKER_NAME="olfs"
-        - source ./build-rh8
-        - export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}:snapshot$TEST_DEPLOYMENT"
-        - export BUILD_VERSION_TAG="opendap/${DOCKER_NAME}:${OLFS_VERSION}$TEST_DEPLOYMENT"
-        - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
+        - export DOCKER_DIR="olfs"
+        - cd "$TARGET_OS-builds"
+        - source "./build-$TARGET_OS"
+        - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "$TOMCAT_MAJOR_VERSION")
         - show_version
         - get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_VERSION}"
         - s3_get_olfs_distro
@@ -225,27 +200,51 @@ jobs:
           --build-arg RELEASE_DATE
           --build-arg HYRAX_VERSION
           --build-arg OLFS_VERSION
-          --tag "${SNAPSHOT_IMAGE_TAG}"
-          --tag "${BUILD_VERSION_TAG}" olfs
+          --tag "$OS_SNAPSHOT_IMAGE_TAG"
+          --tag "$OS_BUILD_VERSION_TAG" olfs
+        - docker image ls -a
+
+    - stage: BUILD
+      name: "Build opendap/hyrax:ngap"
+      script:
+        - cd "$TARGET_OS-builds"
+        - export DOCKER_NAME="ngap"
+        - export DOCKER_DIR="ngap"
+        - export BES_IMAGE_TAG="opendap/bes_core:${BES_VERSION}-el8"
+        - source "./build-$TARGET_OS"
+        - show_version
+        - ./build-hyrax-ngap.sh
         - docker image ls -a
 
     - stage: TEST_DEPLOYED_IMAGE
-      name: "Test Deployed Image (RH8)"
+      name: "Test Deployed Image"
       script:
-        - source ./el8-builds/build-rh8 ./el8-build-recipe
-        - export TEST_IMAGE="opendap/hyrax:${HYRAX_VERSION}$TEST_DEPLOYMENT"
-        - echo "Running Hyrax Regression Test Script on ${TEST_IMAGE}"
-        - ./travis/regression_test_script -i "${TEST_IMAGE}"
+        - cd "$TARGET_OS-builds"
+        - source "./build-$TARGET_OS"
+        - cd ..
+        - echo "Running Hyrax Regression Test Script on $OS_SNAPSHOT_IMAGE_TAG"
+        - ./travis/regression_test_script -i "$OS_SNAPSHOT_IMAGE_TAG" -l "deployed-image-regression-tests-$TRAVIS_JOB_NUMBER"
         - export DEPLOY_ME="false"
+
+after_script:
+  - ./travis/upload-test-results.sh "$DOCKER_NAME" "$TESTS_LOG_BASE.tgz"
 
 before_deploy:
   - export DOCKER_LOGIN=`aws ecr get-login --region us-east-1 | sed "s/-e none //g"`;
   - $DOCKER_LOGIN;
-  - echo "DEPLOY_ME is ${DEPLOY_ME}"
+  - echo "# DEPLOY_ME is $DEPLOY_ME"
 
 deploy:
   - provider: script
-    script: bash ${TRAVIS_BUILD_DIR}/travis/deploy_to_docker_hub.sh
+    script: bash "$TRAVIS_BUILD_DIR/travis/deploy_to_docker_hub.sh"
     on:
       branch: master
-      condition: ${DEPLOY_ME} = "true"
+      condition: $DEPLOY_ME = "true"
+
+  - provider: script
+    script: bash "$TRAVIS_BUILD_DIR/travis/deploy_to_docker_hub.sh"
+    on:
+      branch: el9
+      condition: $DEPLOY_ME = "true"
+
+
