@@ -110,6 +110,9 @@ export RELEASE_HOST=${RELEASE_HOST:-"https://www.opendap.org"}
 function show_version(){
     loggy "${HR}"
     loggy "         RELEASE_DATE: ${RELEASE_DATE}"
+    loggy "            TARGET_OS: $TARGET_OS"
+    loggy "           DOCKER_DIR: $DOCKER_DIR"
+    loggy "          DOCKER_NAME: $DOCKER_NAME"
     loggy "        HYRAX_VERSION: ${HYRAX_VERSION}"
     loggy "         OLFS_VERSION: ${OLFS_VERSION}"
     loggy "          BES_VERSION: ${BES_VERSION}"

@@ -156,6 +156,7 @@ jobs:
 # DISABLE PERMANENTLY??
     - stage: BUILD
       name: "Build opendap/hyrax_ncwms"
+      if: env(TARGET_OS) = el8
       script:
         - export DOCKER_NAME="hyrax_ncwms"
         - export DOCKER_DIR="hyrax"
@@ -170,11 +171,13 @@ jobs:
           "$TARGET_OS"
           "$LIBDAP_VERSION"
           "$BES_VERSION" "$ADD_DEBUG_RPMS" 2>&1
+        - ls -l "$DOCKER_DIR"
         - ls -l "$DOCKER_DIR/*.rpm"
         - s3_get_olfs_distro
           "$S3_BUILD_BUCKET"
           "$DOCKER_DIR"
           "$OLFS_VERSION" 2>&1
+        - ls -l "$DOCKER_DIR"
         - ls -l "$DOCKER_DIR/*.tar.gz"
         - docker build
           --build-arg TOMCAT_VERSION
@@ -184,7 +187,7 @@ jobs:
           --build-arg BES_VERSION
           --build-arg OLFS_VERSION
           --build-arg USE_NCWMS=true
-          --tag "OS_$SNAPSHOT_IMAGE_TAG"
+          --tag "$OS_SNAPSHOT_IMAGE_TAG"
           --tag "$OS_BUILD_VERSION_TAG"
           "$DOCKER_DIR"
         - docker image ls -a
