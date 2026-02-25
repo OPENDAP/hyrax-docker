@@ -155,7 +155,7 @@ jobs:
 # DISABLE PERMANENTLY??
     - stage: BUILD
       name: "Build opendap/hyrax_ncwms"
-      if: env(TARGET_OS)="el8"
+      if: env(TARGET_OS) = el8
       script:
         - export DOCKER_NAME="hyrax_ncwms"
         - export DOCKER_DIR="hyrax"
