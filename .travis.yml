@@ -83,7 +83,7 @@ jobs:
     #
 
 # BUILD_AND_TEST
-    - stage: disabled
+    - stage: BUILD_AND_TEST
       name: "Build and Test opendap/hyrax"
       script:
         - export DOCKER_NAME="hyrax"
@@ -192,7 +192,7 @@ jobs:
 
 
 # BUILD
-    - stage: disabled
+    - stage: BUILD
       name: "Build opendap/olfs"
       script:
         - export DOCKER_NAME="olfs"
@@ -215,7 +215,7 @@ jobs:
           --tag "$OS_BUILD_VERSION_TAG" olfs
         - docker image ls -a
 
-    - stage: disabled
+    - stage: BUILD
       name: "Build opendap/hyrax:ngap"
       script:
         - cd "$TARGET_OS-builds"
@@ -226,7 +226,7 @@ jobs:
         - ./build-hyrax-ngap.sh
         - docker image ls -a
 
-    - stage: disabled
+    - stage: TEST_DEPLOYED_IMAGE
       name: "Test Deployed Image"
       script:
         - cd "$TARGET_OS-builds"
