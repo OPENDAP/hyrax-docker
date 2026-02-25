@@ -84,7 +84,7 @@ jobs:
     #
 
 # BUILD_AND_TEST
-    - stage: BUILD_AND_TEST
+    - stage: disabled
       name: "Build and Test opendap/hyrax"
       script:
         - export DOCKER_NAME="hyrax"
@@ -156,7 +156,7 @@ jobs:
         - docker image ls -a
 
 # DISABLE PERMANENTLY??
-    - stage: BUILD
+    - stage: BUILD_AND_TEST
       name: "Build opendap/hyrax_ncwms"
       if: env(TARGET_OS) = el8
       script:
