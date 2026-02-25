@@ -71,8 +71,8 @@ stages:
   - name: disabled
     if: branch = disabled
   - name: BUILD_EL8_ONLY
-    if: branch = master
-    env: TARGET_OS="el8"
+    if: branch = master and $TARGET_OS="el8"
+
 jobs:
   include:
 
