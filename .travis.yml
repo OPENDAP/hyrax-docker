@@ -171,14 +171,12 @@ jobs:
           "$TARGET_OS"
           "$LIBDAP_VERSION"
           "$BES_VERSION" "$ADD_DEBUG_RPMS" 2>&1
-        - ls -l "$DOCKER_DIR"
-        - ls -l "$DOCKER_DIR/*.rpm"
+        - ls -l "$DOCKER_DIR"/*.rpm
         - s3_get_olfs_distro
           "$S3_BUILD_BUCKET"
           "$DOCKER_DIR"
           "$OLFS_VERSION" 2>&1
-        - ls -l "$DOCKER_DIR"
-        - ls -l "$DOCKER_DIR/*.tar.gz"
+        - ls -l "$DOCKER_DIR"/*.tar.gz
         - docker build
           --build-arg TOMCAT_VERSION
           --build-arg RELEASE_DATE
