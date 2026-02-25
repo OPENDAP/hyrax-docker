@@ -19,13 +19,14 @@ loggy "$prolog BEGIN"
 default_time_out=30
 default_image_name="opendap/hyrax:snapshot"
 default_endpoint="http://localhost:8080/opendap"
+default_tests_log_base="regression_test_output"
 
 time_out="${default_time_out}"
 test_image_name="${default_image_name}"
 end_point="${default_endpoint}"
 netrc_file=""
 tests=""
-tests_log_base=
+tests_log_base="${default_tests_log_base}"
 
 # Must be identical to Dockerfile; initially set in opendap/bes_core, based
 # on hyrax-dependencies prefix path
