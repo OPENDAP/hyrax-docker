@@ -32,6 +32,11 @@ function read_build_recipe() {
     export BES_VERSION=""
     export BUILD_DMRPP_VERSION=""
     export LIBDAP_VERSION=""
+    export SNAPSHOT_IMAGE_TAG=""
+    export BUILD_VERSION_TAG=""
+    export OS_SNAPSHOT_IMAGE_TAG=""
+    export OS_BUILD_VERSION_TAG=""
+
     RELEASE_DATE=${RELEASE_DATE:-$(echo "${build_recipe}" | grep hyrax | awk '{print $2;}')}
     HYRAX_VERSION=${HYRAX_VERSION:-$(echo "${build_recipe}" | grep hyrax | awk '{print $1;}' | sed "s/hyrax-//g" )}
     OLFS_VERSION=${OLFS_VERSION:-$(echo "${build_recipe}" | grep olfs | sed "s/olfs-//g" | awk '{print $1;}')}
@@ -54,36 +59,82 @@ function read_build_recipe() {
             TEST_DEPLOYMENT="$td_value"
         fi
     fi
+
+
+    if test "$DOCKER_NAME" == "ngap"
+    then
+        ###############################################################################################
+        # For the ngap distribution we make special SNAPSHOT_IMAGE_TAG and BUILD_VERSION_TAG values
+        # because the ngap product gets tagged differently than the products from our other repos.
+        # Specifically, we use the opendap/hyrax repo since the ngap product is just a specialization
+        # of hyrax, at least for now. So we use the opendap/hyrax project identifier, and we add the
+        # $DOCKER_NAME ("ngap" in this case) to the image tag:
+        # Examples:
+        #     opendap/hyrax:ngap-snapshot
+        #     opendap/hyrax:ngap-snapshot-el8
+        #     opendap/hyrax:ngap-1.17.1-846
+        #     opendap/hyrax:ngap-1.17.1-846-el8
+        #     opendap/hyrax:ngap-snapshot-el8-test-deploy
+        #     opendap/hyrax:ngap--1.17.1-846-el8-test-deploy
+        # We set (and replace) these values here, in the stage, so that they can be accessed by the
+        # travis/deploy_to_docker_hub.sh script used by the Travis deploy operation below.
+        SNAPSHOT_IMAGE_TAG="${SNAPSHOT_IMAGE_TAG:-"opendap/hyrax:$DOCKER_NAME-snapshot$TEST_DEPLOYMENT"}"
+        BUILD_VERSION_TAG="${BUILD_VERSION_TAG:-"opendap/hyrax:$DOCKER_NAME-$HYRAX_VERSION$TEST_DEPLOYMENT"}"
+
+        OS_SNAPSHOT_IMAGE_TAG="${OS_SNAPSHOT_IMAGE_TAG:-"opendap/hyrax:$DOCKER_NAME-snapshot-$TARGET_OS$TEST_DEPLOYMENT"}"
+        OS_BUILD_VERSION_TAG="${OS_BUILD_VERSION_TAG:-"opendap/hyrax:$DOCKER_NAME-$HYRAX_VERSION-$TARGET_OS$TEST_DEPLOYMENT"}"
+    else
+        ###############################################################################################
+        # This is the nominal tagging scheme
+        #
+
+        SNAPSHOT_IMAGE_TAG="${SNAPSHOT_IMAGE_TAG:-"opendap/$DOCKER_NAME:snapshot$TEST_DEPLOYMENT"}"
+        BUILD_VERSION_TAG="${BUILD_VERSION_TAG:-"opendap/$DOCKER_NAME:$HYRAX_VERSION$TEST_DEPLOYMENT"}"
+
+        OS_SNAPSHOT_IMAGE_TAG="${OS_SNAPSHOT_IMAGE_TAG:-"opendap/$DOCKER_NAME:snapshot-$TARGET_OS$TEST_DEPLOYMENT"}"
+        OS_BUILD_VERSION_TAG="${OS_BUILD_VERSION_TAG:-"opendap/$DOCKER_NAME:$HYRAX_VERSION-$TARGET_OS$TEST_DEPLOYMENT"}"
+    fi
+
 }
 read_build_recipe "${BUILD_RECIPE_FILE}"
 
 
-export SNAPSHOT_IMAGE_TAG=${SNAPSHOT_IMAGE_TAG:-"opendap/${DOCKER_NAME}:snapshot"}
-export BUILD_VERSION_TAG=${BUILD_VERSION_TAG:-"opendap/${DOCKER_NAME}:${HYRAX_VERSION}"}
+
+
+
+
 
 export RELEASE_HOST=${RELEASE_HOST:-"https://www.opendap.org"}
 
 
 function show_version(){
     loggy "${HR}"
-    loggy "        RELEASE_DATE: ${RELEASE_DATE}"
-    loggy "       HYRAX_VERSION: ${HYRAX_VERSION}"
-    loggy "        OLFS_VERSION: ${OLFS_VERSION}"
-    loggy "         BES_VERSION: ${BES_VERSION}"
-    loggy " BUILD_DMRPP_VERSION: ${BUILD_DMRPP_VERSION}"
-    loggy "      LIBDAP_VERSION: ${LIBDAP_VERSION}"
-    loggy "         DOCKER_NAME: ${DOCKER_NAME}"
-    loggy "   BUILD_VERSION_TAG: ${BUILD_VERSION_TAG}"
-    loggy "  SNAPSHOT_IMAGE_TAG: ${SNAPSHOT_IMAGE_TAG}"
-    loggy "     S3_BUILD_BUCKET: ${S3_BUILD_BUCKET}"
-    loggy "      SLEEP_INTERVAL: ${SLEEP_INTERVAL}"
+    loggy "         RELEASE_DATE: ${RELEASE_DATE}"
+    loggy "            TARGET_OS: $TARGET_OS"
+    loggy "           DOCKER_DIR: $DOCKER_DIR"
+    loggy "          DOCKER_NAME: $DOCKER_NAME"
+    loggy "        HYRAX_VERSION: ${HYRAX_VERSION}"
+    loggy "         OLFS_VERSION: ${OLFS_VERSION}"
+    loggy "          BES_VERSION: ${BES_VERSION}"
+    loggy "  BUILD_DMRPP_VERSION: ${BUILD_DMRPP_VERSION}"
+    loggy "       LIBDAP_VERSION: ${LIBDAP_VERSION}"
+    loggy "          DOCKER_NAME: ${DOCKER_NAME}"
     loggy ""
-    loggy "TOMCAT_MAJOR_VERSION: ${TOMCAT_MAJOR_VERSION}"
+    loggy "    BUILD_VERSION_TAG: '$BUILD_VERSION_TAG'"
+    loggy " OS_BUILD_VERSION_TAG: '$OS_BUILD_VERSION_TAG'"
+    loggy ""
+    loggy "   SNAPSHOT_IMAGE_TAG: '$SNAPSHOT_IMAGE_TAG'"
+    loggy "OS_SNAPSHOT_IMAGE_TAG: '$OS_SNAPSHOT_IMAGE_TAG'"
+    loggy ""
+    loggy "      S3_BUILD_BUCKET: ${S3_BUILD_BUCKET}"
+    loggy "       SLEEP_INTERVAL: ${SLEEP_INTERVAL}"
+    loggy ""
+    loggy " TOMCAT_MAJOR_VERSION: ${TOMCAT_MAJOR_VERSION}"
     loggy "      TOMCAT_VERSION: ${TOMCAT_VERSION}"
     loggy ""
-    loggy "            NO_CACHE: ${NO_CACHE}"
+    loggy "             NO_CACHE: ${NO_CACHE}"
     loggy ""
-    loggy "     TEST_DEPLOYMENT: '$TEST_DEPLOYMENT'"
+    loggy "      TEST_DEPLOYMENT: '$TEST_DEPLOYMENT'"
     loggy ""
 }
 
@@ -615,15 +666,15 @@ function s3_get_build_dmrpp_distro() {
 
 ################################################################################
 #
-# woo_get_olfs_distro() - Get the rpm and war files need for a Hyrax installation
+# curl_get_olfs_distro() - Get the rpm and war files need for a Hyrax installation
 #    from the identified S3 bucket.
 #    $1 - The AWS S3 bucket from which to pull the Hyrax components
 #    $2 - The directory into which to place the Hyrax components.
 #    $3 - The olfs version number ##.##.##-##
 #
-function woo_get_olfs_distro() {
+function curl_get_olfs_distro() {
     loggy "${HR}"
-    loggy "TASK: woo_get_olfs_distro()"
+    loggy "TASK: curl_get_olfs_distro()"
     local target_dir="${1}"
     loggy "        target_dir: ${target_dir}"
     local olfs_version="${2}"
@@ -770,7 +821,7 @@ function build_hyrax_ncwms_docker() {
     loggy "build_hyrax_ncwms_docker()"
     loggy ""
     export DOCKER_NAME="hyrax"
-    source ./build-rh8
+    source ./build-el8
     export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}_ncwms:rh8-snapshot"
     export BUILD_VERSION_TAG="opendap/${DOCKER_NAME}_ncwms:rh8-${HYRAX_VERSION}"
     export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
