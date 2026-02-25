@@ -47,6 +47,7 @@ env:
     - ADD_DEBUG_RPMS=""
 
 before_install:
+  - echo "# travis.before_install() - BUILD_RECIPE is $BUILD_RECIPE"
   - echo "# travis.before_install() - TARGET_OS is $TARGET_OS"
   - echo "# travis.before_install() - PythonVersion is $(python3 --version)"
   - echo "# travis.before_install() - Using pip3 to install awscli"
