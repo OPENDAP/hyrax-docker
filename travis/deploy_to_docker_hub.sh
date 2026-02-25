@@ -58,7 +58,6 @@ loggy "$HR1"
 
 if test -n "$SNAPSHOT_IMAGE_TAG"
 then
-    OPENDAP_AWS_ACCOUNT=747931985039
     loggy "AWS configuration: "
     loggy "$(aws configure list)"
     loggy "OPENDAP_AWS_ACCOUNT: $OPENDAP_AWS_ACCOUNT"
