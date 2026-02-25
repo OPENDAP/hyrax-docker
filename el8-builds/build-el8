@@ -43,6 +43,7 @@ function read_build_recipe() {
     BES_VERSION=${BES_VERSION:-$(echo "${build_recipe}" | grep bes | sed "s/bes-//g" | awk '{print $1;}')}
     BUILD_DMRPP_VERSION=${BUILD_DMRPP_VERSION:-$(echo "${build_recipe}" | grep "build_dmrpp-" | sed "s/build_dmrpp-//g" | awk '{print $1;}')}
     LIBDAP_VERSION=${LIBDAP_VERSION:-$(echo "${build_recipe}" | grep libdap4 | sed "s/libdap4-//g"| awk '{print $1;}')}
+    BES_CORE_IMAGE_TAG="opendap/bes_core:$BES_VERSION-$TARGET_OS"
 
     local td_value="-test-deploy"
     export TEST_DEPLOYMENT=""
