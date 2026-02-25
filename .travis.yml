@@ -43,6 +43,7 @@ env:
     - secure: "TwtIaxZhEc+THFGe7qcOTmgeXG37tG9Hqmx0/JQS4UBYmbM+n/RbxV0IK5WjTBsvV/UBPVPdYLb0EOgsZDWjrFR7kyemd1dLc4fgb7EnHEyl17GUK3CR+ZtnRNAn+u10CJ3lq1d+ttda0GrEOpGT9e2nqPo19BxQ4vlhuFq8TAb4lKfBz3y89sY0Py+3htDtqNrIcZ1Ca0cyKmkU90/42Hx5kmBJPcFAIIrxy46cF4iNyQ8cS5TAmY/vQ+ZcoiO5yCA6ACqKWqFH2i7qUZhVsBWI6VWgQTbuRKOJ4RdOv2QtHb3QGO+PdxxitpQvw2aYam4nI7WapqNk84hu+oXoavDSR0kN21vlpfvcyfIi9JuEGGmVb7irbCCVo27kLHrRrntByKJ7GpR5Wf9s8frWd53iri9k0DSwxvKGZBIaFPodnYsJKF1Ck16IrJrr6AgPZvTKN4vBesFiRvI6sIJrZL6gD62cW2s196zKaSzcT0DccUKCaG6/javNazMo+sk74tOgqaeX0r/whXv8Rc/oobdUFI0AkGGOTzp4+QHVKX1swPEVEjP00ewOyurQinG1yhkqOgQU7s6f5dXabepmnFtH5j5W8AjDL6kISk1w/UIfMwGkUDXyxSGZWLaLag2oDxb+0Xe4CC+9m6SxtnRSzUjXDzOL4QBB8ri0VBSMA2E="
     - BUILD_RECIPE="travis-build-recipe"
     - TARGET_OS=$( grep "TARGET_OS" "$BUILD_RECIPE" | awk '{print $2;}' )
+    - BES_CORE_IMAGE_TAG="opendap/bes_core:$BES_VERSION-$TARGET_OS"
     - RELEASE_DATE="$(date +%s)"
     - S3_BUILD_BUCKET="opendap.travis.build"
     - ADD_DEBUG_RPMS=""
@@ -50,6 +51,7 @@ env:
 before_install:
   - echo "# travis.before_install() - BUILD_RECIPE is $BUILD_RECIPE"
   - echo "# travis.before_install() - TARGET_OS is $TARGET_OS"
+  - echo "# travis.before_install() - BES_CORE_IMAGE_TAG is $BES_CORE_IMAGE_TAG"
   - echo "# travis.before_install() - PythonVersion is $(python3 --version)"
   - echo "# travis.before_install() - Using pip3 to install awscli"
   - pip3 install awscli
@@ -92,7 +94,6 @@ jobs:
         - echo "DOCKER_NAME '$DOCKER_NAME'"
         - echo "RELEASE_DATE '$RELEASE_DATE'"
         - echo "BUILDING FOR $TARGET_OS"
-        - export BES_IMAGE_TAG="opendap/bes_core:${BES_VERSION}-el8"
         - cd "$TARGET_OS-builds"
         - source "./build-$TARGET_OS"
         - show_version
@@ -112,7 +113,7 @@ jobs:
           --build-arg HYRAX_VERSION
           --build-arg LIBDAP_VERSION
           --build-arg BES_VERSION
-          --build-arg BES_IMAGE_TAG
+          --build-arg BES_CORE_IMAGE_TAG
           --build-arg OLFS_VERSION
           --tag "$OS_SNAPSHOT_IMAGE_TAG"
           --tag "$OS_BUILD_VERSION_TAG"
@@ -127,7 +128,6 @@ jobs:
       name: "Build opendap/besd"
       script:
         - export DOCKER_NAME="besd"
-        - export BES_IMAGE_TAG="opendap/bes_core:${BES_VERSION}-el8"
         - echo "# RELEASE_DATE '$RELEASE_DATE'"
         - cd "$TARGET_OS-builds"
         - source "./build-$TARGET_OS"
@@ -142,7 +142,7 @@ jobs:
           --build-arg HYRAX_VERSION
           --build-arg LIBDAP_VERSION
           --build-arg BES_VERSION
-          --build-arg BES_IMAGE_TAG
+          --build-arg BES_CORE_IMAGE_TAG
           --tag "$OS_SNAPSHOT_IMAGE_TAG"
           --tag "$OS_BUILD_VERSION_TAG"
           "$DOCKER_NAME"
@@ -153,7 +153,6 @@ jobs:
       script:
         - export DOCKER_NAME="hyrax_ncwms"
         - export DOCKER_DIR="hyrax"
-        - export BES_IMAGE_TAG="opendap/bes_core:${BES_VERSION}-el8"
         - cd "$TARGET_OS-builds"
         - source "./build-$TARGET_OS"
         - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "$TOMCAT_MAJOR_VERSION")
@@ -171,7 +170,7 @@ jobs:
           --build-arg HYRAX_VERSION
           --build-arg LIBDAP_VERSION
           --build-arg BES_VERSION
-          --build-arg BES_IMAGE_TAG
+          --build-arg BES_CORE_IMAGE_TAG
           --build-arg OLFS_VERSION
           --build-arg USE_NCWMS=true
           --tag "$OS_SNAPSHOT_IMAGE_TAG"
@@ -210,7 +209,6 @@ jobs:
         - cd "$TARGET_OS-builds"
         - export DOCKER_NAME="ngap"
         - export DOCKER_DIR="ngap"
-        - export BES_IMAGE_TAG="opendap/bes_core:${BES_VERSION}-el8"
         - source "./build-$TARGET_OS"
         - show_version
         - ./build-hyrax-ngap.sh

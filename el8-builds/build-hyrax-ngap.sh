@@ -45,7 +45,7 @@ docker build \
     --build-arg LIBDAP_VERSION \
     --build-arg BES_VERSION \
     --build-arg OLFS_VERSION \
-    --build-arg BES_IMAGE_TAG \
+    --build-arg BES_CORE_IMAGE_TAG \
     --tag "$OS_SNAPSHOT_IMAGE_TAG" \
     --tag "$OS_BUILD_VERSION_TAG" \
     "$DOCKER_NAME"
