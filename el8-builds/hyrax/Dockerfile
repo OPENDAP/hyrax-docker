@@ -14,7 +14,7 @@
 #
 # Set one or more individual labels
 ARG BES_CORE_IMAGE_TAG
-FROM "${BES_CORE_IMAGE_TAG:-"rockylinux:8"}"
+FROM "${BES_CORE_IMAGE_TAG:-rockylinux:8}"
 
 # ARG BES_CORE_IMAGE_TAG
 # RUN if [ -z "$BES_CORE_IMAGE_TAG" ]; then \
