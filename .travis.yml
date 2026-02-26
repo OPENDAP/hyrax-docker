@@ -87,6 +87,7 @@ jobs:
     - stage: BUILD_AND_TEST
       name: "Build and Test opendap/hyrax"
       script:
+        - echo "THIS IS A TEST. IF IT WASN'T A TEST YOU WOULD HAVE KNOWN THE ANSWERS."
         - export DOCKER_NAME="hyrax"
         - export DOCKER_DIR="$DOCKER_NAME"
         - echo "DOCKER_NAME '$DOCKER_NAME'"
