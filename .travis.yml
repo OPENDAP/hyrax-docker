@@ -147,7 +147,6 @@ jobs:
         - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "$TOMCAT_MAJOR_VERSION")
         - show_version
         - get_tomcat_distro "$DOCKER_DIR" "$TOMCAT_VERSION"
-        - ls -l "$DOCKER_DIR"/*.rpm
         - s3_get_olfs_distro
           "$S3_BUILD_BUCKET"
           "$DOCKER_DIR"
