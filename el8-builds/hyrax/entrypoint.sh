@@ -123,11 +123,11 @@ fi
 #
 if test "${SERVER_HELP_EMAIL}" != "not_set" ; then
     echo "Setting Admin Contact To: $SERVER_HELP_EMAIL"
-    sed -i "s/admin.email.address@your.domain.name/$SERVER_HELP_EMAIL/" /etc/bes/bes.conf
+    sed -i "s/admin.email.address@your.domain.name/$SERVER_HELP_EMAIL/" $PREFIX/etc/bes/bes.conf
 fi
 if test "${FOLLOW_SYMLINKS}" != "not_set" ; then
     echo "Setting BES FollowSymLinks to YES." >&2
-    sed -i "s/^BES.Catalog.catalog.FollowSymLinks=No/BES.Catalog.catalog.FollowSymLinks=Yes/" /etc/bes/bes.conf
+    sed -i "s/^BES.Catalog.catalog.FollowSymLinks=No/BES.Catalog.catalog.FollowSymLinks=Yes/" $PREFIX/etc/bes/bes.conf
 fi
 
 echo "JAVA VERSION: "
@@ -143,19 +143,20 @@ echo "PythonVersion: "$(python3 --version)
 #-------------------------------------------------------------------------------
 # Start the BES daemon process
 # /usr/bin/besdaemon -i /usr -c /etc/bes/bes.conf -r /var/run/bes.pid
-bes_uid=$(id -u bes)
+bes_username=$USER
+bes_uid=$(id -u ${bes_username})
 echo "bes_uid: ${bes_uid}" >&2
-bes_gid=$(id -g bes)
+bes_gid=$(id -g ${bes_username})
 echo "bes_gid: ${bes_gid}" >&2
 
 echo "Launching besd..." >&2
-/usr/bin/besctl start
+$PREFIX/bin/besctl start
 status=$?
 if test $status -ne 0 ; then
     echo "ERROR: Failed to start BES: $status" >&2
     exit $status
 fi
-besd_pid=`ps aux | grep /usr/bin/besdaemon | grep -v grep | awk '{print $2;}' - `
+besd_pid=`ps aux | grep $PREFIX/bin/besdaemon | grep -v grep | awk '{print $2;}' - `
 echo "The besd is UP! [pid: ${besd_pid}]" >&2
 
 #-------------------------------------------------------------------------------

@@ -36,14 +36,6 @@ show_version
 
 get_tomcat_distro "$DOCKER_NAME" "$TOMCAT_VERSION"
 
-s3_get_besd_distro \
-    "$S3_BUILD_BUCKET" \
-    "$DOCKER_NAME" \
-    "$TARGET_OS" \
-    "$LIBDAP_VERSION" \
-    "$BES_VERSION" \
-    "$ADD_DEBUG_RPMS" 2>&1
-
 get_ngap_olfs_distro "$S3_BUILD_BUCKET" "$DOCKER_NAME" "$OLFS_VERSION" 2>&1
 
 docker build \
@@ -53,6 +45,7 @@ docker build \
     --build-arg LIBDAP_VERSION \
     --build-arg BES_VERSION \
     --build-arg OLFS_VERSION \
+    --build-arg BES_CORE_IMAGE_TAG \
     --tag "$OS_SNAPSHOT_IMAGE_TAG" \
     --tag "$OS_BUILD_VERSION_TAG" \
     "$DOCKER_NAME"

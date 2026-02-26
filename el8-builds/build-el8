@@ -36,6 +36,7 @@ function read_build_recipe() {
     export BUILD_VERSION_TAG=""
     export OS_SNAPSHOT_IMAGE_TAG=""
     export OS_BUILD_VERSION_TAG=""
+    export BES_CORE_IMAGE_TAG=""
 
     RELEASE_DATE=${RELEASE_DATE:-$(echo "${build_recipe}" | grep hyrax | awk '{print $2;}')}
     HYRAX_VERSION=${HYRAX_VERSION:-$(echo "${build_recipe}" | grep hyrax | awk '{print $1;}' | sed "s/hyrax-//g" )}
@@ -43,6 +44,7 @@ function read_build_recipe() {
     BES_VERSION=${BES_VERSION:-$(echo "${build_recipe}" | grep bes | sed "s/bes-//g" | awk '{print $1;}')}
     BUILD_DMRPP_VERSION=${BUILD_DMRPP_VERSION:-$(echo "${build_recipe}" | grep "build_dmrpp-" | sed "s/build_dmrpp-//g" | awk '{print $1;}')}
     LIBDAP_VERSION=${LIBDAP_VERSION:-$(echo "${build_recipe}" | grep libdap4 | sed "s/libdap4-//g"| awk '{print $1;}')}
+    BES_CORE_IMAGE_TAG="opendap/bes_core:$BES_VERSION-$TARGET_OS"
 
     local td_value="-test-deploy"
     export TEST_DEPLOYMENT=""
@@ -98,14 +100,7 @@ function read_build_recipe() {
 }
 read_build_recipe "${BUILD_RECIPE_FILE}"
 
-
-
-
-
-
-
 export RELEASE_HOST=${RELEASE_HOST:-"https://www.opendap.org"}
-
 
 function show_version(){
     loggy "${HR}"
@@ -116,6 +111,7 @@ function show_version(){
     loggy "        HYRAX_VERSION: ${HYRAX_VERSION}"
     loggy "         OLFS_VERSION: ${OLFS_VERSION}"
     loggy "          BES_VERSION: ${BES_VERSION}"
+    loggy "   BES_CORE_IMAGE_TAG: ${BES_CORE_IMAGE_TAG}"
     loggy "  BUILD_DMRPP_VERSION: ${BUILD_DMRPP_VERSION}"
     loggy "       LIBDAP_VERSION: ${LIBDAP_VERSION}"
     loggy "          DOCKER_NAME: ${DOCKER_NAME}"
@@ -137,9 +133,6 @@ function show_version(){
     loggy "      TEST_DEPLOYMENT: '$TEST_DEPLOYMENT'"
     loggy ""
 }
-
-
-
 ################################################################################
 #
 # get_tomcat_tag_names()
@@ -444,73 +437,6 @@ function s3_pull(){
     loggy ""
 }
 
-################################################################################
-#
-# s3_get_besd_distro() - Get the rpm and war files need for a Hyrax installation
-#    from the identified S3 bucket.
-#    $1 - The AWS S3 bucket from which to pull the Hyrax components
-#    $2 - The directory into which to place the Hyrax components.
-#    $3 - The linux architecture (aka el7, el8, etc.)
-#    $4 - The libap version number ##.##.##-##
-#    $5 - The bes version number ##.##.##-##
-#    $6 - A debug flag, if present (i.e. not empty string) then the devel and
-#         debuginfo rpm files for libdap and bes will be retrieved as well.
-#
-function s3_get_besd_distro() {
-    loggy "${HR2}"
-    loggy "TASK: s3_get_besd_distro()"
-    local s3_bucket="${1}"
-    loggy "         s3_bucket: ${s3_bucket}"
-    local target_dir="${2}"
-    loggy "        target_dir: ${target_dir}"
-    local larch="${3}"
-    loggy "linux_architecture: ${larch}"
-    local libdap_version="${4}"
-    loggy "    libdap_version: ${libdap_version}"
-    local bes_version="${5}"
-    loggy "       bes_version: ${bes_version}"
-    local debug="${6}"
-    loggy "             debug: ${debug}"
-
-    set -e
-
-    loggy "Cleaning up..."
-    rm -fv "${target_dir}/*.rpm"
-
-    loggy ""
-    s3_pull "${s3_bucket}" \
-            "libdap-${libdap_version}.${larch}.x86_64.rpm" \
-            "${target_dir}"
-
-    if test -n "${debug}"; then # Only get the debug libs when invoked in debug mode
-        s3_pull "${s3_bucket}" \
-                "libdap-devel-${libdap_version}.${larch}.x86_64.rpm" \
-                "${target_dir}"
-        s3_pull "${s3_bucket}" \
-                "libdap-debuginfo-${libdap_version}.${larch}.x86_64.rpm" \
-                "${target_dir}"
-    fi
-
-    s3_pull "${s3_bucket}" \
-            "bes-${bes_version}.static.${larch}.x86_64.rpm" \
-            "${target_dir}"
-
-    if test -n "${debug}"; then # Only get the debug libs when invoked in debug mode
-        s3_pull "${s3_bucket}" \
-                "bes-devel-${bes_version}.static.${larch}.x86_64.rpm" \
-                "${target_dir}"
-        s3_pull "${s3_bucket}" \
-                "bes-debuginfo-${bes_version}.static.${larch}.x86_64.rpm" \
-                "${target_dir}"
-    fi
-
-    set +e
-    loggy ""
-    return 0
-}
-
-
-
 function curl_pull(){
     local release_url="${1}"
     local target_file="${2}"
@@ -732,7 +658,6 @@ function get_ngap_olfs_distro() {
     return 0
 }
 
-
 function build_ngap() {
     loggy "${HR}"
     loggy "TASK: build_ngap_rh8()"
@@ -751,8 +676,6 @@ function build_ngap() {
     loggy ""
     loggy ""
 }
-
-
 
 function build_hyrax_docker() {
     local docker_name="${1}"
@@ -776,9 +699,6 @@ function build_hyrax_docker() {
     loggy ""
     loggy ""
 }
-
-
-
 
 #- docker build
 #  --build-arg TOMCAT_VERSION
@@ -814,8 +734,6 @@ function build_dmrpp_service_docker() {
     loggy ""
 }
 
-
-
 function build_hyrax_ncwms_docker() {
     loggy "$HR"
     loggy "build_hyrax_ncwms_docker()"
@@ -827,12 +745,6 @@ function build_hyrax_ncwms_docker() {
     export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
     show_version 
     get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_VERSION}"
-    s3_get_besd_distro \
-        "${S3_BUILD_BUCKET}" \
-        "${DOCKER_NAME}" \
-        "el8" \
-        "${LIBDAP_VERSION}" \
-        "${BES_VERSION}" true 2>&1
     s3_get_olfs_distro \
         "${S3_BUILD_BUCKET}" \
         "${DOCKER_NAME}" \
@@ -854,14 +766,11 @@ function build_hyrax_ncwms_docker() {
     #docker push ${BUILD_VERSION_TAG}
 }
 
-
-
 function get_platform(){
     local platform=""
     if test `uname -m` = "arm64" ; then platform="--platform linux/amd64"; fi
     echo "${platform}"
 }
-
 
 function start_hyrax(){
     local image_tag="${1}"
@@ -937,13 +846,6 @@ function build_hyrax() {
         "${DOCKER_NAME}" \
         "${TOMCAT_VERSION}" 2>&1 | tee -a "${log_file}"
 
-    s3_get_besd_distro \
-        "${S3_BUILD_BUCKET}" \
-        "${DOCKER_NAME}" \
-        "el8" \
-        "${LIBDAP_VERSION}" \
-        "${BES_VERSION}" $debug 2>&1 | tee -a "${log_file}"
-
     s3_get_olfs_distro \
         "${S3_BUILD_BUCKET}" \
         "${DOCKER_NAME}" \
@@ -971,13 +873,6 @@ function build_dmrpp_service() {
         "${DOCKER_NAME}" \
         "${TOMCAT_VERSION}" 2>&1 | tee -a "${log_file}"
 
-    s3_get_besd_distro \
-        "${S3_BUILD_BUCKET}" \
-        "${DOCKER_NAME}" \
-        "el8" \
-        "${LIBDAP_VERSION}" \
-        "${BES_VERSION}" $debug 2>&1 | tee -a "${log_file}"
-
     s3_get_build_dmrpp_distro \
         "${S3_BUILD_BUCKET}" \
         "${DOCKER_NAME}" \
@@ -986,9 +881,6 @@ function build_dmrpp_service() {
     build_dmrpp_service_docker "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}"
     cleanup_build_files "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}"
 }
-
-
-
 
 function build_ngap() {
     local log_file="build_ngap.log"
@@ -1003,13 +895,6 @@ function build_ngap() {
         "${DOCKER_NAME}" \
         "${tomcat_version}" 2>&1 | tee -a "${log_file}"
 
-    s3_get_besd_distro \
-        "${S3_BUILD_BUCKET}" \
-        "${DOCKER_NAME}" \
-        "el8" \
-        "${LIBDAP_VERSION}" \
-        "${BES_VERSION}" 2>&1 | tee -a "${log_file}"
-
     get_ngap_olfs_distro \
         "${S3_BUILD_BUCKET}" \
         "${DOCKER_NAME}" \
@@ -1018,11 +903,6 @@ function build_ngap() {
     build_hyrax_docker "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}"
     cleanup_build_files "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}"
 }
-
-
-
-
-
 
 function build_olfs_docker() {
     loggy "${HR}"
@@ -1062,7 +942,6 @@ function build_olfs() {
 #    cleanup_build_files "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}"
 }
 
-
 function build_besd_docker() {
     loggy "${HR}"
     loggy "TASK: build_besd_docker()"
@@ -1085,17 +964,9 @@ function build_besd() {
     export DOCKER_NAME="besd"
     show_version 2>&1 | tee "${log_file}"
 
-    s3_get_besd_distro \
-        "${S3_BUILD_BUCKET}" \
-        "${DOCKER_NAME}" \
-        "el8" \
-        "${LIBDAP_VERSION}" \
-        "${BES_VERSION}" 2>&1 | tee -a "${log_file}"
-
     build_besd_docker 2>&1 | tee -a "${log_file}"
 #    cleanup_build_files "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}"
 }
-
 
 function pull_tag_and_push_image(){
     set -e
@@ -1222,12 +1093,6 @@ function travis_hyrax() {
     export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
     show_version
     get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_VERSION}"
-    s3_get_besd_distro \
-        "${S3_BUILD_BUCKET}" \
-        "${DOCKER_NAME}" \
-        "el8" \
-        "${LIBDAP_VERSION}" \
-        "${BES_VERSION}" $ADD_DEBUG 2>&1
     s3_get_olfs_distro \
         "${S3_BUILD_BUCKET}" \
         "${DOCKER_NAME}" \
