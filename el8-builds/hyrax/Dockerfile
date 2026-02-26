@@ -15,13 +15,14 @@
 # Set one or more individual labels
 ARG BES_CORE_IMAGE_TAG
 FROM ${BES_CORE_IMAGE_TAG:-rockylinux:8}
-RUN echo "BES_CORE_IMAGE_TAG: $BES_CORE_IMAGE_TAG" >&2
+RUN echo "BES_CORE_IMAGE_TAG: '$BES_CORE_IMAGE_TAG'" >&2
 
-# ARG BES_CORE_IMAGE_TAG
-# RUN if [ -z "$BES_CORE_IMAGE_TAG" ]; then \
+ARG BES_CORE_IMAGE_TAG
+RUN echo "BES_CORE_IMAGE_TAG: '$BES_CORE_IMAGE_TAG'" >&2
+#RUN if [ -z "$BES_CORE_IMAGE_TAG" ]; then \
 #         echo "Error: Non-empty BES_CORE_IMAGE_TAG must be specified. Exiting."; \
 #         exit 1; \
-#     fi
+#    fi
 
 ENV ARCH="x86_64"
 ENV java_version="java-11-openjdk"
