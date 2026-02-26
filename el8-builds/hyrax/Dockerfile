@@ -15,10 +15,8 @@
 # Set one or more individual labels
 ARG BES_CORE_IMAGE_TAG
 FROM ${BES_CORE_IMAGE_TAG:-rockylinux:8}
-RUN echo "BES_CORE_IMAGE_TAG: '$BES_CORE_IMAGE_TAG'" >&2
 
 ARG BES_CORE_IMAGE_TAG
-RUN echo "BES_CORE_IMAGE_TAG: '$BES_CORE_IMAGE_TAG'" >&2
 RUN if test -n "$BES_CORE_IMAGE_TAG"; then \
         echo "BES_CORE_IMAGE_TAG appears to be set: '$BES_CORE_IMAGE_TAG'" ;\
     else \
