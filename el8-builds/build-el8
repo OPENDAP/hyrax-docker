@@ -36,6 +36,7 @@ function read_build_recipe() {
     export BUILD_VERSION_TAG=""
     export OS_SNAPSHOT_IMAGE_TAG=""
     export OS_BUILD_VERSION_TAG=""
+    export BES_CORE_IMAGE_TAG=""
 
     RELEASE_DATE=${RELEASE_DATE:-$(echo "${build_recipe}" | grep hyrax | awk '{print $2;}')}
     HYRAX_VERSION=${HYRAX_VERSION:-$(echo "${build_recipe}" | grep hyrax | awk '{print $1;}' | sed "s/hyrax-//g" )}
