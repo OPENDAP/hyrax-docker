@@ -1,7 +1,7 @@
 # paste config here
 #
 # Initial Travis-CI control file. 6.11.15 jhrg
-# Added sonar scan 3.12.19 jhrg 
+# Added sonar scan 3.12.19 jhrg
 #
 #
 #
@@ -232,5 +232,3 @@ deploy:
     on:
       branch: el9
       condition: $DEPLOY_ME = "true"
-
-
