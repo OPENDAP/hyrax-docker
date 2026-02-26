@@ -19,10 +19,12 @@ RUN echo "BES_CORE_IMAGE_TAG: '$BES_CORE_IMAGE_TAG'" >&2
 
 ARG BES_CORE_IMAGE_TAG
 RUN echo "BES_CORE_IMAGE_TAG: '$BES_CORE_IMAGE_TAG'" >&2
-#RUN if [ -z "$BES_CORE_IMAGE_TAG" ]; then \
-#         echo "Error: Non-empty BES_CORE_IMAGE_TAG must be specified. Exiting."; \
-#         exit 1; \
-#    fi
+RUN if test -n "$BES_CORE_IMAGE_TAG"; then \
+        echo "BES_CORE_IMAGE_TAG appears to be set: '$BES_CORE_IMAGE_TAG'" ;\
+    else \
+        echo "Error: Non-empty BES_CORE_IMAGE_TAG must be specified. Exiting."; \
+        exit 1; \
+    fi
 
 ENV ARCH="x86_64"
 ENV java_version="java-11-openjdk"
