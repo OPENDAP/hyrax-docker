@@ -55,7 +55,7 @@ before_install:
   - pip3 install awscli
   - echo "# travis.before_install() - TRAVIS_PULL_REQUEST is $TRAVIS_PULL_REQUEST"
   - echo "# travis.before_install() -       TRAVIS_BRANCH is $TRAVIS_BRANCH"
-  - if test "$TRAVIS_PULL_REQUEST" = "false" -o "$TRAVIS_BRANCH" = "el9" ; then export DEPLOY_ME="true"; else export DEPLOY_ME="false"; fi
+  - if test "$TRAVIS_PULL_REQUEST" = "false" -o "$TRAVIS_BRANCH" = "java-17-test-deploy" ; then export DEPLOY_ME="true"; else export DEPLOY_ME="false"; fi
   - echo "# travis.before_install() -           DEPLOY_ME is $DEPLOY_ME"
 
 
