@@ -66,11 +66,11 @@ install:
 
 stages:
   - name: BUILD_AND_TEST
-    if:  branch = master OR branch = el9
+    if:  branch = master OR branch = "java-17-test-deploy"
   - name: BUILD
-    if:  branch = master OR branch = el9
+    if:  branch = master OR branch = "java-17-test-deploy"
   - name: TEST_DEPLOYED_IMAGE
-    if: ((branch = master) and (type != pull_request)) or (branch = el9)
+    if: ((branch = master) and (type != pull_request)) or (branch = "java-17-test-deploy")
   - name: disabled
     if: branch = disabled
 
