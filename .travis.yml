@@ -18,7 +18,7 @@ services:
 branches:
   only:
     - master
-    - el9
+    - java-17-test-deploy
 
 notifications:
   email:
@@ -255,7 +255,7 @@ deploy:
   - provider: script
     script: bash "$TRAVIS_BUILD_DIR/travis/deploy_to_docker_hub.sh"
     on:
-      branch: el9
+      branch: java-17-test-deploy
       condition: $DEPLOY_ME = "true"
 
 
