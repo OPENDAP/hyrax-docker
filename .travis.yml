@@ -251,4 +251,4 @@ deploy:
     script: bash "$TRAVIS_BUILD_DIR/travis/deploy_to_docker_hub.sh"
     on:
       all_branches: true
-      condition: (( branch = master AND type != pull_request ) OR ("$TRAVIS_BRANCH" =~ ^(.*-test-deploy)$) ) && ("$DEPLOY_ME" == "true")
+      condition: ( ( branch = master AND type != pull_request ) OR (branch =~ ^(.*-test-deploy)$) ) && ("$DEPLOY_ME" == "true")
