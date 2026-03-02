@@ -250,13 +250,6 @@ deploy:
   - provider: script
     script: bash "$TRAVIS_BUILD_DIR/travis/deploy_to_docker_hub.sh"
     on:
-      branch: master
-      condition: $DEPLOY_ME = "true"
-
-  - provider: script
-    script: bash "$TRAVIS_BUILD_DIR/travis/deploy_to_docker_hub.sh"
-    on:
-      branch: /(.*-test-deploy)$/
-      condition: $DEPLOY_ME = "true"
-
+      all_branches: true
+      condition: ("$TRAVIS_BRANCH" =~ .*-test-deploy$) && ("$DEPLOY_ME" == "true")
 
