@@ -211,7 +211,9 @@ export NGAP_CERTIFICATE_KEY_FILE="/usr/share/tomcat/conf/NGAP-CA-certificate.key
 startup_log "NGAP_CERTIFICATE_KEY_FILE: ${NGAP_CERTIFICATE_KEY_FILE}"
 
 ################################################################################
-export NETRC_FILE="$PREFIX/etc/bes/ngap_netrc"
+# NETRC_FILE is at the top level /etc/bes instead of $PREFIX/etc/...
+# because that's where bamboo expects it to be
+export NETRC_FILE="/etc/bes/ngap_netrc"
 startup_log "NETRC_FILE: ${NETRC_FILE}"
 
 export BES_SITE_CONF_FILE="$PREFIX/etc/bes/site.conf"
@@ -235,6 +237,7 @@ startup_log "FOLLOW_SYMLINKS: ${FOLLOW_SYMLINKS}"
 #
 if test -n "${HOST}" && test -n "${USERNAME}" && test -n "${PASSWORD}"; then
   startup_log "Updating netrc file: ${NETRC_FILE}"
+  mkdir -p "$(dirname "${NETRC_FILE}")"
   # machine is a domain name or a ip address, not a URL.
   echo "machine ${HOST}" | sed -e "s_https:__g" -e "s_http:__g" -e "s+/++g" >>"${NETRC_FILE}"
   echo "    login ${USERNAME}" >> "${NETRC_FILE}"
