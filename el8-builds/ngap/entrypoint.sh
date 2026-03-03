@@ -13,10 +13,10 @@ if [[ "$LOG_KEY_PREFIX" != *"-" ]]; then
     LOG_KEY_PREFIX="${LOG_KEY_PREFIX}-"
 fi
 
-# Defined upstream in docker image base `bes_core`,
-# reiterated here for legibility
+# Set in docker image.
+# BES_USER initially defined upstream in docker image base `bes_core` as $USER
 export PREFIX=${PREFIX:-"/root/install"}
-export USER=${USER:-"bes_user"}
+export BES_USER=${BES_USER:-"bes_user"}
 
 ##########################################################################
 #
@@ -239,7 +239,7 @@ if test -n "${HOST}" && test -n "${USERNAME}" && test -n "${PASSWORD}"; then
   echo "machine ${HOST}" | sed -e "s_https:__g" -e "s_http:__g" -e "s+/++g" >>"${NETRC_FILE}"
   echo "    login ${USERNAME}" >> "${NETRC_FILE}"
   echo "    password ${PASSWORD}" >> "${NETRC_FILE}"
-  chown $USER:$USER "${NETRC_FILE}"
+  chown $BES_USER:$BES_USER "${NETRC_FILE}"
   chmod 400 "${NETRC_FILE}"
   startup_log " "$(ls -l "${NETRC_FILE}")
   # loggy $( cat "${NETRC_FILE}" )
@@ -460,7 +460,7 @@ fi
 #-------------------------------------------------------------------------------
 # Start the BES daemon process
 # /usr/bin/besdaemon -i /usr -c $PREFIX/etc/bes/bes.conf -r /var/run/bes.pid
-bes_username=$USER
+bes_username=$BES_USER
 bes_uid=$(id -u ${bes_username})
 bes_gid=$(id -g ${bes_username})
 startup_log "Launching besd [uid: ${bes_uid} gid: ${bes_gid}]"
