@@ -5,7 +5,7 @@
 #
 FROM rockylinux:8
 ENV ARCH="x86_64"
-ENV java_version="java-11-openjdk"
+ENV java_version="java-17-openjdk"
 ENV python_version="3.11"
 
 ENV HR="###########################################################################"
