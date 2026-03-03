@@ -426,7 +426,7 @@ RUN set -e \
     && git clone https://github.com/OPENDAP/olfs \
     #&& git clone --depth 1 https://github.com/OPENDAP/olfs \
     && cd olfs \
-    && git checkout tomcat-11 \
+    && git checkout el9 \
     && cd .. \
     && echo "$HR2" >&2 \
     && echo "Copying elasticache client" >&2 \
