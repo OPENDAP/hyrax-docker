@@ -186,17 +186,18 @@ RUN cp ${PREFIX}/etc/rc.d/init.d/besd /etc/rc.d/init.d/besd \
     && echo "whoami: "`whoami` \
     && echo "besdaemon is here: "`which besdaemon`
 
-# Adapted from bes/spec.all_static.in
-# Default macros: https://docs.fedoraproject.org/en-US/packaging-guidelines/RPMMacros/
+# Adapted from bes/spec.all_static.in in RPM creation.
+# The four *.pem substitutions may be unnecessary, as those *.pem files may be
+# vestigial substitutions for a build process past.
 RUN sed -i.dist \
     -e 's:=.*/bes.log:=/var/log/bes/bes.log:' \
     -e 's:=.*/lib/bes:='"$PREFIX"'/lib/bes:' \
     -e 's:=.*/share/bes:='"$PREFIX"'/share/bes:' \
     -e 's:=.*/share/hyrax:='"$PREFIX"'/share/hyrax:' \
-    # -e 's:=/full/path/to/serverside/certificate/file.pem:=/etc/pki/bes/cacerts/file.pem:' \
-    # -e 's:=/full/path/to/serverside/key/file.pem:=/etc/pki/bes/public/file.pem:' \
-    # -e 's:=/full/path/to/clientside/certificate/file.pem:=/etc/pki/bes/cacerts/file.pem:' \
-    # -e 's:=/full/path/to/clientside/key/file.pem:=/etc/pki/bes/public/file.pem:' \
+    -e 's:=/full/path/to/serverside/certificate/file.pem:=/etc/pki/bes/cacerts/file.pem:' \
+    -e 's:=/full/path/to/serverside/key/file.pem:=/etc/pki/bes/public/file.pem:' \
+    -e 's:=/full/path/to/clientside/certificate/file.pem:=/etc/pki/bes/cacerts/file.pem:' \
+    -e 's:=/full/path/to/clientside/key/file.pem:=/etc/pki/bes/public/file.pem:' \
     -e 's:=user_name:='"$USER"':' \
     -e 's:=group_name:='"$USER"':' \
     $PREFIX/etc/bes/bes.conf \
