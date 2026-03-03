@@ -22,6 +22,9 @@ RUN if [ -z "$BES_CORE_IMAGE_TAG" ]; then \
         exit 1; \
     fi
 
+# User defined and created in the `bes_core` image
+ENV BES_USER ${USER:-"bes_user"}
+
 ARG RELEASE_DATE
 ENV RELEASE_DATE ${RELEASE_DATE:-"unknown"}
 RUN echo "RELEASE_DATE: ${RELEASE_DATE}"
@@ -81,23 +84,24 @@ RUN cp ${PREFIX}/etc/rc.d/init.d/besd /etc/rc.d/init.d/besd \
     && echo "whoami: "`whoami` \
     && echo "besdaemon is here: "`which besdaemon`
 
-# Adapted from bes/spec.all_static.in
-# Default macros: https://docs.fedoraproject.org/en-US/packaging-guidelines/RPMMacros/
+# Adapted from bes/spec.all_static.in in RPM creation.
+# The four *.pem substitutions may be unnecessary, as those *.pem files may be
+# vestigial substitutions for a build process past.
 RUN sed -i.dist \
     -e 's:=.*/bes.log:=/var/log/bes/bes.log:' \
     -e 's:=.*/lib/bes:='"$PREFIX"'/lib/bes:' \
     -e 's:=.*/share/bes:='"$PREFIX"'/share/bes:' \
     -e 's:=.*/share/hyrax:='"$PREFIX"'/share/hyrax:' \
-    # -e 's:=/full/path/to/serverside/certificate/file.pem:=/etc/pki/bes/cacerts/file.pem:' \
-    # -e 's:=/full/path/to/serverside/key/file.pem:=/etc/pki/bes/public/file.pem:' \
-    # -e 's:=/full/path/to/clientside/certificate/file.pem:=/etc/pki/bes/cacerts/file.pem:' \
-    # -e 's:=/full/path/to/clientside/key/file.pem:=/etc/pki/bes/public/file.pem:' \
-    -e 's:=user_name:='"$USER"':' \
-    -e 's:=group_name:='"$USER"':' \
+    -e 's:=/full/path/to/serverside/certificate/file.pem:=/etc/pki/bes/cacerts/file.pem:' \
+    -e 's:=/full/path/to/serverside/key/file.pem:=/etc/pki/bes/public/file.pem:' \
+    -e 's:=/full/path/to/clientside/certificate/file.pem:=/etc/pki/bes/cacerts/file.pem:' \
+    -e 's:=/full/path/to/clientside/key/file.pem:=/etc/pki/bes/public/file.pem:' \
+    -e 's:=user_name:='"$BES_USER"':' \
+    -e 's:=group_name:='"$BES_USER"':' \
     $PREFIX/etc/bes/bes.conf \
     && mkdir -p "/var/log/bes/" \
     && touch "/var/log/bes/bes.log" \
-    && sudo chown -R $USER:$USER "/var/log/bes/"
+    && sudo chown -R $BES_USER:$BES_USER "/var/log/bes/"
 
 RUN echo "besdaemon is here: "`which besdaemon`
 
