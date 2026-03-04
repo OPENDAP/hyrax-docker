@@ -31,9 +31,7 @@ woo_get_besd_distro \
      true
 
 # Get the OLFS web archive
-woo_get_olfs_distro \
-    `pwd` \
-    "${OLFS_VERSION}"
+curl_get_olfs_distro  `pwd`  "${OLFS_VERSION}"
 
 ls -l *.rpm *.gz *.tgz
 
@@ -64,7 +62,7 @@ do
     docker image ls -a
     cd ..
     loggy  "Running Test Script"
-    ./regression_test_script -i ${SNAPSHOT_IMAGE_TAG}
+    ./travis/regression_test_script -i ${SNAPSHOT_IMAGE_TAG}
 
     loggy "Cleaning up binaries in $docker_name"
     rm  -v "${BUILD_DIR}/${docker_name}"/*.rpm

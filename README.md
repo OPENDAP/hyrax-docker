@@ -82,8 +82,8 @@ More elaborate instructions may be found below in this document.
 _Hyrax Docker Hub Pages_
 - [**Hyrax Data Server**](https://cloud.docker.com/u/opendap/repository/docker/opendap/hyrax)
 - [**Hyrax Data Server + ncWMS2**](https://cloud.docker.com/u/opendap/repository/docker/opendap/hyrax_ncmws)
-- [**besd**](https://cloud.docker.com/u/opendap/repository/docker/opendap/olfs)
-- [**olfs**](https://cloud.docker.com/u/opendap/repository/docker/opendap/besd)
+- [**besd**](https://cloud.docker.com/u/opendap/repository/docker/opendap/besd)
+- [**olfs**](https://cloud.docker.com/u/opendap/repository/docker/opendap/olfs)
 
 
 #### Build 
@@ -99,7 +99,7 @@ one needs to have credentials to access the S3 bucket. Once you have configured
 your AWS credentials (either using the AS configuratrion or envirnment 
 variables) the`build_from_ci_recipe.sh` shell script will perform the retrieval
 and docker build using the recipe supplied, or the most recent recipe in the 
-`snapshot.time` file.
+`./el8-build-recipe` file.
 
 Our official release builds can be (re)built by using one
 of the recipes located in the _releases_ directory. The 
@@ -640,3 +640,4 @@ license text is in the file CSIRO_MIT_LICENSE
 https://github.com/Unidata/thredds-docker and various other
 contributions on _dockerhub_, including the official _postgres_
 container's exemplar use of variables with an entrypoint.
+

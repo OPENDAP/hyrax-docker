@@ -18,8 +18,6 @@ echo "Docker Hub deployment complete."
 
 if test -n "$PUSH_TO_ECR"
 then
-    OPENDAP_AWS_ACCOUNT=747931985039
-
     echo "AWS configuration: "
     aws configure list
 
