@@ -11,6 +11,9 @@ prolog="deploy_to_docker_hub.sh"
 function loggy(){
     echo  "$@" | awk -v prolog="$prolog" '{ print "# " prolog " - " $0;}' >&2
 }
+
+PUSH_TO_ECR="${PUSH_TO_ECR:-""}"
+
 loggy "$HR0"
 loggy "BEGIN"
 
@@ -53,18 +56,20 @@ fi
 
 loggy "Docker Hub deployment complete."
 loggy "$HR1"
+loggy "PUSH_TO_ECR: '$PUSH_TO_ECR'"
+loggy "SNAPSHOT_IMAGE_TAG: '$SNAPSHOT_IMAGE_TAG'"
 
 
-
-if test -n "$SNAPSHOT_IMAGE_TAG"
+if [[ -n "$PUSH_TO_ECR" && -n "$SNAPSHOT_IMAGE_TAG" ]]
 then
     loggy "AWS configuration: "
     loggy "$(aws configure list)"
-    loggy "OPENDAP_AWS_ACCOUNT: $OPENDAP_AWS_ACCOUNT"
-    loggy "Deploying ${SNAPSHOT_IMAGE_TAG} to AWS ECR"
+    loggy "Pushing $SNAPSHOT_IMAGE_TAG to AWS ECR"
     docker tag "$SNAPSHOT_IMAGE_TAG" "$OPENDAP_AWS_ACCOUNT.dkr.ecr.us-east-1.amazonaws.com/$SNAPSHOT_IMAGE_TAG"
     docker push "$OPENDAP_AWS_ACCOUNT.dkr.ecr.us-east-1.amazonaws.com/$SNAPSHOT_IMAGE_TAG"
     loggy "AWS ECR deployment complete."
+else
+    loggy "No images pushed to ECR."
 fi
 
 loggy "END"
