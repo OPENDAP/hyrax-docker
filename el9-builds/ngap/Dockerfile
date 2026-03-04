@@ -174,7 +174,7 @@ RUN set -e \
     && echo "# Installing cURL for developers (not minimal cURL)" >&2 \
     && dnf install -y curl curl-devel --allowerasing \
     && echo "# cURL version: $(curl --version)" >&2 \
-    && dnf clean all \
+    # && dnf clean all \
     && echo "$HR" >&2 \
 
 ######################################################################

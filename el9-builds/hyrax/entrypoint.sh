@@ -170,10 +170,10 @@ loggy "PythonVersion (again): $( python3 --version 2>&1 )"
 #-------------------------------------------------------------------------------
 # We use 'echo' in the following because downstream code is expecting this
 # output to be a key value pair, so none of that loggy() stuff
-bes_username=$BES_USER
-bes_uid=$(id -u ${bes_username})
+bes_username="$BES_USER"
+bes_uid="$(id -u ${bes_username})"
 echo "bes_uid: $bes_uid"
-bes_gid=$(id -g ${bes_username})
+bes_gid="$(id -g ${bes_username})"
 echo "bes_gid: $bes_gid"
 
 #-------------------------------------------------------------------------------
