@@ -46,6 +46,7 @@ ARG RELEASE_DATE
 ENV RELEASE_DATE="${RELEASE_DATE:-$(date +%s)}"
 RUN echo "RELEASE_DATE: $RELEASE_DATE"
 
+# Fail if requested LIBDAP_VERSION or BES_VERSION do not match installations in base image
 ARG LIBDAP_VERSION
 ENV LIBDAP_VERSION=${LIBDAP_VERSION:-"snapshot-$TARGET_OS"}
 RUN LIBDAP_VERSION_FOUND=$(cat libdap_VERSION); \

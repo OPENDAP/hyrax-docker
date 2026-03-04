@@ -13,7 +13,20 @@
 # it for debugging stuff.
 #
 # Set one or more individual labels
-FROM rockylinux:9
+ARG BES_CORE_IMAGE_TAG
+FROM ${BES_CORE_IMAGE_TAG:-rockylinux:8}
+
+ARG BES_CORE_IMAGE_TAG
+RUN if test -n "$BES_CORE_IMAGE_TAG"; then \
+        echo "BES_CORE_IMAGE_TAG appears to be set: '$BES_CORE_IMAGE_TAG'" ;\
+    else \
+        echo "Error: Non-empty BES_CORE_IMAGE_TAG must be specified. Exiting."; \
+        exit 1; \
+    fi
+
+# User defined and created in the `bes_core` image
+ENV BES_USER ${USER:-"bes_user"}
+
 ENV HR="###############################################################################################################"
 ENV HR2="-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --"
 ENV TARGET_OS="el9"
@@ -58,25 +71,26 @@ ARG HYRAX_VERSION
 ENV HYRAX_VERSION=${HYRAX_VERSION:-"snapshot-$TARGET_OS"}
 RUN echo "# HYRAX_VERSION: $HYRAX_VERSION"
 
+# Fail if requested LIBDAP_VERSION or BES_VERSION do not match installations in base image
 ARG LIBDAP_VERSION
 ENV LIBDAP_VERSION=${LIBDAP_VERSION:-"snapshot-$TARGET_OS"}
-RUN echo "# LIBDAP_VERSION: $LIBDAP_VERSION"
-
-ARG LIBDAP_RPM
-ENV LIBDAP_RPM=${LIBDAP_RPM:-"libdap-$LIBDAP_VERSION.$TARGET_OS.x86_64.rpm"}
-RUN echo "# LIBDAP_RPM: $LIBDAP_RPM"
-COPY "$LIBDAP_RPM" libdap-devel-* libdap-debuginfo-* /
-RUN ls -l /libdap-*  >&2
+RUN LIBDAP_VERSION_FOUND=$(cat libdap_VERSION); \
+    if [ "${LIBDAP_VERSION_FOUND}" == "${LIBDAP_VERSION:-missing}" ]; then \
+        echo "LIBDAP_VERSION: ${LIBDAP_VERSION}"; \
+    else \
+        echo "Error: Expected LIBDAP_VERSION `${LIBDAP_VERSION}`, found version `${LIBDAP_VERSION_FOUND}`. Exiting."; \
+        exit 1; \
+    fi
 
 ARG BES_VERSION
 ENV BES_VERSION=${BES_VERSION:-"snapshot-$TARGET_OS"}
-RUN echo "# BES_VERSION: $BES_VERSION"
-
-ARG BES_RPM
-ENV BES_RPM=${BES_RPM:-"bes-$BES_VERSION.static.$TARGET_OS.x86_64.rpm"}
-RUN echo "# BES_RPM: $BES_RPM"
-COPY "$BES_RPM" bes-devel-* bes-debuginfo-* /
-RUN ls -l /bes-* >&2
+RUN BES_VERSION_FOUND=$(cat bes_VERSION); \
+    if [ "${BES_VERSION_FOUND}" == "${BES_VERSION:-missing}" ]; then \
+        echo "BES_VERSION: ${BES_VERSION}"; \
+    else \
+        echo "Error: Expected BES_VERSION \"${BES_VERSION}\", found version \"${BES_VERSION_FOUND}\". Exiting."; \
+        exit 1; \
+    fi
 
 ARG OLFS_VERSION
 ENV OLFS_VERSION=${OLFS_VERSION:-"snapshot-$TARGET_OS"}
@@ -103,6 +117,7 @@ LABEL org.opendap.hyrax.version.is-production="false"
 LABEL org.opencontainers.image.authors="support@opendap.org"
 
 USER root
+WORKDIR /
 
 #
 # The --build-arg USE_NCWMS can be set to "true" in order to 
@@ -138,7 +153,7 @@ RUN set -e \
     && dnf update -y \
     && echo "#!/bin/bash" > /install-dev-tools \
     && echo "dnf install -y $dnf_developer_tools_packages" > /install-dev-tools \
-    && chmod 755 /install-dev-tools
+    && chmod 755 /install-dev-tools \
 
 ######################################################################
 # Rocky9 comes with built in curl-minimal. For our puposes we want
@@ -146,13 +161,13 @@ RUN set -e \
 # The '--allowerasing' parameter enables dnf to erase curl-minimal
 # and then install the full package.
 #
-RUN set -e \
+# RUN set -e \
     && echo "$HR" >&2 \
     && echo "# Installing cURL for developers (not minimal cURL)" >&2 \
     && dnf install -y curl curl-devel --allowerasing \
     && echo "# cURL version: $(curl --version)" >&2 \
-    && dnf clean all \
-    && echo "$HR" >&2
+    # && dnf clean all \
+    && echo "$HR" >&2 \
 
 ######################################################################
 # We want java ac ertain way ($java_version) and
@@ -164,7 +179,7 @@ RUN set -e \
 #       update-alternatives --list
 # - We're using the one we wanted:
 #       echo "# java version: $( java -version 2>&1 )"
-RUN set -e \
+# RUN set -e \
     && echo "$HR" >&2 \
     && echo "# It's Java Time Witches!" >&2 \
     && echo "# Installing $java_version" >&2 \
@@ -175,10 +190,10 @@ RUN set -e \
     && echo "# Enabled $java_version" >&2 \
     && echo "# java version: $( java -version 2>&1 )" \
     && update-alternatives --list \
-    && dnf clean all \
-    && echo "$HR" >&2
+    # && dnf clean all \
+    && echo "$HR" >&2 \
 
-RUN set -e \
+# RUN set -e \
     && dnf install -y $dnf_runtime_packages $dnf_regression_test_packages \
     && dnf clean all
 #
@@ -186,34 +201,38 @@ RUN set -e \
 #
 
 ################################################################
-# Install the libdap rpm
-#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
-RUN set -e \
-    && echo "$HR" >&2 \
-    && echo "# Installing the libdap rpm: $LIBDAP_RPM" >&2 \
-    && ls -l ./libdap* \
-    && dnf -y install ./libdap-*.rpm \
-    && echo "# The 'dnf install' command exited with status: $?" >&2 \
-    && rm -f "./$LIBDAP_RPM" \
-    && dnf clean all \
-    && echo "# libdap4 is installed." >&2 \
-    && echo "$HR" >&2
+# Set up BES
+#
+# BES is already installed on the base image, but
+# we need to do some additional configuration (to match what was
+# previously handled by bes RPM installation)
 
-################################################################
-# Install the the BES
-# besd, besdaemon, beslistener, besctl, besstandalone, bescmdline
-#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
-RUN set -e \
-    && echo "$HR" >&2 \
-    && echo "# Installing the BES rpm: $BES_RPM" >&2 \
-    && ls -l ./bes* \
-    && dnf -y install ./bes-*.rpm \
-    && echo "# The 'dnf install' command exited with status: $?" >&2 \
-    && rm -f "./$BES_RPM" \
-    && dnf clean all \
-    && echo "# besdaemon is here: $(which besdaemon)" >&2 \
-    && echo "#      besdaemon -v: '$(besdaemon -v)'" >&2 \
-    && echo "$HR" >&2
+# Add besd service to start at boot
+RUN cp ${PREFIX}/etc/rc.d/init.d/besd /etc/rc.d/init.d/besd \
+    && chkconfig --add besd \
+    && ldconfig \
+    && chkconfig --list | grep besd \
+    && echo "whoami: "`whoami` \
+    && echo "besdaemon is here: "`which besdaemon`
+
+# Adapted from bes/spec.all_static.in in RPM creation.
+# The four *.pem substitutions may be unnecessary, as those *.pem files may be
+# vestigial substitutions for a build process past.
+RUN sed -i.dist \
+    -e 's:=.*/bes.log:=/var/log/bes/bes.log:' \
+    -e 's:=.*/lib/bes:='"$PREFIX"'/lib/bes:' \
+    -e 's:=.*/share/bes:='"$PREFIX"'/share/bes:' \
+    -e 's:=.*/share/hyrax:='"$PREFIX"'/share/hyrax:' \
+    -e 's:=/full/path/to/serverside/certificate/file.pem:=/etc/pki/bes/cacerts/file.pem:' \
+    -e 's:=/full/path/to/serverside/key/file.pem:=/etc/pki/bes/public/file.pem:' \
+    -e 's:=/full/path/to/clientside/certificate/file.pem:=/etc/pki/bes/cacerts/file.pem:' \
+    -e 's:=/full/path/to/clientside/key/file.pem:=/etc/pki/bes/public/file.pem:' \
+    -e 's:=user_name:='"$BES_USER"':' \
+    -e 's:=group_name:='"$BES_USER"':' \
+    $PREFIX/etc/bes/bes.conf \
+    && mkdir -p "/var/log/bes/" \
+    && touch "/var/log/bes/bes.log" \
+    && sudo chown -R $BES_USER:$BES_USER "/var/log/bes/"
 
 ################################################################
 # Install and Setup Tomcat
@@ -289,12 +308,6 @@ RUN set -e \
     && chmod 700 "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/WEB-INF/conf/logs"
 
 ################################################################
-# Clean up the Hyrax distribution binaries.
-#
-#
-################################################################
-
-################################################################
 # retrieve and install the ncWMS web application
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 
@@ -350,7 +363,7 @@ RUN set -e \
     && echo "# Retrieving, and building hyrax regression tests." \
     && echo "# h_r_t will be in: $TEST_INSTALL_DIR" \
     && mkdir -p "$TEST_INSTALL_DIR" \
-    && git clone -v https://github.com/opendap/hyrax_regression_tests "$TEST_INSTALL_DIR" \
+    && git clone --depth 1 -v https://github.com/opendap/hyrax_regression_tests "$TEST_INSTALL_DIR" \
     && cd "$TEST_INSTALL_DIR" \
     && autoreconf -vif \
     && ./configure
@@ -386,9 +399,6 @@ EXPOSE 8443
 EXPOSE 10022
 EXPOSE 11002
 
-# can't use USER with entrypoint that needs root
-# use gosu or, as done, enable bes user write so the entrypoint does not need root
-RUN chown -R bes /etc/bes
 USER root
 
 CMD ["-"]

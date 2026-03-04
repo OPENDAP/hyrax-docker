@@ -128,7 +128,7 @@ bes_gid="$(id -g bes)"
 echo "bes_gid: $bes_gid"
 
 # Start the BES daemon process
-# $PREFIX/usr/bin/besdaemon -i $PREFIX/usr -c $PREFIX/etc/bes/bes.conf -r /var/run/bes.pid
+# /usr/bin/besdaemon -i /usr -c $PREFIX/etc/bes/bes.conf -r /var/run/bes.pid
 loggy "Calling 'besctl start'"
 $PREFIX/usr/bin/besctl start
 status=$?
