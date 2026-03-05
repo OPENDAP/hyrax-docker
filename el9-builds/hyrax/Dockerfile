@@ -44,7 +44,7 @@ RUN echo "# Python Version: $(python3 --version)"
 # procps - so we can use 'ps' to track the bes and tomcat processes.
 #     bc - is used by the cleanup_files.sh script to compute time stuff for
 #          orphaned files.
-ENV dnf_runtime_packages="which unzip procps bc"
+ENV dnf_runtime_packages="which unzip procps bc chkconfig"
 RUN echo "# dnf_runtime_packages: $dnf_runtime_packages"
 
 # Stuff we need to build the hyrax_regression_tests
@@ -164,7 +164,7 @@ RUN set -e \
 # RUN set -e \
     && echo "$HR" >&2 \
     && echo "# Installing cURL for developers (not minimal cURL)" >&2 \
-    && dnf install -y curl curl-devel --allowerasing chkconfig \
+    && dnf install -y curl curl-devel --allowerasing \
     && echo "# cURL version: $(curl --version)" >&2 \
     # && dnf clean all \
     && echo "$HR" >&2 \

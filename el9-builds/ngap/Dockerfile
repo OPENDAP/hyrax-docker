@@ -40,7 +40,7 @@ ENV java_version="java-21-openjdk"
 # 'awscli' is used by entrypoint.sh
 # 'ps' (aka procps) is used by besctl and entrypoint.sh
 # 'bc' is used entrypoint.sh and cleanup_files.sh
-ENV dnf_runtime_packages="which unzip jq procps bc"
+ENV dnf_runtime_packages="which unzip jq procps bc chkconfig"
 RUN echo "# dnf_runtime_packages: $dnf_runtime_packages"
 
 
@@ -171,7 +171,7 @@ RUN set -e \
 # RUN set -e \
     && echo "$HR" >&2 \
     && echo "# Installing cURL for developers (not minimal cURL)" >&2 \
-    && dnf install -y curl curl-devel --allowerasing chkconfig \
+    && dnf install -y curl curl-devel --allowerasing \
     && echo "# cURL version: $(curl --version)" >&2 \
     # && dnf clean all \
     && echo "$HR" >&2 \

@@ -36,7 +36,7 @@ RUN echo "# BEGIN - besd docker build"
 # rocky9 comes with python 3.9 by default, and replacing it seems problematic at best.
 RUN echo "# Python Version: $(python3 --version)"
 
-ENV dnf_runtime_packages="which unzip procps bc"
+ENV dnf_runtime_packages="which unzip procps bc chkconfig"
 RUN echo "# dnf_runtime_packages: $dnf_runtime_packages"
 
 ENV dnf_developer_tools_packages="emacs vim awscli jq gdb valgrind"
