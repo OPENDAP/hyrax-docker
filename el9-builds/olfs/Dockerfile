@@ -92,7 +92,7 @@ RUN set -e \
 RUN set -e \
     && echo "$HR" \
     && echo "# Installing cURL" \
-    && yum install -y curl curl-devel --allowerasing \
+    && yum install -y curl curl-devel --allowerasing chkconfig \
     && echo "# cURL version: $(curl --version)" \
     && dnf clean all
 

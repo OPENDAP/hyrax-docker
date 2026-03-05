@@ -23,7 +23,7 @@ RUN if [ -z "$BES_CORE_IMAGE_TAG" ]; then \
     fi
 
 # User defined and created in the `bes_core` image
-ENV BES_USER ${USER:-"bes_user"}
+ENV BES_USER="${USER:-bes_user}"
 
 ENV ARCH="x86_64"
 ENV java_version="java-17-openjdk"

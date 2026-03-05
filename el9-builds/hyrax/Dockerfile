@@ -25,7 +25,7 @@ RUN if test -n "$BES_CORE_IMAGE_TAG"; then \
     fi
 
 # User defined and created in the `bes_core` image
-ENV BES_USER ${USER:-"bes_user"}
+ENV BES_USER="${USER:-bes_user}"
 
 ENV HR="###############################################################################################################"
 ENV HR2="-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --"
@@ -164,7 +164,7 @@ RUN set -e \
 # RUN set -e \
     && echo "$HR" >&2 \
     && echo "# Installing cURL for developers (not minimal cURL)" >&2 \
-    && dnf install -y curl curl-devel --allowerasing \
+    && dnf install -y curl curl-devel --allowerasing chkconfig \
     && echo "# cURL version: $(curl --version)" >&2 \
     # && dnf clean all \
     && echo "$HR" >&2 \
