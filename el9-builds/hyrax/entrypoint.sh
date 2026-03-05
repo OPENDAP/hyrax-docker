@@ -180,7 +180,7 @@ echo "bes_gid: $bes_gid"
 # Start the BES daemon process
 # /usr/bin/besdaemon -i /usr -c $PREFIX/etc/bes/bes.conf -r /var/run/bes.pid (old way)
 loggy "Launching besd..."
-$PREFIX/bin/besctl starttart
+$PREFIX/bin/besctl start
 status=$?
 if test $status -ne 0 ; then
     loggy "ERROR: Failed to start BES: $status"
