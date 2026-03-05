@@ -162,7 +162,6 @@ RUN set -e \
     && echo "dnf install -y $dnf_developer_tools_packages" > /install-dev-tools \
     && chmod 755 /install-dev-tools \
 
-
 ######################################################################
 # Rocky9 comes with built in curl-minimal. For our puposes we want
 # want the full package (I think, probably need to verify).
@@ -255,23 +254,8 @@ RUN set -e \
     && dnf -y info libuuid >&2 \
     && echo "# libuuid-devel info:" >&2 \
     && dnf -y info libuuid-devel >&2 \
-    # && dnf clean all; \
+    && dnf clean all; \
     else echo "# Skipping Sanity Checks." >&2 ; fi \
-    && echo "$HR" >&2 \
-
-################################################################
-# Install the Apache-Portable-Runtime (Apache APR)
-#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
-# RUN set -e \
-    && echo "$HR" >&2 \
-    && echo "Installing the Apache APR rpm: $APACHE_APR_RPM" >&2 \
-    && ls -l ./apr*  >&2\
-    && dnf -y install ./apr-*.rpm  >&2\
-    && echo "# The 'dnf install' command exited with status: $?" >&2 \
-    && dnf list installed | grep apr >&2 \
-    && rm -f "./$APACHE_APR_RPM" \
-    && dnf clean all \
-    && echo "Apache APR is installed." >&2 \
     && echo "$HR" >&2
 
 ################################################################
@@ -307,6 +291,21 @@ RUN sed -i.dist \
     && mkdir -p "/var/log/bes/" \
     && touch "/var/log/bes/bes.log" \
     && sudo chown -R $BES_USER:$BES_USER "/var/log/bes/"
+
+################################################################
+# Install the Apache-Portable-Runtime (Apache APR)
+#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
+RUN set -e \
+    && echo "$HR" >&2 \
+    && echo "Installing the Apache APR rpm: $APACHE_APR_RPM" >&2 \
+    && ls -l ./apr*  >&2\
+    && dnf -y install ./apr-*.rpm  >&2\
+    && echo "# The 'dnf install' command exited with status: $?" >&2 \
+    && dnf list installed | grep apr >&2 \
+    && rm -f "./$APACHE_APR_RPM" \
+    && dnf clean all \
+    && echo "Apache APR is installed." >&2 \
+    && echo "$HR" >&2
 
 ################################################################
 # Install and Setup Tomcat
