@@ -20,7 +20,6 @@ branches:
     - master
     - main
     - /^(.*-test-deploy)$/
-    - hr/HYRAX-1964-use-dockerized-bes
 
 notifications:
   email:
@@ -69,9 +68,9 @@ install:
 
 stages:
   - name: BUILD_AND_TEST
-    if: branch = master OR branch = main OR branch =~ ^(.*-test-deploy)$ OR branch = "hr/HYRAX-1964-use-dockerized-bes"
+    if: branch = master OR branch = main OR branch =~ ^(.*-test-deploy)$
   - name: BUILD
-    if: branch = master OR branch = main OR branch =~ ^(.*-test-deploy)$ OR branch = "hr/HYRAX-1964-use-dockerized-bes"
+    if: branch = master OR branch = main OR branch =~ ^(.*-test-deploy)$
   - name: TEST_DEPLOYED_IMAGE
     if: ((branch = master or branch = main) and (type != pull_request)) or (branch =~ ^(.*-test-deploy)$)
   - name: disabled
