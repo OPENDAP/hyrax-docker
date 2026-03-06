@@ -23,7 +23,7 @@ RUN if [ -z "$BES_CORE_IMAGE_TAG" ]; then \
     fi
 
 # User defined and created in the `bes_core` image
-ENV BES_USER ${USER:-"bes_user"}
+ENV BES_USER="${USER:-"bes_user"}"
 
 ENV ARCH="x86_64"
 ENV java_version="java-17-openjdk"
@@ -167,8 +167,8 @@ RUN cp ${PREFIX}/etc/rc.d/init.d/besd /etc/rc.d/init.d/besd \
     && chkconfig --add besd \
     && ldconfig \
     && chkconfig --list | grep besd \
-    && echo "whoami: "`whoami` \
-    && echo "besdaemon is here: "`which besdaemon`
+    && echo "whoami: $(whoami)" \
+    && echo "besdaemon is here: $(which besdaemon)"
 
 # Adapted from bes/spec.all_static.in in RPM creation.
 # The four *.pem substitutions may be unnecessary, as those *.pem files may be

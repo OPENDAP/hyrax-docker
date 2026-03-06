@@ -693,6 +693,7 @@ function build_hyrax_docker() {
         --build-arg LIBDAP_VERSION \
         --build-arg BES_VERSION \
         --build-arg OLFS_VERSION \
+        --build-arg BES_CORE_IMAGE_TAG \
         --tag "${BUILD_VERSION_TAG}" \
         --tag "${SNAPSHOT_IMAGE_TAG}" \
         ${docker_name}
