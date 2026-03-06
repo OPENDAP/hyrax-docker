@@ -14,7 +14,8 @@ if [[ "$LOG_KEY_PREFIX" != *"-" ]]; then
 fi
 
 # Set in docker image.
-# BES_USER initially defined upstream in docker image base `bes_core` as $USER
+# BES_USER initially defined upstream in docker image base `bes_core` as $USER,
+# updated to $BES_USER in ngap/Dockerfile
 export PREFIX=${PREFIX:-"/root/install"}
 export BES_USER=${BES_USER:-"bes_user"}
 
