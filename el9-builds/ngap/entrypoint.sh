@@ -489,7 +489,7 @@ fi
 
 #-------------------------------------------------------------------------------
 # Start the BES daemon process
-# /usr/bin/besdaemon -i /usr -c $PREFIX/etc/bes/bes.conf -r /var/run/bes.pid
+# $PREFIX/bin/besdaemon -i /usr -c $PREFIX/etc/bes/bes.conf -r /var/run/bes.pid
 bes_username="$BES_USER"
 bes_uid="$(id -u ${bes_username})"
 bes_gid="$(id -g ${bes_username})"
