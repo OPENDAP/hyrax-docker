@@ -38,6 +38,12 @@ fi
 export SLEEP_INTERVAL="${SLEEP_INTERVAL:-60}"
 loggy "SLEEP_INTERVAL: $SLEEP_INTERVAL seconds."
 
+# Set in docker image.
+# BES_USER initially defined upstream in docker image base `bes_core` as $USER,
+# updated to $BES_USER in ngap/Dockerfile
+export PREFIX=${PREFIX:-"/root/install"}
+export BES_USER=${BES_USER:-"bes_user"}
+
 #AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:-<not set>}"
 #loggy "AWS_SECRET_ACCESS_KEY is ${AWS_SECRET_ACCESS_KEY}"
 #
@@ -122,22 +128,23 @@ fi
 #-------------------------------------------------------------------------------
 # We use 'echo' in the following because downstream code is expecting this
 # output to be a key value pair, so none of that loggy() stuff
-bes_uid="$(id -u bes)"
+bes_username=$BES_USER
+bes_uid=$(id -u ${bes_username})
+bes_gid=$(id -g ${bes_username})
 echo "bes_uid: $bes_uid"
-bes_gid="$(id -g bes)"
 echo "bes_gid: $bes_gid"
 
 # Start the BES daemon process
-# /usr/bin/besdaemon -i /usr -c $PREFIX/etc/bes/bes.conf -r /var/run/bes.pid
+# $PREFIX/bin/besdaemon -i /usr -c $PREFIX/etc/bes/bes.conf -r /var/run/bes.pid
 loggy "Calling 'besctl start'"
-$PREFIX/usr/bin/besctl start
+$PREFIX/bin/besctl start
 status=$?
 if [ $status -ne 0 ]; then
     loggy "ERROR: Failed to start BES: $status"
     exit $status
 fi
 
-besd_pid="$(ps aux | grep $PREFIX/usr/bin/besdaemon | grep -v grep | awk '{print $2;}' - )"
+besd_pid="$(ps aux | grep $PREFIX/bin/besdaemon | grep -v grep | awk '{print $2;}' - )"
 loggy "The besdaemon is UP! pid: $besd_pid"
 start_time=
 start_time="$(date  "+%s")"

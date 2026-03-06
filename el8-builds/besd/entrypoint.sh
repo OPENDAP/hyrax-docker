@@ -103,15 +103,15 @@ fi
 
 
 # Start the BES daemon process
-# /usr/bin/besdaemon -i /usr -c /etc/bes/bes.conf -r /var/run/bes.pid
-$PREFIX/usr/bin/besctl start;
+# $PREFIX/bin/besdaemon -i /usr -c /etc/bes/bes.conf -r /var/run/bes.pid
+$PREFIX/bin/besctl start;
 status=$?
 if [ $status -ne 0 ]; then
     echo "Failed to start BES: $status" >&2
     exit $status
 fi
 
-besd_pid=`ps aux | grep $PREFIX/usr/bin/besdaemon | grep -v grep | awk '{print $2;}' - `;
+besd_pid=`ps aux | grep $PREFIX/bin/besdaemon | grep -v grep | awk '{print $2;}' - `;
 echo "The besdaemon is UP! pid: $besd_pid"  >&2
 
 echo "BES Has Arrived..."  >&2

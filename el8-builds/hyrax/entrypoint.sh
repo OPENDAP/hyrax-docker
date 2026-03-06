@@ -142,7 +142,7 @@ fi
 echo "PythonVersion: "$(python3 --version)
 #-------------------------------------------------------------------------------
 # Start the BES daemon process
-# /usr/bin/besdaemon -i /usr -c /etc/bes/bes.conf -r /var/run/bes.pid
+# $PREFIX/bin/besdaemon -i /usr -c /etc/bes/bes.conf -r /var/run/bes.pid
 bes_username=$BES_USER
 bes_uid=$(id -u ${bes_username})
 echo "bes_uid: ${bes_uid}" >&2
