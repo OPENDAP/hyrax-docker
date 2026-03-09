@@ -32,6 +32,7 @@ function read_build_recipe() {
     export BES_VERSION=""
     export BUILD_DMRPP_VERSION=""
     export LIBDAP_VERSION=""
+    export BUILD_NUMBER=""
     export SNAPSHOT_IMAGE_TAG=""
     export BUILD_VERSION_TAG=""
     export OS_SNAPSHOT_IMAGE_TAG=""
@@ -43,6 +44,7 @@ function read_build_recipe() {
     BES_VERSION=${BES_VERSION:-$(echo "${build_recipe}" | grep bes | sed "s/bes-//g" | awk '{print $1;}')}
     BUILD_DMRPP_VERSION=${BUILD_DMRPP_VERSION:-$(echo "${build_recipe}" | grep "build_dmrpp-" | sed "s/build_dmrpp-//g" | awk '{print $1;}')}
     LIBDAP_VERSION=${LIBDAP_VERSION:-$(echo "${build_recipe}" | grep libdap4 | sed "s/libdap4-//g"| awk '{print $1;}')}
+    BUILD_NUMBER="${TRAVIS_BUILD_NUMBER:-manual_build}"
 
     local td_value="-test-deploy"
     export TEST_DEPLOYMENT=""
@@ -79,20 +81,20 @@ function read_build_recipe() {
         # We set (and replace) these values here, in the stage, so that they can be accessed by the
         # travis/deploy_to_docker_hub.sh script used by the Travis deploy operation below.
         SNAPSHOT_IMAGE_TAG="${SNAPSHOT_IMAGE_TAG:-"opendap/hyrax:$DOCKER_NAME-snapshot$TEST_DEPLOYMENT"}"
-        BUILD_VERSION_TAG="${BUILD_VERSION_TAG:-"opendap/hyrax:$DOCKER_NAME-$HYRAX_VERSION$TEST_DEPLOYMENT"}"
+        BUILD_VERSION_TAG="${BUILD_VERSION_TAG:-"opendap/hyrax:$DOCKER_NAME-$HYRAX_VERSION.$BUILD_NUMBER$TEST_DEPLOYMENT"}"
 
         OS_SNAPSHOT_IMAGE_TAG="${OS_SNAPSHOT_IMAGE_TAG:-"opendap/hyrax:$DOCKER_NAME-snapshot-$TARGET_OS$TEST_DEPLOYMENT"}"
-        OS_BUILD_VERSION_TAG="${OS_BUILD_VERSION_TAG:-"opendap/hyrax:$DOCKER_NAME-$HYRAX_VERSION-$TARGET_OS$TEST_DEPLOYMENT"}"
+        OS_BUILD_VERSION_TAG="${OS_BUILD_VERSION_TAG:-"opendap/hyrax:$DOCKER_NAME-$HYRAX_VERSION.$BUILD_NUMBER-$TARGET_OS$TEST_DEPLOYMENT"}"
     else
         ###############################################################################################
         # This is the nominal tagging scheme
         #
 
         SNAPSHOT_IMAGE_TAG="${SNAPSHOT_IMAGE_TAG:-"opendap/$DOCKER_NAME:snapshot$TEST_DEPLOYMENT"}"
-        BUILD_VERSION_TAG="${BUILD_VERSION_TAG:-"opendap/$DOCKER_NAME:$HYRAX_VERSION$TEST_DEPLOYMENT"}"
+        BUILD_VERSION_TAG="${BUILD_VERSION_TAG:-"opendap/$DOCKER_NAME:$HYRAX_VERSION.$BUILD_NUMBER$TEST_DEPLOYMENT"}"
 
         OS_SNAPSHOT_IMAGE_TAG="${OS_SNAPSHOT_IMAGE_TAG:-"opendap/$DOCKER_NAME:snapshot-$TARGET_OS$TEST_DEPLOYMENT"}"
-        OS_BUILD_VERSION_TAG="${OS_BUILD_VERSION_TAG:-"opendap/$DOCKER_NAME:$HYRAX_VERSION-$TARGET_OS$TEST_DEPLOYMENT"}"
+        OS_BUILD_VERSION_TAG="${OS_BUILD_VERSION_TAG:-"opendap/$DOCKER_NAME:$HYRAX_VERSION.$BUILD_NUMBER-$TARGET_OS$TEST_DEPLOYMENT"}"
     fi
 
 }
@@ -118,6 +120,7 @@ function show_version(){
     loggy "          BES_VERSION: ${BES_VERSION}"
     loggy "  BUILD_DMRPP_VERSION: ${BUILD_DMRPP_VERSION}"
     loggy "       LIBDAP_VERSION: ${LIBDAP_VERSION}"
+    loggy "         BUILD_NUMBER: ${BUILD_NUMBER}"
     loggy "          DOCKER_NAME: ${DOCKER_NAME}"
     loggy ""
     loggy "    BUILD_VERSION_TAG: '$BUILD_VERSION_TAG'"
@@ -1218,7 +1221,7 @@ function travis_hyrax() {
     fi
 
     export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}:snapshot"
-    export BUILD_VERSION_TAG="opendap/${DOCKER_NAME}:${HYRAX_VERSION}"
+    export BUILD_VERSION_TAG="opendap/${DOCKER_NAME}:${HYRAX_VERSION}.${BUILD_NUMBER}"
     export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
     show_version
     get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_VERSION}"

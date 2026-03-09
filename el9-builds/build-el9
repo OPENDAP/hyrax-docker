@@ -79,6 +79,7 @@ function read_build_recipe() {
     export BES_VERSION
     export OLFS_VERSION
     export HYRAX_VERSION
+    export BUILD_NUMBER
     export RELEASE_DATE
     # export APR_VERSION
     export OS_SNAPSHOT_IMAGE_TAG
@@ -92,6 +93,7 @@ function read_build_recipe() {
     BES_VERSION=${BES_VERSION:-$(echo "$build_recipe" | grep bes | sed "s/bes-//g" | awk '{print $1;}')}
     OLFS_VERSION=${OLFS_VERSION:-"$(echo "$build_recipe" | grep olfs | sed "s/olfs-//g" | awk '{print $1;}')-$TARGET_OS"}
     HYRAX_VERSION=${HYRAX_VERSION:-$(echo "$build_recipe" | grep hyrax | awk '{print $1;}' | sed "s/hyrax-//g" )}
+    BUILD_NUMBER="${TRAVIS_BUILD_NUMBER:-manual_build}"
     RELEASE_DATE=${RELEASE_DATE:-$(echo "$build_recipe" | grep hyrax | awk '{print $2;}')}
     #APR_VERSION="1.7.6-1"
     #APR_VERSION=${APR_VERSION:-$(echo "${build_recipe}" | grep apr | sed "s/apr-//g" | awk '{print $1;}')}
@@ -107,16 +109,16 @@ function read_build_recipe() {
         # $DOCKER_NAME ("ngap" in this case) to the image tag:
         # Examples:
         #     opendap/hyrax:ngap-snapshot-el9
-        #     opendap/hyrax:ngap-1.17.1-846-el9
+        #     opendap/hyrax:ngap-1.17.1-846.123-el9
         #     opendap/hyrax:ngap-snapshot-el9-test-deploy
-        #     opendap/hyrax:ngap--1.17.1-846-el9-test-deploy
+        #     opendap/hyrax:ngap--1.17.1-846.123-el9-test-deploy
         # We set (and replace) these values here, in the stage, so that they can be accessed by the
         # travis/deploy_to_docker_hub.sh script used by the Travis deploy operation below.
         OS_SNAPSHOT_IMAGE_TAG="${OS_SNAPSHOT_IMAGE_TAG:-"opendap/hyrax:$DOCKER_NAME-snapshot-$TARGET_OS$TEST_DEPLOYMENT"}"
-        OS_BUILD_VERSION_TAG="${OS_BUILD_VERSION_TAG:-"opendap/hyrax:$DOCKER_NAME-$HYRAX_VERSION-$TARGET_OS$TEST_DEPLOYMENT"}"
+        OS_BUILD_VERSION_TAG="${OS_BUILD_VERSION_TAG:-"opendap/hyrax:$DOCKER_NAME-$HYRAX_VERSION.$BUILD_NUMBER-$TARGET_OS$TEST_DEPLOYMENT"}"
     else
         OS_SNAPSHOT_IMAGE_TAG="${OS_SNAPSHOT_IMAGE_TAG:-"opendap/$DOCKER_NAME:snapshot-$TARGET_OS$TEST_DEPLOYMENT"}"
-        OS_BUILD_VERSION_TAG="${OS_BUILD_VERSION_TAG:-"opendap/$DOCKER_NAME:$HYRAX_VERSION-$TARGET_OS$TEST_DEPLOYMENT"}"
+        OS_BUILD_VERSION_TAG="${OS_BUILD_VERSION_TAG:-"opendap/$DOCKER_NAME:$HYRAX_VERSION.$BUILD_NUMBER-$TARGET_OS$TEST_DEPLOYMENT"}"
     fi
 
     # We unset these so that they are surely NOT set when we deploy
@@ -140,6 +142,7 @@ function show_version(){
     loggy "$prolog           BES_VERSION: $BES_VERSION"
     loggy "$prolog          OLFS_VERSION: $OLFS_VERSION"
     loggy "$prolog         HYRAX_VERSION: $HYRAX_VERSION"
+    loggy "$prolog          BUILD_NUMBER: $BUILD_NUMBER"
     loggy "$prolog           DOCKER_NAME: $DOCKER_NAME"
     loggy "$prolog       S3_BUILD_BUCKET: $S3_BUILD_BUCKET"
     loggy "$prolog        SLEEP_INTERVAL: $SLEEP_INTERVAL"
@@ -1325,7 +1328,7 @@ function travis_hyrax() {
         return $status
     fi
     export OS_SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}:snapshot-$TARGET_OS$TEST_DEPLOYMENT"
-    export OS_BUILD_VERSION_TAG="opendap/${DOCKER_NAME}:${HYRAX_VERSION}-$TARGET_OS$TEST_DEPLOYMENT"
+    export OS_BUILD_VERSION_TAG="opendap/${DOCKER_NAME}:${HYRAX_VERSION}.${BUILD_NUMBER}-$TARGET_OS$TEST_DEPLOYMENT"
     export TOMCAT_VERSION
     TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
 
