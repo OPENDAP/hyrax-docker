@@ -93,9 +93,8 @@ RUN set -e \
 # Set up BES
 #
 # BES is already installed on the base image, but
-# we need to do some additional configuration (to match what was
-# previously handled by bes RPM installation)
-
+# we need to do some additional configuration.
+#
 # Add besd service to start at boot
 RUN cp ${PREFIX}/etc/rc.d/init.d/besd /etc/rc.d/init.d/besd \
     && chkconfig --add besd \
