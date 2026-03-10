@@ -86,6 +86,8 @@ function read_build_recipe() {
     export OS_BUILD_VERSION_TAG
     export TEST_DEPLOYMENT
 
+    source "$TRAVIS_BUILD_DIR/travis/versions_and_build_offsets.sh"
+
     HYRAX_BUILD_NUMBER=$(expr $TRAVIS_BUILD_NUMBER - $TRAVIS_HYRAX_BUILD_OFFSET)
     HYRAX_VERSION="$HYRAX_RELEASE_VERSION-$HYRAX_BUILD_NUMBER"
 
