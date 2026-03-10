@@ -57,7 +57,7 @@ USER root
 WORKDIR /
 
 # Update and install the needful.
-RUN set -e
+RUN set -e \
     && dnf install -y which bc emacs vim \
     && dnf install -y procps \
     && dnf update -y \
