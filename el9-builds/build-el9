@@ -71,7 +71,7 @@ function read_build_recipe() {
     local prolog="read_build_recipe() -"
     local build_recipe_file="${1}"
     local build_recipe=""
-    build_recipe=$(cat "${build_recipe_file}")
+    build_recipe="$(cat "$build_recipe_file")"
 
     export TARGET_OS
     export TOMCAT_MAJOR_VERSION
@@ -87,7 +87,7 @@ function read_build_recipe() {
     export TEST_DEPLOYMENT
 
     source "$TRAVIS_BUILD_DIR/travis/versions_and_build_offsets.sh"
-    HYRAX_BUILD_NUMBER=$(expr $TRAVIS_BUILD_NUMBER - $TRAVIS_HYRAX_BUILD_OFFSET)
+    HYRAX_BUILD_NUMBER="$(expr $TRAVIS_BUILD_NUMBER - $TRAVIS_HYRAX_BUILD_OFFSET)"
     HYRAX_VERSION="$HYRAX_RELEASE_VERSION-$HYRAX_BUILD_NUMBER"
 
     TARGET_OS="${TARGET_OS:-$(echo "$build_recipe" | grep "TARGET_OS" | awk '{print $2;}')}"
@@ -203,13 +203,12 @@ function get_tomcat_tag_names(){
         let "page++"
         let "remaining-=ntc"
 
-        new_tags=$(curl -s "${tomcat_gh_repo}?per_page=${ntc}&page=${page}" | \
-                    jq -r '.[] | .name')
+        new_tags="$(curl -s "${tomcat_gh_repo}?per_page=${ntc}&page=${page}" | jq -r '.[] | .name')"
         #loggy "new_tags: "
         #loggy "$new_tags"
         if test -n "$tag_names"
         then
-            tag_names=$(echo "$tag_names"; echo "" ; echo "$new_tags" )
+            tag_names="$(echo "$tag_names"; echo "" ; echo "$new_tags" )"
         else
             tag_names="$new_tags"
         fi
@@ -217,7 +216,7 @@ function get_tomcat_tag_names(){
         #loggy "$tag_names"
     done
 
-    tag_count=$( echo "$tag_names" | wc -l )
+    tag_count="$( echo "$tag_names" | wc -l )"
     loggy "Retrieved $tag_count tags from $tomcat_gh_repo"
     echo "$tag_names" | sort -V
 }
@@ -249,10 +248,10 @@ function get_latest_tomcat_version_number(){
     local ignore_list=
     local tomcat_tags=
 
-    tomcat_tags=$(get_tomcat_tag_names 200)
+    tomcat_tags="$(get_tomcat_tag_names 200)"
     #loggy "Tomcat tomcat_tags: $tomcat_tags"
     while $retry ; do
-        tomcat_major_version_list=$(echo "${tomcat_tags}" | grep "^${tomcat_major_version}" )
+        tomcat_major_version_list="$(echo "${tomcat_tags}" | grep "^${tomcat_major_version}" )"
 
         loggy "$prolog tomcat_major_version_list: "
         loggy "${tomcat_major_version_list}"
@@ -260,20 +259,20 @@ function get_latest_tomcat_version_number(){
         local tomcat_version=""
         if test -n "${ignore_list}" ; then
             loggy "$prolog Using ignore_list: '${ignore_list}'"
-            tomcat_version=$(echo "${tomcat_major_version_list}" | \
+            tomcat_version="$(echo "${tomcat_major_version_list}" | \
             grep -v ${ignore_list} | \
-            tail -n 1 )
+            tail -n 1 )"
         else
             loggy "$prolog The ignore_list is empty."
-            tomcat_version=$(echo "${tomcat_major_version_list}" | \
-            tail -n 1 )
+            tomcat_version="$(echo "${tomcat_major_version_list}" | \
+            tail -n 1 )"
         fi
         loggy "$prolog Candidate tomcat_version: ${tomcat_version}"
 
         local release_endpoint_url="${release_endpoint_base}-${tomcat_major_version}/v${tomcat_version}"
         loggy "$prolog release_endpoint_url=${release_endpoint_url}"
 
-        stat=$(curl -s -o /dev/null -w "%{response_code}" "${release_endpoint_url}")
+        stat="$(curl -s -o /dev/null -w "%{response_code}" "${release_endpoint_url}")"
         if test $stat -eq 404 ; then
             loggy "$prolog Candidate tomcat_version: ${tomcat_version} not found on download site: ${release_endpoint_url} "
             if test -n "${tomcat_version}"; then
@@ -319,7 +318,7 @@ function get_tomcat_distro(){
     loggy "$prolog        tomcat_version: ${tomcat_version}"
 
     local tomcat_major_version=""
-    tomcat_major_version=$(echo "${tomcat_version}" | awk 'BEGIN{FS="."}{print $1;}')
+    tomcat_major_version="$(echo "${tomcat_version}" | awk 'BEGIN{FS="."}{print $1;}')"
     loggy "$prolog  tomcat_major_version: ${tomcat_major_version}"
 
 
@@ -427,15 +426,15 @@ function check_aws(){
     loggy ""
 
     local aws_config_list=
-    aws_config_list=$(aws configure list | sed -e "s/not set/not_set/g")
+    aws_config_list="$(aws configure list | sed -e "s/not set/not_set/g")"
     local access_key
-    access_key=$(echo "${aws_config_list}" | grep -i access_key | awk '{print $2;}')
+    access_key="$(echo "${aws_config_list}" | grep -i access_key | awk '{print $2;}')"
     local secret_key
-    secret_key=$(echo "${aws_config_list}" | grep -i secret_key | awk '{print $2;}')
+    secret_key="$(echo "${aws_config_list}" | grep -i secret_key | awk '{print $2;}')"
     local region
-    region=$(echo "${aws_config_list}" | grep -i region | awk '{print $2;}')
+    region="$(echo "${aws_config_list}" | grep -i region | awk '{print $2;}')"
     local partial=
-    partial=$(echo "${aws_config_list}" | grep -i "Partial credentials found in env")
+    partial="$(echo "${aws_config_list}" | grep -i "Partial credentials found in env")"
 
     ns="<not_set>"
     status=0;
@@ -964,7 +963,7 @@ function start_hyrax(){
     loggy "TASK: start_hyrax()"
     loggy "  Starting docker image: ${image_tag}"
     local platform=""
-    platform=$(get_platform)
+    platform="$(get_platform)"
     loggy "               platform: ${platform}"
 
     docker run \
@@ -989,7 +988,7 @@ function debug_hyrax(){
     loggy "TASK: debug_hyrax()"
     loggy "  Starting docker image: ${image_tag}"
     local platform=""
-    platform=$(get_platform)
+    platform="$(get_platform)"
     loggy "               platform: ${platform}"
 
     # docker run -d -h hyrax -p 8080:8080 --name=hyrax "${IMAGE_TAG}"
@@ -1098,7 +1097,7 @@ function build_ngap() {
     show_version 2>&1 | tee "${log_file}"
 
     local tomcat_version="unset"
-    tomcat_version=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
+    tomcat_version="$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")"
     get_tomcat_distro \
         "${DOCKER_NAME}" \
         "${tomcat_version}" 2>&1 | tee -a "${log_file}"
@@ -1154,7 +1153,7 @@ function build_olfs() {
     show_version 2>&1 | tee "${log_file}"
 
     local tomcat_version="unset"
-    tomcat_version=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
+    tomcat_version="$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")"
     get_tomcat_distro \
         "${DOCKER_NAME}" \
         "${tomcat_version}" 2>&1 | tee -a "${log_file}"
@@ -1287,21 +1286,21 @@ function mk_easy_docker_release(){
     loggy "          RELEASE_DATE: ${RELEASE_DATE}"
     loggy "         HYRAX_VERSION: ${HYRAX_VERSION}"
     local hyrax_major_version=
-    hyrax_major_version=$(echo "${HYRAX_VERSION}" | awk '{split($0,a,"."); print a[1]"."a[2];}')
+    hyrax_major_version="$(echo "${HYRAX_VERSION}" | awk '{split($0,a,"."); print a[1]"."a[2];}')"
     loggy "   hyrax_major_version: ${hyrax_major_version}"
     local hyrax_release_version=
-    hyrax_release_version=$(echo "${HYRAX_VERSION}" | awk '{split($0,a,"-"); print a[1];}')
+    hyrax_release_version="$(echo "${HYRAX_VERSION}" | awk '{split($0,a,"-"); print a[1];}')"
     loggy " hyrax_release_version: ${hyrax_release_version}"
 
     loggy "          OLFS_VERSION: ${OLFS_VERSION}"
     local olfs_release_version=
-    olfs_release_version=$(echo "${OLFS_VERSION}" | awk '{split($0,a,"-"); print a[1];}')
+    olfs_release_version="$(echo "${OLFS_VERSION}" | awk '{split($0,a,"-"); print a[1];}')"
     loggy "  olfs_release_version: ${olfs_release_version}"
 
     local bes_version="${4}"
     loggy "           BES_VERSION: ${BES_VERSION}"
     local bes_release_version=
-    bes_release_version=$(echo "${BES_VERSION}" | awk '{split($0,a,"-"); print a[1];}')
+    bes_release_version="$(echo "${BES_VERSION}" | awk '{split($0,a,"-"); print a[1];}')"
     loggy "   bes_release_version: ${bes_release_version}"
 
     pull_then_tag_and_push_new_tag "opendap/hyrax:${HYRAX_VERSION}" "opendap/hyrax:${hyrax_release_version}"
@@ -1335,7 +1334,7 @@ function travis_hyrax() {
     export OS_SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}:snapshot-$TARGET_OS$TEST_DEPLOYMENT"
     export OS_BUILD_VERSION_TAG="opendap/${DOCKER_NAME}:${HYRAX_VERSION}-$TARGET_OS$TEST_DEPLOYMENT"
     export TOMCAT_VERSION
-    TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
+    TOMCAT_VERSION="$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")"
 
     show_version
     get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_VERSION}"
