@@ -21,15 +21,6 @@ loggy "HYRAX_MAJOR_VERSION: $HYRAX_MAJOR_VERSION"
 # Get the latest TOMCAT distribution
 get_tomcat_distro `pwd` "${TOMCAT_VERSION}"
 
-# Get the BES and libdap RPMs
-woo_get_besd_distro \
-    `pwd` \
-    "el8" \
-    "${LIBDAP_VERSION}" \
-    "${BES_VERSION}" \
-    "${HYRAX_VERSION}" \
-     true
-
 # Get the OLFS web archive
 curl_get_olfs_distro  `pwd`  "${OLFS_VERSION}"
 

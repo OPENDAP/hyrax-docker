@@ -84,6 +84,7 @@ function read_build_recipe() {
     # export APR_VERSION
     export OS_SNAPSHOT_IMAGE_TAG
     export OS_BUILD_VERSION_TAG
+    export BES_CORE_IMAGE_TAG
     export TEST_DEPLOYMENT
 
     source "$TRAVIS_BUILD_DIR/travis/versions_and_build_offsets.sh"
@@ -97,6 +98,7 @@ function read_build_recipe() {
     OLFS_VERSION=${OLFS_VERSION:-"$(echo "$build_recipe" | grep olfs | sed "s/olfs-//g" | awk '{print $1;}')-$TARGET_OS"}
     RELEASE_DATE=${RELEASE_DATE:-$(echo "$build_recipe" | grep hyrax | awk '{print $2;}')}
     TEST_DEPLOYMENT="${TEST_DEPLOYMENT:-"$(get_test_deployment_tag "$build_recipe_file")"}"
+    BES_CORE_IMAGE_TAG="opendap/bes_core:$BES_VERSION-$TARGET_OS"
 
     if test "$DOCKER_NAME" == "ngap"
     then
@@ -142,6 +144,7 @@ function show_version(){
     loggy "$prolog           S3_BUILD_BUCKET: $S3_BUILD_BUCKET"
     loggy "$prolog            SLEEP_INTERVAL: $SLEEP_INTERVAL"
     loggy ""
+    loggy "$prolog    BES_CORE_IMAGE_TAG: $BES_CORE_IMAGE_TAG"
     loggy "$prolog     HYRAX_RELEASE_VERSION: $HYRAX_RELEASE_VERSION"
     loggy "$prolog       TRAVIS_BUILD_NUMBER: $TRAVIS_BUILD_NUMBER"
     loggy "$prolog TRAVIS_HYRAX_BUILD_OFFSET: $TRAVIS_HYRAX_BUILD_OFFSET"
@@ -203,12 +206,13 @@ function get_tomcat_tag_names(){
         let "page++"
         let "remaining-=ntc"
 
-        new_tags="$(curl -s "${tomcat_gh_repo}?per_page=${ntc}&page=${page}" | jq -r '.[] | .name')"
+        new_tags=$(curl -s "${tomcat_gh_repo}?per_page=${ntc}&page=${page}" | \
+                    jq -r '.[] | .name')
         #loggy "new_tags: "
         #loggy "$new_tags"
         if test -n "$tag_names"
         then
-            tag_names="$(echo "$tag_names"; echo "" ; echo "$new_tags" )"
+            tag_names=$(echo "$tag_names"; echo "" ; echo "$new_tags" )
         else
             tag_names="$new_tags"
         fi
@@ -216,7 +220,7 @@ function get_tomcat_tag_names(){
         #loggy "$tag_names"
     done
 
-    tag_count="$( echo "$tag_names" | wc -l )"
+    tag_count=$( echo "$tag_names" | wc -l )
     loggy "Retrieved $tag_count tags from $tomcat_gh_repo"
     echo "$tag_names" | sort -V
 }
@@ -248,10 +252,10 @@ function get_latest_tomcat_version_number(){
     local ignore_list=
     local tomcat_tags=
 
-    tomcat_tags="$(get_tomcat_tag_names 200)"
+    tomcat_tags=$(get_tomcat_tag_names 200)
     #loggy "Tomcat tomcat_tags: $tomcat_tags"
     while $retry ; do
-        tomcat_major_version_list="$(echo "${tomcat_tags}" | grep "^${tomcat_major_version}" )"
+        tomcat_major_version_list=$(echo "${tomcat_tags}" | grep "^${tomcat_major_version}" )
 
         loggy "$prolog tomcat_major_version_list: "
         loggy "${tomcat_major_version_list}"
@@ -259,20 +263,20 @@ function get_latest_tomcat_version_number(){
         local tomcat_version=""
         if test -n "${ignore_list}" ; then
             loggy "$prolog Using ignore_list: '${ignore_list}'"
-            tomcat_version="$(echo "${tomcat_major_version_list}" | \
+            tomcat_version=$(echo "${tomcat_major_version_list}" | \
             grep -v ${ignore_list} | \
-            tail -n 1 )"
+            tail -n 1 )
         else
             loggy "$prolog The ignore_list is empty."
-            tomcat_version="$(echo "${tomcat_major_version_list}" | \
-            tail -n 1 )"
+            tomcat_version=$(echo "${tomcat_major_version_list}" | \
+            tail -n 1 )
         fi
         loggy "$prolog Candidate tomcat_version: ${tomcat_version}"
 
         local release_endpoint_url="${release_endpoint_base}-${tomcat_major_version}/v${tomcat_version}"
         loggy "$prolog release_endpoint_url=${release_endpoint_url}"
 
-        stat="$(curl -s -o /dev/null -w "%{response_code}" "${release_endpoint_url}")"
+        stat=$(curl -s -o /dev/null -w "%{response_code}" "${release_endpoint_url}")
         if test $stat -eq 404 ; then
             loggy "$prolog Candidate tomcat_version: ${tomcat_version} not found on download site: ${release_endpoint_url} "
             if test -n "${tomcat_version}"; then
@@ -318,7 +322,7 @@ function get_tomcat_distro(){
     loggy "$prolog        tomcat_version: ${tomcat_version}"
 
     local tomcat_major_version=""
-    tomcat_major_version="$(echo "${tomcat_version}" | awk 'BEGIN{FS="."}{print $1;}')"
+    tomcat_major_version=$(echo "${tomcat_version}" | awk 'BEGIN{FS="."}{print $1;}')
     loggy "$prolog  tomcat_major_version: ${tomcat_major_version}"
 
 
@@ -426,15 +430,15 @@ function check_aws(){
     loggy ""
 
     local aws_config_list=
-    aws_config_list="$(aws configure list | sed -e "s/not set/not_set/g")"
+    aws_config_list=$(aws configure list | sed -e "s/not set/not_set/g")
     local access_key
-    access_key="$(echo "${aws_config_list}" | grep -i access_key | awk '{print $2;}')"
+    access_key=$(echo "${aws_config_list}" | grep -i access_key | awk '{print $2;}')
     local secret_key
-    secret_key="$(echo "${aws_config_list}" | grep -i secret_key | awk '{print $2;}')"
+    secret_key=$(echo "${aws_config_list}" | grep -i secret_key | awk '{print $2;}')
     local region
-    region="$(echo "${aws_config_list}" | grep -i region | awk '{print $2;}')"
+    region=$(echo "${aws_config_list}" | grep -i region | awk '{print $2;}')
     local partial=
-    partial="$(echo "${aws_config_list}" | grep -i "Partial credentials found in env")"
+    partial=$(echo "${aws_config_list}" | grep -i "Partial credentials found in env")
 
     ns="<not_set>"
     status=0;
@@ -499,72 +503,6 @@ function s3_pull(){
     loggy "$prolog  Retrieving: $s3_url"
     aws s3 cp $be_quiet "$s3_url" "$target_file"
     loggy "$prolog END"
-}
-
-################################################################################
-#
-# s3_get_besd_distro() - Get the rpm and war files need for a Hyrax installation
-#    from the identified S3 bucket.
-#    $1 - The AWS S3 bucket from which to pull the Hyrax components
-#    $2 - The directory into which to place the Hyrax components.
-#    $3 - The linux architecture (aka el7, el8, etc.)
-#    $4 - The libap version number ##.##.##-##
-#    $5 - The bes version number ##.##.##-##
-#    $6 - A debug flag, if present (i.e. not empty string) then the devel and
-#         debuginfo rpm files for libdap and bes will be retrieved as well.
-#
-function s3_get_besd_distro() {
-    local prolog="s3_get_besd_distro() -"
-    loggy "${HR2}"
-    loggy "$prolog BEGIN"
-    local s3_bucket="${1}"
-    loggy "$prolog          s3_bucket: ${s3_bucket}"
-    local target_dir="${2}"
-    loggy "$prolog         target_dir: ${target_dir}"
-    local larch="${3}"
-    loggy "$prolog linux_architecture: ${larch}"
-    local libdap_version="${4}"
-    loggy "$prolog     libdap_version: ${libdap_version}"
-    local bes_version="${5}"
-    loggy "$prolog        bes_version: ${bes_version}"
-    local debug="${6}"
-    loggy "$prolog              debug: ${debug}"
-
-    set -e
-
-    loggy "$prolog Cleaning up..."
-    rm -fv "${target_dir}/*.rpm"
-
-    loggy ""
-    s3_pull "${s3_bucket}" \
-            "libdap-${libdap_version}.${larch}.x86_64.rpm" \
-            "${target_dir}"
-
-    if test -n "${debug}"; then # Only get the debug libs when invoked in debug mode
-        s3_pull "${s3_bucket}" \
-                "libdap-devel-${libdap_version}.${larch}.x86_64.rpm" \
-                "${target_dir}"
-        s3_pull "${s3_bucket}" \
-                "libdap-debuginfo-${libdap_version}.${larch}.x86_64.rpm" \
-                "${target_dir}"
-    fi
-
-    s3_pull "${s3_bucket}" \
-            "bes-${bes_version}.static.${larch}.x86_64.rpm" \
-            "${target_dir}"
-
-    if test -n "${debug}"; then # Only get the debug libs when invoked in debug mode
-        s3_pull "${s3_bucket}" \
-                "bes-devel-${bes_version}.static.${larch}.x86_64.rpm" \
-                "${target_dir}"
-        s3_pull "${s3_bucket}" \
-                "bes-debuginfo-${bes_version}.static.${larch}.x86_64.rpm" \
-                "${target_dir}"
-    fi
-
-    set +e
-    loggy ""
-    return 0
 }
 
 ################################################################################
@@ -675,73 +613,6 @@ function curl_pull(){
     loggy ""
 }
 
-################################################################################
-#
-# woo_get_besd_distro() - Get the rpm and war files need for a Hyrax release
-# from https://www.opendap.org/pub/binaries
-#    $1 - The directory into which to place the Hyrax components.
-#    $2 - The linux architecture (aka el7, el8, etc.)
-#    $3 - The libap version number ##.##.##-##
-#    $4 - The bes version number ##.##.##-##
-#    $5 - A debug flag, if present (i.e. not empty string) then the devel and
-#         debuginfo rpm files for libdap and bes will be retrieved as well.
-#
-function woo_get_besd_distro() {
-    loggy "${HR}"
-    loggy "TASK: woo_get_besd_distro()"
-    local target_dir="${1}"
-    loggy "        target_dir: ${target_dir}"
-    local larch="${2}"
-    loggy "linux_architecture: ${larch}"
-    local libdap_version="${3}"
-    loggy "    libdap_version: ${libdap_version}"
-    local bes_version="${4}"
-    loggy "       bes_version: ${bes_version}"
-    local hyrax_version="${5}"
-    loggy "     hyrax_version: ${hyrax_version}"
-    local debug="${6}"
-    loggy "             debug: ${debug}"
-
-    set -e
-    loggy ""
-    loggy "Cleaning up..."
-    rm -fv "${target_dir}/*.rpm"
-    loggy ""
-
-    local release_dir="pub/binary"
-    release_dir="${release_dir}/hyrax-"$(echo "${hyrax_version}" | awk '{split($0,a,"."); print a[1]"."a[2];}')
-    ######### FIXME #########
-    # FIXME - rocky-8 or rhel8? wtf
-    release_dir="${release_dir}/rocky-8"
-    ######## FIXME #########
-    loggy "release_dir: ${release_dir}"
-
-    release_url="${ARCHIVE_HOST}/${release_dir}"
-    loggy "release_url: ${release_url}"
-
-    target_file="libdap-${libdap_version}.${larch}.x86_64.rpm"
-    curl_pull "${release_url}" "${target_file}" "${target_dir}"
-    if test -n "${debug}"; then # Only get the debug libs when invoked in debug mode
-        target_file="libdap-devel-${libdap_version}.${larch}.x86_64.rpm"
-        curl_pull "${release_url}" "${target_file}" "${target_dir}"
-        target_file="libdap-debuginfo-${libdap_version}.${larch}.x86_64.rpm"
-        curl_pull "${release_url}" "${target_file}" "${target_dir}"
-    fi
-
-
-    target_file="bes-${bes_version}.static.${larch}.x86_64.rpm"
-    curl_pull "${release_url}" "${target_file}" "${target_dir}"
-    if test -n "${debug}"; then # Only get the debug libs when invoked in debug mode
-        target_file="bes-devel-${bes_version}.static.${larch}.x86_64.rpm"
-        curl_pull "${release_url}" "${target_file}" "${target_dir}"
-        target_file="bes-debuginfo-${bes_version}.static.${larch}.x86_64.rpm"
-        curl_pull "${release_url}" "${target_file}" "${target_dir}"
-    fi
-
-    set +e
-    loggy ""
-    return 0
-}
 
 function s3_get_olfs_ngap_distro() {
     local prolog="s3_get_olfs_ngap_distro() -"
@@ -934,6 +805,7 @@ function build_hyrax_docker() {
         --build-arg LIBDAP_VERSION \
         --build-arg BES_VERSION \
         --build-arg OLFS_VERSION \
+        --build-arg BES_CORE_IMAGE_TAG \
         --tag "${OS_BUILD_VERSION_TAG}" \
         --tag "${OS_SNAPSHOT_IMAGE_TAG}" \
         ${docker_name}
@@ -963,7 +835,7 @@ function start_hyrax(){
     loggy "TASK: start_hyrax()"
     loggy "  Starting docker image: ${image_tag}"
     local platform=""
-    platform="$(get_platform)"
+    platform=$(get_platform)
     loggy "               platform: ${platform}"
 
     docker run \
@@ -988,7 +860,7 @@ function debug_hyrax(){
     loggy "TASK: debug_hyrax()"
     loggy "  Starting docker image: ${image_tag}"
     local platform=""
-    platform="$(get_platform)"
+    platform=$(get_platform)
     loggy "               platform: ${platform}"
 
     # docker run -d -h hyrax -p 8080:8080 --name=hyrax "${IMAGE_TAG}"
@@ -1041,13 +913,6 @@ function build_hyrax() {
         "${DOCKER_NAME}" \
         "${TOMCAT_VERSION}" 2>&1 | tee -a "${log_file}"
 
-    s3_get_besd_distro \
-        "${S3_BUILD_BUCKET}" \
-        "${DOCKER_NAME}" \
-        "$TARGET_OS" \
-        "${LIBDAP_VERSION}" \
-        "${BES_VERSION}" $debug 2>&1 | tee -a "${log_file}"
-
     s3_get_olfs_distro \
         "${S3_BUILD_BUCKET}" \
         "${DOCKER_NAME}" \
@@ -1097,17 +962,10 @@ function build_ngap() {
     show_version 2>&1 | tee "${log_file}"
 
     local tomcat_version="unset"
-    tomcat_version="$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")"
+    tomcat_version=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
     get_tomcat_distro \
         "${DOCKER_NAME}" \
         "${tomcat_version}" 2>&1 | tee -a "${log_file}"
-
-    s3_get_besd_distro \
-        "${S3_BUILD_BUCKET}" \
-        "${DOCKER_NAME}" \
-        "el8" \
-        "${LIBDAP_VERSION}" \
-        "${BES_VERSION}" 2>&1 | tee -a "${log_file}"
 
     get_ngap_olfs_distro \
         "${S3_BUILD_BUCKET}" \
@@ -1153,7 +1011,7 @@ function build_olfs() {
     show_version 2>&1 | tee "${log_file}"
 
     local tomcat_version="unset"
-    tomcat_version="$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")"
+    tomcat_version=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
     get_tomcat_distro \
         "${DOCKER_NAME}" \
         "${tomcat_version}" 2>&1 | tee -a "${log_file}"
@@ -1195,13 +1053,6 @@ function build_besd() {
 
     export DOCKER_NAME="besd"
     show_version 2>&1 | tee "${log_file}"
-
-    s3_get_besd_distro \
-        "${S3_BUILD_BUCKET}" \
-        "${DOCKER_NAME}" \
-        "$TARGET_OS" \
-        "${LIBDAP_VERSION}" \
-        "${BES_VERSION}" 2>&1 | tee -a "${log_file}"
 
     build_besd_docker 2>&1 | tee -a "${log_file}"
 #    cleanup_build_files "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}"
@@ -1286,21 +1137,21 @@ function mk_easy_docker_release(){
     loggy "          RELEASE_DATE: ${RELEASE_DATE}"
     loggy "         HYRAX_VERSION: ${HYRAX_VERSION}"
     local hyrax_major_version=
-    hyrax_major_version="$(echo "${HYRAX_VERSION}" | awk '{split($0,a,"."); print a[1]"."a[2];}')"
+    hyrax_major_version=$(echo "${HYRAX_VERSION}" | awk '{split($0,a,"."); print a[1]"."a[2];}')
     loggy "   hyrax_major_version: ${hyrax_major_version}"
     local hyrax_release_version=
-    hyrax_release_version="$(echo "${HYRAX_VERSION}" | awk '{split($0,a,"-"); print a[1];}')"
+    hyrax_release_version=$(echo "${HYRAX_VERSION}" | awk '{split($0,a,"-"); print a[1];}')
     loggy " hyrax_release_version: ${hyrax_release_version}"
 
     loggy "          OLFS_VERSION: ${OLFS_VERSION}"
     local olfs_release_version=
-    olfs_release_version="$(echo "${OLFS_VERSION}" | awk '{split($0,a,"-"); print a[1];}')"
+    olfs_release_version=$(echo "${OLFS_VERSION}" | awk '{split($0,a,"-"); print a[1];}')
     loggy "  olfs_release_version: ${olfs_release_version}"
 
     local bes_version="${4}"
     loggy "           BES_VERSION: ${BES_VERSION}"
     local bes_release_version=
-    bes_release_version="$(echo "${BES_VERSION}" | awk '{split($0,a,"-"); print a[1];}')"
+    bes_release_version=$(echo "${BES_VERSION}" | awk '{split($0,a,"-"); print a[1];}')
     loggy "   bes_release_version: ${bes_release_version}"
 
     pull_then_tag_and_push_new_tag "opendap/hyrax:${HYRAX_VERSION}" "opendap/hyrax:${hyrax_release_version}"
@@ -1334,17 +1185,10 @@ function travis_hyrax() {
     export OS_SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}:snapshot-$TARGET_OS$TEST_DEPLOYMENT"
     export OS_BUILD_VERSION_TAG="opendap/${DOCKER_NAME}:${HYRAX_VERSION}-$TARGET_OS$TEST_DEPLOYMENT"
     export TOMCAT_VERSION
-    TOMCAT_VERSION="$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")"
+    TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
 
     show_version
     get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_VERSION}"
-    s3_get_besd_distro \
-        "${S3_BUILD_BUCKET}" \
-        "${DOCKER_NAME}" \
-        "$TARGET_OS" \
-        "${LIBDAP_VERSION}" \
-        "${BES_VERSION}" \
-        "$ADD_DEBUG" 2>&1
     s3_get_olfs_distro \
         "${S3_BUILD_BUCKET}" \
         "${DOCKER_NAME}" \

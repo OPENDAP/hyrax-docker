@@ -1,7 +1,7 @@
 # paste config here
 #
 # Initial Travis-CI control file. 6.11.15 jhrg
-# Added sonar scan 3.12.19 jhrg 
+# Added sonar scan 3.12.19 jhrg
 #
 #
 #
@@ -51,6 +51,7 @@ env:
 before_install:
   - echo "# travis.before_install() - BUILD_RECIPE is $BUILD_RECIPE"
   - echo "# travis.before_install() - TARGET_OS is $TARGET_OS"
+  - echo "# travis.before_install() - BES_CORE_IMAGE_TAG is $BES_CORE_IMAGE_TAG"
   - echo "# travis.before_install() - PythonVersion is $(python3 --version)"
   - echo "# travis.before_install() - Using pip3 to install awscli"
   - pip3 install awscli
@@ -78,13 +79,6 @@ stages:
 
 jobs:
   include:
-
-    ############################################################################
-    #
-    # RHEL Builds
-    #
-
-# BUILD_AND_TEST
     - stage: BUILD_AND_TEST
       name: "Build and Test opendap/hyrax"
       script:
@@ -101,22 +95,18 @@ jobs:
         - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "$TOMCAT_MAJOR_VERSION")
         - show_version
         - get_tomcat_distro "$DOCKER_NAME" "$TOMCAT_VERSION"
-        - s3_get_besd_distro
-          "$S3_BUILD_BUCKET"
-          "$DOCKER_NAME"
-          "$TARGET_OS"
-          "$LIBDAP_VERSION"
-          "$BES_VERSION" $ADD_DEBUG 2>&1
         - s3_get_olfs_distro
           "$S3_BUILD_BUCKET"
           "$DOCKER_NAME"
           "$OLFS_VERSION" 2>&1
+        - set -e # Don't keep going if the docker build fails....
         - docker build
           --build-arg TOMCAT_VERSION
           --build-arg RELEASE_DATE
           --build-arg HYRAX_VERSION
           --build-arg LIBDAP_VERSION
           --build-arg BES_VERSION
+          --build-arg BES_CORE_IMAGE_TAG
           --build-arg OLFS_VERSION
           --tag "$OS_SNAPSHOT_IMAGE_TAG"
           --tag "$OS_BUILD_VERSION_TAG"
@@ -126,7 +116,6 @@ jobs:
         - echo "Running Test Script"
         - ./travis/regression_test_script -i "$OS_SNAPSHOT_IMAGE_TAG" -l "$TESTS_LOG_BASE"
 
-# BUILD
     - stage: BUILD
       name: "Build opendap/besd"
       script:
@@ -135,28 +124,20 @@ jobs:
         - cd "$TARGET_OS-builds"
         - source "./build-$TARGET_OS"
         - show_version
-        #- export BES_VERSION_TAG="opendap/$DOCKER_NAME:$BES_VERSION-$TEST_DEPLOYMENT"
-        #- echo "# BES_VERSION_TAG '$BES_VERSION_TAG'"
         - OS_BUILD_VERSION_TAG="opendap/$DOCKER_NAME:$BES_VERSION-$TARGET_OS$TEST_DEPLOYMENT"
         - echo "#  OS_BUILD_VERSION_TAG '$OS_BUILD_VERSION_TAG'"
         - echo "# OS_SNAPSHOT_IMAGE_TAG '$OS_SNAPSHOT_IMAGE_TAG'"
-        - s3_get_besd_distro
-          "$S3_BUILD_BUCKET"
-          "$DOCKER_NAME"
-          "$TARGET_OS"
-          "$LIBDAP_VERSION"
-          "$BES_VERSION" "$ADD_DEBUG_RPMS" 2>&1
         - docker build
           --build-arg RELEASE_DATE
           --build-arg HYRAX_VERSION
           --build-arg LIBDAP_VERSION
           --build-arg BES_VERSION
+          --build-arg BES_CORE_IMAGE_TAG
           --tag "$OS_SNAPSHOT_IMAGE_TAG"
           --tag "$OS_BUILD_VERSION_TAG"
           "$DOCKER_NAME"
         - docker image ls -a
 
-# DISABLE PERMANENTLY??
     - stage: BUILD
       name: "Build opendap/hyrax_ncwms"
       script:
@@ -167,13 +148,6 @@ jobs:
         - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "$TOMCAT_MAJOR_VERSION")
         - show_version
         - get_tomcat_distro "$DOCKER_DIR" "$TOMCAT_VERSION"
-        - s3_get_besd_distro
-          "$S3_BUILD_BUCKET"
-          "$DOCKER_DIR"
-          "$TARGET_OS"
-          "$LIBDAP_VERSION"
-          "$BES_VERSION" "$ADD_DEBUG_RPMS" 2>&1
-        - ls -l "$DOCKER_DIR"/*.rpm
         - s3_get_olfs_distro
           "$S3_BUILD_BUCKET"
           "$DOCKER_DIR"
@@ -185,6 +159,7 @@ jobs:
           --build-arg HYRAX_VERSION
           --build-arg LIBDAP_VERSION
           --build-arg BES_VERSION
+          --build-arg BES_CORE_IMAGE_TAG
           --build-arg OLFS_VERSION
           --build-arg USE_NCWMS=true
           --tag "$OS_SNAPSHOT_IMAGE_TAG"
@@ -193,7 +168,6 @@ jobs:
         - docker image ls -a
 
 
-# BUILD
     - stage: BUILD
       name: "Build opendap/olfs"
       script:
@@ -252,4 +226,4 @@ deploy:
     script: bash "$TRAVIS_BUILD_DIR/travis/deploy_to_docker_hub.sh"
     on:
       all_branches: true
-      condition: ( "$DEPLOY_ME" = "true" )
+      condition: $DEPLOY_ME = "true"
