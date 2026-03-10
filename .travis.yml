@@ -123,10 +123,8 @@ jobs:
         - echo "# RELEASE_DATE '$RELEASE_DATE'"
         - cd "$TARGET_OS-builds"
         - source "./build-$TARGET_OS"
-        - show_version
         - OS_BUILD_VERSION_TAG="opendap/$DOCKER_NAME:$BES_VERSION-$TARGET_OS$TEST_DEPLOYMENT"
-        - echo "#  OS_BUILD_VERSION_TAG '$OS_BUILD_VERSION_TAG'"
-        - echo "# OS_SNAPSHOT_IMAGE_TAG '$OS_SNAPSHOT_IMAGE_TAG'"
+        - show_version
         - docker build
           --build-arg RELEASE_DATE
           --build-arg HYRAX_VERSION
