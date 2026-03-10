@@ -12,7 +12,7 @@ export NO_CACHE=${NO_CACHE:-""}
 
 ###########################################################################
 function loggy(){
-    if test -n "${log_file}"
+    if test -n "$log_file"
     then
         echo  "$@"  | awk '{ print "# "$0;}' | tee -a "${log_file}" >&2
     else
@@ -28,20 +28,22 @@ function read_build_recipe() {
 
     export RELEASE_DATE=""
     export HYRAX_VERSION=""
+    export HYRAX_BUILD_NUMBER=""
     export OLFS_VERSION=""
     export BES_VERSION=""
-    export BUILD_DMRPP_VERSION=""
     export LIBDAP_VERSION=""
     export SNAPSHOT_IMAGE_TAG=""
     export BUILD_VERSION_TAG=""
     export OS_SNAPSHOT_IMAGE_TAG=""
     export OS_BUILD_VERSION_TAG=""
 
+    source ../travis/versions_and_build_offsets.sh
+    HYRAX_BUILD_NUMBER=$(expr $TRAVIS_BUILD_NUMBER - $TRAVIS_HYRAX_BUILD_OFFSET)
+    HYRAX_VERSION="$HYRAX_RELEASE_VERSION-$HYRAX_BUILD_NUMBER"
+
     RELEASE_DATE=${RELEASE_DATE:-$(echo "${build_recipe}" | grep hyrax | awk '{print $2;}')}
-    HYRAX_VERSION=${HYRAX_VERSION:-$(echo "${build_recipe}" | grep hyrax | awk '{print $1;}' | sed "s/hyrax-//g" )}
     OLFS_VERSION=${OLFS_VERSION:-$(echo "${build_recipe}" | grep olfs | sed "s/olfs-//g" | awk '{print $1;}')}
     BES_VERSION=${BES_VERSION:-$(echo "${build_recipe}" | grep bes | sed "s/bes-//g" | awk '{print $1;}')}
-    BUILD_DMRPP_VERSION=${BUILD_DMRPP_VERSION:-$(echo "${build_recipe}" | grep "build_dmrpp-" | sed "s/build_dmrpp-//g" | awk '{print $1;}')}
     LIBDAP_VERSION=${LIBDAP_VERSION:-$(echo "${build_recipe}" | grep libdap4 | sed "s/libdap4-//g"| awk '{print $1;}')}
 
     local td_value="-test-deploy"
@@ -99,42 +101,40 @@ function read_build_recipe() {
 read_build_recipe "${BUILD_RECIPE_FILE}"
 
 
-
-
-
-
-
 export RELEASE_HOST=${RELEASE_HOST:-"https://www.opendap.org"}
 
 
 function show_version(){
     loggy "${HR}"
-    loggy "         RELEASE_DATE: ${RELEASE_DATE}"
-    loggy "            TARGET_OS: $TARGET_OS"
-    loggy "           DOCKER_DIR: $DOCKER_DIR"
-    loggy "          DOCKER_NAME: $DOCKER_NAME"
-    loggy "        HYRAX_VERSION: ${HYRAX_VERSION}"
-    loggy "         OLFS_VERSION: ${OLFS_VERSION}"
-    loggy "          BES_VERSION: ${BES_VERSION}"
-    loggy "  BUILD_DMRPP_VERSION: ${BUILD_DMRPP_VERSION}"
-    loggy "       LIBDAP_VERSION: ${LIBDAP_VERSION}"
-    loggy "          DOCKER_NAME: ${DOCKER_NAME}"
+    loggy "             RELEASE_DATE: ${RELEASE_DATE}"
+    loggy "                TARGET_OS: $TARGET_OS"
+    loggy "          TEST_DEPLOYMENT: '$TEST_DEPLOYMENT'"
+    loggy "              DOCKER_NAME: $DOCKER_NAME"
+    loggy "               DOCKER_DIR: $DOCKER_DIR"
+    loggy "          S3_BUILD_BUCKET: $S3_BUILD_BUCKET"
+    loggy "           SLEEP_INTERVAL: $SLEEP_INTERVAL"
     loggy ""
-    loggy "    BUILD_VERSION_TAG: '$BUILD_VERSION_TAG'"
-    loggy " OS_BUILD_VERSION_TAG: '$OS_BUILD_VERSION_TAG'"
+    loggy "    HYRAX_RELEASE_VERSION: $HYRAX_RELEASE_VERSION"
+    loggy "      TRAVIS_BUILD_NUMBER: $TRAVIS_BUILD_NUMBER"
+    loggy "TRAVIS_HYRAX_BUILD_OFFSET: $TRAVIS_HYRAX_BUILD_OFFSET"
+    loggy "       HYRAX_BUILD_NUMBER: $HYRAX_BUILD_NUMBER"
+    loggy "            HYRAX_VERSION: $HYRAX_VERSION"
     loggy ""
-    loggy "   SNAPSHOT_IMAGE_TAG: '$SNAPSHOT_IMAGE_TAG'"
-    loggy "OS_SNAPSHOT_IMAGE_TAG: '$OS_SNAPSHOT_IMAGE_TAG'"
+    loggy "           LIBDAP_VERSION: $LIBDAP_VERSION"
+    loggy "              BES_VERSION: $BES_VERSION"
+    loggy "             OLFS_VERSION: $OLFS_VERSION"
     loggy ""
-    loggy "      S3_BUILD_BUCKET: ${S3_BUILD_BUCKET}"
-    loggy "       SLEEP_INTERVAL: ${SLEEP_INTERVAL}"
+    loggy "        BUILD_VERSION_TAG: '$BUILD_VERSION_TAG'"
+    loggy "     OS_BUILD_VERSION_TAG: '$OS_BUILD_VERSION_TAG'"
     loggy ""
-    loggy " TOMCAT_MAJOR_VERSION: ${TOMCAT_MAJOR_VERSION}"
-    loggy "      TOMCAT_VERSION: ${TOMCAT_VERSION}"
+    loggy "       SNAPSHOT_IMAGE_TAG: '$SNAPSHOT_IMAGE_TAG'"
+    loggy "    OS_SNAPSHOT_IMAGE_TAG: '$OS_SNAPSHOT_IMAGE_TAG'"
     loggy ""
-    loggy "             NO_CACHE: ${NO_CACHE}"
+    loggy "     TOMCAT_MAJOR_VERSION: ${TOMCAT_MAJOR_VERSION}"
+    loggy "          TOMCAT_VERSION: ${TOMCAT_VERSION}"
     loggy ""
-    loggy "      TEST_DEPLOYMENT: '$TEST_DEPLOYMENT'"
+    loggy "                 NO_CACHE: ${NO_CACHE}"
+    loggy ""
     loggy ""
 }
 
@@ -451,7 +451,7 @@ function s3_pull(){
 #    $1 - The AWS S3 bucket from which to pull the Hyrax components
 #    $2 - The directory into which to place the Hyrax components.
 #    $3 - The linux architecture (aka el7, el8, etc.)
-#    $4 - The libap version number ##.##.##-##
+#    $4 - The libdap version number ##.##.##-##
 #    $5 - The bes version number ##.##.##-##
 #    $6 - A debug flag, if present (i.e. not empty string) then the devel and
 #         debuginfo rpm files for libdap and bes will be retrieved as well.
@@ -523,7 +523,7 @@ function curl_pull(){
     loggy "  release_url: ${release_url}"
     loggy "   target_url: ${target_url}"
     curl -s -L -o "${target_dir}/${target_file}" "${target_url}"
-    loggy ""$(ls -l "${target_dir}/${target_file}")
+    loggy "$(ls -l "${target_dir}/${target_file}")"
     loggy ""
 }
 
@@ -533,7 +533,7 @@ function curl_pull(){
 # from https://www.opendap.org/pub/binaries
 #    $1 - The directory into which to place the Hyrax components.
 #    $2 - The linux architecture (aka el7, el8, etc.)
-#    $3 - The libap version number ##.##.##-##
+#    $3 - The libdap version number ##.##.##-##
 #    $4 - The bes version number ##.##.##-##
 #    $5 - A debug flag, if present (i.e. not empty string) then the devel and
 #         debuginfo rpm files for libdap and bes will be retrieved as well.
@@ -681,7 +681,7 @@ function curl_get_olfs_distro() {
     loggy "      olfs_version: ${olfs_version}"
 
     release_url="${RELEASE_HOST}/pub/olfs"
-    loggy "release_url: ${release_dir}"
+    loggy "release_url: $release_url"
 
     set -e
     loggy "Cleaning up..."
@@ -824,7 +824,8 @@ function build_hyrax_ncwms_docker() {
     source ./build-el8
     export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}_ncwms:rh8-snapshot"
     export BUILD_VERSION_TAG="opendap/${DOCKER_NAME}_ncwms:rh8-${HYRAX_VERSION}"
-    export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
+    local TOMCAT_MAJOR_VERSION
+    TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
     show_version 
     get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_VERSION}"
     s3_get_besd_distro \
@@ -930,7 +931,8 @@ function build_hyrax() {
     local log_file="build_hyrax.log"
     show_version 2>&1 | tee "${log_file}"
 
-    export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
+    local TOMCAT_VERSION
+    TOMCAT_VERSION="$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")"
     show_version
 
     get_tomcat_distro \
@@ -957,36 +959,6 @@ function build_hyrax() {
     build_hyrax_docker "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}"
     cleanup_build_files "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}"
 }
-
-function build_dmrpp_service() {
-    local debug="${1}"
-
-    local log_file="build_dmrpp_service.log"
-    show_version 2>&1 | tee "${log_file}"
-
-    export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
-    show_version
-
-    get_tomcat_distro \
-        "${DOCKER_NAME}" \
-        "${TOMCAT_VERSION}" 2>&1 | tee -a "${log_file}"
-
-    s3_get_besd_distro \
-        "${S3_BUILD_BUCKET}" \
-        "${DOCKER_NAME}" \
-        "el8" \
-        "${LIBDAP_VERSION}" \
-        "${BES_VERSION}" $debug 2>&1 | tee -a "${log_file}"
-
-    s3_get_build_dmrpp_distro \
-        "${S3_BUILD_BUCKET}" \
-        "${DOCKER_NAME}" \
-        "${BUILD_DMRPP_VERSION}" 2>&1 | tee -a "${log_file}"
-
-    build_dmrpp_service_docker "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}"
-    cleanup_build_files "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}"
-}
-
 
 
 
@@ -1134,7 +1106,7 @@ function pull_tag_and_push_image(){
 # $1 - You must pass a build recipe (aka el8-build-recipe) file name containing the
 # versions and build times.
 #
-# Reads a el8-build-recipe file (aka a build recipe) which contains a list of the
+# Reads an el8-build-recipe file (aka a build recipe) which contains a list of the
 # Hyrax Docker files that made up the build. The idea is that is the release
 # process is followed then recipe file will look something like:
 #
@@ -1154,7 +1126,7 @@ function pull_tag_and_push_image(){
 # Are pulled from Docker Hub, then they are tagged with the release number. For
 # our release that means the the trailing build number (should be "-0") is
 # removed from the build version. The image is also tagged with the "latest"
-# tag (meaning the most recent release) and then the reults are pushed to Docker
+# tag (meaning the most recent release) and then the results are pushed to Docker
 # Hub.
 #
 # Depends on the functions:
@@ -1219,7 +1191,8 @@ function travis_hyrax() {
 
     export SNAPSHOT_IMAGE_TAG="opendap/${DOCKER_NAME}:snapshot"
     export BUILD_VERSION_TAG="opendap/${DOCKER_NAME}:${HYRAX_VERSION}"
-    export TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
+    local TOMCAT_VERSION
+    TOMCAT_VERSION=$(get_latest_tomcat_version_number "${TOMCAT_MAJOR_VERSION}")
     show_version
     get_tomcat_distro "${DOCKER_NAME}" "${TOMCAT_VERSION}"
     s3_get_besd_distro \
