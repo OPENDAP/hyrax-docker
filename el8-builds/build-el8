@@ -133,7 +133,7 @@ EOF
     #loggy "$(javac --help)"
 
     loggy "$prolog Compiling $target_file"
-    javac -verbose "$target_file"
+    javac -verbose -d "$target_dir" "$target_file"
 
     loggy "$prolog $(ls -l "$target_dir/"HyraxVersion*)"
     loggy "$prolog $(ls -l .)"
