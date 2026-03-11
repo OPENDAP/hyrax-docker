@@ -190,10 +190,10 @@ RUN set -e \
     && echo "# Enabled $java_version" >&2 \
     && echo "# java version: $( java -version 2>&1 )" \
     && update-alternatives --list \
-    # && dnf clean all \
+    && dnf clean all \
     && echo "$HR" >&2
 
-# RUN set -e \
+RUN set -e \
     && dnf install -y $dnf_runtime_packages $dnf_regression_test_packages \
     && dnf clean all
 #
