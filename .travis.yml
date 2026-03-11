@@ -203,7 +203,7 @@ jobs:
         - docker image ls -a
         - |
           echo "Test that image does not crash on startup"
-          docker run --name=test_image "${OS_BUILD_VERSION_TAG}"
+          docker run -d --name=test_image "${OS_BUILD_VERSION_TAG}"
           DOCKER_RESULT=$(docker ps -a | grep Exited)
           if [ -n DOCKER_RESULT ]; then
             echo "Error: Image $(OS_BUILD_VERSION_TAG) failed at entrypoint"
