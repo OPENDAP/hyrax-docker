@@ -138,12 +138,10 @@ EOF
     loggy "$(cat "$target_file")"
 
     loggy "$prolog Compiling $target_file"
-    local returnsy="$PWD"
-    cd "$target_dir"
     set -x -e
     javac -verbose "$target_file"
     set +x +e
-    cd "$returnsy"
+    mv "$class_name.class" "$target_dir"
 
     loggy "$prolog $(ls -la "$target_dir")"
     loggy  "$prolog END"
