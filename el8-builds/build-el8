@@ -105,8 +105,17 @@ read_build_recipe "${BUILD_RECIPE_FILE}"
 export RELEASE_HOST=${RELEASE_HOST:-"https://www.opendap.org"}
 
 
-function mk_hyrax_version() {
-    prolog="mk_hyrax_version() -"
+################################################################################
+#
+# mk_hyrax_version_class()
+#
+# Creates the opendap.version.HyraxVersion java code, compiles and places it so
+# that the soon to nbe launched docker build operation can pick it up and use
+# it to replace the bundled class file of the same (fully qualified) name in the
+# OLFS distribution.
+#
+function mk_hyrax_version_class() {
+    prolog="mk_hyrax_version_class() -"
     loggy  "$HR2"
     loggy  "$prolog BEGIN"
 

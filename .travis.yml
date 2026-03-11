@@ -100,7 +100,7 @@ jobs:
           "$DOCKER_NAME"
           "$OLFS_VERSION" 2>&1
         - set -e # Don't keep going if the docker build fails....
-        - mk_hyrax_version
+        - mk_hyrax_version_class
         - docker build
           --build-arg TOMCAT_VERSION
           --build-arg RELEASE_DATE
@@ -152,7 +152,7 @@ jobs:
           "$DOCKER_DIR"
           "$OLFS_VERSION" 2>&1
         - ls -l "$DOCKER_DIR"/*.tar.gz
-        - mk_hyrax_version
+        - mk_hyrax_version_class
         - docker build
           --build-arg TOMCAT_VERSION
           --build-arg RELEASE_DATE
@@ -183,7 +183,7 @@ jobs:
           "${S3_BUILD_BUCKET}"
           "olfs"
           "${OLFS_VERSION}" 2>&1
-        - mk_hyrax_version
+        - mk_hyrax_version_class
         - docker build
           --build-arg TOMCAT_VERSION
           --build-arg RELEASE_DATE
