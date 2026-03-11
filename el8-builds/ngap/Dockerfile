@@ -320,7 +320,7 @@ RUN set -e \
     && make testsuite > mk.log 2>&1 \
     && echo "SUCCESS: hyrax_regression_tests ready!"
 
-# RUN python3 -m pip uninstall awscli -y
+RUN python3 -m pip uninstall awscli -y
 
 ################################################################
 # TEMPORARY
