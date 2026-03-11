@@ -11,7 +11,7 @@ public class HyraxVersion {
 EOF
     )
 
-target_dir="$TRAVIS_BUILD_DIR/$DOCKER_DIR"
+target_dir="$TRAVIS_BUILD_DIR/$TARGET_OS-builds/$DOCKER_DIR"
 echo "# target_dir: $target_dir" >&2
 target_file="$target_dir/HyraxVersion.java"
 echo "# target_file: $target_file" >&2
