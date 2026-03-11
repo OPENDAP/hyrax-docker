@@ -198,6 +198,9 @@ public class HyraxVersion {
 EOF
     )
 
+    local target_dir
+    local target_file
+
     target_dir="$TRAVIS_BUILD_DIR/$TARGET_OS-builds/$DOCKER_DIR"
     loggy "$prolog  target_dir: $target_dir"
 
@@ -213,7 +216,7 @@ EOF
     javac -verbose -d "$target_dir" "$target_file"
 
 
-    loggy "$prolog $(ls -l "$target_dir/"HyraxVersion*)"
+    loggy "$prolog $(ls -la "$target_dir")"
     loggy  "$prolog END"
     loggy  "$HR2"
 

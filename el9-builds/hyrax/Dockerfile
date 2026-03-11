@@ -191,7 +191,7 @@ RUN set -e \
     && echo "# java version: $( java -version 2>&1 )" \
     && update-alternatives --list \
     # && dnf clean all \
-    && echo "$HR" >&2 \
+    && echo "$HR" >&2
 
 # RUN set -e \
     && dnf install -y $dnf_runtime_packages $dnf_regression_test_packages \
@@ -291,8 +291,10 @@ RUN set -e \
     && echo "# Cleaning up OLFS distribution files."  >&2 \
     && rm -rvf "$ROOT/$OLFS_DISTRO" "./$OLFS_DISTRO.tgz"
 
-RUN set -e && echo "Installing HyraxVersion class..."  >&2
+RUN set -e && echo "Installing HyraxVersion.class..."  >&2
+
 COPY HyraxVersion.class "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/WEB-INF/classes/opendap/version/HyraxVersion.class"
+
 RUN set -e  && ls -l "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/WEB-INF/classes/opendap/version"  >&2
 
 RUN set -e \
