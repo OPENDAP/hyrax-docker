@@ -152,6 +152,7 @@ jobs:
           "$DOCKER_DIR"
           "$OLFS_VERSION" 2>&1
         - ls -l "$DOCKER_DIR"/*.tar.gz
+        - mk_hyrax_version
         - docker build
           --build-arg TOMCAT_VERSION
           --build-arg RELEASE_DATE
@@ -182,6 +183,7 @@ jobs:
           "${S3_BUILD_BUCKET}"
           "olfs"
           "${OLFS_VERSION}" 2>&1
+        - mk_hyrax_version
         - docker build
           --build-arg TOMCAT_VERSION
           --build-arg RELEASE_DATE

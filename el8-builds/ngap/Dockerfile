@@ -237,22 +237,29 @@ RUN set -e && echo "$HR" && which java && java -version && update-alternatives -
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 ENV ROOT=/dev/shm
 
-# NGAP package uses the OLFS_VERSION number. jhrg 4/2/21
+# NGAP package uses the Hyrax version number. jhrg 4/2/21
 RUN set -e \
-    && echo "Installing the latest NGAP distribution (${NGAP_DISTRO})." >&2 \
-    && echo "working dir: "$(pwd)"    ROOT: ${ROOT}"  >&2 \
-    && tar -C "${ROOT}" -xzvf /${NGAP_DISTRO}.tgz >&2 \
-    && ls -l "${ROOT}" >&2 \
+    && echo "Installing the latest NGAP distribution ($NGAP_DISTRO)." >&2 \
+    && echo "working dir: "$(pwd)"    ROOT: $ROOT"  >&2 \
+    && tar -C "$ROOT" -xzvf "/$NGAP_DISTRO.tgz" >&2 \
+    && ls -l "$ROOT" >&2 \
     && echo "Unpacking warfile..." >&2 \
-    && unzip -o ${ROOT}/${NGAP_DISTRO}/${DEFAULT_NGAP_DEPLOYMENT_CONTEXT}.war -d ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/ \
+    && unzip -o "$ROOT/$NGAP_DISTRO/$DEFAULT_NGAP_DEPLOYMENT_CONTEXT.war" -d "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/" \
     && echo "Cleaning up." >&2 \
-    && rm -rf ${ROOT}/${NGAP_DISTRO} /${NGAP_DISTRO}.tgz
+    && rm -rf "$ROOT/$NGAP_DISTRO" "/$NGAP_DISTRO.tgz"
 
 # Fix ownership and access permissions
 RUN set -e \
-    && mkdir -p ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/logs \
-    && chown -R tomcat:tomcat ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/logs \
-    && chmod 700 ${CATALINA_HOME}/webapps/${DEPLOYMENT_CONTEXT}/WEB-INF/conf/logs
+    && mkdir -p "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/WEB-INF/conf/logs" \
+    && chown -R tomcat:tomcat "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/WEB-INF/conf/logs" \
+    && chmod 700 "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/WEB-INF/conf/logs"
+
+RUN set -e && echo "Installing HyraxVersion class..."  >&2
+COPY HyraxVersion.class "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/WEB-INF/classes/opendap/version/HyraxVersion.class"
+RUN set -e  && ls -l "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/WEB-INF/classes/opendap/version"  >&2
+
+
+
 ################################################################
 
 ################################################################
