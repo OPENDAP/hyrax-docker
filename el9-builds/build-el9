@@ -199,7 +199,7 @@ EOF
     )
 
     target_dir="$TRAVIS_BUILD_DIR/$TARGET_OS-builds/$DOCKER_DIR"
-    loggy  "$prolog target_dir: $target_dir"
+    loggy "$prolog  target_dir: $target_dir"
 
     target_file="$target_dir/HyraxVersion.java"
     loggy "$prolog target_file: $target_file"
@@ -207,8 +207,12 @@ EOF
     loggy "$hyrax_version_java" > "$target_file"
     loggy "$prolog $(cat "$target_file")"
 
+    loggy "$(javac --help)"
+
     loggy "$prolog Compiling $target_file"
-    javac --verbose "$target_file"
+    javac "$target_file"
+
+
     loggy "$prolog $(ls -l "$target_dir/"HyraxVersion*)"
     loggy  "$prolog END"
     loggy  "$HR2"
