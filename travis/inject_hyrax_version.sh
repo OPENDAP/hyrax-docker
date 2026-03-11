@@ -19,6 +19,6 @@ EOF
 
 echo "${hyrax_version_class//@HyraxVersion@/$HYRAX_VERSION}" > HyraxVersion.java
 
-loggy "cat HyraxVersion.java"
+cat HyraxVersion.java >&2
 javac HyraxVersion.java
-loggy "$(ls -l HyraxVersion*)"
+ls -l HyraxVersion* >&2
