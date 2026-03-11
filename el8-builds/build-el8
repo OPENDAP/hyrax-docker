@@ -134,13 +134,16 @@ EOF
     loggy "$prolog target_file: $target_file"
 
     echo "$hyrax_version_java" > "$target_file"
-    loggy "$prolog $(cat "$target_file")"
-
-    #loggy "$(javac --help)"
+    loggy "$prolog $target_file:"
+    loggy "$(cat "$target_file")"
 
     loggy "$prolog Compiling $target_file"
-    javac -verbose -d "$target_dir" "$target_file"
-
+    local returnsy="$PWD"
+    cd "$target_dir"
+    set -x -e
+    javac -verbose "$target_file"
+    set +x +e
+    cd "$returnsy"
 
     loggy "$prolog $(ls -la "$target_dir")"
     loggy  "$prolog END"
