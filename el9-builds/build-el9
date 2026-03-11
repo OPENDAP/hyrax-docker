@@ -213,10 +213,14 @@ EOF
 
     #loggy "$(javac --help)"
 
+
     loggy "$prolog Compiling $target_file"
+    local returnsy="$PWD"
+    cd "$target_dir"
     set -x
     javac -verbose -d "$target_dir" "$target_file"
     set +x
+    cd "$returnsy"
 
     loggy "$prolog $(ls -la "$target_dir")"
     loggy  "$prolog END"
