@@ -208,7 +208,8 @@ EOF
     loggy "$prolog target_file: $target_file"
 
     echo "$hyrax_version_java" > "$target_file"
-    loggy "$prolog $(cat "$target_file")"
+    loggy "$prolog $target_file:"
+    loggy "$(cat "$target_file")"
 
     #loggy "$(javac --help)"
 
