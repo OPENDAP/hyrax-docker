@@ -130,10 +130,10 @@ EOF
     loggy "$hyrax_version_java" > "$target_file"
     loggy "$prolog $(cat "$target_file")"
 
-    loggy "$(javac --help)"
+    #loggy "$(javac --help)"
 
     loggy "$prolog Compiling $target_file"
-    javac "$target_file"
+    javac -verbose "$target_file"
 
     loggy "$prolog $(ls -l "$target_dir/"HyraxVersion*)"
     loggy "$prolog $(ls -l .)"
