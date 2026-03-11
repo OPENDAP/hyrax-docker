@@ -13,6 +13,6 @@ EOF
 
 echo "$hyrax_version_class" > "$DOCKER_DIR/HyraxVersion.java"
 
-cat HyraxVersion.java >&2
-javac HyraxVersion.java
-ls -l HyraxVersion* >&2
+cat "$DOCKER_DIR/HyraxVersion.java" >&2
+javac "$DOCKER_DIR/HyraxVersion.java"
+ls -l "$DOCKER_DIR/"HyraxVersion* >&2
