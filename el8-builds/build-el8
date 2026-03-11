@@ -125,10 +125,10 @@ EOF
     loggy  "$prolog target_dir: $target_dir"
 
     target_file="$target_dir/HyraxVersion.java"
-    echo "$prolog target_file: $target_file"
+    loggy "$prolog target_file: $target_file"
 
-    echo "$hyrax_version_java" > "$target_file"
-    loggy "$prolog $()cat "$target_file")"
+    loggy "$hyrax_version_java" > "$target_file"
+    loggy "$prolog $(cat "$target_file")"
 
     javac "$target_file"
     loggy "$prolog $(ls -l "$target_dir/"HyraxVersion*)"
