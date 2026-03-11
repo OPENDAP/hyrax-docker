@@ -165,7 +165,8 @@ clean_and_start "$d_id" "$test_image_name"
 waitForHyrax "$d_id"
 
 loggy "$HR1"
-version_response="$(curl -s -c cookies -b cookies -n "$netrc_file" -I -L "$end_point/hyrax/version")"
+loggy "$prolog Checking version response."
+version_response="$(curl -s -c cookies -b cookies -n "$netrc_file" -L "$end_point/hyrax/version")"
 loggy "$prolog version_response: $version_response"
 
 
