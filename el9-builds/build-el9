@@ -207,14 +207,15 @@ EOF
     target_file="$target_dir/HyraxVersion.java"
     loggy "$prolog target_file: $target_file"
 
-    loggy "$hyrax_version_java" > "$target_file"
+    echo "$hyrax_version_java" > "$target_file"
     loggy "$prolog $(cat "$target_file")"
 
     #loggy "$(javac --help)"
 
     loggy "$prolog Compiling $target_file"
+    set -x
     javac -verbose -d "$target_dir" "$target_file"
-
+    set +x
 
     loggy "$prolog $(ls -la "$target_dir")"
     loggy  "$prolog END"
