@@ -5,7 +5,7 @@ hyrax_version_class=$(
 package opendap.version;
 
 public class HyraxVersion {
-    private static final String hyraxVersion = "@HyraxVersion@";
+    private static final String hyraxVersion = "$HYRAX_VERSION";
 
     /**
      * Returns a String containing the Hyrax version.
@@ -17,7 +17,7 @@ public class HyraxVersion {
 EOF
     )
 
-echo "${hyrax_version_class//@HyraxVersion@/$HYRAX_VERSION}" > HyraxVersion.java
+echo "$hyrax_version_class" > HyraxVersion.java
 
 cat HyraxVersion.java >&2
 javac HyraxVersion.java
