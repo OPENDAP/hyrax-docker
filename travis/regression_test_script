@@ -168,6 +168,9 @@ loggy "$HR1"
 loggy "$prolog Testing image: ${test_image_name}"
 set -x
 
+version_response="$(curl -s -c cookies -b cookies -n "$netrc_file" -I -L "$end_point/hyrax/version")"
+loggy "$prolog version_response: $version_response"
+
 # If the regression tests fail we want the logs, so don't exit on fail right here
 set +e
 docker exec -it $d_id /bin/bash -c "cd hyrax_regression_tests; ./testsuite --hyraxurl=\"${end_point}\" ${netrc_file} ${tests};"
