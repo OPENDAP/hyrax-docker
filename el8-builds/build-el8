@@ -102,8 +102,40 @@ function read_build_recipe() {
 
 }
 read_build_recipe "${BUILD_RECIPE_FILE}"
-
 export RELEASE_HOST=${RELEASE_HOST:-"https://www.opendap.org"}
+
+
+function mk_hyrax_version() {
+    prolog="mk_hyrax_version() -"
+    loggy  "$HR2"
+    loggy  "$prolog BEGIN"
+
+    hyrax_version_java=$(
+        cat << EOF
+package opendap.version;
+
+public class HyraxVersion {
+    private static final String hyraxVersion = "$HYRAX_VERSION";
+    public static String getVersionString() { return hyraxVersion; }
+}
+EOF
+    )
+
+    target_dir="$TRAVIS_BUILD_DIR/$TARGET_OS-builds/$DOCKER_DIR"
+    loggy  "$prolog target_dir: $target_dir"
+
+    target_file="$target_dir/HyraxVersion.java"
+    echo "$prolog target_file: $target_file"
+
+    echo "$hyrax_version_java" > "$target_file"
+    loggy "$prolog $()cat "$target_file")"
+
+    javac "$target_file"
+    loggy "$prolog $(ls -l "$target_dir/"HyraxVersion*)"
+    loggy  "$prolog END"
+    loggy  "$HR2"
+
+}
 
 
 function show_version(){

@@ -170,6 +170,51 @@ function show_version(){
     loggy "$HR"
 }
 
+################################################################################
+#
+# mk_hyrax_version()
+#
+# Creates the opendap.version.HyraxVersion java code, compiles and places it so
+# that the soon to nbe launched docker build operation can pick it up and use
+# it to replace the bundled class file of the same (fully qualified) name in the
+# OLFS distribution.
+#
+function mk_hyrax_version() {
+    prolog="mk_hyrax_version() -"
+    loggy  "$HR2"
+    loggy  "$prolog BEGIN"
+
+    # The hyrax_version_java variable holds the java code with the
+    # Hyrax version number for this build.
+    local hyrax_version_java
+    hyrax_version_java=$(
+        cat << EOF
+package opendap.version;
+
+public class HyraxVersion {
+    private static final String hyraxVersion = "$HYRAX_VERSION";
+    public static String getVersionString() { return hyraxVersion; }
+}
+EOF
+    )
+
+    target_dir="$TRAVIS_BUILD_DIR/$TARGET_OS-builds/$DOCKER_DIR"
+    loggy  "$prolog target_dir: $target_dir"
+
+    target_file="$target_dir/HyraxVersion.java"
+    echo "$prolog target_file: $target_file"
+
+    echo "$hyrax_version_java" > "$target_file"
+    loggy "$prolog $()cat "$target_file")"
+
+    loggy "$prolog Compiling $target_file"
+    javac "$target_file"
+    loggy "$prolog $(ls -l "$target_dir/"HyraxVersion*)"
+    loggy  "$prolog END"
+    loggy  "$HR2"
+
+}
+
 
 
 ################################################################################
