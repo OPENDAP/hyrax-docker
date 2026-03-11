@@ -26,7 +26,7 @@ RUN if [ -z "$BES_CORE_IMAGE_TAG" ]; then \
 ENV BES_USER="${USER:-"bes_user"}"
 
 ARG RELEASE_DATE
-ENV RELEASE_DATE ${RELEASE_DATE:-"unknown"}
+ENV RELEASE_DATE=${RELEASE_DATE:-"unknown"}
 RUN echo "RELEASE_DATE: ${RELEASE_DATE}"
 
 ARG BES_VERSION
@@ -57,25 +57,17 @@ USER root
 WORKDIR /
 
 # Update and install the needful.
-RUN set -e && dnf install -y python3.11 \
-    && python3 --version \
-#
-# RUN set -e
+RUN set -e \
     && dnf install -y which bc emacs vim \
     && dnf install -y procps \
     && dnf update -y \
     && dnf clean all
 
-RUN set -e && curl -sS https://bootstrap.pypa.io/get-pip.py | python3 \
-    && python3 -m pip install --upgrade pip \
-    && python3 -m pip install --no-cache-dir awscli
-
 # Set up BES
 #
 # BES is already installed on the base image, but
-# we need to do some additional configuration (to match what was
-# previously handled by bes RPM installation)
-
+# we need to do some additional configuration.
+#
 # Add besd service to start at boot
 RUN cp ${PREFIX}/etc/rc.d/init.d/besd /etc/rc.d/init.d/besd \
     && chkconfig --add besd \
@@ -113,4 +105,3 @@ EXPOSE 10022
 EXPOSE 11002
 
 CMD ["-"]
-

@@ -158,20 +158,6 @@ RUN set -e  \
     && update-alternatives --list \
     && echo "$HR2" \
     && dnf install -y tzdata-java \
-#     && dnf clean all
-
-# RUN set -e \
-    && echo "$HR" \
-    && echo "# It's AWS CLI Time People!" \
-    && echo "# Installing Python $python_version" \
-    && dnf install -y python$python_version \
-    && echo "# Python version is: $(python3 --version)" \
-    && echo "# Updating pip" \
-    && curl -sS https://bootstrap.pypa.io/get-pip.py | python3 \
-    && python3 -m pip install --upgrade pip \
-    && echo "# Installing aws cli" \
-    && python3 -m pip install --no-cache-dir awscli \
-    && echo "# aws cli version: $(aws --version)" \
     && dnf clean all
 
 ################################################################
