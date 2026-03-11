@@ -204,15 +204,16 @@ jobs:
         - |
           echo "Test that image does not crash on startup"
           docker run -d --name=test_image "${OS_BUILD_VERSION_TAG}"
+          sleep 10
           DOCKER_RESULT=$(docker ps -a | grep Exited)
           if [ -n DOCKER_RESULT ]; then
-            echo "Error: Image $(OS_BUILD_VERSION_TAG) failed at entrypoint"
+            echo "Error: Image ${OS_BUILD_VERSION_TAG} failed at entrypoint"
             docker ps -a
-            echo "Log from failing test instance:"
+            echo "Log from failing test instance: "
             docker logs test_image
             exit 1
           else
-            docker stop test_image
+            echo "Success: Image did not crash upon entry"
           fi
 
     - stage: disabled
