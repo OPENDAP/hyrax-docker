@@ -213,7 +213,7 @@ EOF
     loggy "$(cat "$target_file")"
 
     loggy "$prolog Compiling $target_file"
-    javac -verbose "$target_file"
+    javac "$target_file"
 
     loggy "$prolog $(ls -la "$target_dir")"
     loggy  "$prolog END"
