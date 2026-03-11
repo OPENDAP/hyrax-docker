@@ -138,10 +138,7 @@ EOF
     loggy "$(cat "$target_file")"
 
     loggy "$prolog Compiling $target_file"
-    set -x -e
     javac -verbose "$target_file"
-    set +x +e
-    mv "$class_name.class" "$target_dir"
 
     loggy "$prolog $(ls -la "$target_dir")"
     loggy  "$prolog END"
