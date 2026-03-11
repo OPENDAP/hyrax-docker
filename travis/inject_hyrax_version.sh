@@ -6,18 +6,12 @@ package opendap.version;
 
 public class HyraxVersion {
     private static final String hyraxVersion = "$HYRAX_VERSION";
-
-    /**
-     * Returns a String containing the Hyrax version.
-     * @return The version of Hyrax.
-     */
     public static String getVersionString() { return hyraxVersion; }
-
 }
 EOF
     )
 
-echo "$hyrax_version_class" > HyraxVersion.java
+echo "$hyrax_version_class" > "$DOCKER_DIR/HyraxVersion.java"
 
 cat HyraxVersion.java >&2
 javac HyraxVersion.java
