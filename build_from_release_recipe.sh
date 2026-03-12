@@ -21,19 +21,8 @@ loggy "HYRAX_MAJOR_VERSION: $HYRAX_MAJOR_VERSION"
 # Get the latest TOMCAT distribution
 get_tomcat_distro `pwd` "${TOMCAT_VERSION}"
 
-# Get the BES and libdap RPMs
-woo_get_besd_distro \
-    `pwd` \
-    "el8" \
-    "${LIBDAP_VERSION}" \
-    "${BES_VERSION}" \
-    "${HYRAX_VERSION}" \
-     true
-
 # Get the OLFS web archive
-woo_get_olfs_distro \
-    `pwd` \
-    "${OLFS_VERSION}"
+curl_get_olfs_distro  `pwd`  "${OLFS_VERSION}"
 
 ls -l *.rpm *.gz *.tgz
 
@@ -64,7 +53,7 @@ do
     docker image ls -a
     cd ..
     loggy  "Running Test Script"
-    ./regression_test_script -i ${SNAPSHOT_IMAGE_TAG}
+    ./travis/regression_test_script -i ${SNAPSHOT_IMAGE_TAG}
 
     loggy "Cleaning up binaries in $docker_name"
     rm  -v "${BUILD_DIR}/${docker_name}"/*.rpm

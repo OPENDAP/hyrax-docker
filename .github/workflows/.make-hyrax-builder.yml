@@ -1,0 +1,66 @@
+name: Build hyrax-builder images
+on:
+  # For now, run only on manually triggered builds (workflow_dispatch).
+  # Uncomment the "schedule", "push", and "pull_request" to build on
+  # all non-draft PRs
+  workflow_dispatch:
+  # schedule:
+  #   # https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#onschedule
+  #   # Run on the first minute of the third hour, every day
+  #   - cron: '0 3 * * *'
+  # push:
+  #   branches:
+  #     - master
+  #     - main
+  #     - /^(.*-test-deploy)$/
+  pull_request:
+    paths:
+      - 'utils/**'
+      - '.github/workflows/*.yml'
+    types: [opened, synchronize, reopened, ready_for_review]
+concurrency:
+  # Cancel intermediate builds only on pull requests
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ startsWith(github.ref, 'refs/pull/') }}
+
+jobs:
+  build:
+    # Run on pushes or non-draft PRs
+    if: (github.event_name == 'push') ||  (github.event.pull_request.draft == false) || (github.event_name == 'workflow_dispatch') || (github.event_name == 'schedule')
+    # name: Build on ${{ matrix.runs-on }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [rocky8, rocky9]
+    steps:
+      - name: Output Run Number
+        run: echo "The current run number is ${{ github.run_number }}"
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Run builder script
+        run: |
+          cd utils
+          ./mk_${{ matrix.os }}_hyrax_builder "" ""
+        shell: bash
+      - name: Tag image with os version
+        run: |
+          export SNAPSHOT_IMAGE_TAG="opendap/${{ matrix.os }}_hyrax_builder:snapshot"
+          export BUILD_VERSION="$(docker run --rm ${SNAPSHOT_IMAGE_TAG} -c 'cat OS_VERSION')"
+          export SNAPSHOT_VERSION_TAG="opendap/${{ matrix.os }}_hyrax_builder:${BUILD_VERSION}_${{ github.run_number }}"
+          echo "image tag: $SNAPSHOT_IMAGE_TAG; build version: $BUILD_VERSION; version tag: $SNAPSHOT_VERSION_TAG"
+          docker tag "$SNAPSHOT_IMAGE_TAG" "$SNAPSHOT_VERSION_TAG"
+
+          # Make environment variables available for following steps
+          echo "SNAPSHOT_IMAGE_TAG=$SNAPSHOT_IMAGE_TAG" >> $GITHUB_ENV
+          echo "BUILD_VERSION=$BUILD_VERSION" >> $GITHUB_ENV
+          echo "SNAPSHOT_VERSION_TAG=$SNAPSHOT_VERSION_TAG" >> $GITHUB_ENV
+        shell: bash
+      - name: Push to DockerHub
+        if: (github.event_name == 'workflow_dispatch') || (github.event_name == 'push') || (github.event_name == 'schedule')
+        run: |
+          docker login -u "${{ secrets.DOCKERHUB_HYRAX_DOCKER_USER }}" -p "${{ secrets.DOCKERHUB_HYRAX_DOCKER_TOKEN }}" "docker.io"
+          docker push ${{ env.SNAPSHOT_IMAGE_TAG }}
+          docker push ${{ env.SNAPSHOT_VERSION_TAG }}
+        shell: bash
