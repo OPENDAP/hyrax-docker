@@ -175,12 +175,12 @@ loggy "$version_response"
 hyrax_version_response="$(echo "$version_response" | grep "<Hyrax version" | awk '{split($0, a, "\""); print a[2];}')"
 if test "$HYRAX_VERSION" != "$hyrax_version_response"
 then
-    loggy "The Hyrax version value returned by the tested docker image matches the HYRAX_VERSION from the production environment."
-    loggy "hyrax_version_response: $hyrax_version_response"
-    loggy "         HYRAX_VERSION: $HYRAX_VERSION"
+    loggy "$prolog The Hyrax version value returned by the tested docker image matches the HYRAX_VERSION from the production environment."
+    loggy "$prolog hyrax_version_response: $hyrax_version_response"
+    loggy "$prolog          HYRAX_VERSION: $HYRAX_VERSION"
 else
-    loggy "ERROR! The returned hyrax version string ($hyrax_version_response) does not match the HYRAX_VERSION ($HYRAX_VERSION) in the production environment!"
-    loggy "ERROR! Exiting process."
+    loggy "$prolog ERROR! The returned hyrax version string ($hyrax_version_response) does not match the HYRAX_VERSION ($HYRAX_VERSION) in the production environment!"
+    loggy "$prolog ERROR! Exiting process."
     exit 1;
 fi
 loggy "$HR1"
