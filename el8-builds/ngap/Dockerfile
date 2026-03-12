@@ -305,6 +305,7 @@ RUN set -e \
     && make testsuite > mk.log 2>&1 \
     && echo "SUCCESS: hyrax_regression_tests ready!"
 
+
 ################################################################
 # TEMPORARY
 # Grab the cleanup files script for managing orphaned files

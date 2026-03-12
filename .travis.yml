@@ -201,6 +201,22 @@ jobs:
         - show_version
         - ./build-hyrax-ngap.sh
         - docker image ls -a
+        - |
+          echo "Test that image does not crash on startup"
+          docker run -d --name=test_image "${OS_BUILD_VERSION_TAG}"
+          sleep 10
+          export DOCKER_RESULT=$(docker ps -a | grep Exited)
+          if [ -n "$DOCKER_RESULT" ]; then
+            echo "Error: Image ${OS_BUILD_VERSION_TAG} failed at entrypoint"
+            docker ps -a
+            echo "Log from failing test instance: "
+            docker logs test_image
+            sleep 10
+            exit 1
+          else
+            echo "Success: Image '${OS_BUILD_VERSION_TAG}' did not crash upon entry"
+            docker rm -f test_image
+          fi
 
     - stage: TEST_DEPLOYED_IMAGE
       name: "Test Deployed Image"
