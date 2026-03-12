@@ -173,7 +173,7 @@ loggy "$version_response"
 
 #   Get this line from the version response <Hyrax version="##########" /> and get the actual value of ##########
 hyrax_version_response="$(echo "$version_response" | grep "<Hyrax version" | awk '{split($0, a, "\""); print a[2];}')"
-if test "$HYRAX_VERSION" != "$hyrax_version_response"
+if test "$HYRAX_VERSION" == "$hyrax_version_response"
 then
     loggy "$prolog The Hyrax version value returned by the tested docker image matches the HYRAX_VERSION from the production environment."
     loggy "$prolog hyrax_version_response: $hyrax_version_response"
