@@ -157,15 +157,6 @@ startup_log "PythonVersion: "$(python3 --version)
 SYSTEM_ID=$(get_aws_instance_id)
 
 ################################################################################
-startup_log "Checking AWS CLI: "
-acl=$(aws configure list 2>&1)
-acl_status=$?
-startup_log $acl
-if test $acl_status -ne 0; then
-  startup_log "WARNING: Problem with AWS CLI! (status: ${acl_status})"
-fi
-
-################################################################################
 startup_log "JAVA VERSION: " $( java -version 2>&1 | sed -e "s/\"//g"; ) # Java version has undesired double quote chars
 export JAVA_HOME=${JAVA_HOME:-"/etc/alternatives/jre"}
 startup_log "JAVA_HOME: ${JAVA_HOME}"
