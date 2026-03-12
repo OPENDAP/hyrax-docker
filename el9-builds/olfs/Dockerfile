@@ -86,17 +86,17 @@ RUN set -e \
     && echo "#!/bin/bash" > /install-dev-tools \
     && echo "dnf install -y $dnf_developer_tools_packages" > /install-dev-tools \
     && chmod 755 /install-dev-tools \
-    && dnf clean all
-
-
-RUN set -e \
+#    && dnf clean all
+#
+#
+#RUN set -e \
     && echo "$HR" \
     && echo "# Installing cURL" \
     && yum install -y curl curl-devel --allowerasing \
     && echo "# cURL version: $(curl --version)" \
-    && dnf clean all
-
-RUN set -e \
+#    && dnf clean all
+#
+#RUN set -e \
     && echo "$HR" \
     && echo "# It's Java Time Witches!" \
     && echo "# Installing $java_version" \
@@ -108,10 +108,10 @@ RUN set -e \
     && echo "# java version: $( java -version 2>&1 )" \
     && update-alternatives --list \
     && dnf install -y tzdata-java \
-    && dnf clean all \
-    && echo "$HR"
-
-RUN set -e \
+    && echo "$HR" \
+#    && dnf clean all
+#
+#RUN set -e \
     && dnf install -y $dnf_runtime_packages \
     && dnf clean all
 
@@ -188,6 +188,10 @@ RUN set -e \
     && mkdir -p "$CATALINA_HOME/webapps/opendap/WEB-INF/conf/logs" \
     && chown -R tomcat:tomcat "$CATALINA_HOME/webapps/opendap/WEB-INF/conf/logs" \
     && chmod 700 "$CATALINA_HOME/webapps/opendap/WEB-INF/conf/logs"
+
+RUN set -e && echo "Installing HyraxVersion class..."  >&2
+COPY HyraxVersion.class "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/WEB-INF/classes/opendap/version/HyraxVersion.class"
+RUN set -e  && ls -l "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/WEB-INF/classes/opendap/version"  >&2
 
 ################################################################
 # Clean up the distribution binaries.

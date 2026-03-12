@@ -154,10 +154,10 @@ RUN set -e \
     && echo "#!/bin/bash" > /install-dev-tools \
     && echo "dnf install -y $dnf_developer_tools_packages" > /install-dev-tools \
     && chmod 755 /install-dev-tools \
-
+#
 ######################################################################
-# Rocky9 comes with built in curl-minimal. For our puposes we want
-# want the full package (I think, probably need to verify).
+# Rocky9 comes with built-in curl-minimal. For our purposes we want
+# the full package (I think, probably need to verify).
 # The '--allowerasing' parameter enables dnf to erase curl-minimal
 # and then install the full package.
 #
@@ -168,7 +168,7 @@ RUN set -e \
     && echo "# cURL version: $(curl --version)" >&2 \
     # && dnf clean all \
     && echo "$HR" >&2 \
-
+#
 ######################################################################
 # We want java ac ertain way ($java_version) and
 # we want to be sure that
@@ -190,10 +190,9 @@ RUN set -e \
     && echo "# Enabled $java_version" >&2 \
     && echo "# java version: $( java -version 2>&1 )" \
     && update-alternatives --list \
-    && dnf clean all \
-    && echo "$HR" >&2
-
-RUN set -e \
+    # && dnf clean all \
+    && echo "$HR" >&2 \
+# RUN set -e \
     && dnf install -y $dnf_runtime_packages $dnf_regression_test_packages \
     && dnf clean all
 #
@@ -254,14 +253,6 @@ RUN set -e \
     && echo "# Cleaning up Tomcat distribution files..." >&2 \
     && rm -fv "/$TOMCAT_DISTRO.tar.gz" \
     && echo "# Tomcat is unpacked and ready. >&2 "
-
-# @TODO REMOVE THIS COMMENTED OUT CODE BEFORE MERGE
-#COPY tomcat.service /etc/systemd/system/tomcat.service
-#RUN set -e \
-#    && which systemctl \
-#    && systemctl enable tomcat
-#RUN firewall-cmd --add-port 8080/tcp --permanent
-#RUN firewall-cmd --reload
 
 ENV CATALINA_HOME=/usr/share/tomcat
 ENV PATH=$CATALINA_HOME/bin:$PATH
