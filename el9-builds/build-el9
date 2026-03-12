@@ -71,7 +71,7 @@ function read_build_recipe() {
     local prolog="read_build_recipe() -"
     local build_recipe_file="${1}"
     local build_recipe=""
-    build_recipe=$(cat "${build_recipe_file}")
+    build_recipe="$(cat "$build_recipe_file")"
 
     export TARGET_OS
     export TOMCAT_MAJOR_VERSION
@@ -79,6 +79,7 @@ function read_build_recipe() {
     export BES_VERSION
     export OLFS_VERSION
     export HYRAX_VERSION
+    export HYRAX_BUILD_NUMBER
     export RELEASE_DATE
     # export APR_VERSION
     export OS_SNAPSHOT_IMAGE_TAG
@@ -86,16 +87,16 @@ function read_build_recipe() {
     export BES_CORE_IMAGE_TAG
     export TEST_DEPLOYMENT
 
+    source "$TRAVIS_BUILD_DIR/travis/versions_and_build_offsets.sh"
+    HYRAX_BUILD_NUMBER="$(expr $TRAVIS_BUILD_NUMBER - $TRAVIS_HYRAX_BUILD_OFFSET)"
+    HYRAX_VERSION="$HYRAX_RELEASE_VERSION-$HYRAX_BUILD_NUMBER"
 
     TARGET_OS="${TARGET_OS:-$(echo "$build_recipe" | grep "TARGET_OS" | awk '{print $2;}')}"
     TOMCAT_MAJOR_VERSION="${TOMCAT_MAJOR_VERSION:-$(echo "$build_recipe" | grep "TOMCAT_MAJOR_VERSION" | awk '{print $2;}')}"
     LIBDAP_VERSION=${LIBDAP_VERSION:-$(echo "$build_recipe" | grep libdap4 | sed "s/libdap4-//g"| awk '{print $1;}')}
     BES_VERSION=${BES_VERSION:-$(echo "$build_recipe" | grep bes | sed "s/bes-//g" | awk '{print $1;}')}
     OLFS_VERSION=${OLFS_VERSION:-"$(echo "$build_recipe" | grep olfs | sed "s/olfs-//g" | awk '{print $1;}')-$TARGET_OS"}
-    HYRAX_VERSION=${HYRAX_VERSION:-$(echo "$build_recipe" | grep hyrax | awk '{print $1;}' | sed "s/hyrax-//g" )}
     RELEASE_DATE=${RELEASE_DATE:-$(echo "$build_recipe" | grep hyrax | awk '{print $2;}')}
-    #APR_VERSION="1.7.6-1"
-    #APR_VERSION=${APR_VERSION:-$(echo "${build_recipe}" | grep apr | sed "s/apr-//g" | awk '{print $1;}')}
     TEST_DEPLOYMENT="${TEST_DEPLOYMENT:-"$(get_test_deployment_tag "$build_recipe_file")"}"
     BES_CORE_IMAGE_TAG="opendap/bes_core:$BES_VERSION-$TARGET_OS"
 
@@ -135,31 +136,108 @@ function show_version(){
     local prolog="show_version() -"
     loggy "${HR}"
     loggy "$prolog BEGIN"
-    loggy "$prolog          RELEASE_DATE: $RELEASE_DATE"
-    loggy "$prolog             TARGET_OS: $TARGET_OS"
-    loggy "$prolog       TEST_DEPLOYMENT: $TEST_DEPLOYMENT"
-    loggy "$prolog        LIBDAP_VERSION: $LIBDAP_VERSION"
-    loggy "$prolog           BES_VERSION: $BES_VERSION"
+    loggy "$prolog              RELEASE_DATE: $RELEASE_DATE"
+    loggy "$prolog                 TARGET_OS: $TARGET_OS"
+    loggy "$prolog           TEST_DEPLOYMENT: $TEST_DEPLOYMENT"
+    loggy "$prolog               DOCKER_NAME: $DOCKER_NAME"
+    loggy "$prolog                DOCKER_DIR: $DOCKER_DIR"
+    loggy "$prolog           S3_BUILD_BUCKET: $S3_BUILD_BUCKET"
+    loggy "$prolog            SLEEP_INTERVAL: $SLEEP_INTERVAL"
+    loggy ""
     loggy "$prolog    BES_CORE_IMAGE_TAG: $BES_CORE_IMAGE_TAG"
-    loggy "$prolog          OLFS_VERSION: $OLFS_VERSION"
-    loggy "$prolog         HYRAX_VERSION: $HYRAX_VERSION"
-    loggy "$prolog           DOCKER_NAME: $DOCKER_NAME"
-    loggy "$prolog       S3_BUILD_BUCKET: $S3_BUILD_BUCKET"
-    loggy "$prolog        SLEEP_INTERVAL: $SLEEP_INTERVAL"
+    loggy "$prolog     HYRAX_RELEASE_VERSION: $HYRAX_RELEASE_VERSION"
+    loggy "$prolog       TRAVIS_BUILD_NUMBER: $TRAVIS_BUILD_NUMBER"
+    loggy "$prolog TRAVIS_HYRAX_BUILD_OFFSET: $TRAVIS_HYRAX_BUILD_OFFSET"
+    loggy "$prolog        HYRAX_BUILD_NUMBER: $HYRAX_BUILD_NUMBER"
+    loggy "$prolog             HYRAX_VERSION: $HYRAX_VERSION"
+    loggy ""
+    loggy "$prolog            LIBDAP_VERSION: $LIBDAP_VERSION"
+    loggy "$prolog               BES_VERSION: $BES_VERSION"
+    loggy "$prolog              OLFS_VERSION: $OLFS_VERSION"
     loggy "$prolog"
-    loggy "$prolog     BUILD_VERSION_TAG: '$BUILD_VERSION_TAG'"
-    loggy "$prolog  OS_BUILD_VERSION_TAG: '$OS_BUILD_VERSION_TAG'"
+    loggy "$prolog         BUILD_VERSION_TAG: '$BUILD_VERSION_TAG'"
+    loggy "$prolog      OS_BUILD_VERSION_TAG: '$OS_BUILD_VERSION_TAG'"
     loggy "$prolog"
-    loggy "$prolog    SNAPSHOT_IMAGE_TAG: '$SNAPSHOT_IMAGE_TAG'"
-    loggy "$prolog OS_SNAPSHOT_IMAGE_TAG: '$OS_SNAPSHOT_IMAGE_TAG'"
+    loggy "$prolog        SNAPSHOT_IMAGE_TAG: '$SNAPSHOT_IMAGE_TAG'"
+    loggy "$prolog     OS_SNAPSHOT_IMAGE_TAG: '$OS_SNAPSHOT_IMAGE_TAG'"
     loggy "$prolog"
-    loggy "$prolog  TOMCAT_MAJOR_VERSION: $TOMCAT_MAJOR_VERSION"
-    loggy "$prolog        TOMCAT_VERSION: $TOMCAT_VERSION"
-    loggy "$prolog    APACHE_APR_VERSION: $APACHE_APR_VERSION"
+    loggy "$prolog      TOMCAT_MAJOR_VERSION: $TOMCAT_MAJOR_VERSION"
+    loggy "$prolog            TOMCAT_VERSION: $TOMCAT_VERSION"
+    loggy "$prolog        APACHE_APR_VERSION: $APACHE_APR_VERSION"
     loggy "$prolog"
-    loggy "$prolog              NO_CACHE: '$NO_CACHE'"
+    loggy "$prolog                  NO_CACHE: '$NO_CACHE'"
     loggy "$prolog END"
     loggy "$HR"
+}
+
+##########################################################################################################
+#
+# mk_hyrax_version_class()
+#
+# Creates the opendap.version.HyraxVersion java code, compiles and places it so
+# that the soon-to-be launched docker build operation can pick it up and use
+# it to replace the bundled class file of the same (fully qualified) name in the
+# OLFS distribution.
+#
+# A special HyraxVersion.java file is created using the current value of HYRAX_VERSION as
+# defined by the production environment.
+#
+# This special HyraxVersion.java file is placed in the DOCKER_DIR for the current job.
+# The class is compiled using javac and the resulting HyraxVersion.class file is placed in
+# the same DOCKER_DIR adjacent to the original HyraxVersion.java file.
+#
+# When the docker build command(s) are run, the Dockerfile unpacks the OLFS distribution into the
+# Tomcat directory. Once the OLFS is unpacked the Dockerfile copies the HyraxVersion.class file into
+# the $CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/WEB-INF/classes/opendap/version directory,
+# overwriting the class built and distributed by the OLFS.
+#
+# This allows us to have hyrax-docker set the Hyrax version numbers (since hyrax-docker is in fact
+# the assembler of the Hyrax docker images and thus the responsible party)
+#
+#
+# Here is the java code as a Here Document. Note that $HYRAX_VERSION is substituted when
+# the script is run.
+#
+function mk_hyrax_version_class() {
+    prolog="mk_hyrax_version_class() -"
+    loggy  "$HR2"
+    loggy  "$prolog BEGIN"
+
+    # The hyrax_version_java variable holds the java code with the
+    # Hyrax version number for this build.
+    local hyrax_version_java
+    hyrax_version_java=$(
+        cat << EOF
+package opendap.version;
+
+public class HyraxVersion {
+    private static final String hyraxVersion = "$HYRAX_VERSION";
+    public static String getVersionString() { return hyraxVersion; }
+}
+EOF
+    )
+
+    local target_dir
+    local target_file
+    local class_name="HyraxVersion"
+
+    target_dir="$TRAVIS_BUILD_DIR/$TARGET_OS-builds/$DOCKER_DIR"
+    loggy "$prolog  target_dir: $target_dir"
+
+    target_file="$target_dir/$class_name.java"
+    loggy "$prolog target_file: $target_file"
+
+    echo "$hyrax_version_java" > "$target_file"
+    loggy "$prolog $target_file:"
+    loggy "$(cat "$target_file")"
+
+    loggy "$prolog Compiling $target_file"
+    javac "$target_file"
+
+    loggy "$prolog $(ls -la "$target_dir")"
+    loggy  "$prolog END"
+    loggy  "$HR2"
+
 }
 
 

@@ -38,6 +38,9 @@ get_tomcat_distro "$DOCKER_NAME" "$TOMCAT_VERSION"
 
 get_ngap_olfs_distro "$S3_BUILD_BUCKET" "$DOCKER_NAME" "$OLFS_VERSION" 2>&1
 
+# Make the HyraxVersion.class file to inject into the docker image.
+mk_hyrax_version_class
+
 docker build \
     --build-arg TOMCAT_VERSION \
     --build-arg RELEASE_DATE \
