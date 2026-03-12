@@ -237,7 +237,7 @@ RUN set -e && echo "$HR" && which java && java -version && update-alternatives -
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 ENV ROOT=/dev/shm
 
-# NGAP package uses the Hyrax version number. jhrg 4/2/21
+# NGAP package uses the Hyrax version number.
 RUN set -e \
     && echo "Installing the latest NGAP distribution ($NGAP_DISTRO)." >&2 \
     && echo "working dir: "$(pwd)"    ROOT: $ROOT"  >&2 \

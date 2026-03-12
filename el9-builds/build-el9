@@ -170,14 +170,33 @@ function show_version(){
     loggy "$HR"
 }
 
-################################################################################
+##########################################################################################################
 #
 # mk_hyrax_version_class()
 #
 # Creates the opendap.version.HyraxVersion java code, compiles and places it so
-# that the soon to nbe launched docker build operation can pick it up and use
+# that the soon-to-be launched docker build operation can pick it up and use
 # it to replace the bundled class file of the same (fully qualified) name in the
 # OLFS distribution.
+#
+# A special HyraxVersion.java file is created using the current value of HYRAX_VERSION as
+# defined by the production environment.
+#
+# This special HyraxVersion.java file is placed in the DOCKER_DIR for the current job.
+# The class is compiled using javac and the resulting HyraxVersion.class file is placed in
+# the same DOCKER_DIR adjacent to the original HyraxVersion.java file.
+#
+# When the docker build command(s) are run, the Dockerfile unpacks the OLFS distribution into the
+# Tomcat directory. Once the OLFS is unpacked the Dockerfile copies the HyraxVersion.class file into
+# the $CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/WEB-INF/classes/opendap/version directory,
+# overwriting the class built and distributed by the OLFS.
+#
+# This allows us to have hyrax-docker set the Hyrax version numbers (since hyrax-docker is in fact
+# the assembler of the Hyrax docker images and thus the responsible party)
+#
+#
+# Here is the java code as a Here Document. Note that $HYRAX_VERSION is substituted when
+# the script is run.
 #
 function mk_hyrax_version_class() {
     prolog="mk_hyrax_version_class() -"

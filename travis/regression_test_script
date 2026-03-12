@@ -176,14 +176,14 @@ loggy "$version_response"
 #   Get this line from the version response:
 #       <Hyrax version="##########" />
 #   and then use awk to get the actual value of ##########
-hyrax_version_response="$(echo "$version_response" | grep "<Hyrax version" | awk '{split($0, a, "\""); print a[2];}')"
-if test "$HYRAX_VERSION" == "$hyrax_version_response"
+hyrax_version_value="$(echo "$version_response" | grep "<Hyrax version" | awk '{split($0, a, "\""); print a[2];}')"
+if test "$HYRAX_VERSION" == "$hyrax_version_value"
 then
     loggy "$prolog The Hyrax version value returned by the tested docker image matches the HYRAX_VERSION from the production environment."
-    loggy "$prolog hyrax_version_response: $hyrax_version_response"
+    loggy "$prolog hyrax_version_response: $hyrax_version_value"
     loggy "$prolog          HYRAX_VERSION: $HYRAX_VERSION"
 else
-    loggy "$prolog ERROR! The returned hyrax version string ($hyrax_version_response) does not match the HYRAX_VERSION ($HYRAX_VERSION) in the production environment!"
+    loggy "$prolog ERROR! The returned hyrax version string ($hyrax_version_value) does not match the HYRAX_VERSION ($HYRAX_VERSION) in the production environment!"
     loggy "$prolog ERROR! Exiting process."
     exit 1;
 fi
@@ -230,7 +230,7 @@ loggy "$prolog Acquiring bes.log from docker image."
 docker cp $d_id:/var/log/bes/bes.log .
 
 loggy "$prolog Acquiring beslog2json.py from docker image."
-docker cp $d_id:${BES_PREFIX}/bin/beslog2json.py $(pwd)/beslog2json.py
+docker cp $d_id:${BES_PREFIX}/bin/beslog2json.py "$(pwd)/beslog2json.py"
 ls -l ./beslog2json.py
 
 loggy "$HR2"
