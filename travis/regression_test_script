@@ -171,7 +171,11 @@ version_response="$(curl -s -c cookies -b cookies -n "$netrc_file" -L "$version_
 loggy "$prolog Hyrax Version Response:"
 loggy "$version_response"
 
-#   Get this line from the version response <Hyrax version="##########" /> and get the actual value of ##########
+#########################################################################################################
+# Verify Hyrax Version Injection
+#   Get this line from the version response:
+#       <Hyrax version="##########" />
+#   and then use awk to get the actual value of ##########
 hyrax_version_response="$(echo "$version_response" | grep "<Hyrax version" | awk '{split($0, a, "\""); print a[2];}')"
 if test "$HYRAX_VERSION" == "$hyrax_version_response"
 then
@@ -184,13 +188,14 @@ else
     exit 1;
 fi
 loggy "$HR1"
+#########################################################################################################
 
 loggy "$prolog Testing image: ${test_image_name}"
 set -x
 
 # If the regression tests fail we want the logs, so don't exit on fail right here
 set +e
-docker exec -it $d_id /bin/bash -c "cd hyrax_regression_tests; ./testsuite --hyraxurl=\"${end_point}\" ${netrc_file} ${tests};"
+docker exec -it $d_id /bin/bash -c "cd hyrax_regression_tests; ./testsuite --hyraxurl=\"$end_point\" $netrc_file $tests;"
 test_status=$?
 set -e
 # http_url https_url stdout testsuite.log
