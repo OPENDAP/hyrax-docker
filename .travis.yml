@@ -79,7 +79,7 @@ stages:
 
 jobs:
   include:
-    - stage: BUILD
+    - stage: BUILD_AND_TEST
       name: "Build and Test opendap/hyrax"
       script:
         - export DOCKER_NAME="hyrax"
