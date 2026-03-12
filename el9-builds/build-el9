@@ -211,7 +211,7 @@ function mk_hyrax_version_class() {
 package opendap.version;
 
 public class HyraxVersion {
-    private static final String hyraxVersion = "$HYRAX_VERSION$TEST_DEPLOY";
+    private static final String hyraxVersion = "$HYRAX_VERSION$TEST_DEPLOYMENT";
     public static String getVersionString() { return hyraxVersion; }
 }
 EOF
