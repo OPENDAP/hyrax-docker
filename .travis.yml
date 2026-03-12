@@ -137,6 +137,7 @@ jobs:
           --tag "$OS_BUILD_VERSION_TAG"
           "$DOCKER_NAME"
         - docker image ls -a
+        - ./travis/test_image_starts_without_crashing.sh "$OS_BUILD_VERSION_TAG"
 
     - stage: BUILD
       name: "Build opendap/hyrax_ncwms"
@@ -166,6 +167,7 @@ jobs:
           --tag "$OS_BUILD_VERSION_TAG"
           "$DOCKER_DIR"
         - docker image ls -a
+        - ./travis/test_image_starts_without_crashing.sh "$OS_BUILD_VERSION_TAG"
 
 
     - stage: BUILD
@@ -190,6 +192,7 @@ jobs:
           --tag "$OS_SNAPSHOT_IMAGE_TAG"
           --tag "$OS_BUILD_VERSION_TAG" olfs
         - docker image ls -a
+        - ./travis/test_image_starts_without_crashing.sh "$OS_BUILD_VERSION_TAG"
 
     - stage: BUILD
       name: "Build opendap/hyrax:ngap"
@@ -201,22 +204,7 @@ jobs:
         - show_version
         - ./build-hyrax-ngap.sh
         - docker image ls -a
-        - |
-          echo "Test that image does not crash on startup"
-          docker run -d --name=test_image "${OS_BUILD_VERSION_TAG}"
-          sleep 10
-          export DOCKER_RESULT=$(docker ps -a | grep Exited)
-          if [ -n "$DOCKER_RESULT" ]; then
-            echo "Error: Image ${OS_BUILD_VERSION_TAG} failed at entrypoint"
-            docker ps -a
-            echo "Log from failing test instance: "
-            docker logs test_image
-            sleep 10
-            exit 1
-          else
-            echo "Success: Image '${OS_BUILD_VERSION_TAG}' did not crash upon entry"
-            docker rm -f test_image
-          fi
+        - ./travis/test_image_starts_without_crashing.sh "$OS_BUILD_VERSION_TAG"
 
     - stage: TEST_DEPLOYED_IMAGE
       name: "Test Deployed Image"
