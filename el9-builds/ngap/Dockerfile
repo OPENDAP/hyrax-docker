@@ -332,26 +332,17 @@ RUN set -e \
     && chown -R tomcat:tomcat /var/log/tomcat /home/tomcat \
     && echo "# Tomcat is unpacked and ready. >&2 "
 
-# @TODO REMOVE THIS FOLLOWING COMMENTED OUT CODE BEFORE MERGE
-#COPY tomcat.service /etc/systemd/system/tomcat.service
-#RUN set -e \
-#    && echo "$HR2" >&2 \
-#    && echo "# Calling: 'systemctl enable tomcat'" >&2 \
-#    && echo "# $(systemctl enable tomcat)" >&2 \
-#    && echo "# systemctl status: $?" >&2 \
-#    && echo "$HR" >&2
-#RUN firewall-cmd --add-port 8080/tcp --permanent
-#RUN firewall-cmd --reload
-
 ENV CATALINA_HOME="/usr/share/tomcat"
 ENV PATH="$CATALINA_HOME/bin:$PATH"
 RUN set -e && echo "# CATALINA_HOME: $CATALINA_HOME" >&2
 
 # Install our modified server.xml so that the server compresses responses.
-COPY tomcat11-server.xml /
-RUN set -e \
-    && mv "/tomcat11-server.xml" "$CATALINA_HOME/conf/server.xml" \
-    && chown -R tomcat:tomcat "$CATALINA_HOME/conf/server.xml"
+COPY tomcat11-server.xml "$CATALINA_HOME/conf/server.xml"
+RUN set -e && chown -R tomcat:tomcat "$CATALINA_HOME/conf/server.xml"
+
+# Modernize the mime-type for javascript. from text/javascript to application/javascript
+Run set -e \
+    && sed -i 's+text/javascript+application/javascript+g' ${CATALINA_HOME}/conf/web.xml
 
 RUN set -e \
     && echo "Cleaning up Tomcat distribution files..." >&2 \

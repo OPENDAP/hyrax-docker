@@ -200,12 +200,10 @@ ENV PATH $CATALINA_HOME/bin:$PATH
 RUN set -e && echo "CATALINA_HOME: ${CATALINA_HOME}" >&2
 
 # Install our modified server.xml so that the server compresses responses.
-COPY tomcat9-server.xml /
-RUN set -e \
-    && mv /tomcat9-server.xml ${CATALINA_HOME}/conf/server.xml \
-    && chown -R tomcat:tomcat ${CATALINA_HOME}/conf/server.xml
+COPY tomcat9-server.xml ${CATALINA_HOME}/conf/server.xml
+RUN set -e && chown -R tomcat:tomcat ${CATALINA_HOME}/conf/server.xml
 
-# Tweak the mime-type for javascript. (@TODO Will this satisfy X-Content-Type-Options=nosniff issues?)
+# Modernize the mime-type for javascript. from text/javascript to application/javascript
 Run set -e \
     && sed -i 's+text/javascript+application/javascript+g' ${CATALINA_HOME}/conf/web.xml
 
