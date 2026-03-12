@@ -76,16 +76,16 @@ RUN set -e && \
 RUN set -e  \
     && echo "$HR" \
     && echo "# It's dnf update Time!" \
-    && yum update -y \
-    && yum install -y curl unzip which emacs vim bc \
-    && yum clean all
-
-RUN set -e \
+    && dnf update -y \
+    && dnf install -y curl unzip which emacs vim bc \
+#    && dnf clean all
+#
+#RUN set -e \
     && echo "$HR" \
     && echo "# It's Java Time!" \
     && echo "# Installing $java_version and ant." \
-    && yum install -y "$java_version" "$java_version-devel"  \
-    && yum install -y ant \
+    && dnf install -y "$java_version" "$java_version-devel"  \
+    && dnf install -y ant \
     && echo "$HR2" \
     && echo "# Using java version $java_version" \
     && update-alternatives --set java "$java_version.$ARCH" \
@@ -94,10 +94,10 @@ RUN set -e \
     && echo "$HR2" \
     && update-alternatives --list \
     && echo "$HR2" \
-    && dnf clean all
-
+#    && dnf clean all
 #
-RUN set -e \
+#
+#RUN set -e \
     && echo "$HR" \
     && echo "# It's AWS CLI Time!" \
     && echo "# Installing python$python_version" \
@@ -179,6 +179,10 @@ RUN set -e \
     && mkdir -p ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs \
     && chown -R tomcat:tomcat ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs \
     && chmod 700 ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/logs
+
+RUN set -e && echo "Installing HyraxVersion class..."  >&2
+COPY HyraxVersion.class "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/WEB-INF/classes/opendap/version/HyraxVersion.class"
+RUN set -e  && ls -l "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/WEB-INF/classes/opendap/version"  >&2
 
 ################################################################
 # Clean up the distribution binaries.

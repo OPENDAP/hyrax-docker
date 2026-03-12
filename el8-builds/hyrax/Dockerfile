@@ -134,7 +134,7 @@ RUN set -e  \
     && echo "# It's dnf update Time!" \
     && dnf update -y \
 #     && dnf clean all
-
+#
 # RUN set -e \
     && echo "$HR" \
     && echo "# Installing command line tools and libraries." \
@@ -142,7 +142,7 @@ RUN set -e  \
     && dnf install -y diffutils procps git bc valgrind gdb \
     && echo "# The diff executable is here: $(which diff)" \
 #     && dnf clean all
-
+#
 # RUN set -e \
     && echo "$HR" \
     && echo "# It's Java Time Witches!" \

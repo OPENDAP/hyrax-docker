@@ -161,7 +161,7 @@ RUN set -e \
     && echo "#!/bin/bash" > /install-dev-tools \
     && echo "dnf install -y $dnf_developer_tools_packages" > /install-dev-tools \
     && chmod 755 /install-dev-tools \
-
+#
 ######################################################################
 # Rocky9 comes with built in curl-minimal. For our puposes we want
 # want the full package (I think, probably need to verify).
@@ -175,7 +175,7 @@ RUN set -e \
     && echo "# cURL version: $(curl --version)" >&2 \
     # && dnf clean all \
     && echo "$HR" >&2 \
-
+#
 ######################################################################
 # We want java ac ertain way ($java_version) and
 # we want to be sure that
@@ -199,7 +199,7 @@ RUN set -e \
     && update-alternatives --list \
     # && dnf clean all \
     && echo "$HR" >&2 \
-
+#
 ######################################################################
 # This Dockerfile brings in the Tomcat Native APR by using the one
 # that ships in the Tomcat package that we install. The Tomcat Native
@@ -216,7 +216,7 @@ RUN set -e \
     && dnf config-manager --set-enabled crb \
     && dnf groupinstall "Development Tools" -y \
     && echo "$HR2" >&2 \
-
+#
 ######################################################################
 # Install our runtime and build time packages.
 #
@@ -226,7 +226,7 @@ RUN set -e \
     && dnf install -y $dnf_runtime_packages $dnf_build_the_things_packages \
     # && dnf clean all \
     && echo "$HR" >&2 \
-
+#
 ######################################################################
 # The follow is a sanity check so that we can see what we got.
 # RUN set -e \
