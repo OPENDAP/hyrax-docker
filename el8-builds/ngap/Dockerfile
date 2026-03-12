@@ -125,21 +125,6 @@ RUN set -e \
     && dnf install -y redhat-rpm-config  apr-devel openssl-devel \
 #     && dnf clean all
 
-# AWS CLI is required for entrypoint.sh
-# RUN set -e \
-    && echo "$HR" \
-    && echo "# It's AWS CLI Time!" \
-    && echo "# Installing python$python_version" \
-    && dnf install -y python$python_version && python3 --version \
-    && echo "# python version: $(python3 --version)" \
-    && echo "# Updating pip" \
-    && curl -sS https://bootstrap.pypa.io/get-pip.py | python3 \
-    && python3 -m pip install --upgrade pip \
-    && echo "# Installing aws cli" \
-    && python3 -m pip install awscli \
-    && echo "# aws cli version: $(aws --version)" \
-#     && dnf clean all
-
 # RUN set -e \
     && echo "$HR" \
     && echo "# It's Java Time Witches!" \
