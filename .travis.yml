@@ -218,6 +218,16 @@ jobs:
         - ./travis/regression_test_script -i "$OS_BUILD_VERSION_TAG" -l "deployed-image-regression-tests-$TRAVIS_JOB_NUMBER"
         - export DEPLOY_ME="false"
 
+after_success:
+  - if [ "$TRAVIS_BRANCH" == "master" ]; then 
+      echo "# OS_BUILD_VERSION_TAG is '$OS_BUILD_VERSION_TAG'" >&2
+      tag_name="$(echo "$OS_BUILD_VERSION_TAG" | sed "s/:/@/g" )"
+      echo "#             tag_name is '$tag_name'" >&2
+      git tag -a "$tag_name" -m "$(cat $TRAVIS_BUILD_DIR/travis-build-recipe)";
+      git push origin "$tag_name"
+    fi
+
+
 after_script:
   - ./travis/upload-test-results.sh "$DOCKER_NAME" "$TESTS_LOG_BASE.tgz"
 
