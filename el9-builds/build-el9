@@ -79,6 +79,7 @@ function read_build_recipe() {
     export BES_VERSION
     export OLFS_VERSION
     export HYRAX_VERSION
+    export HYRAX_DISPLAY_VERSION
     export HYRAX_BUILD_NUMBER
     export RELEASE_DATE
     # export APR_VERSION
@@ -90,6 +91,7 @@ function read_build_recipe() {
     source "$TRAVIS_BUILD_DIR/travis/versions_and_build_offsets.sh"
     HYRAX_BUILD_NUMBER="$(expr $TRAVIS_BUILD_NUMBER - $TRAVIS_HYRAX_BUILD_OFFSET)"
     HYRAX_VERSION="$HYRAX_RELEASE_VERSION-$HYRAX_BUILD_NUMBER"
+    HYRAX_DISPLAY_VERSION="$HYRAX_VERSION$TEST_DEPLOYMENT"
 
     TARGET_OS="${TARGET_OS:-$(echo "$build_recipe" | grep "TARGET_OS" | awk '{print $2;}')}"
     TOMCAT_MAJOR_VERSION="${TOMCAT_MAJOR_VERSION:-$(echo "$build_recipe" | grep "TOMCAT_MAJOR_VERSION" | awk '{print $2;}')}"
@@ -211,7 +213,7 @@ function mk_hyrax_version_class() {
 package opendap.version;
 
 public class HyraxVersion {
-    private static final String hyraxVersion = "$HYRAX_VERSION$TEST_DEPLOYMENT";
+    private static final String hyraxVersion = "$HYRAX_DISPLAY_VERSION";
     public static String getVersionString() { return hyraxVersion; }
 }
 EOF
