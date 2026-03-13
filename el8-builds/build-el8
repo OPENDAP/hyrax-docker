@@ -28,6 +28,7 @@ function read_build_recipe() {
 
     export RELEASE_DATE=""
     export HYRAX_VERSION=""
+    export HYRAX_WEB_UI_VERSION=""
     export HYRAX_BUILD_NUMBER=""
     export OLFS_VERSION=""
     export BES_VERSION=""
@@ -64,6 +65,8 @@ function read_build_recipe() {
             TEST_DEPLOYMENT="$td_value"
         fi
     fi
+
+    HYRAX_WEB_UI_VERSION="$HYRAX_VERSION$TEST_DEPLOYMENT"
 
 
     if test "$DOCKER_NAME" == "ngap"
@@ -146,7 +149,7 @@ function mk_hyrax_version_class() {
 package opendap.version;
 
 public class HyraxVersion {
-    private static final String hyraxVersion = "$HYRAX_VERSION";
+    private static final String hyraxVersion = "$HYRAX_WEB_UI_VERSION";
     public static String getVersionString() { return hyraxVersion; }
 }
 EOF
@@ -190,6 +193,7 @@ function show_version(){
     loggy "TRAVIS_HYRAX_BUILD_OFFSET: $TRAVIS_HYRAX_BUILD_OFFSET"
     loggy "       HYRAX_BUILD_NUMBER: $HYRAX_BUILD_NUMBER"
     loggy "            HYRAX_VERSION: $HYRAX_VERSION"
+    loggy "    HYRAX_WEB_UI_VERSION: $HYRAX_WEB_UI_VERSION"
     loggy ""
     loggy "           LIBDAP_VERSION: $LIBDAP_VERSION"
     loggy "              BES_VERSION: $BES_VERSION"

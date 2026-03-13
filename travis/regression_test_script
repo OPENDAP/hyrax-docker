@@ -164,12 +164,15 @@ d_id="hyrax"
 clean_and_start "$d_id" "$test_image_name"
 waitForHyrax "$d_id"
 
+#########################################################################################################
+# Get Hyrax version response from the running server
 loggy "$HR1"
 version_url="$end_point/hyrax/version"
 loggy "$prolog Retrieving Hyrax Version Response from: '$version_url'"
 version_response="$(curl -s -c cookies -b cookies -n "$netrc_file" -L "$version_url")"
 loggy "$prolog Hyrax Version Response:"
 loggy "$version_response"
+loggy "$HR2"
 
 #########################################################################################################
 # Verify Hyrax Version Injection
@@ -177,15 +180,16 @@ loggy "$version_response"
 #       <Hyrax version="##########" />
 #   and then use awk to get the actual value of ##########
 hyrax_version_value="$(echo "$version_response" | grep "<Hyrax version" | awk '{split($0, a, "\""); print a[2];}')"
-if test "$HYRAX_VERSION" == "$hyrax_version_value"
+loggy "$prolog hyrax_version_response: $hyrax_version_value"
+loggy "$prolog  HYRAX_WEB_UI_VERSION: $HYRAX_WEB_UI_VERSION"
+if test "$HYRAX_WEB_UI_VERSION" == "$hyrax_version_value"
 then
-    loggy "$prolog The Hyrax version value returned by the tested docker image matches the HYRAX_VERSION from the production environment."
-    loggy "$prolog hyrax_version_response: $hyrax_version_value"
-    loggy "$prolog          HYRAX_VERSION: $HYRAX_VERSION"
+    loggy "$prolog The Hyrax version value returned by the tested docker image matches the HYRAX_WEB_UI_VERSION from the production environment."
 else
-    loggy "$prolog ERROR! The returned hyrax version string ($hyrax_version_value) does not match the HYRAX_VERSION ($HYRAX_VERSION) in the production environment!"
+    loggy "$prolog ERROR! The returned hyrax version string in the version response does not match the HYRAX_WEB_UI_VERSION env var in this production environment!"
     loggy "$prolog ERROR! Exiting process."
-    exit 1;
+    sleep 5
+    exit 1
 fi
 loggy "$HR1"
 #########################################################################################################
