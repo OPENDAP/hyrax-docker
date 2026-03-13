@@ -91,7 +91,6 @@ function read_build_recipe() {
     source "$TRAVIS_BUILD_DIR/travis/versions_and_build_offsets.sh"
     HYRAX_BUILD_NUMBER="$(expr $TRAVIS_BUILD_NUMBER - $TRAVIS_HYRAX_BUILD_OFFSET)"
     HYRAX_VERSION="$HYRAX_RELEASE_VERSION-$HYRAX_BUILD_NUMBER"
-    HYRAX_DISPLAY_VERSION="$HYRAX_VERSION$TEST_DEPLOYMENT"
 
     TARGET_OS="${TARGET_OS:-$(echo "$build_recipe" | grep "TARGET_OS" | awk '{print $2;}')}"
     TOMCAT_MAJOR_VERSION="${TOMCAT_MAJOR_VERSION:-$(echo "$build_recipe" | grep "TOMCAT_MAJOR_VERSION" | awk '{print $2;}')}"
@@ -101,6 +100,8 @@ function read_build_recipe() {
     RELEASE_DATE=${RELEASE_DATE:-$(echo "$build_recipe" | grep hyrax | awk '{print $2;}')}
     TEST_DEPLOYMENT="${TEST_DEPLOYMENT:-"$(get_test_deployment_tag "$build_recipe_file")"}"
     BES_CORE_IMAGE_TAG="opendap/bes_core:$BES_VERSION-$TARGET_OS"
+
+    HYRAX_DISPLAY_VERSION="$HYRAX_VERSION$TEST_DEPLOYMENT"
 
     if test "$DOCKER_NAME" == "ngap"
     then
