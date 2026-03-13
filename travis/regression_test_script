@@ -188,7 +188,8 @@ then
 else
     loggy "$prolog ERROR! The returned hyrax version string in the version response does not match the HYRAX_DISPLAY_VERSION env var in this production environment!"
     loggy "$prolog ERROR! Exiting process."
-    #exit 1;
+    sleep 5
+    exit 1
 fi
 loggy "$HR1"
 #########################################################################################################
