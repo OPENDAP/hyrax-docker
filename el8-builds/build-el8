@@ -66,7 +66,7 @@ function read_build_recipe() {
         fi
     fi
 
-    HYRAX_VERSION="$HYRAX_VERSION$TEST_DEPLOYMENT"
+    HYRAX_DISPLAY_VERSION="$HYRAX_VERSION$TEST_DEPLOYMENT"
 
 
     if test "$DOCKER_NAME" == "ngap"
