@@ -79,7 +79,7 @@ function read_build_recipe() {
     export BES_VERSION
     export OLFS_VERSION
     export HYRAX_VERSION
-    export HYRAX_DISPLAY_VERSION
+    export HYRAX_WEB_UI_VERSION
     export HYRAX_BUILD_NUMBER
     export RELEASE_DATE
     # export APR_VERSION
@@ -101,7 +101,7 @@ function read_build_recipe() {
     TEST_DEPLOYMENT="${TEST_DEPLOYMENT:-"$(get_test_deployment_tag "$build_recipe_file")"}"
     BES_CORE_IMAGE_TAG="opendap/bes_core:$BES_VERSION-$TARGET_OS"
 
-    HYRAX_DISPLAY_VERSION="$HYRAX_VERSION$TEST_DEPLOYMENT"
+    HYRAX_WEB_UI_VERSION="$HYRAX_VERSION$TEST_DEPLOYMENT"
 
     if test "$DOCKER_NAME" == "ngap"
     then
@@ -153,7 +153,7 @@ function show_version(){
     loggy "$prolog TRAVIS_HYRAX_BUILD_OFFSET: $TRAVIS_HYRAX_BUILD_OFFSET"
     loggy "$prolog        HYRAX_BUILD_NUMBER: $HYRAX_BUILD_NUMBER"
     loggy "$prolog             HYRAX_VERSION: $HYRAX_VERSION"
-    loggy "$prolog     HYRAX_DISPLAY_VERSION: $HYRAX_DISPLAY_VERSION"
+    loggy "$prolog     HYRAX_WEB_UI_VERSION: $HYRAX_WEB_UI_VERSION"
     loggy ""
     loggy "$prolog            LIBDAP_VERSION: $LIBDAP_VERSION"
     loggy "$prolog               BES_VERSION: $BES_VERSION"
@@ -215,7 +215,7 @@ function mk_hyrax_version_class() {
 package opendap.version;
 
 public class HyraxVersion {
-    private static final String hyraxVersion = "$HYRAX_DISPLAY_VERSION";
+    private static final String hyraxVersion = "$HYRAX_WEB_UI_VERSION";
     public static String getVersionString() { return hyraxVersion; }
 }
 EOF
