@@ -181,7 +181,7 @@ loggy "$HR2"
 #   and then use awk to get the actual value of ##########
 hyrax_version_value="$(echo "$version_response" | grep "<Hyrax version" | awk '{split($0, a, "\""); print a[2];}')"
 loggy "$prolog hyrax_version_response: $hyrax_version_value"
-loggy "$prolog  HYRAX_WEB_UI_VERSION: $HYRAX_WEB_UI_VERSION"
+loggy "$prolog   HYRAX_WEB_UI_VERSION: $HYRAX_WEB_UI_VERSION"
 if test "$HYRAX_WEB_UI_VERSION" == "$hyrax_version_value"
 then
     loggy "$prolog The Hyrax version value returned by the tested docker image matches the HYRAX_WEB_UI_VERSION from the production environment."
