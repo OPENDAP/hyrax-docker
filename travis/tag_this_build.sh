@@ -15,9 +15,9 @@ tag_this_build() {
     if [[ "$TRAVIS_BRANCH" == "master" && "$TRAVIS_PULL_REQUEST" == "false" ]]
     then
         loggy "$prolog Tagging Build. TRAVIS_BRANCH: $TRAVIS_BRANCH, TRAVIS_PULL_REQUEST: $TRAVIS_PULL_REQUEST "
-        loggy "$prolog OS_BUILD_VERSION_TAG is '$OS_BUILD_VERSION_TAG'"
+        loggy "$prolog OS_BUILD_VERSION_TAG: '$OS_BUILD_VERSION_TAG'"
         tag_name="${OS_BUILD_VERSION_TAG//:/@}"
-        loggy "$prolog             tag_name is '$tag_name'"
+        loggy "$prolog             tag_name: '$tag_name'"
         # git tag -a "$tag_name" -m "$(cat $TRAVIS_BUILD_DIR/travis-build-recipe)"; \
         # git push origin "$tag_name"
     else
