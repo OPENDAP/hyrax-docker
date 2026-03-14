@@ -220,15 +220,16 @@ jobs:
 
 after_success:
   - echo "# after_success - BEGIN'" >&2
-  - if test "$TRAVIS_BRANCH" = "master"; then
-  -     echo "# after_success - OS_BUILD_VERSION_TAG is '$OS_BUILD_VERSION_TAG'" >&2
-  -     tag_name="${OS_BUILD_VERSION_TAG//:/@}"
-  -     echo "# after_success -             tag_name is '$tag_name'" >&2
+  - | 
+    if test "$TRAVIS_BRANCH" = "master"; then
+       echo "# after_success - OS_BUILD_VERSION_TAG is '$OS_BUILD_VERSION_TAG'" >&2
+       tag_name="${OS_BUILD_VERSION_TAG//:/@}"
+       echo "# after_success -             tag_name is '$tag_name'" >&2
   #    git tag -a "$tag_name" -m "$(cat $TRAVIS_BUILD_DIR/travis-build-recipe)"; \
   #    git push origin "$tag_name"
-  - else
-  -     echo "# after_success - TRAVIS_BRANCH is not 'master', Skipping Build Tag" >&2
-  - fi
+    else
+       echo "# after_success - TRAVIS_BRANCH is not 'master', Skipping Build Tag" >&2
+    fi
   - echo "# after_success - END'" >&2
 
 
