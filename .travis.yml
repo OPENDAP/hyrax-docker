@@ -221,9 +221,9 @@ jobs:
 after_success:
   - echo "# after_success BEGIN'" >&2
   #- if test "$TRAVIS_BRANCH" = "master"; then \
-  -     echo "# OS_BUILD_VERSION_TAG is '$OS_BUILD_VERSION_TAG'" >&2 \
-  -     tag_name="$(echo "$OS_BUILD_VERSION_TAG" | sed "s/-/@/g" )"; \
-  -     echo "#             tag_name is '$tag_name'" >&2; \
+  -     echo "# OS_BUILD_VERSION_TAG is '$OS_BUILD_VERSION_TAG'" >&2
+  -     tag_name="$(echo "$OS_BUILD_VERSION_TAG" | sed "s/-/@/g" )"
+  -     echo "#             tag_name is '$tag_name'" >&2
   #    git tag -a "$tag_name" -m "$(cat $TRAVIS_BUILD_DIR/travis-build-recipe)"; \
   #    git push origin "$tag_name"
   #  fi
