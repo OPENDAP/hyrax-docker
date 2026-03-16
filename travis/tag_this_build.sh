@@ -14,7 +14,7 @@ tag_this_build() {
     local repo_name="hyrax-docker"
 
     loggy "$prolog BEGIN"
-    if [[ "$TRAVIS_BRANCH" == "master" && "$TRAVIS_PULL_REQUEST" == "false" ]]
+    if [[ "$TRAVIS_BRANCH" == "master" ]] # && "$TRAVIS_PULL_REQUEST" == "false" ]]
     then
         loggy "$prolog Tagging Build. TRAVIS_BRANCH: $TRAVIS_BRANCH, TRAVIS_PULL_REQUEST: $TRAVIS_PULL_REQUEST "
         loggy "$prolog OS_BUILD_VERSION_TAG: '$OS_BUILD_VERSION_TAG' GITUID: $GITUID"
