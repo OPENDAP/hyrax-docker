@@ -15,10 +15,10 @@ tag_this_build() {
     if [[ "$TRAVIS_BRANCH" == "master" && "$TRAVIS_PULL_REQUEST" == "false" ]]
     then
         loggy "$prolog Tagging Build. TRAVIS_BRANCH: $TRAVIS_BRANCH, TRAVIS_PULL_REQUEST: $TRAVIS_PULL_REQUEST "
-        loggy "$prolog OS_BUILD_VERSION_TAG: '$OS_BUILD_VERSION_TAG'"
+        loggy "$prolog OS_BUILD_VERSION_TAG: '$OS_BUILD_VERSION_TAG' GITUID: $GITUID"
         tag_name="${OS_BUILD_VERSION_TAG//:/@}"
         loggy "$prolog             tag_name: '$tag_name'"
-        git tag -a "$tag_name" -m "$(cat $TRAVIS_BUILD_DIR/travis-build-recipe)"; \
+        git tag -a "$tag_name" -m "$(cat $TRAVIS_BUILD_DIR/travis-build-recipe)"
         git push "https://${GIT_UID}:${GIT_PSWD}@github.com/OPENDAP/hyrax-docker.git" "$tag_name"
     else
         loggy "$prolog Skipping Build Tag. TRAVIS_BRANCH: $TRAVIS_BRANCH, TRAVIS_PULL_REQUEST: $TRAVIS_PULL_REQUEST "
