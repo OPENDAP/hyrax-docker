@@ -218,6 +218,12 @@ jobs:
         - ./travis/regression_test_script -i "$OS_BUILD_VERSION_TAG" -l "deployed-image-regression-tests-$TRAVIS_JOB_NUMBER"
         - export DEPLOY_ME="false"
 
+after_success:
+  - echo "# after_success - BEGIN'" >&2
+  - $TRAVIS_BUILD_DIR/travis/tag_this_build.sh
+  - echo "# after_success - END'" >&2
+
+
 after_script:
   - ./travis/upload-test-results.sh "$DOCKER_NAME" "$TESTS_LOG_BASE.tgz"
 
