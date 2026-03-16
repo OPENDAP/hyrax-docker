@@ -18,8 +18,8 @@ tag_this_build() {
         loggy "$prolog OS_BUILD_VERSION_TAG: '$OS_BUILD_VERSION_TAG'"
         tag_name="${OS_BUILD_VERSION_TAG//:/@}"
         loggy "$prolog             tag_name: '$tag_name'"
-        # git tag -a "$tag_name" -m "$(cat $TRAVIS_BUILD_DIR/travis-build-recipe)"; \
-        # git push origin "$tag_name"
+        git tag -a "$tag_name" -m "$(cat $TRAVIS_BUILD_DIR/travis-build-recipe)"; \
+        git push origin "$tag_name"
     else
         loggy "$prolog Skipping Build Tag. TRAVIS_BRANCH: $TRAVIS_BRANCH, TRAVIS_PULL_REQUEST: $TRAVIS_PULL_REQUEST "
     fi
