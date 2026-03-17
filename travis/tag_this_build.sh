@@ -84,7 +84,7 @@ tag_this_build() {
             loggy "$prolog The 'git remote set-url origin https://TOKEN@github.com/OPENDAP/$repo_name.git' command succeeded."
         fi
 
-        if test -z "$DEBUG_TAG_OPS"
+        if test -n "$DEBUG_TAG_OPS"
         then
             loggy "$prolog Running 'git config --list'"
             loggy "$(git config --list)"
