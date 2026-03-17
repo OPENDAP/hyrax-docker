@@ -73,12 +73,17 @@ tag_this_build() {
         #    loggy "$prolog The 'git remote add origin-auth https://TOKEN@github.com/OPENDAP/$repo_name.git' command succeeded."
         #fi
 
+        if test -z "$GIT_TOKEN"
+        then
+          echo "The GIT_TOKEN is empty. Check your Travis settings or PR source."
+          return 99
+        fi
 
 
         # Rewrite the remote URL to include the PAT
         # The "2>/dev/null" hides the URL (and token) if the command fails
         loggy "$prolog Rewrite the remote URL to include the PAT $repo_name"
-        git remote set-url origin "https://${GITHUB_TOKEN}@github.com/OPENDAP/$repo_name.git" > /dev/null 2>&1
+        git remote set-url origin "https://${GIT_TOKEN}@github.com/OPENDAP/$repo_name.git" > /dev/null 2>&1
         if test $status -ne 0
         then
            loggy "$prolog Failed to 'git remote set-url origin https://TOKEN@github.com/OPENDAP/$repo_name.git'"
