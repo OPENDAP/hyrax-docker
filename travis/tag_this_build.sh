@@ -28,7 +28,7 @@ tag_this_build() {
         if test -z "$GIT_TOKEN"
         then
           echo "ERROR: Unable to tag build. The GIT_TOKEN is empty. Check your Travis settings or PR source."
-          return 99
+          return 111
         fi
 
         if test -z "$DEBUG_TAG_OPS"
@@ -51,7 +51,6 @@ tag_this_build() {
         else
             loggy "$prolog Tag operation succeeded."
         fi
-
 
         loggy "$prolog Setting git user.email"
         git config --global user.email "npotter@opendap.org"
@@ -127,12 +126,3 @@ tag_this_build() {
 
 tag_this_build
 exit $?
-
-
-
-
-
-
-
-
-
