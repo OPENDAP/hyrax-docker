@@ -86,10 +86,10 @@ tag_this_build() {
         loggy "$prolog "
         loggy "$prolog Pushing tag '$tag_name' to GitHub."
         set -x
-        git push origin-auth HEAD:main "$tag_name"
+        # git push origin-auth HEAD:main "$tag_name"
         # git push "https://${GIT_TOKEN}@github.com/OPENDAP/$repo_name.git" "$tag_name"
         # git push "https://${GIT_UID}:${GIT_TOKEN}@github.com/OPENDAP/$repo_name.git" "$tag_name"
-        # git push "$tag_name"
+        git push "$tag_name"
         status=$?
         set +x
         if test $status -ne 0
