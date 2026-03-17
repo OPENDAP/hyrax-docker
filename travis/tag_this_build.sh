@@ -67,10 +67,10 @@ tag_this_build() {
         git remote add origin-auth "https://${GIT_TOKEN}@github.com/OPENDAP/$repo_name.git" >&2
         if test $status -ne 0
         then
-           loggy "$prolog Failed to git remote add origin-auth STUFF"
+           loggy "$prolog Failed to git remote add origin-auth 'https://TOKEN@github.com/OPENDAP/$repo_name.git'"
            return $status
         else
-            loggy "$prolog The 'git remote add origin-auth' command succeeded."
+            loggy "$prolog The 'git remote add origin-auth https://TOKEN@github.com/OPENDAP/$repo_name.git' command succeeded."
         fi
 
         loggy "$prolog Running 'git config --list'"
@@ -85,10 +85,10 @@ tag_this_build() {
         fi
         loggy "$prolog "
         loggy "$prolog Pushing tag '$tag_name' to GitHub."
-        # git push origin-auth HEAD:main "$tag_name"
-        # git push "https://${GIT_TOKEN}@github.com/OPENDAP/$repo_name.git" "$tag_name"
         set -x
-        git push "https://${GIT_UID}:${GIT_TOKEN}@github.com/OPENDAP/$repo_name.git" "$tag_name"
+        git push origin-auth HEAD:main "$tag_name"
+        # git push "https://${GIT_TOKEN}@github.com/OPENDAP/$repo_name.git" "$tag_name"
+        # git push "https://${GIT_UID}:${GIT_TOKEN}@github.com/OPENDAP/$repo_name.git" "$tag_name"
         # git push "$tag_name"
         status=$?
         set +x
