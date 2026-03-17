@@ -90,7 +90,8 @@ tag_this_build() {
         # git push "https://${GIT_TOKEN}@github.com/OPENDAP/$repo_name.git" "$tag_name"
         # git push "https://${GIT_UID}:${GIT_TOKEN}@github.com/OPENDAP/$repo_name.git" "$tag_name"
         # git push "$tag_name"
-        git push "$tag_name" HEAD:main
+        # git push "$tag_name" HEAD:main
+        git push "https://${GITHUB_TOKEN}@github.com/OPENDAP/$repo_name.git" "$tag_name"
         status=$?
         set +x
         if test $status -ne 0
