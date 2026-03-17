@@ -89,9 +89,9 @@ tag_this_build() {
         # git push "https://${GIT_TOKEN}@github.com/OPENDAP/$repo_name.git" "$tag_name"
         set -x
         git push "https://${GIT_UID}:${GIT_TOKEN}@github.com/OPENDAP/$repo_name.git" "$tag_name"
-        set +x
         # git push "$tag_name"
         status=$?
+        set +x
         if test $status -ne 0
         then
            loggy "$prolog The 'git push' attempt failed."
