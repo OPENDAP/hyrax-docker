@@ -25,8 +25,9 @@ tag_this_build() {
         tag_name="DEBUG-FTW-$TRAVIS_BUILD_NUMBER"
         loggy "$prolog             tag_name: '$tag_name'"
 
-       loggy "$prolog Tagging local '$repo_name' repository"
+        loggy "$prolog Tagging local '$repo_name' repository"
         git tag -a "$tag_name" -m "Testing tag and push."
+
         status=$?
         if test $status -ne 0
         then
@@ -58,11 +59,12 @@ tag_this_build() {
         else
             loggy "$prolog git config user.name succeeded."
         fi
+
         # Add
         # 2. Add the remote using the token
         # The PAT token is injected into the URL for authentication
         loggy "$prolog Injecting PAT token for $repo_name"
-        git remote add origin-auth https://${GIT_TOKEN}@github.com/OPENDAP/$repo_name.git >&2
+        git remote add origin-auth "https://${GIT_TOKEN}@github.com/OPENDAP/$repo_name.git" >&2
         if test $status -ne 0
         then
            loggy "$prolog Failed to git remote add origin-auth STUFF"
@@ -81,18 +83,23 @@ tag_this_build() {
         else
             loggy "$prolog The 'git config --list' succeeded."
         fi
-
+        loggy "$prolog "
         loggy "$prolog Pushing tag '$tag_name' to GitHub."
         # git push origin-auth HEAD:main "$tag_name"
         # git push "https://${GIT_TOKEN}@github.com/OPENDAP/$repo_name.git" "$tag_name"
-        # git push "https://${GIT_UID}:${GIT_TOKEN}@github.com/OPENDAP/$repo_name.git" "$tag_name"
-        git push "$tag_name"
+        set -x
+        git push "https://${GIT_UID}:${GIT_TOKEN}@github.com/OPENDAP/$repo_name.git" "$tag_name"
+        set +x
+        # git push "$tag_name"
         status=$?
         if test $status -ne 0
         then
            loggy "$prolog The 'git push' attempt failed."
            return $status
         else
+            loggy "$prolog "
+            loggy "$prolog "
+            loggy "$prolog "
             loggy "$prolog The 'git push' command. succeeded."
         fi
     else
