@@ -1,4 +1,5 @@
 #!/bin/bash
+HR="###########################################################################"
 ###########################################################################
 # loggy()
 function loggy() {
@@ -15,9 +16,10 @@ tag_this_build() {
     local status
     local repo_name="hyrax-docker"
 
+    loggy "$HR"
     loggy "$prolog BEGIN"
     loggy "$prolog Tagging Build. TRAVIS_BRANCH: '$TRAVIS_BRANCH', TRAVIS_PULL_REQUEST: '$TRAVIS_PULL_REQUEST'"
-    if [[ "$TRAVIS_BRANCH" == "master" ]] # && "$TRAVIS_PULL_REQUEST" == "false" ]]
+    if [[ "$TRAVIS_BRANCH" == "master" ]] && [[ "$TRAVIS_PULL_REQUEST" == "false" ]]
     then
                 # Check for a token...
         if test -z "$GIT_TOKEN"
@@ -72,9 +74,6 @@ tag_this_build() {
             loggy "$prolog git config user.name succeeded."
         fi
 
-
-        # Rewrite the remote URL to include the PAT
-        # The "2>/dev/null" hides the URL (and token) if the command fails
         loggy "$prolog Rewrite the remote URL to include the PAT $repo_name"
         git remote set-url origin "https://${GIT_TOKEN}@github.com/OPENDAP/$repo_name.git" > /dev/null 2>&1
         if test $status -ne 0
@@ -119,6 +118,8 @@ tag_this_build() {
         loggy "$prolog Skipping Build Tag. TRAVIS_BRANCH: $TRAVIS_BRANCH, TRAVIS_PULL_REQUEST: $TRAVIS_PULL_REQUEST "
     fi
     loggy "$prolog END"
+    loggy "$HR"
+
 }
 
 
