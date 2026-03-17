@@ -25,7 +25,15 @@ tag_this_build() {
         tag_name="DEBUG-FTW-$TRAVIS_BUILD_NUMBER"
         git tag -a "$tag_name" -m "Testing tag and push."
 
-        git push "https://${GIT_PSWD}@github.com/OPENDAP/$repo_name.git" "$tag_name"
+        git config --global user.email "npotter@opendap.org"
+        git config --global user.name "The Robot Travis"
+        # Add
+        # 2. Add the remote using the token
+        # The PAT token is injected into the URL for authentication
+        git remote add origin-auth https://${GIT_TOKEN}@github.com/OPENDAP/$repo_name.git >&2
+
+        git push origin-auth HEAD:main "$tag_name"
+        #git push "https://${GIT_TOKEN}@github.com/OPENDAP/$repo_name.git" "$tag_name"
         status=$?
         if $status -ne 0
         then
@@ -40,3 +48,11 @@ tag_this_build() {
 
 
 tag_this_build
+
+
+
+
+
+
+
+
