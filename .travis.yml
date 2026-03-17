@@ -221,7 +221,7 @@ jobs:
 
 after_success:
   - echo "# after_success - BEGIN'" >&2
-  - $TRAVIS_BUILD_DIR/travis/tag_this_build.sh
+  - set -e && $TRAVIS_BUILD_DIR/travis/tag_this_build.sh
   - echo "# after_success - END'" >&2
 
 

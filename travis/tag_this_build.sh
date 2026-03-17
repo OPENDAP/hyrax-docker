@@ -84,18 +84,19 @@ tag_this_build() {
             loggy "$prolog The 'git remote set-url origin https://TOKEN@github.com/OPENDAP/$repo_name.git' command succeeded."
         fi
 
-
-        loggy "$prolog Running 'git config --list'"
-        loggy "$(git config --list)"
-        status=$?
-        if test $status -ne 0
+        if test -z "$DEBUG_TAG_OPS"
         then
-           loggy "$prolog ERROR(status: $status): The 'git config --list' failed."
-           return $status
-        else
-            loggy "$prolog The 'git config --list' succeeded."
+            loggy "$prolog Running 'git config --list'"
+            loggy "$(git config --list)"
+            status=$?
+            if test $status -ne 0
+            then
+               loggy "$prolog ERROR(status: $status): The 'git config --list' failed."
+               return $status
+            else
+                loggy "$prolog The 'git config --list' succeeded."
+            fi
         fi
-
 
         loggy "$prolog "
         loggy "$prolog Pushing tag '$tag_name' to GitHub."
