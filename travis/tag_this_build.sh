@@ -6,7 +6,7 @@ function loggy() {
     echo "$@" | awk '{ print "# "$0;}' >&2
 }
 
-DEBUG_TAG_OPS=foo
+DEBUG_TAG_OPS=
 
 ###########################################################################
 # tag_this_build()
@@ -18,17 +18,18 @@ tag_this_build() {
 
     loggy "$HR"
     loggy "$prolog BEGIN"
-    loggy "$prolog Tagging Build. TRAVIS_BRANCH: '$TRAVIS_BRANCH', TRAVIS_PULL_REQUEST: '$TRAVIS_PULL_REQUEST'"
+    loggy "$prolog        TRAVIS_BRANCH: '$TRAVIS_BRANCH'"
+    loggy "$prolog  TRAVIS_PULL_REQUEST: '$TRAVIS_PULL_REQUEST'"
+    loggy "$prolog        DEBUG_TAG_OPS: '$DEBUG_TAG_OPS'"
+    loggy "$prolog OS_BUILD_VERSION_TAG: '$OS_BUILD_VERSION_TAG'"
     if [[ "$TRAVIS_BRANCH" == "master" ]] && [[ "$TRAVIS_PULL_REQUEST" == "false" || -n "$DEBUG_TAG_OPS" ]]
     then
-                # Check for a token...
+        # Check for a token...
         if test -z "$GIT_TOKEN"
         then
           echo "ERROR: Unable to tag build. The GIT_TOKEN is empty. Check your Travis settings or PR source."
           return 99
         fi
-
-        loggy "$prolog OS_BUILD_VERSION_TAG: '$OS_BUILD_VERSION_TAG'"
 
         if test -z "$DEBUG_TAG_OPS"
         then
