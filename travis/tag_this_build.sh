@@ -22,7 +22,7 @@ tag_this_build() {
     loggy "$prolog  TRAVIS_PULL_REQUEST: '$TRAVIS_PULL_REQUEST'"
     loggy "$prolog        DEBUG_TAG_OPS: '$DEBUG_TAG_OPS'"
     loggy "$prolog OS_BUILD_VERSION_TAG: '$OS_BUILD_VERSION_TAG'"
-    if [[ "$TRAVIS_BRANCH" == "master" ]] && [[ "$TRAVIS_PULL_REQUEST" == "false" || -n "$DEBUG_TAG_OPS" ]]
+    if [[ "$TRAVIS_BRANCH" == "master" ]] && [[ "$DEPLOY_ME" == "true" || -n "$DEBUG_TAG_OPS" ]]
     then
         # Check for a token...
         if test -z "$GIT_TOKEN"
@@ -109,11 +109,7 @@ tag_this_build() {
            loggy "$prolog ERROR(status: $status): The 'git push' attempt failed."
            return $status
         else
-            loggy "$prolog "
-            loggy "$prolog "
             loggy "$prolog The 'git push' command. succeeded."
-            loggy "$prolog "
-            loggy "$prolog "
         fi
     else
         loggy "$prolog Skipping Build Tag. TRAVIS_BRANCH: $TRAVIS_BRANCH, TRAVIS_PULL_REQUEST: $TRAVIS_PULL_REQUEST "
