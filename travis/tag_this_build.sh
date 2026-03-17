@@ -71,6 +71,17 @@ tag_this_build() {
             loggy "$prolog The 'git remote add origin-auth' command succeeded."
         fi
 
+        loggy "$prolog Running 'git config --list'"
+        loggy "$(git config --list)"
+        status=$?
+        if test $status -ne 0
+        then
+           loggy "$prolog The 'git config --list' failed."
+           return $status
+        else
+            loggy "$prolog The 'git config --list' succeeded."
+        fi
+
         loggy "$prolog Pushing tag '$tag_name' to GitHub."
         # git push origin-auth HEAD:main "$tag_name"
         # git push "https://${GIT_TOKEN}@github.com/OPENDAP/$repo_name.git" "$tag_name"
@@ -78,10 +89,10 @@ tag_this_build() {
         status=$?
         if test $status -ne 0
         then
-           loggy "$prolog The 'git push attempt' failed."
+           loggy "$prolog The 'git push' attempt failed."
            return $status
         else
-            loggy "$prolog The git push command. succeeded."
+            loggy "$prolog The 'git push' command. succeeded."
         fi
     else
         loggy "$prolog Skipping Build Tag. TRAVIS_BRANCH: $TRAVIS_BRANCH, TRAVIS_PULL_REQUEST: $TRAVIS_PULL_REQUEST "
