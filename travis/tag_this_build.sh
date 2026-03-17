@@ -16,6 +16,7 @@ tag_this_build() {
     local repo_name="hyrax-docker"
 
     loggy "$prolog BEGIN"
+    loggy "$prolog Tagging Build. TRAVIS_BRANCH: '$TRAVIS_BRANCH', TRAVIS_PULL_REQUEST: '$TRAVIS_PULL_REQUEST'"
     if [[ "$TRAVIS_BRANCH" == "master" ]] # && "$TRAVIS_PULL_REQUEST" == "false" ]]
     then
                 # Check for a token...
@@ -24,10 +25,10 @@ tag_this_build() {
           echo "ERROR: Unable to tag build. The GIT_TOKEN is empty. Check your Travis settings or PR source."
           return 99
         fi
-        loggy "$prolog Tagging Build. TRAVIS_BRANCH: $TRAVIS_BRANCH, TRAVIS_PULL_REQUEST: $TRAVIS_PULL_REQUEST "
-        loggy "$prolog OS_BUILD_VERSION_TAG: '$OS_BUILD_VERSION_TAG' GITUID: $GITUID"
 
-        if test -z DEBUG_TAG_OPS
+        loggy "$prolog OS_BUILD_VERSION_TAG: '$OS_BUILD_VERSION_TAG'"
+
+        if test -z "$DEBUG_TAG_OPS"
         then
             # Not debuggin? Then tag it for real.
             tag_name="${OS_BUILD_VERSION_TAG//:/@}"
@@ -36,8 +37,7 @@ tag_this_build() {
         else
             # We're debuggin, use the debuggin tags
             tag_name="DEBUG-FTW-$TRAVIS_BUILD_NUMBER"
-            loggy "$prolog             tag_name: '$tag_name'"
-            loggy "$prolog Tagging local '$repo_name' repository"
+            loggy "$prolog DEBUG ----- tag_name: '$tag_name'"
             git tag -a "$tag_name" -m "Testing tag and push."
         fi
         status=$?
