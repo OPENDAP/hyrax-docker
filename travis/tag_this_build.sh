@@ -63,15 +63,30 @@ tag_this_build() {
         # Add
         # 2. Add the remote using the token
         # The PAT token is injected into the URL for authentication
-        loggy "$prolog Injecting PAT token for $repo_name"
-        git remote add origin-auth "https://${GIT_TOKEN}@github.com/OPENDAP/$repo_name.git" >&2
+        #loggy "$prolog Injecting PAT token for $repo_name"
+        #git remote add origin-auth "https://${GIT_TOKEN}@github.com/OPENDAP/$repo_name.git" >&2
+        #if test $status -ne 0
+        #then
+        #   loggy "$prolog Failed to git remote add origin-auth 'https://TOKEN@github.com/OPENDAP/$repo_name.git'"
+        #   return $status
+        #else
+        #    loggy "$prolog The 'git remote add origin-auth https://TOKEN@github.com/OPENDAP/$repo_name.git' command succeeded."
+        #fi
+
+
+
+        # Rewrite the remote URL to include the PAT
+        # The "2>/dev/null" hides the URL (and token) if the command fails
+        loggy "$prolog Rewrite the remote URL to include the PAT $repo_name"
+        git remote set-url origin "https://${GITHUB_TOKEN}@github.com/OPENDAP/$repo_name.git" > /dev/null 2>&1
         if test $status -ne 0
         then
-           loggy "$prolog Failed to git remote add origin-auth 'https://TOKEN@github.com/OPENDAP/$repo_name.git'"
+           loggy "$prolog Failed to 'git remote set-url origin https://TOKEN@github.com/OPENDAP/$repo_name.git'"
            return $status
         else
-            loggy "$prolog The 'git remote add origin-auth https://TOKEN@github.com/OPENDAP/$repo_name.git' command succeeded."
+            loggy "$prolog The 'git remote set-url origin https://TOKEN@github.com/OPENDAP/$repo_name.git' command succeeded."
         fi
+
 
         loggy "$prolog Running 'git config --list'"
         loggy "$(git config --list)"
@@ -83,6 +98,8 @@ tag_this_build() {
         else
             loggy "$prolog The 'git config --list' succeeded."
         fi
+
+
         loggy "$prolog "
         loggy "$prolog Pushing tag '$tag_name' to GitHub."
         set -x
@@ -91,7 +108,10 @@ tag_this_build() {
         # git push "https://${GIT_UID}:${GIT_TOKEN}@github.com/OPENDAP/$repo_name.git" "$tag_name"
         # git push "$tag_name"
         # git push "$tag_name" HEAD:main
-        git push "https://${GITHUB_TOKEN}@github.com/OPENDAP/$repo_name.git" "$tag_name"
+        #git push "https://${GITHUB_TOKEN}@github.com/OPENDAP/$repo_name.git" "$tag_name"
+
+        # Push the tag
+        git push origin "$tag_name"
         status=$?
         set +x
         if test $status -ne 0
