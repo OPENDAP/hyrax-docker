@@ -25,39 +25,53 @@ tag_this_build() {
         tag_name="DEBUG-FTW-$TRAVIS_BUILD_NUMBER"
         loggy "$prolog             tag_name: '$tag_name'"
 
-
+       loggy "$prolog Tagging local '$repo_name' repository"
         git tag -a "$tag_name" -m "Testing tag and push."
         status=$?
         if test $status -ne 0
         then
-           loggy "$prolog Failed to rag repo."
+           loggy "$prolog Failed to tag repo."
            return $status
+        else
+            loggy "$prolog Tag operation succeeded."
         fi
 
+
+        loggy "$prolog Setting git user.email"
         git config --global user.email "npotter@opendap.org"
         status=$?
         if test $status -ne 0
         then
            loggy "$prolog Failed to git config --global user.email \"npotter@opendap.org\""
            return $status
+        else
+            loggy "$prolog git config user.email succeeded."
         fi
+
+        loggy "$prolog Setting git user.name"
         git config --global user.name "The Robot Travis"
         status=$?
         if test $status -ne 0
         then
            loggy "$prolog Failed to git config --global user.name \"The Robot Travis\""
            return $status
+        else
+            loggy "$prolog git config user.name succeeded."
         fi
         # Add
         # 2. Add the remote using the token
         # The PAT token is injected into the URL for authentication
+        loggy "$prolog Injecting PAT token for $repo_name"
         git remote add origin-auth https://${GIT_TOKEN}@github.com/OPENDAP/$repo_name.git >&2
         if test $status -ne 0
         then
            loggy "$prolog Failed to git remote add origin-auth STUFF"
            return $status
+        else
+            loggy "$prolog The 'git remote add origin-auth' command succeeded."
         fi
 
+        loggy "$prolog Pushing tag '$tag_name' to GitHub."
         git push origin-auth HEAD:main "$tag_name"
         #git push "https://${GIT_TOKEN}@github.com/OPENDAP/$repo_name.git" "$tag_name"
         status=$?
@@ -65,6 +79,8 @@ tag_this_build() {
         then
            loggy "$prolog The 'git push attempt' failed."
            return $status
+        else
+            loggy "$prolog The git push command. succeeded."
         fi
     else
         loggy "$prolog Skipping Build Tag. TRAVIS_BRANCH: $TRAVIS_BRANCH, TRAVIS_PULL_REQUEST: $TRAVIS_PULL_REQUEST "
