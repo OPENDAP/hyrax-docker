@@ -28,7 +28,7 @@ tag_this_build() {
 
         git tag -a "$tag_name" -m "Testing tag and push."
         status=$?
-        if $status -ne 0
+        if test $status -ne 0
         then
            loggy "$prolog Failed to rag repo."
            return $status
@@ -36,14 +36,14 @@ tag_this_build() {
 
         git config --global user.email "npotter@opendap.org"
         status=$?
-        if $status -ne 0
+        if test $status -ne 0
         then
            loggy "$prolog Failed to git config --global user.email \"npotter@opendap.org\""
            return $status
         fi
         git config --global user.name "The Robot Travis"
         status=$?
-        if $status -ne 0
+        if test $status -ne 0
         then
            loggy "$prolog Failed to git config --global user.name \"The Robot Travis\""
            return $status
@@ -52,7 +52,7 @@ tag_this_build() {
         # 2. Add the remote using the token
         # The PAT token is injected into the URL for authentication
         git remote add origin-auth https://${GIT_TOKEN}@github.com/OPENDAP/$repo_name.git >&2
-        if $status -ne 0
+        if test $status -ne 0
         then
            loggy "$prolog Failed to git remote add origin-auth STUFF"
            return $status
@@ -61,7 +61,7 @@ tag_this_build() {
         git push origin-auth HEAD:main "$tag_name"
         #git push "https://${GIT_TOKEN}@github.com/OPENDAP/$repo_name.git" "$tag_name"
         status=$?
-        if $status -ne 0
+        if test $status -ne 0
         then
            loggy "$prolog The 'git push attempt' failed."
            return $status
