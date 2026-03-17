@@ -6,7 +6,7 @@ function loggy() {
     echo "$@" | awk '{ print "# "$0;}' >&2
 }
 
-DEBUG_TAG_OPS=
+DEBUG_TAG_OPS=foo
 
 ###########################################################################
 # tag_this_build()
@@ -19,7 +19,7 @@ tag_this_build() {
     loggy "$HR"
     loggy "$prolog BEGIN"
     loggy "$prolog Tagging Build. TRAVIS_BRANCH: '$TRAVIS_BRANCH', TRAVIS_PULL_REQUEST: '$TRAVIS_PULL_REQUEST'"
-    if [[ "$TRAVIS_BRANCH" == "master" ]] # && [[ "$TRAVIS_PULL_REQUEST" == "false" ]]
+    if [[ "$TRAVIS_BRANCH" == "master" ]] && [[ "$TRAVIS_PULL_REQUEST" == "false" || -n "$DEBUG_TAG_OPS" ]]
     then
                 # Check for a token...
         if test -z "$GIT_TOKEN"
