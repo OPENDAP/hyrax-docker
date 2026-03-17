@@ -94,14 +94,15 @@ jobs:
         - export TESTS_LOG_BASE="$DOCKER_NAME-regression-tests-$TRAVIS_JOB_NUMBER"
         - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "$TOMCAT_MAJOR_VERSION")
         - show_version
+        - set -e && $TRAVIS_BUILD_DIR/travis/tag_this_build.sh
         - get_tomcat_distro "$DOCKER_NAME" "$TOMCAT_VERSION"
         - s3_get_olfs_distro
           "$S3_BUILD_BUCKET"
           "$DOCKER_NAME"
           "$OLFS_VERSION" 2>&1
-        - set -e # Don't keep going if the docker build fails....
-        - mk_hyrax_version_class
-        - docker build
+        # Don't keep going if the docker build fails....
+        - set -e && mk_hyrax_version_class
+        - set -e && docker build
           --build-arg TOMCAT_VERSION
           --build-arg RELEASE_DATE
           --build-arg HYRAX_VERSION
