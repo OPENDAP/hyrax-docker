@@ -99,9 +99,9 @@ jobs:
           "$S3_BUILD_BUCKET"
           "$DOCKER_NAME"
           "$OLFS_VERSION" 2>&1
-        - set -e # Don't keep going if the docker build fails....
-        - mk_hyrax_version_class
-        - docker build
+        # Don't keep going if the docker build fails....
+        - set -e && mk_hyrax_version_class
+        - set -e && docker build
           --build-arg TOMCAT_VERSION
           --build-arg RELEASE_DATE
           --build-arg HYRAX_VERSION
@@ -220,12 +220,12 @@ jobs:
 
 after_success:
   - echo "# after_success - BEGIN'" >&2
-  - $TRAVIS_BUILD_DIR/travis/tag_this_build.sh
+  - set -e && $TRAVIS_BUILD_DIR/travis/tag_this_build.sh && echo "exit status was $?"
   - echo "# after_success - END'" >&2
 
 
 after_script:
-  - ./travis/upload-test-results.sh "$DOCKER_NAME" "$TESTS_LOG_BASE.tgz"
+  - $TRAVIS_BUILD_DIR/travis/upload-test-results.sh "$DOCKER_NAME" "$TESTS_LOG_BASE.tgz"
 
 before_deploy:
   - export DOCKER_LOGIN=`aws ecr get-login --region us-east-1 | sed "s/-e none //g"`;
