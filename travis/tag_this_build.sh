@@ -19,7 +19,7 @@ tag_this_build() {
     loggy "$HR"
     loggy "$prolog BEGIN"
     loggy "$prolog Tagging Build. TRAVIS_BRANCH: '$TRAVIS_BRANCH', TRAVIS_PULL_REQUEST: '$TRAVIS_PULL_REQUEST'"
-    if [[ "$TRAVIS_BRANCH" == "master" ]] && [[ "$TRAVIS_PULL_REQUEST" == "false" ]]
+    if [[ "$TRAVIS_BRANCH" == "master" ]] # && [[ "$TRAVIS_PULL_REQUEST" == "false" ]]
     then
                 # Check for a token...
         if test -z "$GIT_TOKEN"
