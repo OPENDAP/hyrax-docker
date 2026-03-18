@@ -203,7 +203,7 @@ function show_version(){
 # the script is run.
 #
 function mk_hyrax_version_class() {
-    prolog="mk_hyrax_version_class() -"
+    local prolog="mk_hyrax_version_class() -"
     loggy  "$HR2"
     loggy  "$prolog BEGIN"
 
