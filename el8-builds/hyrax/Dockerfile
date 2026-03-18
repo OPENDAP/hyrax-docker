@@ -25,7 +25,7 @@ RUN if test -n "$BES_CORE_IMAGE_TAG"; then \
     fi
 
 # User defined and created in the `bes_core` image
-ENV BES_USER="${USER:-"bes_user"}"
+ENV BES_USER="${BES_USER:-"bes_user"}"
 
 ENV ARCH="x86_64"
 ENV java_version="java-17-openjdk"
@@ -164,11 +164,12 @@ RUN set -e  \
 # Set up BES
 #
 # BES is already installed on the base image, but
-# we need to do some additional configuration (to match what was
-# previously handled by bes RPM installation)
+# we need to do some additional configuration
 
 # Add besd service to start at boot
-RUN cp ${PREFIX}/etc/rc.d/init.d/besd /etc/rc.d/init.d/besd \
+# TODO: remove first line if this setup happens by default now that file
+# doesn't need copying over
+RUN chkconfig --list | grep besd \
     && chkconfig --add besd \
     && ldconfig \
     && chkconfig --list | grep besd \
@@ -180,9 +181,9 @@ RUN cp ${PREFIX}/etc/rc.d/init.d/besd /etc/rc.d/init.d/besd \
 # vestigial substitutions for a build process past.
 RUN sed -i.dist \
     -e 's:=.*/bes.log:=/var/log/bes/bes.log:' \
-    -e 's:=.*/lib/bes:='"$PREFIX"'/lib/bes:' \
-    -e 's:=.*/share/bes:='"$PREFIX"'/share/bes:' \
-    -e 's:=.*/share/hyrax:='"$PREFIX"'/share/hyrax:' \
+    -e 's:=.*/lib/bes:=/lib/bes:' \
+    -e 's:=.*/share/bes:=/share/bes:' \
+    -e 's:=.*/share/hyrax:=/share/hyrax:' \
     -e 's:=/full/path/to/serverside/certificate/file.pem:=/etc/pki/bes/cacerts/file.pem:' \
     -e 's:=/full/path/to/serverside/key/file.pem:=/etc/pki/bes/public/file.pem:' \
     -e 's:=/full/path/to/clientside/certificate/file.pem:=/etc/pki/bes/cacerts/file.pem:' \

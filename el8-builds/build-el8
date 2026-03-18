@@ -48,7 +48,9 @@ function read_build_recipe() {
     BES_VERSION="${BES_VERSION:-"$(echo "${build_recipe}" | grep bes | sed "s/bes-//g" | awk '{print $1;}')"}"
     LIBDAP_VERSION="${LIBDAP_VERSION:-"$(echo "${build_recipe}" | grep libdap4 | sed "s/libdap4-//g"| awk '{print $1;}')"}"
 
-    BES_CORE_IMAGE_TAG="opendap/bes_core:$BES_VERSION-$TARGET_OS"
+    # TODO: REVERT BEFORE MERGING!!!!!!
+    # BES_CORE_IMAGE_TAG="opendap/bes_core:$BES_VERSION-$TARGET_OS"
+    BES_CORE_IMAGE_TAG="opendap/bes_core:3.21.1-1164-el8-pull-request-test-image"
 
     local td_value="-test-deploy"
     export TEST_DEPLOYMENT=""
