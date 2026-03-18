@@ -38,10 +38,7 @@ fi
 export SLEEP_INTERVAL="${SLEEP_INTERVAL:-60}"
 loggy "SLEEP_INTERVAL: $SLEEP_INTERVAL seconds."
 
-# Set in docker image.
-# BES_USER initially defined upstream in docker image base `bes_core` as $USER,
-# updated to $BES_USER in ngap/Dockerfile
-export PREFIX=${PREFIX:-"/root/install"}
+# As set in Dockerfile
 export BES_USER=${BES_USER:-"bes_user"}
 
 #AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:-<not set>}"
