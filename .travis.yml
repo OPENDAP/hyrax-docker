@@ -126,7 +126,7 @@ jobs:
         - source "./build-$TARGET_OS" "$BUILD_RECIPE_ABSPATH"
         - OS_BUILD_VERSION_TAG="opendap/$DOCKER_NAME:$BES_VERSION.$HYRAX_BUILD_NUMBER-$TARGET_OS$TEST_DEPLOYMENT"
         - show_version
-        - docker build
+        - set -e && docker build
           --build-arg RELEASE_DATE
           --build-arg HYRAX_VERSION
           --build-arg LIBDAP_VERSION
@@ -154,7 +154,7 @@ jobs:
           "$OLFS_VERSION" 2>&1
         - ls -l "$DOCKER_DIR"/*.tar.gz
         - mk_hyrax_version_class
-        - docker build
+        - set -e && docker build
           --build-arg TOMCAT_VERSION
           --build-arg RELEASE_DATE
           --build-arg HYRAX_VERSION
@@ -186,7 +186,7 @@ jobs:
           "olfs"
           "${OLFS_VERSION}" 2>&1
         - mk_hyrax_version_class
-        - docker build
+        - set -e && docker build
           --build-arg TOMCAT_VERSION
           --build-arg RELEASE_DATE
           --build-arg HYRAX_VERSION
@@ -204,7 +204,7 @@ jobs:
         - export DOCKER_DIR="ngap"
         - source "./build-$TARGET_OS" "$BUILD_RECIPE_ABSPATH"
         - show_version
-        - ./build-hyrax-ngap.sh
+        - set -e && ./build-hyrax-ngap.sh
         - docker image ls -a
         - ../travis/test_image_starts_without_crashing.sh "$OS_BUILD_VERSION_TAG"
 
