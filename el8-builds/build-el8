@@ -6,7 +6,7 @@ export BUILD_RECIPE=${1}
 if test -z "$BUILD_RECIPE"
 then
     echo "ERROR: BUILD_RECIPE required!"
-    return 1
+    return 2
 fi
 
 export S3_BUILD_BUCKET=${S3_BUILD_BUCKET:-"opendap.travis.build"}

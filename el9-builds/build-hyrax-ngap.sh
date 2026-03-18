@@ -5,6 +5,11 @@
 # downstream Travis activities (like deployment) will have all the ENV vars they
 # need to run.
 source  "./build-$TARGET_OS"
+if test $? -ne 0; then
+    echo "ERROR! Failed to source ./build-$TARGET_OS" >&2
+    return 2
+fi
+
 HR0="#######################################################################"
 HR1="- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
 HR2="--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---"

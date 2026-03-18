@@ -1,7 +1,12 @@
 #!/bin/bash
 #
 #
-source  "./build-$TARGET_OS"
+source  "./build-$TARGET_OS" "$BUILD_RECIPE_ABSPATH"
+if test $? -ne 0; then
+    echo "ERROR! Failed to source ./build-$TARGET_OS" >&2
+    return 2
+fi
+
 HR0="#######################################################################"
 HR1="- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
 HR2="--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---"
