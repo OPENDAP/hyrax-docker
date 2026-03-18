@@ -153,7 +153,7 @@ function show_version(){
     loggy "$prolog TRAVIS_HYRAX_BUILD_OFFSET: $TRAVIS_HYRAX_BUILD_OFFSET"
     loggy "$prolog        HYRAX_BUILD_NUMBER: $HYRAX_BUILD_NUMBER"
     loggy "$prolog             HYRAX_VERSION: $HYRAX_VERSION"
-    loggy "$prolog     HYRAX_WEB_UI_VERSION: $HYRAX_WEB_UI_VERSION"
+    loggy "$prolog      HYRAX_WEB_UI_VERSION: $HYRAX_WEB_UI_VERSION"
     loggy ""
     loggy "$prolog            LIBDAP_VERSION: $LIBDAP_VERSION"
     loggy "$prolog               BES_VERSION: $BES_VERSION"
@@ -203,7 +203,7 @@ function show_version(){
 # the script is run.
 #
 function mk_hyrax_version_class() {
-    prolog="mk_hyrax_version_class() -"
+    local prolog="mk_hyrax_version_class() -"
     loggy  "$HR2"
     loggy  "$prolog BEGIN"
 
@@ -551,32 +551,45 @@ function check_aws(){
 #
 function s3_pull(){
     loggy "$HR3"
-    local prolog="s3_pull() -"
+    local plog="s3_pull() -"
     loggy "$prolog BEGIN"
 
-    local bucket_name="${1}"
-    loggy "$prolog bucket_name: $bucket_name"
+    local bucket_name="$1"
+    loggy "$plog bucket_name: $bucket_name"
 
-    local object_name="${2}"
-    loggy "$prolog object_name: $object_name"
+    local object_name="$2"
+    loggy "$plog object_name: $object_name"
 
-    local target_dir="${3}"
-    loggy "$prolog  target_dir: $target_dir"
+    local target_dir="$3"
+    loggy "$plog  target_dir: $target_dir"
 
-    local s3_url="s3://${bucket_name}/${object_name}"
-    loggy "$prolog      s3_url: $s3_url"
-    loggy "$prolog   aws s3 ls: $(aws s3 ls "$s3_url")"
+    local s3_url="s3://$bucket_name/$object_name"
+    loggy "$plog      s3_url: $s3_url"
+    loggy "$plog   aws s3 ls: $(aws s3 ls "$s3_url")"
 
-    local target_file="${target_dir}/${object_name}"
-    loggy "$prolog target_file: $target_file"
+    local target_file="$target_dir/$object_name"
+    loggy "$plog target_file: $target_file"
 
     local be_quiet
-    if test -n "${aws_quiet}"; then be_quiet="--quiet"; fi
-    loggy "$prolog    be_quiet: '$be_quiet'"
+    if test -n "$aws_quiet"; then be_quiet="--quiet"; fi
+    loggy "$plog    be_quiet: '$be_quiet'"
 
-    loggy "$prolog  Retrieving: $s3_url"
+    loggy "$plog Checking for the existence of '$object_name' in '$bucket_name' "
+    set +e
+    aws s3 ls "$s3_url"
+    status=$?
+    set -e
+    if test $status -ne 0
+    then
+        loggy "$plog ERROR! Failed to locate '$object_name' in '$bucket_name'. The Bad Things Are Happening."
+        return $status
+    else
+        loggy "$plog Located '$object_name' in '$bucket_name'. Found it, woot."
+    fi
+
+    loggy "$plog  Retrieving: $s3_url"
     aws s3 cp $be_quiet "$s3_url" "$target_file"
-    loggy "$prolog END"
+    loggy "$plog END"
 }
 
 ################################################################################
