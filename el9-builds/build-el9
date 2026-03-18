@@ -576,12 +576,16 @@ function s3_pull(){
 
     loggy "$prolog    Checking for the existence of '$object_name' in '$bucket_name' "
 #    aws s3api head-object --bucket "$bucket_name" --key path/to/your/object.txt
+    set +e
     aws s3 ls "$s3_url"
     status=$?
+    set -e
     if test $status -ne 0
     then
         loggy "ERROR! Failed to locate '$object_name' in '$bucket_name'. Bad things are happening."
         return $status
+    else
+        loggy "Located '$object_name' in '$bucket_name'. woot."
     fi
 
 
