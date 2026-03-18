@@ -551,30 +551,30 @@ function check_aws(){
 #
 function s3_pull(){
     loggy "$HR3"
-    local prolog="s3_pull() -"
+    local plog="s3_pull() -"
     loggy "$prolog BEGIN"
 
     local bucket_name="$1"
-    loggy "$prolog bucket_name: $bucket_name"
+    loggy "$plog bucket_name: $bucket_name"
 
     local object_name="$2"
-    loggy "$prolog object_name: $object_name"
+    loggy "$plog object_name: $object_name"
 
     local target_dir="$3"
-    loggy "$prolog  target_dir: $target_dir"
+    loggy "$plog  target_dir: $target_dir"
 
     local s3_url="s3://$bucket_name/$object_name"
-    loggy "$prolog      s3_url: $s3_url"
-    loggy "$prolog   aws s3 ls: $(aws s3 ls "$s3_url")"
+    loggy "$plog      s3_url: $s3_url"
+    loggy "$plog   aws s3 ls: $(aws s3 ls "$s3_url")"
 
     local target_file="$target_dir/$object_name"
-    loggy "$prolog target_file: $target_file"
+    loggy "$plog target_file: $target_file"
 
     local be_quiet
     if test -n "$aws_quiet"; then be_quiet="--quiet"; fi
-    loggy "$prolog    be_quiet: '$be_quiet'"
+    loggy "$plog    be_quiet: '$be_quiet'"
 
-    loggy "$prolog    Checking for the existence of '$object_name' in '$bucket_name' "
+    loggy "$plog    Checking for the existence of '$object_name' in '$bucket_name' "
 #    aws s3api head-object --bucket "$bucket_name" --key path/to/your/object.txt
     set +e
     aws s3 ls "$s3_url"
@@ -582,16 +582,15 @@ function s3_pull(){
     set -e
     if test $status -ne 0
     then
-        loggy "ERROR! Failed to locate '$object_name' in '$bucket_name'. Bad things are happening."
+        loggy "$plog ERROR! Failed to locate '$object_name' in '$bucket_name'. The Bad Things Are Happening."
         return $status
     else
-        loggy "Located '$object_name' in '$bucket_name'. woot."
+        loggy "$plog Located '$object_name' in '$bucket_name'. Found it, woot."
     fi
 
-
-    loggy "$prolog  Retrieving: $s3_url"
+    loggy "$plog  Retrieving: $s3_url"
     aws s3 cp $be_quiet "$s3_url" "$target_file"
-    loggy "$prolog END"
+    loggy "$plog END"
 }
 
 ################################################################################
