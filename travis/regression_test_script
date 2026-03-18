@@ -191,7 +191,6 @@ loggy "$HR1"
 #########################################################################################################
 
 loggy "$prolog Testing image: ${test_image_name}"
-set -x
 
 # If the regression tests fail we want the logs, so don't exit on fail right here
 set +e
