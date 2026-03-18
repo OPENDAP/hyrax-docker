@@ -439,10 +439,10 @@ RUN set -e \
     && echo "org.apache.catalina.core.level = FINE" >> "$CATALINA_HOME/conf/logging.properties" \
     && echo "org.apache.catalina.session.level = FINE" >> "$CATALINA_HOME/conf/logging.properties"
 #
-# Install Memcached Session Manager jars into the Tomcat: ${CATALINA_HOME}/lib
+# Install Redisson Session Manager jars into the Tomcat: ${CATALINA_HOME}/lib
 RUN set -e \
     && echo "$HR" >&2 \
-    && echo "Installing Session Manager jar files. Cloning OLFS..." >&2 \
+    && echo "Installing Redisson Session Manager jar files into this image. Cloning OLFS..." >&2 \
     && git clone https://github.com/OPENDAP/olfs \
     #&& git clone --depth 1 https://github.com/OPENDAP/olfs \
     && cd olfs \
