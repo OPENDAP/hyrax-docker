@@ -574,8 +574,7 @@ function s3_pull(){
     if test -n "$aws_quiet"; then be_quiet="--quiet"; fi
     loggy "$plog    be_quiet: '$be_quiet'"
 
-    loggy "$plog    Checking for the existence of '$object_name' in '$bucket_name' "
-#    aws s3api head-object --bucket "$bucket_name" --key path/to/your/object.txt
+    loggy "$plog Checking for the existence of '$object_name' in '$bucket_name' "
     set +e
     aws s3 ls "$s3_url"
     status=$?

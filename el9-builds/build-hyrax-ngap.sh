@@ -66,10 +66,7 @@ s3_get_olfs_ngap_distro \
 #
 
 # Make the HyraxVersion.class file to inject into the docker image.
-
-loggy "$prolog CALLING mk_hyrax_version_class"
 mk_hyrax_version_class
-loggy "$prolog RETURN FROM mk_hyrax_version_class"
 
 set -e
 docker build \
