@@ -205,6 +205,12 @@ RUN set -e \
 # BES is already installed on the base image, but
 # we need to do some additional configuration
 
+# Patch a mistake that was introduced at the bes_core layer
+# After it's fixed in the bes repo, this line will be redundant
+# and we can remove it
+RUN cp -r /share/bes /usr/share/bes \
+    && cp -r /share/hyrax /usr/share/hyrax
+
 # Adapted from bes/spec.all_static.in in RPM creation.
 # The four *.pem substitutions may be unnecessary, as those *.pem files may be
 # vestigial substitutions for a build process past.
