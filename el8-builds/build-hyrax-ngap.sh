@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 #
-source  "./build-$TARGET_OS" "$BUILD_RECIPE_ABSPATH"
+source  "./build-$TARGET_OS" "$BUILD_RECIPE"
 if test $? -ne 0; then
     echo "ERROR! Failed to source ./build-$TARGET_OS" >&2
     return 2

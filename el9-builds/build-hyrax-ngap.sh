@@ -4,7 +4,7 @@
 # We must assume that the shell has sourced ./build-el9 prior (in Travis) so that
 # downstream Travis activities (like deployment) will have all the ENV vars they
 # need to run.
-source  "./build-$TARGET_OS"
+source  "./build-$TARGET_OS" "$BUILD_RECIPE"
 if test $? -ne 0; then
     echo "ERROR! Failed to source ./build-$TARGET_OS" >&2
     return 2
