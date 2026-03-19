@@ -1,7 +1,12 @@
 #!/bin/bash
 #
 #
-source  "./build-$TARGET_OS"
+source  "./build-$TARGET_OS" "$BUILD_RECIPE"
+if test $? -ne 0; then
+    echo "ERROR! Failed to source ./build-$TARGET_OS" >&2
+    return 2
+fi
+
 HR0="#######################################################################"
 HR1="- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
 HR2="--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---"
@@ -41,6 +46,7 @@ get_ngap_olfs_distro "$S3_BUILD_BUCKET" "$DOCKER_NAME" "$OLFS_VERSION" 2>&1
 # Make the HyraxVersion.class file to inject into the docker image.
 mk_hyrax_version_class
 
+set -e
 docker build \
     --build-arg TOMCAT_VERSION \
     --build-arg RELEASE_DATE \
@@ -52,6 +58,7 @@ docker build \
     --tag "$OS_SNAPSHOT_IMAGE_TAG" \
     --tag "$OS_BUILD_VERSION_TAG" \
     "$DOCKER_NAME"
+set +e
 
 docker image ls -a
 

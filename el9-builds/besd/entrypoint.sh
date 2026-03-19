@@ -38,10 +38,7 @@ fi
 export SLEEP_INTERVAL="${SLEEP_INTERVAL:-60}"
 loggy "SLEEP_INTERVAL: $SLEEP_INTERVAL seconds."
 
-# Set in docker image.
-# BES_USER initially defined upstream in docker image base `bes_core` as $USER,
-# updated to $BES_USER in ngap/Dockerfile
-export PREFIX=${PREFIX:-"/root/install"}
+# As set in Dockerfile
 export BES_USER=${BES_USER:-"bes_user"}
 
 #AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:-<not set>}"
@@ -118,11 +115,11 @@ fi
 #
 if [ "$SERVER_HELP_EMAIL" != "not_set" ]; then
     loggy "Setting Admin Contact To: $SERVER_HELP_EMAIL"
-    sed -i "s/admin.email.address@your.domain.name/$SERVER_HELP_EMAIL/" $PREFIX/etc/bes/bes.conf
+    sed -i "s/admin.email.address@your.domain.name/$SERVER_HELP_EMAIL/" /etc/bes/bes.conf
 fi
 if [ "$FOLLOW_SYMLINKS" != "not_set" ]; then
     loggy "Setting BES FollowSymLinks to YES."
-    sed -i "s/^BES.Catalog.catalog.FollowSymLinks=No/BES.Catalog.catalog.FollowSymLinks=Yes/" $PREFIX/etc/bes/bes.conf
+    sed -i "s/^BES.Catalog.catalog.FollowSymLinks=No/BES.Catalog.catalog.FollowSymLinks=Yes/" /etc/bes/bes.conf
 fi
 
 #-------------------------------------------------------------------------------
@@ -135,16 +132,16 @@ echo "bes_uid: $bes_uid"
 echo "bes_gid: $bes_gid"
 
 # Start the BES daemon process
-# $PREFIX/bin/besdaemon -i /usr -c $PREFIX/etc/bes/bes.conf -r /var/run/bes.pid
+# /usr/bin/besdaemon -i /usr -c /etc/bes/bes.conf -r /var/run/bes.pid
 loggy "Calling 'besctl start'"
-$PREFIX/bin/besctl start
+/usr/bin/besctl start
 status=$?
 if [ $status -ne 0 ]; then
     loggy "ERROR: Failed to start BES: $status"
     exit $status
 fi
 
-besd_pid="$(ps aux | grep $PREFIX/bin/besdaemon | grep -v grep | awk '{print $2;}' - )"
+besd_pid="$(ps aux | grep /usr/bin/besdaemon | grep -v grep | awk '{print $2;}' - )"
 loggy "The besdaemon is UP! pid: $besd_pid"
 start_time=
 start_time="$(date  "+%s")"

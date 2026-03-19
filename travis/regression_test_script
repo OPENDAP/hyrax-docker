@@ -28,10 +28,6 @@ netrc_file=""
 tests=""
 tests_log_base="${default_tests_log_base}"
 
-# Must be identical to Dockerfile; initially set in opendap/bes_core, based
-# on hyrax-dependencies prefix path
-BES_PREFIX="/root/install"
-
 while getopts "ht:i:e:n:l:" OPTION; do
     case $OPTION in
         h)
@@ -195,7 +191,6 @@ loggy "$HR1"
 #########################################################################################################
 
 loggy "$prolog Testing image: ${test_image_name}"
-set -x
 
 # If the regression tests fail we want the logs, so don't exit on fail right here
 set +e
@@ -234,7 +229,7 @@ loggy "$prolog Acquiring bes.log from docker image."
 docker cp $d_id:/var/log/bes/bes.log .
 
 loggy "$prolog Acquiring beslog2json.py from docker image."
-docker cp $d_id:${BES_PREFIX}/bin/beslog2json.py "$(pwd)/beslog2json.py"
+docker cp $d_id:/usr/bin/beslog2json.py "$(pwd)/beslog2json.py"
 ls -l ./beslog2json.py
 
 loggy "$HR2"

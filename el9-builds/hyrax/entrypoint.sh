@@ -139,11 +139,11 @@ fi
 #
 if test "$SERVER_HELP_EMAIL" != "not_set" ; then
     loggy "Setting Admin Contact To: $SERVER_HELP_EMAIL"
-    sed -i "s/admin.email.address@your.domain.name/$SERVER_HELP_EMAIL/" "$PREFIX/etc/bes/bes.conf"
+    sed -i "s/admin.email.address@your.domain.name/$SERVER_HELP_EMAIL/" "/etc/bes/bes.conf"
 fi
 if test "$FOLLOW_SYMLINKS" != "not_set" ; then
     loggy "Setting BES FollowSymLinks to YES."
-    sed -i "s/^BES.Catalog.catalog.FollowSymLinks=No/BES.Catalog.catalog.FollowSymLinks=Yes/" "$PREFIX/etc/bes/bes.conf"
+    sed -i "s/^BES.Catalog.catalog.FollowSymLinks=No/BES.Catalog.catalog.FollowSymLinks=Yes/" "/etc/bes/bes.conf"
 fi
 
 loggy "JAVA VERSION: $( java -version 2>&1 )"
@@ -178,15 +178,15 @@ echo "bes_gid: $bes_gid"
 
 #-------------------------------------------------------------------------------
 # Start the BES daemon process
-# $PREFIX/bin/besdaemon -i /usr -c $PREFIX/etc/bes/bes.conf -r /var/run/bes.pid (old way)
+# /usr/bin/besdaemon -i /usr -c /etc/bes/bes.conf -r /var/run/bes.pid (old way)
 loggy "Launching besd..."
-$PREFIX/bin/besctl start
+/usr/bin/besctl start
 status=$?
 if test $status -ne 0 ; then
     loggy "ERROR: Failed to start BES: $status"
     exit $status
 fi
-besd_pid="$(ps aux | grep "$PREFIX/bin/besdaemon" | grep -v grep | awk '{print $2;}' - )"
+besd_pid="$(ps aux | grep "/usr/bin/besdaemon" | grep -v grep | awk '{print $2;}' - )"
 loggy "The besd is UP! [pid: $besd_pid]"
 
 #-------------------------------------------------------------------------------

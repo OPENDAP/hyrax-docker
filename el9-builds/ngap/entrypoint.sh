@@ -13,11 +13,8 @@ if [[ "$LOG_KEY_PREFIX" != *"-" ]]; then
     LOG_KEY_PREFIX="$LOG_KEY_PREFIX-"
 fi
 
-# Set in docker image.
-# BES_USER initially defined upstream in docker image base `bes_core` as $USER,
-# updated to $BES_USER in ngap/Dockerfile
-export PREFIX="${PREFIX:-/root/install}"
-export BES_USER="${BES_USER:-bes_user}"
+# As set in Dockerfile
+export BES_USER=${BES_USER:-"bes_user"}
 
 ##########################################################################
 #
@@ -215,12 +212,10 @@ export NGAP_CERTIFICATE_KEY_FILE="/usr/share/tomcat/conf/NGAP-CA-certificate.key
 startup_log "NGAP_CERTIFICATE_KEY_FILE: $NGAP_CERTIFICATE_KEY_FILE"
 
 ################################################################################
-# NETRC_FILE is at the top level /etc/bes instead of $PREFIX/etc/...
-# because that's where bamboo expects it to be
 export NETRC_FILE="/etc/bes/ngap_netrc"
 startup_log "NETRC_FILE: $NETRC_FILE"
 
-export BES_SITE_CONF_FILE="$PREFIX/etc/bes/site.conf"
+export BES_SITE_CONF_FILE="/etc/bes/site.conf"
 startup_log "BES_SITE_CONF_FILE: $BES_SITE_CONF_FILE"
 
 export BES_LOG_FILE="/var/log/bes/bes.log"
@@ -479,29 +474,29 @@ fi
 #
 if test "$SERVER_HELP_EMAIL" != "not_set"; then
   startup_log "Setting Admin Contact To: $SERVER_HELP_EMAIL"
-  sed -i "s/admin.email.address@your.domain.name/$SERVER_HELP_EMAIL/" $PREFIX/etc/bes/bes.conf
+  sed -i "s/admin.email.address@your.domain.name/$SERVER_HELP_EMAIL/" /etc/bes/bes.conf
 fi
 if test "$FOLLOW_SYMLINKS" != "not_set"; then
   startup_log "Setting BES FollowSymLinks to YES."
-  sed -i "s/^BES.Catalog.catalog.FollowSymLinks=No/BES.Catalog.catalog.FollowSymLinks=Yes/"  $PREFIX/etc/bes/bes.conf
+  sed -i "s/^BES.Catalog.catalog.FollowSymLinks=No/BES.Catalog.catalog.FollowSymLinks=Yes/"  /etc/bes/bes.conf
 fi
 ################################################################################
 
 #-------------------------------------------------------------------------------
 # Start the BES daemon process
-# $PREFIX/bin/besdaemon -i /usr -c $PREFIX/etc/bes/bes.conf -r /var/run/bes.pid
+# /usr/bin/besdaemon -i /usr -c /etc/bes/bes.conf -r /var/run/bes.pid
 bes_username="$BES_USER"
 bes_uid="$(id -u ${bes_username})"
 bes_gid="$(id -g ${bes_username})"
 startup_log "Launching besd [uid: $bes_uid gid: $bes_gid]"
-$PREFIX/bin/besctl start > ./besctl.log  2>&1 # dropped debug control -d "/dev/null,timing"  - ndp 10/12/2023
+/usr/bin/besctl start > ./besctl.log  2>&1 # dropped debug control -d "/dev/null,timing"  - ndp 10/12/2023
 status=$?
 startup_log "$(cat ./besctl.log)"
 if test $status -ne 0; then
   error_log "ERROR: Failed to start BES: $status"
   #exit $status
 fi
-besd_pid="$(ps aux | grep $PREFIX/bin/besdaemon | grep -v grep | awk '{print $2;}' -)"
+besd_pid="$(ps aux | grep /usr/bin/besdaemon | grep -v grep | awk '{print $2;}' -)"
 startup_log "The besd is UP! [pid: $besd_pid]"
 
 #-------------------------------------------------------------------------------

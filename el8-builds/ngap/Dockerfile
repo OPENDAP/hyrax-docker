@@ -72,7 +72,7 @@ RUN LIBDAP_VERSION_FOUND=$(cat libdap_VERSION); \
     if [ "${LIBDAP_VERSION_FOUND}" == "${LIBDAP_VERSION:-missing}" ]; then \
         echo "LIBDAP Version: ${LIBDAP_VERSION}"; \
     else \
-        echo "Error: Expected LIBDAP_VERSION `${LIBDAP_VERSION}`, found version `${LIBDAP_VERSION_FOUND}`. Exiting."; \
+        echo "Error: Expected LIBDAP_VERSION \"${LIBDAP_VERSION}\", found version \"${LIBDAP_VERSION_FOUND}\". Exiting."; \
         exit 1; \
     fi
 
@@ -141,38 +141,37 @@ RUN set -e \
     && echo "$HR2" \
     && dnf clean all
 
+################################################################
 # Set up BES
 #
 # BES is already installed on the base image, but
-# we need to do some additional configuration (to match what was
-# previously handled by bes RPM installation)
-
-# Add besd service to start at boot
-RUN cp ${PREFIX}/etc/rc.d/init.d/besd /etc/rc.d/init.d/besd \
-    && chkconfig --add besd \
-    && ldconfig \
-    && chkconfig --list | grep besd \
-    && echo "whoami: $(whoami)" \
-    && echo "besdaemon is here: $(which besdaemon)"
+# we need to do some additional configuration
 
 # Adapted from bes/spec.all_static.in in RPM creation.
 # The four *.pem substitutions may be unnecessary, as those *.pem files may be
 # vestigial substitutions for a build process past.
 RUN sed -i.dist \
     -e 's:=.*/bes.log:=/var/log/bes/bes.log:' \
-    -e 's:=.*/lib/bes:='"$PREFIX"'/lib/bes:' \
-    -e 's:=.*/share/bes:='"$PREFIX"'/share/bes:' \
-    -e 's:=.*/share/hyrax:='"$PREFIX"'/share/hyrax:' \
+    -e 's:=.*/lib/bes:=/lib/bes:' \
+    -e 's:=.*/share/bes:=/share/bes:' \
+    -e 's:=.*/share/hyrax:=/share/hyrax:' \
     -e 's:=/full/path/to/serverside/certificate/file.pem:=/etc/pki/bes/cacerts/file.pem:' \
     -e 's:=/full/path/to/serverside/key/file.pem:=/etc/pki/bes/public/file.pem:' \
     -e 's:=/full/path/to/clientside/certificate/file.pem:=/etc/pki/bes/cacerts/file.pem:' \
     -e 's:=/full/path/to/clientside/key/file.pem:=/etc/pki/bes/public/file.pem:' \
     -e 's:=user_name:='"$BES_USER"':' \
     -e 's:=group_name:='"$BES_USER"':' \
-    $PREFIX/etc/bes/bes.conf \
+    /etc/bes/bes.conf \
     && mkdir -p "/var/log/bes/" \
     && touch "/var/log/bes/bes.log" \
     && sudo chown -R $BES_USER:$BES_USER "/var/log/bes/"
+
+# Start besd service at boot
+RUN chkconfig --add besd \
+    && ldconfig \
+    && chkconfig --list | grep besd \
+    && echo "whoami: $(whoami)" \
+    && echo "besdaemon is here: $(which besdaemon)"
 
 ################################################################
 # Install and Setup Tomcat

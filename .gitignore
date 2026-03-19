@@ -16,3 +16,5 @@ apache_tomcat_keys
 travis/bes.json
 travis/beslog2json.py
 travis/cookies
+HyraxVersion.java
+HyraxVersion.class
