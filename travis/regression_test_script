@@ -72,43 +72,48 @@ loggy "$prolog  tests_log_base: ${tests_log_base}"
 #
 function waitForHyrax() {
     local prolog="waitForHyrax() -"
+    loggy "$prolog BEGIN"
     local docker_id="$1"
-    # Don't fail on errors, they're expected...
-    set +e
+    if test -z "$docker_id"
+    then
+        loggy "ERROR! A docker id must be supplied to the waitForHyrax() function!!"
+        return 2;
+    fi
+
+    set +e # Don't fail on errors, they're expected...
     local start
     let start=$(date "+%s")
     local done_flag=""
     local curl_response
-    echo -n "$prolog " >&2
-    while test -z "${done_flag}"; do
+    echo "$prolog WAITING FOR HYRAX (so patient): " >&2
+    while test -z "$done_flag"; do
         echo -n "." >&2
-        curl -s -c cookies -b cookies -n --netrc-file ${netrc_file} -L ${end_point} >/dev/null 2>&1
+        curl -s -c cookies -b cookies -n --netrc-file "$netrc_file" -L "$end_point" >/dev/null 2>&1
         status=$?
         # echo "cURL status: ${status}";
-        if [ ${status} -eq 0 ]; then
-            echo "" >&2
-            loggy "$prolog "
+        if [ $status -eq 0 ]; then # The request succeeded!
+            loggy ""
             loggy "$prolog Endpoint may have been retrieved. Checking again..."
             # What happens next: We get the response headers "-I" and look
             # for the string "HTTP/" because we know there will be redirects.
             # We use tail to look at the last HTTP/ header and if that status is
             # 200 we're off to the races.
-            curl_response=$(curl -s -c cookies -b cookies -n "$netrc_file" -I -L "$end_point")
+            curl_response="$(curl -s -c cookies -b cookies -n "$netrc_file" -I -L "$end_point" 2>&1)"
             loggy "$prolog curl_response: $curl_response"
             echo "$curl_response" | grep "HTTP/" | tail -1 | grep 200 # > /dev/null;
             found=$?
             # echo "cURL found: ${found}";
-            if [ ${found} -eq 0 ]; then
-                loggy "$prolog The Test Endpoint URL: ${end_point} returned a status of 200"
+            if [ $found -eq 0 ]; then
+                loggy "$prolog The Test Endpoint URL: $end_point returned a status of 200"
                 done_flag="yup"
             fi
         fi
-        let now=$(date "+%s")
+        let now="$(date "+%s")"
         let elapsed=$now-$start
         # echo "elapsed: $elapsed"
-        if [ ${elapsed} -gt ${time_out} ]; then
+        if [ $elapsed -gt $time_out ]; then
             loggy "$prolog "
-            loggy "$prolog ERROR: Hyrax FAILED To Start! Waited for ${elapsed} seconds"
+            loggy "$prolog ERROR: Hyrax FAILED To Start! Waited for $elapsed seconds"
             loggy "$prolog docker logs: "
             loggy "$(docker logs "$docker_id")"
             loggy "$prolog $HR2"
@@ -123,7 +128,9 @@ function waitForHyrax() {
     sleep 10
     loggy "$prolog $HR2"
     loggy "$prolog Start-up Docker logs: "
-    loggy "$(docker logs "$docker_id")"
+    loggy "$(docker logs "$docker_id")" # By default, this should return the whole thing
+    loggy ""
+    loggy "$prolog END"
     loggy "$prolog $HR2"
 
     return 0
