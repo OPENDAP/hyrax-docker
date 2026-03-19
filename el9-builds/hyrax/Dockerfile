@@ -210,9 +210,9 @@ RUN set -e \
 # vestigial substitutions for a build process past.
 RUN sed -i.dist \
     -e 's:=.*/bes.log:=/var/log/bes/bes.log:' \
-    -e 's:=.*/lib/bes:=/lib/bes:' \
-    -e 's:=.*/share/bes:=/share/bes:' \
-    -e 's:=.*/share/hyrax:=/share/hyrax:' \
+    -e 's:=.*/lib/bes:=/usr/lib/bes:' \
+    -e 's:=.*/share/bes:=/usr/share/bes:' \
+    -e 's:=.*/share/hyrax:=/usr/share/hyrax:' \
     -e 's:=/full/path/to/serverside/certificate/file.pem:=/etc/pki/bes/cacerts/file.pem:' \
     -e 's:=/full/path/to/serverside/key/file.pem:=/etc/pki/bes/public/file.pem:' \
     -e 's:=/full/path/to/clientside/certificate/file.pem:=/etc/pki/bes/cacerts/file.pem:' \
