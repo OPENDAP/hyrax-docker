@@ -240,7 +240,6 @@ function check_version(){
         The value of the hyrax version string '$hyrax_version_value' returned in the version
         response does not match the expected_hyrax_version env value '$expected_hyrax_version'
         in this production environment!"
-        loggy "$prolog ERROR! Exiting process."
         return 1
     fi
     loggy "$prolog END"
@@ -401,19 +400,29 @@ loggy "$prolog              DOCKER_ID: $DOCKER_ID"
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     set -e
     clean_and_start "$DOCKER_ID" "$TEST_IMAGE_NAME"
-    loggy "$prolog clean_and_start status: $?"
+    clean_and_start_status=$?
+    loggy "$prolog clean_and_start status: $clean_and_start_status"
+    if test $clean_and_start_status -ne 0; then exit $clean_and_start_status; fi
 
     wait_for_hyrax "$DOCKER_ID" "$HYRAX_END_POINT"
-    loggy "$prolog wait_for_hyrax status: $?"
+    wait_for_hyrax_status=$?
+    loggy "$prolog wait_for_hyrax status: $wait_for_hyrax_status"
+    if test $wait_for_hyrax_status -ne 0; then exit $wait_for_hyrax_status; fi
 
     check_version "$HYRAX_END_POINT" "$EXPECTED_HYRAX_VERSION"
-    loggy "$prolog check_version status: $?"
+    check_version_status=$?
+    loggy "$prolog check_version status: $check_version_status"
+    if test $check_version_status -ne 0; then exit $check_version_status; fi
 
     run_regression_tests "$TEST_IMAGE_NAME" "$HYRAX_END_POINT" "$DOCKER_ID"
-    loggy "$prolog run_regression_tests status: $?"
+    run_regression_tests_status=$?
+    loggy "$prolog run_regression_tests status: $run_regression_tests_status"
+    if test $run_regression_tests_status -ne 0; then exit $run_regression_tests_status; fi
 
     test_beslog2json "$DOCKER_ID"
-    loggy "$prolog test_beslog2json status: $?"
+    test_beslog2json_status=$?
+    loggy "$prolog test_beslog2json status: $test_beslog2json_status"
+    if test $test_beslog2json_status -ne 0; then exit $test_beslog2json_status; fi
 
 else
     loggy "$prolog SUCCESS! The reggression_test_script functions have been loaded in to the current shell."
