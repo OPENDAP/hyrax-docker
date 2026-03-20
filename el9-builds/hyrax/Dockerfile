@@ -24,9 +24,6 @@ RUN if test -n "$BES_CORE_IMAGE_TAG"; then \
         exit 1; \
     fi
 
-# User defined and created in the `bes_core` image
-ENV BES_USER="${BES_USER:-"bes_user"}"
-
 ENV HR="###############################################################################################################"
 ENV HR2="-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --"
 ENV TARGET_OS="el9"
@@ -200,42 +197,16 @@ RUN set -e \
 #
 
 ################################################################
-# Set up BES
+# Test BES installation
 #
-# BES is already installed on the base image, but
-# we need to do some additional configuration
-
-# Patch a mistake that was introduced at the bes_core layer
-# After it's fixed in the bes repo, this line will be redundant
-# and we can remove it
-RUN cp -r /share/bes /usr/share/bes \
-    && cp -r /share/hyrax /usr/share/hyrax
-
-# Adapted from bes/spec.all_static.in in RPM creation.
-# The four *.pem substitutions may be unnecessary, as those *.pem files may be
-# vestigial substitutions for a build process past.
-RUN sed -i.dist \
-    -e 's:=.*/bes.log:=/var/log/bes/bes.log:' \
-    -e 's:=.*/lib/bes:=/usr/lib/bes:' \
-    -e 's:=.*/share/bes:=/usr/share/bes:' \
-    -e 's:=.*/share/hyrax:=/usr/share/hyrax:' \
-    -e 's:=/full/path/to/serverside/certificate/file.pem:=/etc/pki/bes/cacerts/file.pem:' \
-    -e 's:=/full/path/to/serverside/key/file.pem:=/etc/pki/bes/public/file.pem:' \
-    -e 's:=/full/path/to/clientside/certificate/file.pem:=/etc/pki/bes/cacerts/file.pem:' \
-    -e 's:=/full/path/to/clientside/key/file.pem:=/etc/pki/bes/public/file.pem:' \
-    -e 's:=user_name:='"$BES_USER"':' \
-    -e 's:=group_name:='"$BES_USER"':' \
-    /etc/bes/bes.conf \
-    && mkdir -p "/var/log/bes/" \
-    && touch "/var/log/bes/bes.log" \
-    && sudo chown -R $BES_USER:$BES_USER "/var/log/bes/"
-
-# Start besd service at boot
-RUN chkconfig --add besd \
-    && ldconfig \
-    && chkconfig --list | grep besd \
+# Confirm that the besd service starts at boot
+RUN echo "besdaemon is here: $(which besdaemon)"
     && echo "whoami: $(whoami)" \
-    && echo "besdaemon is here: $(which besdaemon)"
+    && BESD_COUNT=$(chkconfig --list | grep besd) \
+    && if [ -z "$BESD_COUNT" ]; then \
+        echo "Error: besd service not configured to run on startup. Exiting."; \
+        exit 1; \
+    fi
 
 ################################################################
 # Install and Setup Tomcat
