@@ -161,7 +161,7 @@ RUN set -e  \
 # Test BES installation
 #
 # Confirm that the besd service starts at boot
-RUN echo "besdaemon is here: $(which besdaemon)"
+RUN echo "besdaemon is here: $(which besdaemon)" \
     && echo "whoami: $(whoami)" \
     && BESD_COUNT=$(chkconfig --list | grep besd) \
     && if [ -z "$BESD_COUNT" ]; then \
