@@ -215,7 +215,7 @@ jobs:
         - source "./build-$TARGET_OS" "$BUILD_RECIPE"
         - cd ..
         - echo "Running Hyrax Regression Test Script on $OS_BUILD_VERSION_TAG" >&2
-        - $TRAVIS_BUILD_DIR/travis/regression_test_script -i "$OS_BUILD_VERSION_TAG" -l "deployed-image-regression-tests-$TRAVIS_JOB_NUMBER"
+        - $TRAVIS_BUILD_DIR/travis/regression_test_script -v "$HYRAX_WEB_UI_VERSION" -i "$OS_BUILD_VERSION_TAG" -l "deployed-image-regression-tests-$TRAVIS_JOB_NUMBER"
         - export DEPLOY_ME="false"
 
 after_success:
