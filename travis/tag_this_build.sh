@@ -22,6 +22,7 @@ tag_this_build() {
     loggy "$prolog  TRAVIS_PULL_REQUEST: '$TRAVIS_PULL_REQUEST'"
     loggy "$prolog        DEBUG_TAG_OPS: '$DEBUG_TAG_OPS'"
     loggy "$prolog OS_BUILD_VERSION_TAG: '$OS_BUILD_VERSION_TAG'"
+    loggy "$prolog         BUILD_RECIPE: '$BUILD_RECIPE'"
     if [[ "$TRAVIS_BRANCH" == "master" ]] && [[ "$DEPLOY_ME" == "true" || -n "$DEBUG_TAG_OPS" ]]
     then
         # Check for a token...
@@ -36,7 +37,7 @@ tag_this_build() {
             # Not debuggin? Then tag it for real.
             tag_name="${OS_BUILD_VERSION_TAG//:/@}"
             loggy "$prolog             tag_name: '$tag_name'"
-            git tag -a "$tag_name" -m "$(cat $TRAVIS_BUILD_DIR/travis-build-recipe)"
+            git tag -a "$tag_name" -m "$(cat $BUILD_RECIPE)"
         else
             # We're debuggin, use the debuggin tags
             tag_name="DEBUG-FTW-$TRAVIS_BUILD_NUMBER"
