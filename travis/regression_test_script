@@ -30,22 +30,28 @@ TEST_NAMES=""
 TESTS_LOG_BASE="$default_tests_log_base"
 DOCKER_ID="hyrax"
 
-EXPECTED_HYRAX_VERSION="${HYRAX_WEB_UI_VERSION:-"HYRAX_WEB_UI_VERSION-NOT-FOUND-IN-ENV"}"
+EXPECTED_HYRAX_VERSION="${HYRAX_WEB_UI_VERSION:-"HYRAX_WEB_UI_VERSION_WAS_NOT_SET_IN_ENV"}"
+
+function usage(){
+    echo "$HR0" >&2
+    loggy "regression_test_script"
+    loggy "USAGE:"
+    loggy "    [-h] - Show this help message"
+    loggy "    [-t time_out] - The number of seconds to wait for Hyrax to start."
+    loggy "    [-i image_name] - The docker image name/tag to test."
+    loggy "    [-V expected_hyrax_version] - The Hyrax version number expected."
+    loggy "    [-e end_point_url] - The regression test endpoint URL"
+    loggy "    [-l test_log_base_name] - The base name for the test log bundle."
+    loggy "    [-n netrc_file] - The name of the netrc file to use for client authentication with Hyrax"
+    loggy "    [testname1 testname2 ...] - Optional list of one or more test names."
+    echo "$HR0" >&2
+}
 
 while getopts "ht:i:e:n:l:V:" OPTION; do
     case $OPTION in
+# The echo in the -h case is formaated this way for output readability. Please don't ruin it.
         h)
-            echo "USAGE:
-    [-h] - Show this help message
-    [-t time_out] - The number of seconds to wait for Hyrax to start.
-    [-i image_name] - The docker image name/tag to test.
-    [-V expected_hyrax_version] - The Hyrax version number expected.
-    [-e end_point_url] - The regression test endpoint URL
-    [-l test_log_base_name] - The base name for the test log bundle.
-    [-n netrc_file] - The name of the netrc file to use for client authentication with Hyrax
-    [testname1 testname2 ...]
-    " >&2
-
+            usage
             exit 0
             ;;
         t)
