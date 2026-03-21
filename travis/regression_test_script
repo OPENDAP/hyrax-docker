@@ -53,7 +53,7 @@ function usage(){
     loggy "                         HYRAX_WEB_UI_VERSION prior to running"
     loggy "                         this script."
     loggy "                         (default: none)"
-    loggy "                          "
+    loggy ""
     loggy "    [-e end_point_url] - The regression test endpoint URL"
     loggy "                         (default: $default_endpoint)"
     loggy ""
