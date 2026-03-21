@@ -1,6 +1,7 @@
 #!/bin/bash
 set -e
-
+#############################################################################
+# regression_test_script
 #
 # Travis invocation: ./travis/regression_test_script -i "$SNAPSHOT_IMAGE_TAG"
 #
@@ -12,42 +13,85 @@ HR2="--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---"
 function loggy() {
     echo "$@" | awk '{ print "# "$0;}' >&2
 }
-prolog="$0() -"
-loggy "$HR0"
-loggy "$prolog BEGIN"
+
+#############################################################################
+# Configuration & Command line all inline
 
 default_time_out=30
-default_image_name="opendap/hyrax:snapshot"
+default_image_name="opendap/hyrax:snapshot-el9"
 default_endpoint="http://localhost:8080/opendap"
 default_tests_log_base="regression_test_output"
 
-time_out="${default_time_out}"
-test_image_name="${default_image_name}"
-end_point="${default_endpoint}"
-netrc_file=""
-tests=""
-tests_log_base="${default_tests_log_base}"
+TIME_OUT_SECONDS="${default_time_out}"
+TEST_IMAGE_NAME="$default_image_name"
+HYRAX_END_POINT="$default_endpoint"
+NETRC_FILE=""
+TEST_NAMES=""
+TESTS_LOG_BASE="$default_tests_log_base"
+DOCKER_ID="hyrax"
 
-while getopts "ht:i:e:n:l:" OPTION; do
+EXPECTED_HYRAX_VERSION="${HYRAX_WEB_UI_VERSION:-"HYRAX_WEB_UI_VERSION_WAS_NOT_SET_IN_ENV"}"
+
+function usage(){
+    echo "$HR0" >&2
+    loggy "regression_test_script"
+    loggy ""
+    loggy "usage:"
+    loggy "    [-h] - Show this help message"
+    loggy ""
+    loggy "    [-t time_out] - The number of seconds to wait for Hyrax"
+    loggy "                    to start. (default: $default_time_out)"
+    loggy ""
+    loggy "    [-i image_name] - The docker image name/tag to test."
+    loggy "                      (default: $default_image_name)"
+    loggy ""
+    loggy "    [-V hyrax_version] - The Hyrax version number expected in the"
+    loggy "                         test server's Hyrax version response."
+    loggy "                         This value must be supplied by using"
+    loggy "                         either the -V commandline option or by"
+    loggy "                         exporting the environment variable"
+    loggy "                         HYRAX_WEB_UI_VERSION prior to running"
+    loggy "                         this script."
+    loggy "                         (default: none)"
+    loggy "                          "
+    loggy "    [-e end_point_url] - The regression test endpoint URL"
+    loggy "                         (default: $default_endpoint)"
+    loggy ""
+    loggy "    [-l test_log_base_name] - The base name for the test log bundle."
+    loggy "                         (default: $default_tests_log_base)"
+    loggy ""
+    loggy "    [-n netrc_file] - The name of the netrc file to use for client"
+    loggy "                      authentication with Hyrax. (default: ~/.netrc)"
+    loggy ""
+    loggy "    [testname1 ...] - Optional list of one or more test names."
+    loggy ""
+    echo "$HR0" >&2
+}
+
+while getopts "ht:i:e:n:l:V:" OPTION; do
     case $OPTION in
+# The echo in the -h case is formaated this way for output readability. Please don't ruin it.
         h)
-            echo "-h help -t time_out -i image_name -e end_point_url -n netrc_file test1 test2 ..."
+            usage
             exit 0
             ;;
         t)
-            time_out=$OPTARG
+            TIME_OUT_SECONDS=$OPTARG
             ;;
         i)
-            test_image_name=$OPTARG
+            TEST_IMAGE_NAME=$OPTARG
+            ;;
+        V)
+            EXPECTED_HYRAX_VERSION=$OPTARG
             ;;
         e)
-            end_point=$OPTARG
+            HYRAX_END_POINT=$OPTARG
             ;;
         l)
-            tests_log_base=$OPTARG
+            TESTS_LOG_BASE=$OPTARG
             ;;
         n)
-            netrc_file="--netrc ${OPTARG}"
+            NETRC_FILE="--netrc-file ${OPTARG}"
             ;;
         *)
             loggy "Incorrect options provided"
@@ -57,74 +101,110 @@ while getopts "ht:i:e:n:l:" OPTION; do
 done
 
 shift $(($OPTIND - 1))
-tests="$@"
-
-loggy "$prolog $HR1"
-loggy "$prolog Using the following configuration:"
-loggy "$prolog        time_out: ${time_out}"
-loggy "$prolog test_image_name: ${test_image_name}"
-loggy "$prolog       end_point: ${end_point}"
-loggy "$prolog           tests: ${tests}"
-loggy "$prolog  tests_log_base: ${tests_log_base}"
+TEST_NAMES="$@"
 
 #############################################################################
-# waitForHyrax()
+# show_docker_logs()
 #
-function waitForHyrax() {
-    local prolog="waitForHyrax() -"
+function show_docker_logs(){
+    local prolog="show_docker_logs()"
+    loggy "$prolog - BEGIN"
+
     local docker_id="$1"
-    # Don't fail on errors, they're expected...
-    set +e
-    local start
-    let start=$(date "+%s")
+    if test -z "$docker_id"
+    then
+        loggy "$prolog - ERROR!
+        You must supply the docker container is the first parameter to the show_docker_logs() function."
+        return 2;
+    fi
+    local docker_startup_logs
+
+    docker_startup_logs="$(docker logs "$docker_id" 2>&1)"
+    status=$?
+    if test  $status -ne 0
+    then
+        loggy "$prolog - ERROR!
+        Failed to acquire the docker logs for container: '$docker_id'"
+        return 2;
+    fi
+    echo "$docker_startup_logs" | awk -v prolog="$prolog" '{print "# " prolog "    "$0;}' >&2
+    # loggy "$docker_startup_logs" # By default, this should return the whole thing
+    loggy "$prolog - END"
+}
+
+#############################################################################
+# wait_for_hyrax()
+#
+function wait_for_hyrax() {
+    local prolog="wait_for_hyrax() -"
+    loggy "$HR0"
+    loggy "$prolog BEGIN"
+
+    local docker_id="$1"
+    if test -z "$docker_id"
+    then
+        loggy "$prolog ERROR!
+        A docker id must be supplied to the wait_for_hyrax() function!!"
+        return 2;
+    fi
+
+    local end_point_url="$2"
+    if test -z "$end_point_url"
+    then
+        loggy "$prolog ERROR!
+        You must supply the Hyrax endpoint URL as the second parameter to the wait_for_hyrax() function."
+        return 2;
+    fi
+    local docker_startup_logs
+    local elapsed
     local done_flag=""
     local curl_response
-    echo -n "$prolog " >&2
-    while test -z "${done_flag}"; do
+
+    SECONDS=0
+
+    set +e # Don't fail on errors, they're expected...
+
+    loggy "$prolog I'm waiting for Hyrax to start on $end_point_url (so patient, I am):"
+    while test -z "$done_flag"; do
         echo -n "." >&2
-        curl -s -c cookies -b cookies -n --netrc-file ${netrc_file} -L ${end_point} >/dev/null 2>&1
+        curl -s -c cookies -b cookies -n $NETRC_FILE -L "$end_point_url" >/dev/null 2>&1
         status=$?
-        # echo "cURL status: ${status}";
-        if [ ${status} -eq 0 ]; then
+        # loggy "cURL status: ${status}";
+        if [ $status -eq 0 ]; then # The request succeeded!
             echo "" >&2
-            loggy "$prolog "
             loggy "$prolog Endpoint may have been retrieved. Checking again..."
             # What happens next: We get the response headers "-I" and look
             # for the string "HTTP/" because we know there will be redirects.
             # We use tail to look at the last HTTP/ header and if that status is
             # 200 we're off to the races.
-            curl_response=$(curl -s -c cookies -b cookies -n "$netrc_file" -I -L "$end_point")
+            curl_response="$(curl -s -c cookies -b cookies -n $NETRC_FILE -I -L "$end_point_url" 2>&1)"
             loggy "$prolog curl_response: $curl_response"
             echo "$curl_response" | grep "HTTP/" | tail -1 | grep 200 # > /dev/null;
             found=$?
-            # echo "cURL found: ${found}";
-            if [ ${found} -eq 0 ]; then
-                loggy "$prolog The Test Endpoint URL: ${end_point} returned a status of 200"
+            # loggy "cURL found: ${found}";
+            if [ $found -eq 0 ]; then
+                loggy "$prolog The Test Endpoint URL: $end_point_url returned a status of 200"
                 done_flag="yup"
             fi
         fi
-        let now=$(date "+%s")
-        let elapsed=$now-$start
-        # echo "elapsed: $elapsed"
-        if [ ${elapsed} -gt ${time_out} ]; then
-            loggy "$prolog "
-            loggy "$prolog ERROR: Hyrax FAILED To Start! Waited for ${elapsed} seconds"
-            loggy "$prolog docker logs: "
-            loggy "$(docker logs "$docker_id")"
-            loggy "$prolog $HR2"
-            loggy "$prolog Hyrax failed to arrive...!"
-            exit 1
+        # Capture SECONDS in the 'elapsed' envar so we can evaluate and display a single value.
+        elapsed=$SECONDS
+        if [ $elapsed -ge $TIME_OUT_SECONDS ]; then
+            echo "" >&2 # Because all those dang '.' characters from above gotta have a new line.
+            loggy "$prolog ERROR: Hyrax FAILED To Start! Waited for $elapsed seconds"
+            show_docker_logs "$docker_id"
+            loggy "$prolog ERROR! Hyrax FAILED to start!"
+            loggy "$prolog $HR0"
+            return 1
         fi
     done
-    loggy ""
+    loggy "$prolog"
     # Now we can fail on errors again.
     set -e
-    loggy "$prolog Hyrax has arrived!"
-    sleep 10
-    loggy "$prolog $HR2"
-    loggy "$prolog Start-up Docker logs: "
-    loggy "$(docker logs "$docker_id")"
-    loggy "$prolog $HR2"
+    loggy "$prolog Hyrax Is Running!"
+    show_docker_logs "$docker_id"
+    loggy "$prolog END"
+    loggy "$HR0"
 
     return 0
 }
@@ -133,124 +213,283 @@ function waitForHyrax() {
 # clean_and_start()
 function clean_and_start() {
     local prolog="clean_and_start_docker() -"
-    loggy "$prolog $HR1"
+    loggy "$HR0"
     loggy "$prolog BEGIN"
 
     local d_id="$1"
+    if test -z "$d_id";
+    then
+        loggy "$prolog ERROR! You must pass a docker container id as parameter 1"
+        return 1;
+    fi
     loggy "$prolog       d_id: $d_id"
 
     local test_image="$2"
+    if test -z "$test_image";
+    then
+        loggy "$prolog ERROR! You must pass a docker image name  as parameter 2"
+        return 1;
+    fi
     loggy "$prolog test_image: $test_image"
+
+    local containers
+    local container_id
 
     # Dump all other containers
     containers=$(docker ps -aq)
-    if test -n "${containers}"; then
-        loggy "$prolog Removing containers: ${containers}"
-        loggy "$(docker rm -f ${containers})"
+    if test -n "$containers"; then
+        loggy "$prolog Removing containers: $containers"
+        loggy "$(docker rm -f $containers)"
     fi
 
     loggy "$prolog Starting: $d_id"
     container_id=$(docker run -d -h "$d_id" -p 8080:8080 --name="$d_id" "$test_image")
     loggy "$prolog Started container: $container_id"
     loggy "$prolog END"
+    loggy "$HR0"
 }
 
-d_id="hyrax"
+#########################################################################################################
+# check_version()
+#     Verify that we have the expected server version
+function check_version(){
+    local prolog="check_version() -"
+    loggy "$HR0"
+    loggy "$prolog BEGIN"
 
-clean_and_start "$d_id" "$test_image_name"
-waitForHyrax "$d_id"
+    local end_point_url="$1"
+    if test -z "$end_point_url";
+    then
+        loggy "$prolog ERROR! You must pass a Hyrax endpoint url string as parameter 1"
+        return 1;
+    fi
+
+    local expected_hyrax_version="$2"
+    if test -z "$expected_hyrax_version";
+    then
+        loggy "$prolog ERROR! You must pass a Hyrax endpoint url string as parameter 1"
+        return 1;
+    fi
+
+    local version_url
+    local version_response
+    local hyrax_version_value
+    version_url="$end_point_url/hyrax/version"
+
+    #####################################################
+    # Get Hyrax version response from the running server
+    loggy "$prolog Retrieving Hyrax Version Response from: '$version_url'"
+    version_response="$(curl -s -c cookies -b cookies -n $NETRC_FILE -L "$version_url")"
+    loggy "$prolog Hyrax Version Response:"
+    loggy "$version_response"
+    loggy "$HR1"
+
+    ############################################################
+    # Verify Hyrax Version Injection
+    #   Get this line from the version response:
+    #       <Hyrax version="##########" />
+    #   and then use awk to get the actual value of ##########
+    hyrax_version_value="$(echo "$version_response" | grep "<Hyrax version" | awk '{split($0, a, "\""); print a[2];}')"
+    loggy "$prolog hyrax_version_response: $hyrax_version_value"
+    loggy "$prolog expected_hyrax_version: $expected_hyrax_version"
+    if test "$expected_hyrax_version" == "$hyrax_version_value"
+    then
+        loggy "$prolog SUCCESS!
+        The Hyrax version value returned by the tested docker image matches the
+        expected_hyrax_version value."
+    else
+        loggy "$prolog ERROR!
+        The value of the hyrax version string '$hyrax_version_value' returned in the version
+        response does not match the expected_hyrax_version env value '$expected_hyrax_version'
+        in this production environment!"
+        return 1
+    fi
+    loggy "$prolog END"
+    loggy "$HR0"
+    return 0
+}
 
 #########################################################################################################
-# Get Hyrax version response from the running server
-loggy "$HR1"
-version_url="$end_point/hyrax/version"
-loggy "$prolog Retrieving Hyrax Version Response from: '$version_url'"
-version_response="$(curl -s -c cookies -b cookies -n "$netrc_file" -L "$version_url")"
-loggy "$prolog Hyrax Version Response:"
-loggy "$version_response"
-loggy "$HR2"
+# run_regression_tests()
+#     Run the Hyrax regression tests against the Hyrax server @ $endpoint
+function run_regression_tests(){
+    local prolog="run_regression_tests() -"
+    loggy "$HR0"
+    loggy "$prolog BEGIN"
+    loggy "$prolog Testing image: $TEST_IMAGE_NAME"
+    #
+    local test_image_name="$1"
+    if test -z "$test_image_name";
+    then
+        loggy "$prolog ERROR! You must pass the test image (docker) name as parameter 1"
+        return 1;
+    fi
+    #
+    local end_point_url="$2"
+    if test -z "$end_point_url";
+    then
+        loggy "$prolog ERROR! You must pass a Hyrax endpoint url string as parameter 2"
+        return 1;
+    fi
+    #
+    local d_id="$3"
+    if test -z "$d_id";
+    then
+        loggy "$prolog ERROR! You must pass the Docker ID of the running container as parameter 3"
+        return 1;
+    fi
+    local ret_dir
+    local name
+    local log_file
+    local rt_dir
+    local source_name
+    local target_name
+    local test_status
+
+    loggy "$prolog Launching Hyrax Regression Tests in: $TEST_IMAGE_NAME"
+
+    # If the regression tests fail we want the logs, so don't exit on fail right here
+    set +e
+    docker exec -it "$d_id" /bin/bash -c "cd hyrax_regression_tests; ./testsuite --hyraxurl=\"$end_point_url\" $NETRC_FILE $TEST_NAMES;"
+    test_status=$?
+    set -e
+    # http_url https_url stdout testsuite.log
+    log_file="$TESTS_LOG_BASE.tgz"
+    loggy "$prolog log_file: $log_file"
+
+    ret_dir=$PWD
+    cd "/tmp"
+
+    rt_dir="$TESTS_LOG_BASE"
+    loggy "$prolog rt_dir: $rt_dir"
+
+    loggy "$prolog Creating host directory '$PWD/$rt_dir' for docker run reggression test results."
+    mkdir -vp "$rt_dir"
+
+    for name in testsuite.log testsuite.dir; do
+        source_name="$d_id:/hyrax_regression_tests/$name"
+        target_name="$rt_dir/$name"
+        loggy "$prolog AWS S3: Copying '$source_name' to '$target_name'"
+        docker cp "$source_name" "$target_name"
+    done
+    loggy "$prolog TarBallBeGzipping': $rt_dir)"
+    tar -cvzf "$log_file" "$rt_dir"
+    loggy "$prolog log_file: $(ls -l "$log_file")"
+
+    cd "$ret_dir"
+    loggy "$prolog END"
+    loggy "$HR0"
+
+    return $test_status
+}
 
 #########################################################################################################
-# Verify Hyrax Version Injection
-#   Get this line from the version response:
-#       <Hyrax version="##########" />
-#   and then use awk to get the actual value of ##########
-hyrax_version_value="$(echo "$version_response" | grep "<Hyrax version" | awk '{split($0, a, "\""); print a[2];}')"
-loggy "$prolog hyrax_version_response: $hyrax_version_value"
-loggy "$prolog   HYRAX_WEB_UI_VERSION: $HYRAX_WEB_UI_VERSION"
-if test "$HYRAX_WEB_UI_VERSION" == "$hyrax_version_value"
-then
-    loggy "$prolog The Hyrax version value returned by the tested docker image matches the HYRAX_WEB_UI_VERSION from the production environment."
+# test_beslog2json()
+#     Verify that the beslog2json.py can read the bes.log and produce well-formed JSON
+function test_beslog2json(){
+    local prolog="run_regression_tests() -"
+    loggy "$HR0"
+    loggy "$prolog BEGIN"
+
+    local d_id="$1"
+    if test -z "$d_id";
+    then
+        loggy "$prolog ERROR! You must pass the Docker ID of the running container as parameter 1"
+        return 1;
+    fi
+
+    local jq_status
+
+    loggy "$prolog Checking beslog2json.awk"
+    loggy "$prolog Python Version: '$(python3 --version)'"
+
+    loggy "$prolog Acquiring bes.log from docker image."
+    docker cp "$d_id:/var/log/bes/bes.log" .
+
+    loggy "$prolog Acquiring beslog2json.py from docker image."
+    docker cp "$d_id:/usr/bin/beslog2json.py" "$(pwd)/beslog2json.py"
+    ls -l ./beslog2json.py
+    loggy "$HR2"
+
+    loggy "$prolog head -n 20 ./bes.log"
+    head -n 20 ./bes.log
+
+    loggy "$HR2"
+    loggy "Running beslog2json.py:  bes.log -> bes.json "
+    cat ./bes.log | python3 ./beslog2json.py --all >./bes.json
+
+    loggy "$HR2"
+    loggy "$prolog head -n 10 ./bes.json"
+    head -n 10 ./bes.json
+
+    loggy "$HR2"
+    loggy "$prolog tail -n 10 ./bes.json"
+    tail -n 10 ./bes.json
+
+    loggy "$HR1"
+    loggy "Checking bes.json parsability jq"
+    jq '.' ./bes.json >/dev/null
+    jq_status=$?
+    loggy "$prolog JQ STATUS: $?"
+
+    loggy "$prolog END"
+    loggy "$HR0"
+
+    return $jq_status
+}
+
+
+#########################################################################################################
+#########################################################################################################
+#########################################################################################################
+# main()
+# Run the script is invoked as an application, otherwise source it into the current shell.
+#
+
+prolog="regression_test_script[] -"
+loggy "$HR0"
+loggy "$prolog BEGIN"
+loggy "$prolog Using the following configuration:"
+loggy "$prolog       TIME_OUT_SECONDS: $TIME_OUT_SECONDS"
+loggy "$prolog        TEST_IMAGE_NAME: $TEST_IMAGE_NAME"
+loggy "$prolog EXPECTED_HYRAX_VERSION: $EXPECTED_HYRAX_VERSION"
+loggy "$prolog        HYRAX_END_POINT: $HYRAX_END_POINT"
+loggy "$prolog             TEST_NAMES: $TEST_NAMES"
+loggy "$prolog         TESTS_LOG_BASE: $TESTS_LOG_BASE"
+loggy "$prolog              DOCKER_ID: $DOCKER_ID"
+
+
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    set -e
+    clean_and_start "$DOCKER_ID" "$TEST_IMAGE_NAME"
+    clean_and_start_status=$?
+    loggy "$prolog clean_and_start status: $clean_and_start_status"
+    if test $clean_and_start_status -ne 0; then exit $clean_and_start_status; fi
+
+    wait_for_hyrax "$DOCKER_ID" "$HYRAX_END_POINT"
+    wait_for_hyrax_status=$?
+    loggy "$prolog wait_for_hyrax status: $wait_for_hyrax_status"
+    if test $wait_for_hyrax_status -ne 0; then exit $wait_for_hyrax_status; fi
+
+    check_version "$HYRAX_END_POINT" "$EXPECTED_HYRAX_VERSION"
+    check_version_status=$?
+    loggy "$prolog check_version status: $check_version_status"
+    if test $check_version_status -ne 0; then exit $check_version_status; fi
+
+    run_regression_tests "$TEST_IMAGE_NAME" "$HYRAX_END_POINT" "$DOCKER_ID"
+    run_regression_tests_status=$?
+    loggy "$prolog run_regression_tests status: $run_regression_tests_status"
+    if test $run_regression_tests_status -ne 0; then exit $run_regression_tests_status; fi
+
+    test_beslog2json "$DOCKER_ID"
+    test_beslog2json_status=$?
+    loggy "$prolog test_beslog2json status: $test_beslog2json_status"
+    if test $test_beslog2json_status -ne 0; then exit $test_beslog2json_status; fi
+
 else
-    loggy "$prolog ERROR! The returned hyrax version string in the version response does not match the HYRAX_WEB_UI_VERSION env var in this production environment!"
-    loggy "$prolog ERROR! Exiting process."
-    sleep 5
-    exit 1
+    loggy "$prolog SUCCESS! The reggression_test_script functions have been loaded in to the current shell."
 fi
-loggy "$HR1"
-#########################################################################################################
 
-loggy "$prolog Testing image: ${test_image_name}"
+loggy "$prolog END"
+loggy "$HR0"
 
-# If the regression tests fail we want the logs, so don't exit on fail right here
-set +e
-docker exec -it $d_id /bin/bash -c "cd hyrax_regression_tests; ./testsuite --hyraxurl=\"$end_point\" $netrc_file $tests;"
-test_status=$?
-set -e
-# http_url https_url stdout testsuite.log
-log_file="$tests_log_base.tgz"
-loggy "$prolog log_file: $log_file"
-
-ret_dir=$PWD
-cd "/tmp"
-
-rt_dir="$tests_log_base"
-loggy "$prolog rt_dir: $rt_dir"
-
-loggy "$prolog Creating host directory '$PWD/$rt_dir' for docker run reggression test results."
-mkdir -vp "$rt_dir"
-
-for name in testsuite.log testsuite.dir; do
-    source_name="$d_id:/hyrax_regression_tests/$name"
-    target_name="$rt_dir/$name"
-    loggy "$prolog AWS S3: Copying '$source_name' to '$target_name'"
-    docker cp "$source_name" "$target_name"
-done
-loggy "$prolog TarballBeGzipping': $rt_dir)"
-tar -cvzf "$log_file" "$rt_dir"
-loggy "$prolog log_file: $(ls -l "$log_file")"
-
-cd "$ret_dir"
-
-loggy "$HR1"
-loggy "$prolog Checking beslog2json.awk"
-loggy "$prolog Python Version: '$(python3 --version)'"
-loggy "$prolog Acquiring bes.log from docker image."
-docker cp $d_id:/var/log/bes/bes.log .
-
-loggy "$prolog Acquiring beslog2json.py from docker image."
-docker cp $d_id:/usr/bin/beslog2json.py "$(pwd)/beslog2json.py"
-ls -l ./beslog2json.py
-
-loggy "$HR2"
-loggy "$prolog head -n 20 ./bes.log"
-head -n 20 ./bes.log
-
-loggy "$HR2"
-loggy "Running beslog2json.py:  bes.log -> bes.json "
-cat ./bes.log | python3 ./beslog2json.py --all >./bes.json
-
-loggy "$HR2"
-loggy "$prolog head -n 10 ./bes.json"
-head -n 10 ./bes.json
-
-loggy "$HR2"
-loggy "$prolog tail -n 10 ./bes.json"
-tail -n 10 ./bes.json
-
-loggy "$HR1"
-loggy "Checking bes.json parsability jq"
-jq '.' ./bes.json >/dev/null
-loggy "$prolog JQ STATUS: $?"
-
-exit $test_status
