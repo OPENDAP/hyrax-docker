@@ -35,15 +35,27 @@ EXPECTED_HYRAX_VERSION="${HYRAX_WEB_UI_VERSION:-"HYRAX_WEB_UI_VERSION_WAS_NOT_SE
 function usage(){
     echo "$HR0" >&2
     loggy "regression_test_script"
-    loggy "USAGE:"
+    loggy ""
+    loggy "usage:"
     loggy "    [-h] - Show this help message"
-    loggy "    [-t time_out] - The number of seconds to wait for Hyrax to start."
+    loggy ""
+    loggy "    [-t time_out] - The number of seconds to wait for Hyrax"
+    loggy "                    to start."
+    loggy ""
     loggy "    [-i image_name] - The docker image name/tag to test."
-    loggy "    [-V expected_hyrax_version] - The Hyrax version number expected."
+    loggy ""
+    loggy "    [-V expected_hyrax_version] - The Hyrax version number expected"
+    loggy "                                  in the Hyrax version response."
+    loggy ""
     loggy "    [-e end_point_url] - The regression test endpoint URL"
+    loggy ""
     loggy "    [-l test_log_base_name] - The base name for the test log bundle."
-    loggy "    [-n netrc_file] - The name of the netrc file to use for client authentication with Hyrax"
-    loggy "    [testname1 testname2 ...] - Optional list of one or more test names."
+    loggy ""
+    loggy "    [-n netrc_file] - The name of the netrc file to use for client"
+    loggy "                      authentication with Hyrax"
+    loggy ""
+    loggy "    [testname1 ...] - Optional list of one or more test names."
+    loggy ""
     echo "$HR0" >&2
 }
 
