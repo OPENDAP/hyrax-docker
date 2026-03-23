@@ -265,7 +265,9 @@ RUN echo "besdaemon is here: $(which besdaemon)" \
     && if [ -z "$BESD_COUNT" ]; then \
         echo "Error: besd service not configured to run on startup. Exiting."; \
         exit 1; \
-    fi
+    fi \
+    && besctl start \
+    && besctl stop
 
 ################################################################
 # Install the Apache-Portable-Runtime (Apache APR)

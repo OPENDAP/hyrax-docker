@@ -148,7 +148,9 @@ RUN echo "besdaemon is here: $(which besdaemon)" \
     && if [ -z "$BESD_COUNT" ]; then \
         echo "Error: besd service not configured to run on startup. Exiting."; \
         exit 1; \
-    fi
+    fi \
+    && besctl start \
+    && besctl stop
 
 ################################################################
 # Install and Setup Tomcat
@@ -171,8 +173,8 @@ RUN set -e && systemctl enable tomcat >&2
 #RUN firewall-cmd --add-port 8080/tcp --permanent
 #RUN firewall-cmd --reload
 
-ENV CATALINA_HOME /usr/share/tomcat
-ENV PATH $CATALINA_HOME/bin:$PATH
+ENV CATALINA_HOME=/usr/share/tomcat
+ENV PATH=$CATALINA_HOME/bin:$PATH
 RUN set -e && echo "CATALINA_HOME: ${CATALINA_HOME}" >&2
 
 # Install our modified server.xml so that the server compresses responses.
@@ -182,7 +184,7 @@ RUN set -e \
     && chown -R tomcat:tomcat ${CATALINA_HOME}/conf/server.xml
 
 # Tweak the mime-type for javascript. (@TODO Will this satisfy X-Content-Type-Options=nosniff issues?)
-Run set -e \
+RUN set -e \
     && sed -i 's+text/javascript+application/javascript+g' ${CATALINA_HOME}/conf/web.xml
 
 
@@ -204,7 +206,7 @@ RUN set -e \
     && make install >&2 \
     && echo "SUCCESS: Tomcat Native-APR Library installed"
 
-ENV CATALINA_OPTS "-Djava.library.path=/usr/local/apr/lib"
+ENV CATALINA_OPTS="-Djava.library.path=/usr/local/apr/lib"
 
 RUN set -e && echo "$HR" && which java && java -version && update-alternatives --list && echo "$HR"
 
