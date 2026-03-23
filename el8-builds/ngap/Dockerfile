@@ -22,9 +22,6 @@ RUN if [ -z "$BES_CORE_IMAGE_TAG" ]; then \
         exit 1; \
     fi
 
-# User defined and created in the `bes_core` image
-ENV BES_USER="${USER:-"bes_user"}"
-
 ENV ARCH="x86_64"
 ENV java_version="java-17-openjdk"
 ENV python_version="3.11"
@@ -142,42 +139,18 @@ RUN set -e \
     && dnf clean all
 
 ################################################################
-# Set up BES
+# Test BES installation
 #
-# BES is already installed on the base image, but
-# we need to do some additional configuration
-
-# Patch a mistake that was introduced at the bes_core layer
-# After it's fixed in the bes repo, this line will be redundant
-# and we can remove it
-RUN cp -r /share/bes /usr/share/bes \
-    && cp -r /share/hyrax /usr/share/hyrax
-
-# Adapted from bes/spec.all_static.in in RPM creation.
-# The four *.pem substitutions may be unnecessary, as those *.pem files may be
-# vestigial substitutions for a build process past.
-RUN sed -i.dist \
-    -e 's:=.*/bes.log:=/var/log/bes/bes.log:' \
-    -e 's:=.*/lib/bes:=/usr/lib/bes:' \
-    -e 's:=.*/share/bes:=/usr/share/bes:' \
-    -e 's:=.*/share/hyrax:=/usr/share/hyrax:' \
-    -e 's:=/full/path/to/serverside/certificate/file.pem:=/etc/pki/bes/cacerts/file.pem:' \
-    -e 's:=/full/path/to/serverside/key/file.pem:=/etc/pki/bes/public/file.pem:' \
-    -e 's:=/full/path/to/clientside/certificate/file.pem:=/etc/pki/bes/cacerts/file.pem:' \
-    -e 's:=/full/path/to/clientside/key/file.pem:=/etc/pki/bes/public/file.pem:' \
-    -e 's:=user_name:='"$BES_USER"':' \
-    -e 's:=group_name:='"$BES_USER"':' \
-    /etc/bes/bes.conf \
-    && mkdir -p "/var/log/bes/" \
-    && touch "/var/log/bes/bes.log" \
-    && sudo chown -R $BES_USER:$BES_USER "/var/log/bes/"
-
-# Start besd service at boot
-RUN chkconfig --add besd \
-    && ldconfig \
-    && chkconfig --list | grep besd \
+# Confirm that the besd service starts at boot
+RUN echo "besdaemon is here: $(which besdaemon)" \
     && echo "whoami: $(whoami)" \
-    && echo "besdaemon is here: $(which besdaemon)"
+    && BESD_COUNT=$(chkconfig --list | grep besd) \
+    && if [ -z "$BESD_COUNT" ]; then \
+        echo "Error: besd service not configured to run on startup. Exiting."; \
+        exit 1; \
+    fi \
+    && besctl start \
+    && besctl stop
 
 ################################################################
 # Install and Setup Tomcat
@@ -195,13 +168,14 @@ RUN set -e \
     && rm -rvf /usr/share/tomcat/webapps/* >&2 \
     && mkdir -p /var/log/tomcat \
     && chown -R tomcat:tomcat /var/log/tomcat /home/tomcat
+
 COPY tomcat.service /etc/systemd/system/tomcat.service
 RUN set -e && systemctl enable tomcat >&2
 #RUN firewall-cmd --add-port 8080/tcp --permanent
 #RUN firewall-cmd --reload
 
-ENV CATALINA_HOME /usr/share/tomcat
-ENV PATH $CATALINA_HOME/bin:$PATH
+ENV CATALINA_HOME=/usr/share/tomcat
+ENV PATH=$CATALINA_HOME/bin:$PATH
 RUN set -e && echo "CATALINA_HOME: ${CATALINA_HOME}" >&2
 
 # Install our modified server.xml so that the server compresses responses.
@@ -211,7 +185,7 @@ RUN set -e \
     && chown -R tomcat:tomcat ${CATALINA_HOME}/conf/server.xml
 
 # Tweak the mime-type for javascript. (@TODO Will this satisfy X-Content-Type-Options=nosniff issues?)
-Run set -e \
+RUN set -e \
     && sed -i 's+text/javascript+application/javascript+g' ${CATALINA_HOME}/conf/web.xml
 
 
@@ -226,14 +200,14 @@ RUN set -e \
     && echo "JAVA_HOME ${JAVA_HOME}" >&2 \
     && tar -xvf "/${CATALINA_HOME}/bin/tomcat-native.tar.gz" -C ${CATALINA_HOME}/bin >&2 \
     && ls -l ${CATALINA_HOME}/bin >&2 \
-    && ls -l ${CATALINA_HOME}/bin/tomcat-native-1.3.5-src >&2 \
-    && cd ${CATALINA_HOME}/bin/tomcat-native-1.3.5-src/native >&2 \
+    && ls -l ${CATALINA_HOME}/bin/tomcat-native-*-src >&2 \
+    && cd ${CATALINA_HOME}/bin/tomcat-native-*-src/native >&2 \
     && ./configure >&2 \
     && make >&2 \
     && make install >&2 \
     && echo "SUCCESS: Tomcat Native-APR Library installed"
 
-ENV CATALINA_OPTS "-Djava.library.path=/usr/local/apr/lib"
+ENV CATALINA_OPTS="-Djava.library.path=/usr/local/apr/lib"
 
 RUN set -e && echo "$HR" && which java && java -version && update-alternatives --list && echo "$HR"
 

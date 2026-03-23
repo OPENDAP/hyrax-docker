@@ -143,7 +143,9 @@ echo "PythonVersion: "$(python3 --version)
 #-------------------------------------------------------------------------------
 # Start the BES daemon process
 # /usr/bin/besdaemon -i /usr -c /etc/bes/bes.conf -r /var/run/bes.pid
-bes_username=$BES_USER
+
+# BES_USER set in base bes_core docker image
+bes_username=${BES_USER:-"bes_user"}
 bes_uid=$(id -u ${bes_username})
 echo "bes_uid: ${bes_uid}" >&2
 bes_gid=$(id -g ${bes_username})
