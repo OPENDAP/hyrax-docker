@@ -195,7 +195,8 @@ RUN set -e \
 
 # Install the Tomcat Native-APR library.
 #
-RUN export JAVA_HOME="$(dirname $(dirname $(readlink -f $(which javac))))" >&2 \
+RUN set -e \
+    && export JAVA_HOME="$(dirname $(dirname $(readlink -f $(which javac))))" >&2 \
     && echo "JAVA_HOME ${JAVA_HOME}" >&2 \
     && tar -xvf "/${CATALINA_HOME}/bin/tomcat-native.tar.gz" -C ${CATALINA_HOME}/bin >&2 \
     && ls -l ${CATALINA_HOME}/bin >&2 \
