@@ -162,12 +162,12 @@ RUN set -e && useradd -m -U -d /home/tomcat -s /bin/false tomcat
 # Install the Tomcat package that should have been copied into
 # the root directory prior to this layer.
 #
-RUN set -e \
-    && tar -xvf "/${TOMCAT_DISTRO}.tar.gz" -C /home/tomcat >&2 \
-    && ln -s /home/tomcat/${TOMCAT_DISTRO} /usr/share/tomcat >&2 \
-    && rm -rvf /usr/share/tomcat/webapps/* >&2 \
-    && mkdir -p /var/log/tomcat \
-    && chown -R tomcat:tomcat /var/log/tomcat /home/tomcat
+# RUN set -e \
+RUN set -e && tar -xvf "/${TOMCAT_DISTRO}.tar.gz" -C /home/tomcat >&2 
+RUN set -e && ln -s /home/tomcat/${TOMCAT_DISTRO} /usr/share/tomcat >&2 
+RUN set -e && rm -rvf /usr/share/tomcat/webapps/* >&2 
+RUN set -e && mkdir -p /var/log/tomcat 
+RUN set -e && chown -R tomcat:tomcat /var/log/tomcat /home/tomcat
 COPY tomcat.service /etc/systemd/system/tomcat.service
 RUN set -e && systemctl enable tomcat >&2
 #RUN firewall-cmd --add-port 8080/tcp --permanent
