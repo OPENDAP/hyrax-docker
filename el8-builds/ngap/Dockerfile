@@ -162,12 +162,13 @@ RUN set -e && useradd -m -U -d /home/tomcat -s /bin/false tomcat
 # Install the Tomcat package that should have been copied into
 # the root directory prior to this layer.
 #
-# RUN set -e \
-RUN set -e && tar -xvf "/${TOMCAT_DISTRO}.tar.gz" -C /home/tomcat >&2 
-RUN set -e && ln -s /home/tomcat/${TOMCAT_DISTRO} /usr/share/tomcat >&2 
-RUN set -e && rm -rvf /usr/share/tomcat/webapps/* >&2 
-RUN set -e && mkdir -p /var/log/tomcat 
-RUN set -e && chown -R tomcat:tomcat /var/log/tomcat /home/tomcat
+RUN set -e \
+    && tar -xvf "/${TOMCAT_DISTRO}.tar.gz" -C /home/tomcat >&2 \
+    && ln -s /home/tomcat/${TOMCAT_DISTRO} /usr/share/tomcat >&2 \
+    && rm -rvf /usr/share/tomcat/webapps/* >&2 \
+    && mkdir -p /var/log/tomcat \
+    && chown -R tomcat:tomcat /var/log/tomcat /home/tomcat
+
 COPY tomcat.service /etc/systemd/system/tomcat.service
 RUN set -e && systemctl enable tomcat >&2
 #RUN firewall-cmd --add-port 8080/tcp --permanent
@@ -194,13 +195,12 @@ RUN set -e \
 
 # Install the Tomcat Native-APR library.
 #
-RUN set -e \
-    && export JAVA_HOME="$(dirname $(dirname $(readlink -f $(which javac))))" >&2 \
+RUN export JAVA_HOME="$(dirname $(dirname $(readlink -f $(which javac))))" >&2 \
     && echo "JAVA_HOME ${JAVA_HOME}" >&2 \
     && tar -xvf "/${CATALINA_HOME}/bin/tomcat-native.tar.gz" -C ${CATALINA_HOME}/bin >&2 \
     && ls -l ${CATALINA_HOME}/bin >&2 \
-    && ls -l ${CATALINA_HOME}/bin/tomcat-native-1.3.5-src >&2 \
-    && cd ${CATALINA_HOME}/bin/tomcat-native-1.3.5-src/native >&2 \
+    && ls -l ${CATALINA_HOME}/bin/tomcat-native-*-src >&2 \
+    && cd ${CATALINA_HOME}/bin/tomcat-native-*-src/native >&2 \
     && ./configure >&2 \
     && make >&2 \
     && make install >&2 \
