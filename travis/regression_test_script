@@ -3,7 +3,12 @@ set -e
 #############################################################################
 # regression_test_script
 #
-# Travis invocation: ./travis/regression_test_script -i "$SNAPSHOT_IMAGE_TAG"
+# Travis invocation:
+#
+#     - $TRAVIS_BUILD_DIR/travis/regression_test_script \
+#           -V "$HYRAX_WEB_UI_VERSION" \
+#           -i "$OS_BUILD_VERSION_TAG" \
+#           -l "deployed-image-regression-tests-$TRAVIS_JOB_NUMBER"
 #
 HR0="#######################################################################"
 HR1="- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
@@ -36,7 +41,7 @@ EXPECTED_HYRAX_VERSION="${HYRAX_WEB_UI_VERSION:-"HYRAX_WEB_UI_VERSION_WAS_NOT_SE
 # usage()
 #    Write the usage response (for -h switch)
 #
-function usage(){
+function usage() {
     echo "$HR0" >&2
     loggy "regression_test_script"
     loggy ""
@@ -77,7 +82,7 @@ function usage(){
 #
 while getopts "ht:i:e:n:l:V:" OPTION; do
     case $OPTION in
-# The echo in the -h case is formaated this way for output readability. Please don't ruin it.
+        # The echo in the -h case is formaated this way for output readability. Please don't ruin it.
         h)
             usage
             exit 0
@@ -113,26 +118,24 @@ TEST_NAMES="$@"
 #############################################################################
 # show_docker_logs()
 #
-function show_docker_logs(){
+function show_docker_logs() {
     local prolog="show_docker_logs()"
     loggy "$prolog - BEGIN"
 
     local docker_id="$1"
-    if test -z "$docker_id"
-    then
+    if test -z "$docker_id"; then
         loggy "$prolog - ERROR!
         You must supply the docker container is the first parameter to the show_docker_logs() function."
-        return 2;
+        return 2
     fi
     local docker_startup_logs
 
     docker_startup_logs="$(docker logs "$docker_id" 2>&1)"
     status=$?
-    if test  $status -ne 0
-    then
+    if test $status -ne 0; then
         loggy "$prolog - ERROR!
         Failed to acquire the docker logs for container: '$docker_id'"
-        return 2;
+        return 2
     fi
     echo "$docker_startup_logs" | awk -v prolog="$prolog" '{print "# " prolog "    "$0;}' >&2
     # loggy "$docker_startup_logs" # By default, this should return the whole thing
@@ -148,19 +151,17 @@ function wait_for_hyrax() {
     loggy "$prolog BEGIN"
 
     local docker_id="$1"
-    if test -z "$docker_id"
-    then
+    if test -z "$docker_id"; then
         loggy "$prolog ERROR!
         A docker id must be supplied to the wait_for_hyrax() function!!"
-        return 2;
+        return 2
     fi
 
     local end_point_url="$2"
-    if test -z "$end_point_url"
-    then
+    if test -z "$end_point_url"; then
         loggy "$prolog ERROR!
         You must supply the Hyrax endpoint URL as the second parameter to the wait_for_hyrax() function."
-        return 2;
+        return 2
     fi
     local docker_startup_logs
     local elapsed
@@ -224,18 +225,16 @@ function clean_and_start() {
     loggy "$prolog BEGIN"
 
     local d_id="$1"
-    if test -z "$d_id";
-    then
+    if test -z "$d_id"; then
         loggy "$prolog ERROR! You must pass a docker container id as parameter 1"
-        return 1;
+        return 1
     fi
     loggy "$prolog       d_id: $d_id"
 
     local test_image="$2"
-    if test -z "$test_image";
-    then
+    if test -z "$test_image"; then
         loggy "$prolog ERROR! You must pass a docker image name  as parameter 2"
-        return 1;
+        return 1
     fi
     loggy "$prolog test_image: $test_image"
 
@@ -259,23 +258,21 @@ function clean_and_start() {
 #########################################################################################################
 # check_version()
 #     Verify that we have the expected server version
-function check_version(){
+function check_version() {
     local prolog="check_version() -"
     loggy "$HR0"
     loggy "$prolog BEGIN"
 
     local end_point_url="$1"
-    if test -z "$end_point_url";
-    then
+    if test -z "$end_point_url"; then
         loggy "$prolog ERROR! You must pass a Hyrax endpoint url string as parameter 1"
-        return 1;
+        return 1
     fi
 
     local expected_hyrax_version="$2"
-    if test -z "$expected_hyrax_version";
-    then
+    if test -z "$expected_hyrax_version"; then
         loggy "$prolog ERROR! You must pass a Hyrax endpoint url string as parameter 1"
-        return 1;
+        return 1
     fi
 
     local version_url
@@ -299,8 +296,7 @@ function check_version(){
     hyrax_version_value="$(echo "$version_response" | grep "<Hyrax version" | awk '{split($0, a, "\""); print a[2];}')"
     loggy "$prolog hyrax_version_response: $hyrax_version_value"
     loggy "$prolog expected_hyrax_version: $expected_hyrax_version"
-    if test "$expected_hyrax_version" == "$hyrax_version_value"
-    then
+    if test "$expected_hyrax_version" == "$hyrax_version_value"; then
         loggy "$prolog SUCCESS!
         The Hyrax version value returned by the tested docker image matches the
         expected_hyrax_version value."
@@ -319,31 +315,28 @@ function check_version(){
 #########################################################################################################
 # run_regression_tests()
 #     Run the Hyrax regression tests against the Hyrax server @ $endpoint
-function run_regression_tests(){
+function run_regression_tests() {
     local prolog="run_regression_tests() -"
     loggy "$HR0"
     loggy "$prolog BEGIN"
     loggy "$prolog Testing image: $TEST_IMAGE_NAME"
     #
     local test_image_name="$1"
-    if test -z "$test_image_name";
-    then
+    if test -z "$test_image_name"; then
         loggy "$prolog ERROR! You must pass the test image (docker) name as parameter 1"
-        return 1;
+        return 1
     fi
     #
     local end_point_url="$2"
-    if test -z "$end_point_url";
-    then
+    if test -z "$end_point_url"; then
         loggy "$prolog ERROR! You must pass a Hyrax endpoint url string as parameter 2"
-        return 1;
+        return 1
     fi
     #
     local d_id="$3"
-    if test -z "$d_id";
-    then
+    if test -z "$d_id"; then
         loggy "$prolog ERROR! You must pass the Docker ID of the running container as parameter 3"
-        return 1;
+        return 1
     fi
     local ret_dir
     local name
@@ -393,16 +386,15 @@ function run_regression_tests(){
 #########################################################################################################
 # test_beslog2json()
 #     Verify that the beslog2json.py can read the bes.log and produce well-formed JSON
-function test_beslog2json(){
+function test_beslog2json() {
     local prolog="test_beslog2json() -"
     loggy "$HR0"
     loggy "$prolog BEGIN"
 
     local d_id="$1"
-    if test -z "$d_id";
-    then
+    if test -z "$d_id"; then
         loggy "$prolog ERROR! You must pass the Docker ID of the running container as parameter 1"
-        return 1;
+        return 1
     fi
 
     local jq_status
@@ -445,12 +437,11 @@ function test_beslog2json(){
     return $jq_status
 }
 
-
 #########################################################################################################
 # run_tests()
 #     Run the regression tests, and a few more for good measure.
 #
-function run_the_tests(){
+function run_the_tests() {
     local prolog="run_the_tests() -"
     loggy "$prolog BEGIN"
 
@@ -499,7 +490,6 @@ loggy "$prolog             TEST_NAMES: $TEST_NAMES"
 loggy "$prolog         TESTS_LOG_BASE: $TESTS_LOG_BASE"
 loggy "$prolog              DOCKER_ID: $DOCKER_ID"
 
-
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     # Run the script invoked as an application,
     set -e
@@ -512,4 +502,3 @@ fi
 
 loggy "$prolog END"
 loggy "$HR0"
-
