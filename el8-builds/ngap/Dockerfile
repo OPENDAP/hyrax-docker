@@ -51,7 +51,7 @@ COPY "$TOMCAT_DISTRO.tar.gz" /
 RUN ls -l /apache-tomcat-*  >&2
 
 ARG HYRAX_VERSION
-ENV HYRAX_VERSION="${HYRAX_VERSION:-"snapshot"}"
+ENV HYRAX_VERSION="${HYRAX_VERSION:-"snapshot-$TARGET_OS"}"
 RUN echo "HYRAX_VERSION: $HYRAX_VERSION"
 
 # Fail if requested LIBDAP_VERSION or BES_VERSION do not match installations in base image
@@ -237,6 +237,11 @@ RUN set -e && echo "Installing HyraxVersion class..."  >&2
 COPY HyraxVersion.class "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/WEB-INF/classes/opendap/version/HyraxVersion.class"
 RUN set -e  && ls -l "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/WEB-INF/classes/opendap/version"  >&2
 
+# Inject Hyrax Version into the NGAP landing page.
+# Do both the "Not.A.Release" string (filtered by OLFS) and the
+# @HyraxVersion@ string (not filtered by the OLFS) to be sure we get it.
+RUN set -e  && sed -i "s/@HyraxVersion@/$HYRAX_VERSION/g" "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/docs/ngap/ngap.html"  >&2
+RUN set -e  && sed -i "s/Not.A.Release/$HYRAX_VERSION/g" "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/docs/ngap/ngap.html"  >&2
 
 
 ################################################################
