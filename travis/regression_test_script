@@ -219,7 +219,7 @@ function wait_for_hyrax() {
 #############################################################################
 # clean_and_start()
 function clean_and_start() {
-    local prolog="clean_and_start_docker() -"
+    local prolog="clean_and_start() -"
     loggy "$HR0"
     loggy "$prolog BEGIN"
 
@@ -394,7 +394,7 @@ function run_regression_tests(){
 # test_beslog2json()
 #     Verify that the beslog2json.py can read the bes.log and produce well-formed JSON
 function test_beslog2json(){
-    local prolog="run_regression_tests() -"
+    local prolog="test_beslog2json() -"
     loggy "$HR0"
     loggy "$prolog BEGIN"
 
@@ -450,8 +450,8 @@ function test_beslog2json(){
 # run_tests()
 #     Run the regression tests, and a few more for good measure.
 #
-function run_tests(){
-    local prolog="run_tests() -"
+function run_the_tests(){
+    local prolog="run_the_tests() -"
     loggy "$prolog BEGIN"
 
     clean_and_start "$DOCKER_ID" "$TEST_IMAGE_NAME"
@@ -503,7 +503,7 @@ loggy "$prolog              DOCKER_ID: $DOCKER_ID"
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     # Run the script invoked as an application,
     set -e
-    run_tests
+    run_the_tests
 else
     # Otherwise...
     # Just source it into the current shell.
