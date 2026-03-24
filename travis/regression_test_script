@@ -18,7 +18,7 @@ function loggy() {
 # Configuration & Command line all inline
 
 default_time_out=30
-default_image_name="opendap/hyrax:snapshot-el9"
+default_image_name="opendap/hyrax:snapshot-el8"
 default_endpoint="http://localhost:8080/opendap"
 default_tests_log_base="regression_test_output"
 
@@ -447,27 +447,13 @@ function test_beslog2json(){
 
 
 #########################################################################################################
-#########################################################################################################
-#########################################################################################################
-# main()
-# Run the script is invoked as an application, otherwise source it into the current shell.
+# run_tests()
+#     Run the regression tests, and a few more for good measure.
 #
+function run_tests(){
+    local prolog="run_tests() -"
+    loggy "$prolog BEGIN"
 
-prolog="regression_test_script[] -"
-loggy "$HR0"
-loggy "$prolog BEGIN"
-loggy "$prolog Using the following configuration:"
-loggy "$prolog       TIME_OUT_SECONDS: $TIME_OUT_SECONDS"
-loggy "$prolog        TEST_IMAGE_NAME: $TEST_IMAGE_NAME"
-loggy "$prolog EXPECTED_HYRAX_VERSION: $EXPECTED_HYRAX_VERSION"
-loggy "$prolog        HYRAX_END_POINT: $HYRAX_END_POINT"
-loggy "$prolog             TEST_NAMES: $TEST_NAMES"
-loggy "$prolog         TESTS_LOG_BASE: $TESTS_LOG_BASE"
-loggy "$prolog              DOCKER_ID: $DOCKER_ID"
-
-
-if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    set -e
     clean_and_start "$DOCKER_ID" "$TEST_IMAGE_NAME"
     clean_and_start_status=$?
     loggy "$prolog clean_and_start status: $clean_and_start_status"
@@ -493,7 +479,34 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     loggy "$prolog test_beslog2json status: $test_beslog2json_status"
     if test $test_beslog2json_status -ne 0; then exit $test_beslog2json_status; fi
 
+    loggy "$prolog END"
+
+}
+
+#########################################################################################################
+#########################################################################################################
+#########################################################################################################
+
+prolog="regression_test_script[] -"
+loggy "$HR0"
+loggy "$prolog BEGIN"
+loggy "$prolog Using the following configuration:"
+loggy "$prolog       TIME_OUT_SECONDS: $TIME_OUT_SECONDS"
+loggy "$prolog        TEST_IMAGE_NAME: $TEST_IMAGE_NAME"
+loggy "$prolog EXPECTED_HYRAX_VERSION: $EXPECTED_HYRAX_VERSION"
+loggy "$prolog        HYRAX_END_POINT: $HYRAX_END_POINT"
+loggy "$prolog             TEST_NAMES: $TEST_NAMES"
+loggy "$prolog         TESTS_LOG_BASE: $TESTS_LOG_BASE"
+loggy "$prolog              DOCKER_ID: $DOCKER_ID"
+
+
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    # Run the script invoked as an application,
+    set -e
+    run_tests
 else
+    # Otherwise...
+    # Just source it into the current shell.
     loggy "$prolog SUCCESS! The reggression_test_script functions have been loaded in to the current shell."
 fi
 
