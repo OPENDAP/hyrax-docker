@@ -455,27 +455,27 @@ function run_the_tests(){
     loggy "$prolog BEGIN"
 
     clean_and_start "$DOCKER_ID" "$TEST_IMAGE_NAME"
-    clean_and_start_status=$?
+    local clean_and_start_status=$?
     loggy "$prolog clean_and_start status: $clean_and_start_status"
     if test $clean_and_start_status -ne 0; then exit $clean_and_start_status; fi
 
     wait_for_hyrax "$DOCKER_ID" "$HYRAX_END_POINT"
-    wait_for_hyrax_status=$?
+    local wait_for_hyrax_status=$?
     loggy "$prolog wait_for_hyrax status: $wait_for_hyrax_status"
     if test $wait_for_hyrax_status -ne 0; then exit $wait_for_hyrax_status; fi
 
     check_version "$HYRAX_END_POINT" "$EXPECTED_HYRAX_VERSION"
-    check_version_status=$?
+    local check_version_status=$?
     loggy "$prolog check_version status: $check_version_status"
     if test $check_version_status -ne 0; then exit $check_version_status; fi
 
     run_regression_tests "$TEST_IMAGE_NAME" "$HYRAX_END_POINT" "$DOCKER_ID"
-    run_regression_tests_status=$?
+    local run_regression_tests_status=$?
     loggy "$prolog run_regression_tests status: $run_regression_tests_status"
     if test $run_regression_tests_status -ne 0; then exit $run_regression_tests_status; fi
 
     test_beslog2json "$DOCKER_ID"
-    test_beslog2json_status=$?
+    local test_beslog2json_status=$?
     loggy "$prolog test_beslog2json status: $test_beslog2json_status"
     if test $test_beslog2json_status -ne 0; then exit $test_beslog2json_status; fi
 
