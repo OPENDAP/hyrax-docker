@@ -71,7 +71,7 @@ s3_get_olfs_ngap_distro \
 #
 
 # Make the HyraxVersion assests to be injected into the docker image.
-inject_hyrax_version "$HYRAX_WEB_UI_VERSION"
+make_hyrax_version_assets "$HYRAX_WEB_UI_VERSION"
 
 set -e
 docker build \

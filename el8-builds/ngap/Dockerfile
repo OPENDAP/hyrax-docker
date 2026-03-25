@@ -248,7 +248,6 @@ RUN set -e  && ls -l "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/xsl/version.xsl
 # @HyraxVersion@ string (not filtered by the OLFS) to be sure we get it.
 RUN set -e  && sed -i "s/@HyraxVersion@/$HYRAX_VERSION/g" "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/docs/ngap/ngap.html"  >&2
 RUN set -e  && sed -i "s/Not.A.Release/$HYRAX_VERSION/g" "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/docs/ngap/ngap.html"  >&2
-
 ################################################################
 
 

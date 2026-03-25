@@ -244,12 +244,12 @@ EOF
 
 
 ################################################################################
-# inject_hyrax_version()
+# make_hyrax_version_assets()
 #    Build the various Hyrax Verison assets for the OLFS that will be copied
 #    into the Hyrax builds by their respective Dockerfiles.
 #
-function inject_hyrax_version(){
-    prolog="inject_hyrax_version() -"
+function make_hyrax_version_assets(){
+    prolog="make_hyrax_version_assets() -"
     loggy  "$HR1"
     loggy  "$prolog BEGIN"
 

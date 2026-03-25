@@ -268,9 +268,7 @@ RUN set -e  && ls -l "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/WEB-INF/classes
 RUN set -e && echo "Installing Hyrax Version: version.xsl..."  >&2
 COPY version.xsl "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/xsl/version.xsl"
 RUN set -e  && ls -l "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/xsl/version.xsl"  >&2
-
 ################################################################
-
 
 RUN set -e \
     && echo "# Installing the latest dynamic robots.txt distribution ($OLFS_VERSION)."  >&2 \
