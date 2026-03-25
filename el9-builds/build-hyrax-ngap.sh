@@ -60,7 +60,8 @@ s3_get_apache_apr_distro \
 s3_get_olfs_ngap_distro \
   "$S3_BUILD_BUCKET" \
   "$DOCKER_DIR" \
-  "$OLFS_VERSION" 2>&1
+  "$OLFS_VERSION" \
+  "$TARGET_OS" 2>&1
 
 #s3_get_openssl_distro \
 #    "$S3_BUILD_BUCKET" \
