@@ -70,8 +70,8 @@ s3_get_olfs_ngap_distro \
 #    "$ADD_DEBUG_RPMS"
 #
 
-# Make the HyraxVersion.class file to inject into the docker image.
-mk_hyrax_version_class
+# Make the HyraxVersion assests to be injected into the docker image.
+inject_hyrax_version "$HYRAX_WEB_UI_VERSION"
 
 set -e
 docker build \

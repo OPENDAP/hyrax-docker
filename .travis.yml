@@ -99,8 +99,8 @@ jobs:
           "$S3_BUILD_BUCKET"
           "$DOCKER_NAME"
           "$OLFS_VERSION" 2>&1
-        # Don't keep going if the docker build fails....
-        - set -e && mk_hyrax_version_class
+        # Don't keep going if the docker build fails....'
+        - set -e && inject_hyrax_version "$HYRAX_WEB_UI_VERSION"
         - set -e && docker build
           --build-arg TOMCAT_VERSION
           --build-arg RELEASE_DATE
@@ -153,7 +153,7 @@ jobs:
           "$DOCKER_DIR"
           "$OLFS_VERSION" 2>&1
         - ls -l "$DOCKER_DIR"/*.tar.gz
-        - mk_hyrax_version_class
+        - inject_hyrax_version "$HYRAX_WEB_UI_VERSION"
         - set -e && docker build
           --build-arg TOMCAT_VERSION
           --build-arg RELEASE_DATE
@@ -185,7 +185,7 @@ jobs:
           "${S3_BUILD_BUCKET}"
           "olfs"
           "${OLFS_VERSION}" 2>&1
-        - mk_hyrax_version_class
+        - inject_hyrax_version "$HYRAX_WEB_UI_VERSION"
         - set -e && docker build
           --build-arg TOMCAT_VERSION
           --build-arg RELEASE_DATE

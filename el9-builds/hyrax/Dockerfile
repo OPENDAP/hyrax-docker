@@ -259,11 +259,18 @@ RUN set -e \
     && echo "# Cleaning up OLFS distribution files."  >&2 \
     && rm -rvf "$ROOT/$OLFS_DISTRO" "./$OLFS_DISTRO.tgz"
 
-RUN set -e && echo "Installing HyraxVersion.class..."  >&2
-
+################################################################
+# Inject Hyrax Version Assets
+RUN set -e && echo "Installing HyraxVersion class..."  >&2
 COPY HyraxVersion.class "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/WEB-INF/classes/opendap/version/HyraxVersion.class"
-
 RUN set -e  && ls -l "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/WEB-INF/classes/opendap/version"  >&2
+
+
+RUN set -e && echo "Installing Hyrax Version: version.xsl..."  >&2
+COPY version.xsl "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/xsl/version.xsl"
+RUN set -e  && ls -l "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/xsl/version.xsl"  >&2
+################################################################
+
 
 RUN set -e \
     && echo "# Installing the latest dynamic robots.txt distribution ($OLFS_VERSION)."  >&2 \
