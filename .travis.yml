@@ -89,7 +89,6 @@ jobs:
         - echo "BUILDING FOR $TARGET_OS"
         - cd "$TARGET_OS-builds"
         - source "./build-$TARGET_OS" "$BUILD_RECIPE"
-        - show_version
         - echo "USING TOMCAT MAJOR VERSION '$TOMCAT_MAJOR_VERSION'"
         - export TESTS_LOG_BASE="$DOCKER_NAME-regression-tests-$TRAVIS_JOB_NUMBER"
         - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "$TOMCAT_MAJOR_VERSION")
