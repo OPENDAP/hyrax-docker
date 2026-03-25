@@ -190,11 +190,6 @@ RUN set -e && echo "Installing Hyrax Version: version.xsl..."  >&2
 COPY version.xsl "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/xsl/version.xsl"
 RUN set -e  && ls -l "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/xsl/version.xsl"  >&2
 
-# Inject Hyrax Version into the NGAP landing page.
-# Do both the "Not.A.Release" string (filtered by OLFS) and the
-# @HyraxVersion@ string (not filtered by the OLFS) to be sure we get it.
-RUN set -e  && sed -i "s/@HyraxVersion@/$HYRAX_VERSION/g" "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/docs/ngap/ngap.html"  >&2
-RUN set -e  && sed -i "s/Not.A.Release/$HYRAX_VERSION/g" "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/docs/ngap/ngap.html"  >&2
 ################################################################
 
 ################################################################
