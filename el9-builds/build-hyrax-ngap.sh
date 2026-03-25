@@ -15,9 +15,9 @@ HR1="- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
 HR2="--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---"
 #############################################################################
 # loggy()
-prolog="build-hyrax-ngap.sh"
+bhn_prolog="build-hyrax-ngap.sh[]"
 function loggy(){
-    echo  "$@" | awk -v prolog="$prolog" '{ print "# " prolog " - " $0;}' >&2
+    echo  "$@" | awk -v prolog="$bhn_prolog" '{ print "# " prolog " - " $0;}' >&2
 }
 loggy "$HR0"
 loggy "BEGIN"
