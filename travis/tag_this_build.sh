@@ -15,6 +15,8 @@ tag_this_build() {
     local tag_name
     local status
     local repo_name="hyrax-docker"
+    local msg
+    local NL=$'\n'
 
     loggy "$HR"
     loggy "$prolog BEGIN"
@@ -37,12 +39,13 @@ tag_this_build() {
             # Not debuggin? Then tag it for real.
             tag_name="${OS_BUILD_VERSION_TAG//:/@}"
             loggy "$prolog             tag_name: '$tag_name'"
-            git tag -a "$tag_name" -m "$(cat $BUILD_RECIPE)"
+            msg="$(cat "$BUILD_RECIPE")${NL}${NL}[skip ci]"
+            git tag -a "$tag_name" -m "$msg"
         else
             # We're debuggin, use the debuggin tags
             tag_name="DEBUG-FTW-$TRAVIS_BUILD_NUMBER"
             loggy "$prolog DEBUG ----- tag_name: '$tag_name'"
-            git tag -a "$tag_name" -m "Testing tag and push."
+            git tag -a "$tag_name" -m "Testing tag and push. [skip ci]"
         fi
         status=$?
         if test $status -ne 0
