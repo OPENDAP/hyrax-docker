@@ -89,7 +89,6 @@ jobs:
         - echo "BUILDING FOR $TARGET_OS"
         - cd "$TARGET_OS-builds"
         - source "./build-$TARGET_OS" "$BUILD_RECIPE"
-        - show_version
         - echo "USING TOMCAT MAJOR VERSION '$TOMCAT_MAJOR_VERSION'"
         - export TESTS_LOG_BASE="$DOCKER_NAME-regression-tests-$TRAVIS_JOB_NUMBER"
         - export TOMCAT_VERSION=$(get_latest_tomcat_version_number "$TOMCAT_MAJOR_VERSION")
@@ -98,9 +97,10 @@ jobs:
         - s3_get_olfs_distro
           "$S3_BUILD_BUCKET"
           "$DOCKER_NAME"
-          "$OLFS_VERSION" 2>&1
-        # Don't keep going if the docker build fails....
-        - set -e && mk_hyrax_version_class
+          "$OLFS_VERSION" 
+          "$TARGET_OS" 2>&1
+        # Don't keep going if the docker build fails....'
+        - set -e && make_hyrax_version_assets "$HYRAX_WEB_UI_VERSION"
         - set -e && docker build
           --build-arg TOMCAT_VERSION
           --build-arg RELEASE_DATE
@@ -151,9 +151,10 @@ jobs:
         - s3_get_olfs_distro
           "$S3_BUILD_BUCKET"
           "$DOCKER_DIR"
-          "$OLFS_VERSION" 2>&1
+          "$OLFS_VERSION" 
+          "$TARGET_OS" 2>&1
         - ls -l "$DOCKER_DIR"/*.tar.gz
-        - mk_hyrax_version_class
+        - make_hyrax_version_assets "$HYRAX_WEB_UI_VERSION"
         - set -e && docker build
           --build-arg TOMCAT_VERSION
           --build-arg RELEASE_DATE
@@ -184,8 +185,9 @@ jobs:
         - s3_get_olfs_distro
           "${S3_BUILD_BUCKET}"
           "olfs"
-          "${OLFS_VERSION}" 2>&1
-        - mk_hyrax_version_class
+          "$OLFS_VERSION" 
+          "$TARGET_OS" 2>&1
+        - make_hyrax_version_assets "$HYRAX_WEB_UI_VERSION"
         - set -e && docker build
           --build-arg TOMCAT_VERSION
           --build-arg RELEASE_DATE

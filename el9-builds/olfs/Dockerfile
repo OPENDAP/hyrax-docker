@@ -22,7 +22,6 @@ ENV dnf_developer_tools_packages="diffutils emacs vim jq git bc valgrind gdb aws
 RUN echo "# dnf_developer_tools_packages: $dnf_developer_tools_packages"
 
 
-
 ARG RELEASE_DATE
 ENV RELEASE_DATE=${RELEASE_DATE:-"$(date +%s)"}
 RUN echo "# RELEASE_DATE: ${RELEASE_DATE}"
@@ -39,18 +38,22 @@ ENV HYRAX_VERSION=${HYRAX_VERSION:-"snapshot"}
 RUN echo "# HYRAX_VERSION: ${HYRAX_VERSION}"
 
 ARG OLFS_VERSION
-ENV OLFS_VERSION=${OLFS_VERSION:-"unknown"}
+ENV OLFS_VERSION="${OLFS_VERSION:-"unknown"}"
 RUN echo "# OLFS_VERSION: ${OLFS_VERSION}"
 
 ARG OLFS_DISTRO
-ENV OLFS_DISTRO=${OLFS_DISTRO:-"olfs-${OLFS_VERSION}-webapp"}
-RUN echo "# OLFS_DISTRO: ${OLFS_DISTRO}"
-COPY ${OLFS_DISTRO}.tgz /${OLFS_DISTRO}.tgz
+ENV OLFS_DISTRO="${OLFS_DISTRO:-"olfs-$OLFS_VERSION-$TARGET_OS-webapp"}"
+RUN echo "# OLFS_DISTRO: $OLFS_DISTRO"
+COPY $OLFS_DISTRO.tgz "/$OLFS_DISTRO.tgz"
 
 ARG ROBOTS_DISTRO
-ENV ROBOTS_DISTRO=${ROBOTS_DISTRO:-"robots-olfs-${OLFS_VERSION}-webapp"}
-RUN echo "# ROBOTS_DISTRO: ${ROBOTS_DISTRO}"
-COPY ${ROBOTS_DISTRO}.tgz /${ROBOTS_DISTRO}.tgz
+ENV ROBOTS_DISTRO=${ROBOTS_DISTRO:-"robots-olfs-$OLFS_VERSION-$TARGET_OS-webapp"}
+RUN echo "# ROBOTS_DISTRO: $ROBOTS_DISTRO"
+COPY $ROBOTS_DISTRO.tgz /$ROBOTS_DISTRO.tgz
+
+ARG DEPLOYMENT_CONTEXT
+ENV DEPLOYMENT_CONTEXT=${DEPLOYMENT_CONTEXT:-"opendap"}
+RUN echo "# DEPLOYMENT_CONTEXT: $DEPLOYMENT_CONTEXT"
 
 LABEL vendor="OPeNDAP"
 LABEL org.opendap.olfs.version=${OLFS_VERSION}
@@ -189,9 +192,17 @@ RUN set -e \
     && chown -R tomcat:tomcat "$CATALINA_HOME/webapps/opendap/WEB-INF/conf/logs" \
     && chmod 700 "$CATALINA_HOME/webapps/opendap/WEB-INF/conf/logs"
 
+################################################################
+# Inject Hyrax Version Assets
 RUN set -e && echo "Installing HyraxVersion class..."  >&2
 COPY HyraxVersion.class "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/WEB-INF/classes/opendap/version/HyraxVersion.class"
 RUN set -e  && ls -l "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/WEB-INF/classes/opendap/version"  >&2
+
+RUN set -e && echo "Installing Hyrax Version: version.xsl..."  >&2
+COPY version.xsl "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/xsl/version.xsl"
+RUN set -e  && ls -l "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/xsl/version.xsl"  >&2
+
+################################################################
 
 ################################################################
 # Clean up the distribution binaries.

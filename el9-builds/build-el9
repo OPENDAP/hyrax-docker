@@ -101,7 +101,7 @@ function read_build_recipe() {
     TOMCAT_MAJOR_VERSION="${TOMCAT_MAJOR_VERSION:-$(echo "$build_recipe" | grep "TOMCAT_MAJOR_VERSION" | awk '{print $2;}')}"
     LIBDAP_VERSION=${LIBDAP_VERSION:-$(echo "$build_recipe" | grep libdap4 | sed "s/libdap4-//g"| awk '{print $1;}')}
     BES_VERSION=${BES_VERSION:-$(echo "$build_recipe" | grep bes | sed "s/bes-//g" | awk '{print $1;}')}
-    OLFS_VERSION=${OLFS_VERSION:-"$(echo "$build_recipe" | grep olfs | sed "s/olfs-//g" | awk '{print $1;}')-$TARGET_OS"}
+    OLFS_VERSION=${OLFS_VERSION:-"$(echo "$build_recipe" | grep olfs | sed "s/olfs-//g" | awk '{print $1;}')"}
     RELEASE_DATE=${RELEASE_DATE:-$(echo "$build_recipe" | grep hyrax | awk '{print $2;}')}
     TEST_DEPLOYMENT="${TEST_DEPLOYMENT:-"$(get_test_deployment_tag "$build_recipe_file")"}"
     BES_CORE_IMAGE_TAG="opendap/bes_core:$BES_VERSION-$TARGET_OS"
@@ -140,6 +140,160 @@ read_build_recipe "${BUILD_RECIPE}"
 
 
 
+
+##########################################################################################################
+# mk_hyrax_version_class()
+#
+# Creates the opendap.version.HyraxVersion java code, compiles and places it so
+# that the soon-to-be launched docker build operation can pick it up and use
+# it to replace the bundled class file of the same (fully qualified) name in the
+# OLFS distribution.
+#
+# A special HyraxVersion.java file is created using the passed parameter value 1, stored in
+# the local variable hyrax_version. If the passed parameter is not supplied or if it is the empty
+# string the value will default to  the value of HYRAX_WEB_UI_VERSION as, defined by the production
+# environment.
+#
+# This special HyraxVersion.java file is placed in the DOCKER_DIR for the current job.
+# The class is compiled using javac and the resulting HyraxVersion.class file is placed in
+# the same DOCKER_DIR adjacent to the original HyraxVersion.java file.
+#
+# When the docker build command(s) are run, the Dockerfile unpacks the OLFS distribution into the
+# Tomcat directory. Once the OLFS is unpacked the Dockerfile copies the HyraxVersion.class file into
+# the $CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/WEB-INF/classes/opendap/version directory,
+# overwriting the class built and distributed by the OLFS.
+#
+# This allows us to have hyrax-docker set the Hyrax version numbers (since hyrax-docker is in fact
+# the assembler of the Hyrax docker images and thus the responsible party)
+#
+#
+# Here is the java code as a Here Document. Note that HYRAX_WEB_UI_VERSION is substituted when
+# the script is run.
+#
+function mk_hyrax_version_class() {
+    prolog="mk_hyrax_version_class() -"
+    loggy  "$HR2"
+    loggy  "$prolog BEGIN"
+
+    local hyrax_version="${1:-"$HYRAX_WEB_UI_VERSION"}"
+
+    # The hyrax_version_java variable holds the java code with the
+    # Hyrax version number for this build.
+    local hyrax_version_java
+    hyrax_version_java=$(
+        cat << EOF
+package opendap.version;
+
+public class HyraxVersion {
+    private static final String hyraxVersion = "$hyrax_version";
+    public static String getVersionString() { return hyraxVersion; }
+}
+EOF
+    )
+
+    local target_dir
+    local target_file
+
+    target_dir="$TRAVIS_BUILD_DIR/$TARGET_OS-builds/$DOCKER_DIR"
+    loggy "$prolog  target_dir: $target_dir"
+
+    target_file="$target_dir/HyraxVersion.java"
+    loggy "$prolog target_file: $target_file"
+
+    echo "$hyrax_version_java" > "$target_file"
+    loggy "$prolog $target_file:"
+    loggy "$(cat "$target_file")"
+
+    loggy "$prolog Compiling $target_file"
+    javac "$target_file"
+
+    loggy "$prolog $(ls -la "$target_dir")"
+    loggy  "$prolog END"
+    loggy  "$HR2"
+
+}
+
+
+##########################################################################################################
+# mk_version_xsl()
+#
+# Creates the version.xsl file using the value of the HYRAX_WEB_UI_VERSION envar.
+# The version.xsl document is imported by a number of our XSLTs.
+#
+# This special version.xsl file is placed in the DOCKER_DIR for the current job.
+#
+# When the docker build command(s) are run, the Dockerfile unpacks the OLFS distribution into the
+# Tomcat directory. Once the OLFS is unpacked the Dockerfile copies the version.xsl file into
+# the $CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/WEB-INF/xsl directory,
+# overwriting the file built and distributed by the OLFS.
+#
+# This allows us to have hyrax-docker set the Hyrax version numbers (since hyrax-docker is in fact
+# the assembler of the Hyrax docker images and thus the responsible party)
+#
+#
+function mk_hyrax_version_xsl() {
+    prolog="mk_version_xsl() -"
+    loggy  "$HR2"
+    loggy  "$prolog BEGIN"
+
+    local hyrax_version="${1:-"$HYRAX_WEB_UI_VERSION"}"
+
+    # The hyrax_version_xsl variable holds the XSL document with the
+    # Hyrax version number for this build.
+    local hyrax_version_xsl
+    hyrax_version_xsl=$(
+        cat << EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+    <xsl:variable name="HyraxVersion">$hyrax_version</xsl:variable>
+</xsl:stylesheet>
+EOF
+    )
+
+    local target_dir
+    local target_file
+
+    target_dir="$TRAVIS_BUILD_DIR/$TARGET_OS-builds/$DOCKER_DIR"
+    loggy "$prolog  target_dir: $target_dir"
+
+    target_file="$target_dir/version.xsl"
+    loggy "$prolog target_file: $target_file"
+
+    echo "$hyrax_version_xsl" > "$target_file"
+    loggy "$prolog $target_file:"
+    loggy "$(cat "$target_file")"
+
+    loggy "$prolog $(ls -la "$target_dir")"
+    loggy  "$prolog END"
+    loggy  "$HR2"
+
+}
+
+
+################################################################################
+# make_hyrax_version_assets()
+#    Build the various Hyrax Verison assets for the OLFS that will be copied
+#    into the Hyrax builds by their respective Dockerfiles.
+#
+function make_hyrax_version_assets(){
+    prolog="make_hyrax_version_assets() -"
+    loggy  "$HR1"
+    loggy  "$prolog BEGIN"
+
+    local hyrax_version="${1:-"$HYRAX_WEB_UI_VERSION"}"
+
+    loggy  "$prolog Using Hyrax Version: '$hyrax_version'"
+    mk_hyrax_version_class "$hyrax_version"
+    mk_hyrax_version_xsl "$hyrax_version"
+    loggy  "$HR1"
+    loggy  "$prolog END"
+}
+
+
+################################################################################
+# show_version()
+#    Prints all the version/build info envars currently in-play.
+#
 function show_version(){
     local prolog="show_version() -"
     loggy "${HR}"
@@ -177,76 +331,6 @@ function show_version(){
     loggy "$prolog                  NO_CACHE: '$NO_CACHE'"
     loggy "$prolog END"
     loggy "$HR"
-}
-
-##########################################################################################################
-#
-# mk_hyrax_version_class()
-#
-# Creates the opendap.version.HyraxVersion java code, compiles and places it so
-# that the soon-to-be launched docker build operation can pick it up and use
-# it to replace the bundled class file of the same (fully qualified) name in the
-# OLFS distribution.
-#
-# A special HyraxVersion.java file is created using the current value of HYRAX_VERSION as
-# defined by the production environment.
-#
-# This special HyraxVersion.java file is placed in the DOCKER_DIR for the current job.
-# The class is compiled using javac and the resulting HyraxVersion.class file is placed in
-# the same DOCKER_DIR adjacent to the original HyraxVersion.java file.
-#
-# When the docker build command(s) are run, the Dockerfile unpacks the OLFS distribution into the
-# Tomcat directory. Once the OLFS is unpacked the Dockerfile copies the HyraxVersion.class file into
-# the $CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/WEB-INF/classes/opendap/version directory,
-# overwriting the class built and distributed by the OLFS.
-#
-# This allows us to have hyrax-docker set the Hyrax version numbers (since hyrax-docker is in fact
-# the assembler of the Hyrax docker images and thus the responsible party)
-#
-#
-# Here is the java code as a Here Document. Note that $HYRAX_VERSION is substituted when
-# the script is run.
-#
-function mk_hyrax_version_class() {
-    local prolog="mk_hyrax_version_class() -"
-    loggy  "$HR2"
-    loggy  "$prolog BEGIN"
-
-    # The hyrax_version_java variable holds the java code with the
-    # Hyrax version number for this build.
-    local hyrax_version_java
-    hyrax_version_java=$(
-        cat << EOF
-package opendap.version;
-
-public class HyraxVersion {
-    private static final String hyraxVersion = "$HYRAX_WEB_UI_VERSION";
-    public static String getVersionString() { return hyraxVersion; }
-}
-EOF
-    )
-
-    local target_dir
-    local target_file
-    local class_name="HyraxVersion"
-
-    target_dir="$TRAVIS_BUILD_DIR/$TARGET_OS-builds/$DOCKER_DIR"
-    loggy "$prolog  target_dir: $target_dir"
-
-    target_file="$target_dir/$class_name.java"
-    loggy "$prolog target_file: $target_file"
-
-    echo "$hyrax_version_java" > "$target_file"
-    loggy "$prolog $target_file:"
-    loggy "$(cat "$target_file")"
-
-    loggy "$prolog Compiling $target_file"
-    javac "$target_file"
-
-    loggy "$prolog $(ls -la "$target_dir")"
-    loggy  "$prolog END"
-    loggy  "$HR2"
-
 }
 
 
@@ -706,25 +790,39 @@ function curl_pull(){
 }
 
 
+################################################################################
+# s3_get_olfs_ngap_distro()
+#     Retrieves the OLFS NGAP asset fromm our S3 bucket.
+# $1 - bucket name
+# $2 - target_dir, where to write the results.
+# $3 - NGAP assests version number.
+# $4 - Target OS (el8 | el9)
+#
 function s3_get_olfs_ngap_distro() {
     local prolog="s3_get_olfs_ngap_distro() -"
-    loggy "${HR}"
+    loggy "$HR"
     loggy "$prolog BEGIN"
-    local s3_bucket="${1}"
-    loggy "$prolog    s3_bucket: ${s3_bucket}"
-    local target_dir="${2}"
-    loggy "$prolog   target_dir: ${target_dir}"
-    local ngap_version="${3}"
-    loggy "$prolog ngap_version: ${ngap_version}"
+
+    local s3_bucket="$1"
+    loggy "$prolog    s3_bucket: $s3_bucket"
+
+    local target_dir="$2"
+    loggy "$prolog   target_dir: $target_dir"
+
+    local ngap_version="$3"
+    loggy "$prolog ngap_version: $ngap_version"
+
+    local target_os="$4"
+    loggy "$prolog          target_os: $target_os"
 
     set -e
     loggy "$prolog Cleaning up..."
-    rm -fv "${target_dir}/nap*.tgz"
+    rm -fv "$target_dir/nap*.tgz"
 
     loggy ""
-    s3_pull "${s3_bucket}" \
-            "ngap-${ngap_version}-webapp.tgz" \
-            "${target_dir}"
+    s3_pull "$s3_bucket" \
+            "ngap-$ngap_version-$target_os-webapp.tgz" \
+            "$target_dir"
 
     set +e
     loggy "$prolog END"
@@ -738,65 +836,38 @@ function s3_get_olfs_ngap_distro() {
 #    $1 - The AWS S3 bucket from which to pull the Hyrax components
 #    $2 - The directory into which to place the Hyrax components.
 #    $3 - The olfs version number ##.##.##-##
+#    $4 - The target OS (el8 | el9)
 #
 function s3_get_olfs_distro() {
     local prolog="s3_get_olfs_distro() -"
-    loggy "${HR}"
+    loggy "$HR"
     loggy "$prolog BEGIN"
-    local s3_bucket="${1}"
-    loggy "$prolog    s3_bucket: ${s3_bucket}"
-    local target_dir="${2}"
-    loggy "$prolog   target_dir: ${target_dir}"
-    local olfs_version="${3}"
-    loggy "$prolog olfs_version: ${olfs_version}"
+
+    local s3_bucket="$1"
+    loggy "$prolog    s3_bucket: $s3_bucket"
+
+    local target_dir="$2"
+    loggy "$prolog   target_dir: $target_dir"
+
+    local olfs_version="$3"
+    loggy "$prolog olfs_version: $olfs_version"
+
+    local target_os="$4"
+    loggy "$prolog          target_os: $target_os"
 
     set -e
     loggy "$prolog Cleaning up..."
-    rm -fv "${target_dir}/olfs*.tgz"
+    rm -fv "$target_dir/olfs*.tgz"
 
     loggy ""
-    s3_pull "${s3_bucket}" \
-            "olfs-${olfs_version}-webapp.tgz" \
-            "${target_dir}"
+    s3_pull "$s3_bucket" \
+            "olfs-$olfs_version-$target_os-webapp.tgz" \
+            "$target_dir"
 
-    s3_pull "${s3_bucket}" \
-            "robots-olfs-${olfs_version}-webapp.tgz" \
-            "${target_dir}"
+    s3_pull "$s3_bucket" \
+            "robots-olfs-$olfs_version-$target_os-webapp.tgz" \
+            "$target_dir"
     set +e
-    loggy "$prolog END"
-    return 0
-}
-
-################################################################################
-#
-# s3_get_build_dmrpp_distro() - Get the rpm and war files need for a Hyrax
-# installation from the identified S3 bucket.
-#    $1 - The AWS S3 bucket from which to pull the Hyrax components
-#    $2 - The directory into which to place the Hyrax components.
-#    $3 - The olfs version number ##.##.##-##
-#
-function s3_get_build_dmrpp_distro() {
-    local prolog="s3_get_build_dmrpp_distro() -"
-    loggy "${HR}"
-    loggy "$prolog BEGIN"
-    local s3_bucket="${1}"
-    loggy "$prolog           s3_bucket: ${s3_bucket}"
-    local target_dir="${2}"
-    loggy "$prolog          target_dir: ${target_dir}"
-    local build_dmrpp_version="${3}"
-    loggy "$prolog build_dmrpp_version: ${build_dmrpp_version}"
-
-    set -e
-    loggy "$prolog Cleaning up..."
-    rm -fv "${target_dir}/build_dmrpp*.tgz"
-
-    loggy ""
-    s3_pull "${s3_bucket}" \
-            "build_dmrpp-${build_dmrpp_version}-webapp.tgz" \
-            "${target_dir}"
-
-    set +e
-    loggy ""
     loggy "$prolog END"
     return 0
 }
@@ -851,21 +922,23 @@ function get_ngap_olfs_distro() {
     local prolog="get_ngap_olfs_distro() -"
     loggy "${HR}"
     loggy "$prolog BEGIN"
-    local s3_bucket="${1}"
-    loggy "$prolog          s3_bucket: ${s3_bucket}"
-    local target_dir="${2}"
-    loggy "$prolog         target_dir: ${target_dir}"
-    local olfs_version="${3}"
-    loggy "$prolog       olfs_version: ${olfs_version}"
+    local s3_bucket="$1"
+    loggy "$prolog          s3_bucket: $s3_bucket"
+    local target_dir="$2"
+    loggy "$prolog         target_dir: $target_dir"
+    local olfs_version="$3"
+    loggy "$prolog       olfs_version: $olfs_version"
+    local target_os="$4"
+    loggy "$prolog          target_os: $target_os"
 
     set -e
     loggy "$prolog Cleaning up..."
-    rm -fv "${target_dir}/ngap*.tgz"
+    rm -fv "$target_dir/ngap*.tgz"
 
     loggy ""
-    s3_pull "${s3_bucket}" \
-            "ngap-${olfs_version}-webapp.tgz" \
-            "${target_dir}"
+    s3_pull "$s3_bucket" \
+            "ngap-$olfs_version-$target_os-webapp.tgz" \
+            "$target_dir"
 
     set +e
     loggy ""
@@ -1008,12 +1081,14 @@ function build_hyrax() {
     s3_get_olfs_distro \
         "${S3_BUILD_BUCKET}" \
         "${DOCKER_NAME}" \
-        "${OLFS_VERSION}" 2>&1 | tee -a "${log_file}"
+        "${OLFS_VERSION}" \
+        "$TARGET_OS" 2>&1 | tee -a "${log_file}"
 
     get_ngap_olfs_distro \
         "${S3_BUILD_BUCKET}" \
         "${DOCKER_NAME}" \
-        "${OLFS_VERSION}" 2>&1 | tee -a "${log_file}"
+        "${OLFS_VERSION}" \
+        "$TARGET_OS" 2>&1 | tee -a "${log_file}"
 
     build_hyrax_docker "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}"
     cleanup_build_files "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}"
@@ -1062,7 +1137,8 @@ function build_ngap() {
     get_ngap_olfs_distro \
         "${S3_BUILD_BUCKET}" \
         "${DOCKER_NAME}" \
-        "${OLFS_VERSION}" 2>&1 | tee -a "${log_file}"
+        "${OLFS_VERSION}" \
+        "$TARGET_OS" 2>&1 | tee -a "${log_file}"
 
     build_hyrax_docker "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}"
     cleanup_build_files "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}"
@@ -1111,7 +1187,8 @@ function build_olfs() {
     s3_get_olfs_distro \
         "${S3_BUILD_BUCKET}" \
         "${DOCKER_NAME}" \
-        "${OLFS_VERSION}" 2>&1 | tee -a "${log_file}"
+        "${OLFS_VERSION}" \
+        "$TARGET_OS" 2>&1 | tee -a "${log_file}"
 
     build_olfs_docker 2>&1 | tee -a "${log_file}"
 #    cleanup_build_files "${DOCKER_NAME}" 2>&1 | tee -a "${log_file}"
@@ -1284,7 +1361,8 @@ function travis_hyrax() {
     s3_get_olfs_distro \
         "${S3_BUILD_BUCKET}" \
         "${DOCKER_NAME}" \
-        "${OLFS_VERSION}-${TARGET_OS}" 2>&1
+        "${OLFS_VERSION}" \
+        "$TARGET_OS" 2>&1 | tee -a "${log_file}"
 
     OLFS_VERSION="$OLFS_VERSION-${TARGET_OS}"
     loggy "OLFS_VERSION: $OLFS_VERSION"

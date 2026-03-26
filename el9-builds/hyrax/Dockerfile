@@ -94,12 +94,12 @@ ENV OLFS_VERSION=${OLFS_VERSION:-"snapshot-$TARGET_OS"}
 RUN echo "# OLFS_VERSION: $OLFS_VERSION"
 
 ARG OLFS_DISTRO
-ENV OLFS_DISTRO=${OLFS_DISTRO:-"olfs-$OLFS_VERSION-webapp"}
+ENV OLFS_DISTRO=${OLFS_DISTRO:-"olfs-$OLFS_VERSION-$TARGET_OS-webapp"}
 RUN echo "# OLFS_DISTRO: $OLFS_DISTRO"
 COPY "$OLFS_DISTRO.tgz" "/$OLFS_DISTRO.tgz"
 
 ARG ROBOTS_DISTRO
-ENV ROBOTS_DISTRO=${ROBOTS_DISTRO:-"robots-olfs-$OLFS_VERSION-webapp"}
+ENV ROBOTS_DISTRO=${ROBOTS_DISTRO:-"robots-olfs-$OLFS_VERSION-$TARGET_OS-webapp"}
 RUN echo "# ROBOTS_DISTRO: $ROBOTS_DISTRO"
 COPY "$ROBOTS_DISTRO.tgz" "/$ROBOTS_DISTRO.tgz"
 
@@ -259,11 +259,16 @@ RUN set -e \
     && echo "# Cleaning up OLFS distribution files."  >&2 \
     && rm -rvf "$ROOT/$OLFS_DISTRO" "./$OLFS_DISTRO.tgz"
 
-RUN set -e && echo "Installing HyraxVersion.class..."  >&2
-
+################################################################
+# Inject Hyrax Version Assets
+RUN set -e && echo "Installing HyraxVersion class..."  >&2
 COPY HyraxVersion.class "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/WEB-INF/classes/opendap/version/HyraxVersion.class"
-
 RUN set -e  && ls -l "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/WEB-INF/classes/opendap/version"  >&2
+
+RUN set -e && echo "Installing Hyrax Version: version.xsl..."  >&2
+COPY version.xsl "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/xsl/version.xsl"
+RUN set -e  && ls -l "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/xsl/version.xsl"  >&2
+################################################################
 
 RUN set -e \
     && echo "# Installing the latest dynamic robots.txt distribution ($OLFS_VERSION)."  >&2 \

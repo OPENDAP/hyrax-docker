@@ -15,9 +15,9 @@ HR1="- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
 HR2="--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---"
 #############################################################################
 # loggy()
-prolog="build-hyrax-ngap.sh"
+bhn_prolog="build-hyrax-ngap.sh[]"
 function loggy(){
-    echo  "$@" | awk -v prolog="$prolog" '{ print "# " prolog " - " $0;}' >&2
+    echo  "$@" | awk -v prolog="$bhn_prolog" '{ print "# " prolog " - " $0;}' >&2
 }
 loggy "$HR0"
 loggy "BEGIN"
@@ -49,18 +49,22 @@ loggy "APACHE_APR_VERSION: $APACHE_APR_VERSION"
 #
 show_version
 #
+loggy "Getting Tomcat distro..."
 get_tomcat_distro "$DOCKER_NAME" "$TOMCAT_VERSION"
 
+loggy "Getting Apache APR..."
 s3_get_apache_apr_distro \
     "$S3_BUILD_BUCKET" \
     "$DOCKER_DIR" \
     "$APACHE_APR_VERSION" \
     "$ADD_DEBUG_RPMS"
 
+loggy "GettingNGAP/OLFS distribution."
 s3_get_olfs_ngap_distro \
   "$S3_BUILD_BUCKET" \
   "$DOCKER_DIR" \
-  "$OLFS_VERSION" 2>&1
+  "$OLFS_VERSION" \
+  "$TARGET_OS" 2>&1
 
 #s3_get_openssl_distro \
 #    "$S3_BUILD_BUCKET" \
@@ -70,8 +74,8 @@ s3_get_olfs_ngap_distro \
 #    "$ADD_DEBUG_RPMS"
 #
 
-# Make the HyraxVersion.class file to inject into the docker image.
-mk_hyrax_version_class
+# Make the HyraxVersion assets to be injected into the docker image.
+make_hyrax_version_assets "$HYRAX_WEB_UI_VERSION"
 
 set -e
 docker build \

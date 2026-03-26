@@ -119,9 +119,9 @@ ENV REDIS_VERSION="redisson-3.50.0"
 RUN echo "# REDIS_VERSION: $REDIS_VERSION"
 
 ARG NGAP_DISTRO
-ENV NGAP_DISTRO=${NGAP_DISTRO:-"ngap-${OLFS_VERSION}-webapp"}
-RUN echo "# NGAP_DISTRO: ${NGAP_DISTRO}"
-COPY ${NGAP_DISTRO}.tgz /${NGAP_DISTRO}.tgz
+ENV NGAP_DISTRO="${NGAP_DISTRO:-"ngap-$OLFS_VERSION-$TARGET_OS-webapp"}"
+RUN echo "# NGAP_DISTRO: $NGAP_DISTRO"
+COPY "$NGAP_DISTRO.tgz" "/$NGAP_DISTRO.tgz"
 
 ############################################################
 # @TODO Do we need this?
@@ -309,16 +309,6 @@ RUN set -e \
     && chown -R tomcat:tomcat /var/log/tomcat /home/tomcat \
     && echo "# Tomcat is unpacked and ready. >&2 "
 
-# @TODO REMOVE THIS FOLLOWING COMMENTED OUT CODE BEFORE MERGE
-#COPY tomcat.service /etc/systemd/system/tomcat.service
-#RUN set -e \
-#    && echo "$HR2" >&2 \
-#    && echo "# Calling: 'systemctl enable tomcat'" >&2 \
-#    && echo "# $(systemctl enable tomcat)" >&2 \
-#    && echo "# systemctl status: $?" >&2 \
-#    && echo "$HR" >&2
-#RUN firewall-cmd --add-port 8080/tcp --permanent
-#RUN firewall-cmd --reload
 
 ENV CATALINA_HOME="/usr/share/tomcat"
 ENV PATH="$CATALINA_HOME/bin:$PATH"
@@ -386,16 +376,28 @@ RUN set -e \
     && rm -rf "$ROOT/$NGAP_DISTRO" "/$NGAP_DISTRO.tgz" \
     && echo "$HR" >&2
 
+################################################################
 # Fix ownership and access permissions
 RUN set -e \
     && mkdir -p "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/WEB-INF/conf/logs" \
     && chown -R tomcat:tomcat "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/WEB-INF/conf/logs" \
     && chmod 700 "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/WEB-INF/conf/logs"
 
+################################################################
+# Inject Hyrax Version Assets
 RUN set -e && echo "Installing HyraxVersion class..."  >&2
 COPY HyraxVersion.class "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/WEB-INF/classes/opendap/version/HyraxVersion.class"
 RUN set -e  && ls -l "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/WEB-INF/classes/opendap/version"  >&2
 
+RUN set -e && echo "Installing Hyrax Version: version.xsl..."  >&2
+COPY version.xsl "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/xsl/version.xsl"
+RUN set -e  && ls -l "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/xsl/version.xsl"  >&2
+
+# Inject Hyrax Version into the NGAP landing page.
+# Do both the "Not.A.Release" string (filtered by OLFS) and the
+# @HyraxVersion@ string (not filtered by the OLFS) to be sure we get it.
+RUN set -e  && sed -i "s/@HyraxVersion@/$HYRAX_VERSION/g" "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/docs/ngap/ngap.html"  >&2
+RUN set -e  && sed -i "s/Not.A.Release/$HYRAX_VERSION/g" "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/docs/ngap/ngap.html"  >&2
 ################################################################
 
 ################################################################
