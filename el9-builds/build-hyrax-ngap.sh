@@ -79,17 +79,17 @@ make_hyrax_version_assets "$HYRAX_WEB_UI_VERSION"
 
 set -e
 docker build \
-       --build-arg TOMCAT_VERSION \
-       --build-arg RELEASE_DATE \
-       --build-arg HYRAX_VERSION \
-       --build-arg LIBDAP_VERSION \
-       --build-arg BES_VERSION \
-       --build-arg OLFS_VERSION \
-       --build-arg BES_CORE_IMAGE_TAG \
-       --build-arg OPENSSL_VERSION \
-       --tag "${OS_SNAPSHOT_IMAGE_TAG}" \
-       --tag "${OS_BUILD_VERSION_TAG}" \
-       "${DOCKER_NAME}"
+   --build-arg TOMCAT_VERSION \
+   --build-arg RELEASE_DATE \
+   --build-arg HYRAX_VERSION="$HYRAX_WEB_UI_VERSION" \
+   --build-arg LIBDAP_VERSION \
+   --build-arg BES_VERSION \
+   --build-arg OLFS_VERSION \
+   --build-arg BES_CORE_IMAGE_TAG \
+   --build-arg OPENSSL_VERSION \
+   --tag "${OS_SNAPSHOT_IMAGE_TAG}" \
+   --tag "${OS_BUILD_VERSION_TAG}" \
+   "${DOCKER_NAME}"
 #
 set +e
 
