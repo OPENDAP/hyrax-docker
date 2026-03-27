@@ -40,6 +40,7 @@ function check_version() {
     loggy "$prolog expected_hyrax_version: $expected_hyrax_version"
 
     local docker_version_label
+    local docker_labels
     local docker_version_status
     local status
 
@@ -48,6 +49,11 @@ function check_version() {
     # local version_label_key="org.opendap.$DOCKER_NAME.version"
     local version_label_key="org.opendap.hyrax.version"
     loggy "$prolog version_label_key: $version_label_key"
+    docker_labels=$(docker inspect --format="{{ index .Config.Labels}}" "$d_id")
+    loggy "$prolog docker_labels:"
+    loggy "$docker_labels"
+    loggy ""
+
     docker_version_label=$(docker inspect --format="{{ index .Config.Labels \"$version_label_key\" }}" "$d_id")
     docker_version_status=$?
     loggy "docker_version_label: '$docker_version_label'"
