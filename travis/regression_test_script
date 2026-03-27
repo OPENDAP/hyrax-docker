@@ -336,37 +336,38 @@ function check_version() {
     fi
 
 
-    local somepage
+    local some_page
     if test "$DOCKER_NAME" = "ngap"
     then
         loggy "$HR1"
         loggy "$prolog Checking NGAP landing page for correct Hyrax version."
-        somepage="$(docker exec -it $d_id bash -c "cat /usr/share/tomcat/webapps/ROOT/docs/ngap/ngap.html")"
+        some_page="$(docker exec -it $d_id bash -c "cat /usr/share/tomcat/webapps/ROOT/docs/ngap/ngap.html")"
         loggy "$prolog NGAP Landing Page: "
-        loggy "$somepage"
+        loggy "$some_page"
     fi
 
     loggy "$HR1"
+    loggy "$prolog Expecting docker id: $d_id"
     loggy "$prolog docker container ls -a:"
     docker container ls -a
 
     loggy "$HR1"
-    loggy "$prolog Checking version.xsl for correct Hyrax version."
-    somepage="$(docker exec -it $d_id bash -c "cat /usr/share/tomcat/webapps/ROOT/xls/version.xsl")"
+    loggy "$prolog Checking version.xsl for correct Hyrax version, d_id: $d_id"
+    docker exec -it "$d_id" bash -c "cat /usr/share/tomcat/webapps/ROOT/xls/version.xsl"
     loggy "$prolog version.xsl: "
-    loggy "$somepage"
+    loggy "$some_page"
 
     loggy "$HR1"
     loggy "$prolog Checking contents.html for correct Hyrax version."
-    somepage="$(curl -s -c cookies -b cookies -n $NETRC_FILE -L "$contents_url")"
+    some_page="$(curl -s -c cookies -b cookies -n $NETRC_FILE -L "$contents_url")"
     loggy "$prolog $contents_url: "
-    loggy "$somepage"
+    loggy "$some_page"
 
     loggy "$HR1"
     loggy "$prolog Checking DAP4 Data Request Form page for correct version."
-    somepage="$(curl -s -c cookies -b cookies -n $NETRC_FILE -L "$ifh_url")"
+    some_page="$(curl -s -c cookies -b cookies -n $NETRC_FILE -L "$ifh_url")"
     loggy "$prolog $ifh_url: "
-    loggy "$somepage"
+    loggy "$some_page"
 
     loggy "$prolog END"
     loggy "$HR0"
