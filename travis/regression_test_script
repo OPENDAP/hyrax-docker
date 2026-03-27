@@ -283,6 +283,7 @@ function check_version() {
 
     local docker_version_label
     local docker_version_status
+    local status
     local version_url
     local version_response
     local hyrax_version_value
@@ -358,18 +359,39 @@ function check_version() {
     some_page="$(docker exec -it "$d_id" bash -c "cat /usr/share/tomcat/webapps/$deployment_context/xsl/version.xsl")"
     loggy "$prolog version.xsl: "
     loggy "$some_page"
+    echo "$some_page" | grep "$expected_hyrax_version"
+    status=$?
+    if $status -ne 0
+    then
+        loggy "$prolog ERROR! The expected version string as not found in the version.xsl file."
+        return  $status
+    fi
 
     loggy "$HR1"
     loggy "$prolog Checking contents.html for correct Hyrax version."
     some_page="$(curl -s -c cookies -b cookies -n $NETRC_FILE -L "$contents_url")"
     loggy "$prolog $contents_url: "
     loggy "$some_page"
+    echo "$some_page" | grep "$expected_hyrax_version"
+    status=$?
+    if $status -ne 0
+    then
+        loggy "$prolog ERROR! The expected version string as not found in the contents.html page."
+        return  $status
+    fi
 
     loggy "$HR1"
     loggy "$prolog Checking DAP4 Data Request Form page for correct version."
     some_page="$(curl -s -c cookies -b cookies -n $NETRC_FILE -L "$ifh_url")"
     loggy "$prolog $ifh_url: "
     loggy "$some_page"
+    echo "$some_page" | grep "$expected_hyrax_version"
+    status=$?
+    if $status -ne 0
+    then
+        loggy "$prolog ERROR! The expected version string as not found in the Data Request Form page."
+        return  $status
+    fi
 
     loggy "$prolog END"
     loggy "$HR0"
