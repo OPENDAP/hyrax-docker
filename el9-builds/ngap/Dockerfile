@@ -141,8 +141,8 @@ ENV TOMCAT_CONNECTION_TIMEOUT_MS="${TOMCAT_CONNECTION_TIMEOUT_MS:-"1000000"}"
 RUN echo "# TOMCAT_CONNECTION_TIMEOUT_MS: $TOMCAT_CONNECTION_TIMEOUT_MS"
 
 LABEL vendor="OPeNDAP"
-LABEL org.opendap.hyrax.ngap.version=${HYRAX_VERSION}
-LABEL org.opendap.hyrax.ngap.release-date=${RELEASE_DATE}
+LABEL org.opendap.hyrax.version="ngap-$HYRAX_VERSION"
+LABEL org.opendap.hyrax.release-date="$RELEASE_DATE"
 LABEL org.opendap.hyrax.version.is-production="false"
 LABEL org.opencontainers.image.authors="support@opendap.org"
 
