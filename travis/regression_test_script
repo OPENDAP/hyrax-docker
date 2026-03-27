@@ -82,7 +82,7 @@ function usage() {
 #
 while getopts "ht:i:e:n:l:V:" OPTION; do
     case $OPTION in
-        # The echo in the -h case is formaated this way for output readability. Please don't ruin it.
+        # The echo in the -h case is formated this way for output readability. Please don't ruin it.
         h)
             usage
             exit 0
@@ -287,6 +287,8 @@ function check_version() {
     local version_response
     local hyrax_version_value
     version_url="$end_point_url/hyrax/version"
+    contents_url="$end_point_url/hyrax/contents.html"
+    ifh_url="$end_point_url/hyrax/data/nc/fnoc1.nc.dmr.html"
 
     #####################################################
     # Get Hyrax version response from the running server
@@ -306,7 +308,7 @@ function check_version() {
     loggy "$prolog expected_hyrax_version: $expected_hyrax_version"
     if test "$expected_hyrax_version" == "$hyrax_version_value"; then
         loggy "$prolog SUCCESS!
-        The Hyrax version value returned by the tested docker image matches the
+        The Hyrax version returned by the Hyrax version response from the tested docker image matches the
         expected_hyrax_version value."
     else
         loggy "$prolog ERROR!
@@ -324,8 +326,7 @@ function check_version() {
 
     if test "$expected_hyrax_version" == "$docker_version_label"; then
         loggy "$prolog SUCCESS!
-        The Hyrax version value returned by the tested docker image inspect response
-        matches the expected_hyrax_version value."
+        The 'docker inspect' command for $d_id returned the expected_hyrax_version value."
     else
         loggy "$prolog ERROR!
         The value of the hyrax version string '$docker_version_label' found in the docker
@@ -334,6 +335,34 @@ function check_version() {
         return 1
     fi
 
+
+    local somepage
+    if test "$DOCKER_NAME" -eq "ngap"
+    then
+        loggy "$HR1"
+        loggy "$prolog Checking NGAP landing page for correct Hyrax version."
+        somepage="$(docker exec -it $d_id bash -c "cat /usr/share/tomcat/webapps/ROOT/docs/ngap/ngap.html")"
+        loggy "$prolog NGAP Landing Page: "
+        loggy "$somepage"
+    fi
+
+    loggy "$HR1"
+    loggy "$prolog Checking version.xsl for correct Hyrax version."
+    somepage="$(docker exec -it $d_id bash -c "cat /usr/share/tomcat/webapps/ROOT/xls/version.xsl")"
+    loggy "$prolog version.xsl: "
+    loggy "$somepage"
+
+    loggy "$HR1"
+    loggy "$prolog Checking contents.html for correct Hyrax version."
+    somepage="$(curl -s -c cookies -b cookies -n $NETRC_FILE -L "$contents_url")"
+    loggy "$prolog $contents_url: "
+    loggy "$somepage"
+
+    loggy "$HR1"
+    loggy "$prolog Checking DAP4 Data Request Form page for correct version."
+    somepage="$(curl -s -c cookies -b cookies -n $NETRC_FILE -L "$ifh_url")"
+    loggy "$prolog $ifh_url: "
+    loggy "$somepage"
 
     loggy "$prolog END"
     loggy "$HR0"
