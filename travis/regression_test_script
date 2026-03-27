@@ -324,7 +324,7 @@ function check_version() {
     docker_version_status=$?
     loggy "docker_version_label: '$docker_version_label' docker_version_status: $docker_version_status"
 
-    if test "$expected_hyrax_version" == "$docker_version_label"; then
+    if test "$expected_hyrax_version" = "$docker_version_label"; then
         loggy "$prolog SUCCESS!
         The 'docker inspect' command for $d_id returned the expected_hyrax_version value."
     else
@@ -337,7 +337,7 @@ function check_version() {
 
 
     local somepage
-    if test "$DOCKER_NAME" -eq "ngap"
+    if test "$DOCKER_NAME" = "ngap"
     then
         loggy "$HR1"
         loggy "$prolog Checking NGAP landing page for correct Hyrax version."
