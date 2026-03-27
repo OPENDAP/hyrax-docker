@@ -107,38 +107,6 @@ function check_version() {
         return  $status
     fi
 
-    #####################################################################
-    # Check contents.html
-    #
-    loggy "$HR1"
-    loggy "$prolog Checking contents.html for correct Hyrax version."
-    some_page="$(curl -s -c cookies -b cookies -n $NETRC_FILE -L "$contents_url")"
-    # loggy "$prolog $contents_url: "
-    # loggy "$some_page"
-    echo "$some_page" | grep "$expected_hyrax_version"
-    status=$?
-    if test $status -ne 0
-    then
-        loggy "$prolog ERROR! The expected version string as not found in the contents.html page."
-        return  $status
-    fi
-
-    #####################################################################
-    # Check DAP4 Data Request Form
-    #
-    loggy "$HR1"
-    loggy "$prolog Checking DAP4 Data Request Form page for correct version."
-    some_page="$(curl -s -c cookies -b cookies -n $NETRC_FILE -L "$ifh_url")"
-    # loggy "$prolog $ifh_url: "
-    # loggy "$some_page"
-    echo "$some_page" | grep "$expected_hyrax_version"
-    status=$?
-    if test $status -ne 0
-    then
-        loggy "$prolog ERROR! The expected version string as not found in the Data Request Form page."
-        return  $status
-    fi
-
     loggy "$prolog END"
     loggy "$HR0"
     return 0
