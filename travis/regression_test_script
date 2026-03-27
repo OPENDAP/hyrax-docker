@@ -355,7 +355,7 @@ function check_version() {
 
     loggy "$HR1"
     loggy "$prolog Checking version.xsl for correct Hyrax version, d_id: $d_id"
-    docker exec -it "$d_id" bash -c "ls -l /usr/share/tomcat/webapps/$deployment_context; ls -l  /usr/share/tomcat/webapps/$deployment_context/xls; ls -l /usr/share/tomcat/webapps/$deployment_context/xls/version.xsl"
+    some_page="$(docker exec -it "$d_id" bash -c "cat /usr/share/tomcat/webapps/$deployment_context/xsl/version.xsl")"
     loggy "$prolog version.xsl: "
     loggy "$some_page"
 
