@@ -23,18 +23,21 @@ function check_version() {
         loggy "$prolog ERROR! You must pass valid docker id as parameter 1"
         return 1
     fi
+    loggy "$prolog                   d_id: $d_id"
 
     local deployment_context="$2"
     if test -z "$deployment_context"; then
         loggy "$prolog ERROR! You must pass a Hyrax deployment context  string as parameter 3"
         return 2
     fi
+    loggy "$prolog     deployment_context: $deployment_context"
 
     local expected_hyrax_version="$3"
     if test -z "$expected_hyrax_version"; then
         loggy "$prolog ERROR! You must pass a Hyrax endpoint url string as parameter 4"
         return 3
     fi
+    loggy "$prolog expected_hyrax_version: $expected_hyrax_version"
 
     local docker_version_label
     local docker_version_status
@@ -42,7 +45,8 @@ function check_version() {
 
 
     loggy "$prolog Checking docker image metadata for correct Hyrax version..."
-    local version_label_key="org.opendap.hyrax.version"
+    local version_label_key="org.opendap.$DOCKER_NAME.version"
+    loggy "$prolog version_label_key: $version_label_key"
     docker_version_label=$(docker inspect --format="{{ index .Config.Labels \"$version_label_key\" }}" "$d_id")
     docker_version_status=$?
     loggy "docker_version_label: '$docker_version_label'"
