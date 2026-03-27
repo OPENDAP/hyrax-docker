@@ -71,7 +71,6 @@ function check_version() {
     local some_page
     if test "$DOCKER_NAME" = "ngap"
     then
-        deployment_context="ROOT"
         loggy "$HR1"
         loggy "$prolog Checking NGAP landing page for correct Hyrax version."
         some_page="$(docker exec -it $d_id bash -c "cat /usr/share/tomcat/webapps/$deployment_context/docs/ngap/ngap.html")"
@@ -81,15 +80,10 @@ function check_version() {
         status=$?
         if test $status -ne 0
         then
-            loggy "$prolog ERROR! The expected version string as not found in the version.xsl file."
+            loggy "$prolog ERROR! The expected version string as not found in the NGAP landing page."
             return  $status
         fi
     fi
-
-    loggy "$HR1"
-    loggy "$prolog Expecting docker id: $d_id"
-    loggy "$prolog docker container ls -a:"
-    docker container ls -a
 
     #####################################################################
     # Check version.xsl
@@ -117,7 +111,7 @@ function check_version() {
 
 function test_startup() {
     local image_tag="$1"
-
+    local any_images_crashed
     echo "# Test that image does not crash on startup"
     docker run -d --name=travis_test_image "${image_tag}"
     
@@ -126,7 +120,7 @@ function test_startup() {
 
     # The launched image should be running; if it is not, it must have crashed 
     # at startup. This will show up as an `Exited` message in `docker ps`
-    local any_images_crashed=$(docker ps -a | grep travis_test_image | grep Exited)
+    any_images_crashed=$(docker ps -a | grep travis_test_image | grep Exited)
     if [ -n "$result" ]; then
         echo "# Error: Image ${image_tag} failed at startup\n"
         docker ps -a
