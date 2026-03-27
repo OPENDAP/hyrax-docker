@@ -45,7 +45,8 @@ function check_version() {
 
 
     loggy "$prolog Checking docker image metadata for correct Hyrax version..."
-    local version_label_key="org.opendap.$DOCKER_NAME.version"
+    # local version_label_key="org.opendap.$DOCKER_NAME.version"
+    local version_label_key="org.opendap.hyrax.version"
     loggy "$prolog version_label_key: $version_label_key"
     docker_version_label=$(docker inspect --format="{{ index .Config.Labels \"$version_label_key\" }}" "$d_id")
     docker_version_status=$?
