@@ -1,4 +1,130 @@
 #!/bin/bash
+
+
+
+#########################################################################################################
+# check_version()
+#     Verify that we have the expected server version
+function check_version() {
+    local prolog="check_version() -"
+    loggy "$HR0"
+    loggy "$prolog BEGIN"
+
+    local d_id="$1"
+    if test -z "$d_id"; then
+        loggy "$prolog ERROR! You must pass valid docker id as parameter 1"
+        return 1
+    fi
+
+    local deployment_context="$2"
+    if test -z "$deployment_context"; then
+        loggy "$prolog ERROR! You must pass a Hyrax deployment context  string as parameter 3"
+        return 2
+    fi
+
+    local expected_hyrax_version="$3"
+    if test -z "$expected_hyrax_version"; then
+        loggy "$prolog ERROR! You must pass a Hyrax endpoint url string as parameter 4"
+        return 3
+    fi
+
+    local docker_version_label
+    local docker_version_status
+    local status
+
+
+    loggy "$prolog Checking docker image metadata for correct Hyrax version..."
+    local version_label_key="org.opendap.hyrax.version"
+    docker_version_label=$(docker inspect --format="{{ index .Config.Labels \"$version_label_key\" }}" "$d_id")
+    docker_version_status=$?
+    loggy "docker_version_label: '$docker_version_label'"
+    if test "$expected_hyrax_version" = "$docker_version_label"; then
+        loggy "$prolog SUCCESS!
+        The 'docker inspect' command for $d_id returned the expected_hyrax_version value."
+    else
+        loggy "$prolog ERROR!
+        The value of the hyrax version string '$docker_version_label' found in the docker
+        inspect response does not match the expected_hyrax_version env value '$expected_hyrax_version'
+        in this production environment!"
+        return 1
+    fi
+
+    local some_page
+    if test "$DOCKER_NAME" = "ngap"
+    then
+        deployment_context="ROOT"
+        loggy "$HR1"
+        loggy "$prolog Checking NGAP landing page for correct Hyrax version."
+        some_page="$(docker exec -it $d_id bash -c "cat /usr/share/tomcat/webapps/$deployment_context/docs/ngap/ngap.html")"
+        # loggy "$prolog NGAP Landing Page: "
+        # loggy "$some_page"
+        echo "$some_page" | grep "$expected_hyrax_version"
+        status=$?
+        if test $status -ne 0
+        then
+            loggy "$prolog ERROR! The expected version string as not found in the version.xsl file."
+            return  $status
+        fi
+    fi
+
+    loggy "$HR1"
+    loggy "$prolog Expecting docker id: $d_id"
+    loggy "$prolog docker container ls -a:"
+    docker container ls -a
+
+    #####################################################################
+    # Check version.xsl
+    #
+    loggy "$HR1"
+    loggy "$prolog Checking version.xsl for correct Hyrax version, d_id: $d_id"
+    some_page="$(docker exec -it "$d_id" bash -c "cat /usr/share/tomcat/webapps/$deployment_context/xsl/version.xsl")"
+    #loggy "$prolog version.xsl: "
+    #loggy "$some_page"
+    echo "$some_page" | grep "$expected_hyrax_version"
+    status=$?
+    if test $status -ne 0
+    then
+        loggy "$prolog ERROR! The expected version string as not found in the version.xsl file."
+        return  $status
+    fi
+
+    #####################################################################
+    # Check contents.html
+    #
+    loggy "$HR1"
+    loggy "$prolog Checking contents.html for correct Hyrax version."
+    some_page="$(curl -s -c cookies -b cookies -n $NETRC_FILE -L "$contents_url")"
+    # loggy "$prolog $contents_url: "
+    # loggy "$some_page"
+    echo "$some_page" | grep "$expected_hyrax_version"
+    status=$?
+    if test $status -ne 0
+    then
+        loggy "$prolog ERROR! The expected version string as not found in the contents.html page."
+        return  $status
+    fi
+
+    #####################################################################
+    # Check DAP4 Data Request Form
+    #
+    loggy "$HR1"
+    loggy "$prolog Checking DAP4 Data Request Form page for correct version."
+    some_page="$(curl -s -c cookies -b cookies -n $NETRC_FILE -L "$ifh_url")"
+    # loggy "$prolog $ifh_url: "
+    # loggy "$some_page"
+    echo "$some_page" | grep "$expected_hyrax_version"
+    status=$?
+    if test $status -ne 0
+    then
+        loggy "$prolog ERROR! The expected version string as not found in the Data Request Form page."
+        return  $status
+    fi
+
+    loggy "$prolog END"
+    loggy "$HR0"
+    return 0
+}
+
 #
 # Confirm that image launches without crashing at startup
 
@@ -25,8 +151,14 @@ function test_startup() {
         exit 1
     else
         echo "# Success: Image '${image_tag}' did not crash on startup"
+        check_version "travis_test_image" "ROOT" "$HYRAX_WEB_UI_VERSION"
         docker rm -f travis_test_image
     fi
 }
+
+
+
+
+
 
 test_startup $1
