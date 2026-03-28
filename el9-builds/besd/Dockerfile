@@ -65,8 +65,10 @@ RUN BES_VERSION_FOUND=$(cat bes_VERSION); \
     fi
 
 LABEL vendor="OPeNDAP Incorporated"
-LABEL org.opendap.besdaemon.version="$BES_VERSION"
-LABEL org.opendap.besdaemon.release-date="$RELEASE_DATE"
+#LABEL org.opendap.besdaemon.version="$BES_VERSION"
+#LABEL org.opendap.besdaemon.release-date="$RELEASE_DATE"
+LABEL org.opendap.besd.version="$BES_VERSION"
+LABEL org.opendap.besd.release-date="$RELEASE_DATE"
 LABEL org.opendap.hyrax.version.is-production="false"
 LABEL org.opencontainers.image.authors="support@opendap.org"
 

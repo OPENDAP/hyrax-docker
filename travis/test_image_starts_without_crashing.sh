@@ -99,22 +99,23 @@ function check_version() {
 
     local status
 
-
+    #################################################################################################
+    # Target specific tweaking using global values
+    # @TODO - refactor and move upstream where possible
     local version_label_key="org.opendap.hyrax.version"
     local expected_version_str="$HYRAX_WEB_UI_VERSION"
     if test "$DOCKER_NAME" = "besd"
     then
-        version_label_key="org.opendap.besdaemon.version"
+        version_label_key="org.opendap.$DOCKER_NAME.version"
         expected_version_str="$BES_VERSION"
     fi
     if test "$DOCKER_NAME" = "olfs"
     then
-        version_label_key="org.opendap.olfs.version"
+        version_label_key="org.opendap.$DOCKER_NAME.version"
         expected_version_str="$OLFS_VERSION"
     fi
-    loggy "$prolog    version_label_key: $version_label_key"
-    loggy "$prolog expected_version_str: $expected_version_str"
-
+    loggy "$prolog      version_label_key: $version_label_key"
+    loggy "$prolog   expected_version_str: $expected_version_str"
 
     check_image_labels "$d_id" "$version_label_key" "$expected_version_str"
     status=$?
@@ -124,7 +125,8 @@ function check_version() {
         return  $status
     fi
 
-
+    #################################################################
+    # The NGAP build has a static landing page that needs to match.
     if test "$DOCKER_NAME" = "ngap"
     then
         check_file_in_image "$d_id" "/usr/share/tomcat/webapps/$deployment_context/docs/ngap/ngap.html" "$expected_version_str"
@@ -135,6 +137,9 @@ function check_version() {
         fi
     fi
 
+    #################################################################
+    # The service deployments except the besd have the OLFS installed
+    # in Tomcat. We check the version.xsl static file for the things.
     if test $DOCKER_NAME != "besd"
     then
         check_file_in_image "$d_id" "/usr/share/tomcat/webapps/$deployment_context/xsl/version.xsl" "$expected_version_str"
