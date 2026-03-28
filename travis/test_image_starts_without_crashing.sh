@@ -115,8 +115,11 @@ function check_version() {
 
 function test_startup() {
     local prolog="test_startup() -"
+    loggy "$HR0"
+    loggy "$prolog BEGIN"
     local image_tag="$1"
     local any_images_crashed
+    local status
     loggy "$prolog Test that image does not crash on startup"
     docker run -d --name=travis_test_image "${image_tag}"
     
@@ -138,8 +141,12 @@ function test_startup() {
     else
         loggy "$prolog Success: Image '${image_tag}' did not crash on startup"
         check_version "travis_test_image" "ROOT" "$HYRAX_WEB_UI_VERSION"
+
         docker rm -f travis_test_image
     fi
+    loggy "$prolog END"
+    loggy "$HR0"
+    retirn 0
 }
 
 
