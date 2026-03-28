@@ -102,11 +102,8 @@ function check_version() {
     fi
     loggy "$prolog                   d_id: $d_id"
 
-    local deployment_context="$2"
-    if test -z "$deployment_context"; then
-        loggy "$prolog ERROR! You must pass a Hyrax deployment context  string as parameter 3"
-        return 2
-    fi
+    local deployment_context="opendap"
+    if test "$DOCKER_NAME" = "ngap"; then deployment_context="ROOT"; fi
     loggy "$prolog     deployment_context: $deployment_context"
 
     local status
@@ -198,7 +195,7 @@ function test_startup() {
     else
         loggy "$prolog Success: Image '$image_tag' did not crash on startup"
 
-        check_version "travis_test_image" "ROOT" "$HYRAX_WEB_UI_VERSION"
+        check_version "travis_test_image"
         status=$?
         if test $status -ne 0
         then
