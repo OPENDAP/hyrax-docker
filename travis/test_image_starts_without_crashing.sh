@@ -141,12 +141,17 @@ function test_startup() {
     else
         loggy "$prolog Success: Image '${image_tag}' did not crash on startup"
         check_version "travis_test_image" "ROOT" "$HYRAX_WEB_UI_VERSION"
-
+        status=$?
+        if test $status -ne 0
+        then
+            loggy "$prolog ERROR! Version check failed. status: $status"
+            return $status
+        fi
         docker rm -f travis_test_image
     fi
     loggy "$prolog END"
     loggy "$HR0"
-    retirn 0
+    return 0
 }
 
 
