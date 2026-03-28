@@ -12,7 +12,7 @@ function loggy() {
 
 function check_image_labels(){
     local prolog="check_image_labels() -"
-    loggy "$HR0"
+    loggy "$HR2"
     loggy "$prolog BEGIN"
 
     local d_id="$1"
@@ -41,11 +41,15 @@ function check_image_labels(){
         in this production environment!"
         return 1
     fi
+
+    loggy "$prolog END"
+    loggy "$HR2"
+    return 0
 }
 
 function check_file_in_image() {
     local prolog="check_file_in_image() -"
-    loggy "$HR0"
+    loggy "$HR2"
     loggy "$prolog BEGIN"
 
     local d_id="$1"
@@ -67,6 +71,8 @@ function check_file_in_image() {
         loggy "$prolog ERROR! The expected value '$expected_value' was not found in the file '$file_path'"
         return  $status
     fi
+    loggy "$prolog END"
+    loggy "$HR2"
     return 0
 }
 #########################################################################################################
@@ -74,7 +80,7 @@ function check_file_in_image() {
 #     Verify that we have the expected server version
 function check_version() {
     local prolog="check_version() -"
-    loggy "$HR0"
+    loggy "$HR1"
     loggy "$prolog BEGIN"
 
     local d_id="$1"
@@ -139,7 +145,7 @@ function check_version() {
         fi
     fi
     loggy "$prolog END"
-    loggy "$HR0"
+    loggy "$HR1"
     return 0
 }
 
