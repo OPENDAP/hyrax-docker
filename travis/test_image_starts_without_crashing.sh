@@ -10,6 +10,65 @@ function loggy() {
     echo "$@" | awk '{ print "# "$0;}' >&2
 }
 
+function check_image_labels(){
+    local prolog="check_image_labels() -"
+    loggy "$HR0"
+    loggy "$prolog BEGIN"
+
+    local d_id="$1"
+    local label_key="$2"
+    local expected_value="$3"
+
+    local docker_labels
+    local status
+
+    loggy "$prolog Retrieving docker image metadata for correct Hyrax version..."
+    docker_labels="$(docker inspect --format="{{ index .Config.Labels}}" "$d_id")"
+    loggy "$prolog docker_labels:"
+    loggy "$docker_labels"
+    loggy ""
+
+    loggy "$prolog Checking the value of label '$label_key' from docker image '$d_id' metadata..."
+    key_value="$(docker inspect --format="{{ index .Config.Labels \"$label_key\" }}" "$d_id")"
+    loggy "key_value: '$key_value'"
+    if test "$expected_value" = "$key_value"; then
+        loggy "$prolog SUCCESS!
+        The 'docker inspect' command for $d_id returned the expected_value string."
+    else
+        loggy "$prolog ERROR!
+        The value of the the docker label '$label_key' found in the docker
+        inspect response does not match the expected_value '$expected_value'
+        in this production environment!"
+        return 1
+    fi
+}
+
+function check_file_in_image() {
+    local prolog="check_file_in_image() -"
+    loggy "$HR0"
+    loggy "$prolog BEGIN"
+
+    local d_id="$1"
+    local file_path="$2"
+    local expected_value="$3"
+
+    local status
+    local some_page
+
+    loggy "$HR1"
+    loggy "$prolog Checking for $expected_value' in '$d_id:$file_path'"
+    some_page="$(docker exec -it "$d_id" bash -c "cat \"$file_path\"")"
+    # loggy "$prolog NGAP Landing Page: "
+    # loggy "$some_page"
+    echo "$some_page" | grep "$expected_value"
+    status=$?
+    if test $status -ne 0
+    then
+        loggy "$prolog ERROR! The expected value '$expected_value' was not found in the file '$file_path'"
+        return  $status
+    fi
+    return 0
+}
 #########################################################################################################
 # check_version()
 #     Verify that we have the expected server version
@@ -33,17 +92,10 @@ function check_version() {
     loggy "$prolog     deployment_context: $deployment_context"
 
     local expected_version_str="$HYRAX_WEB_UI_VERSION"
-    local docker_version_label
-    local docker_labels
-    local docker_version_status
     local status
+    local some_page
 
 
-    loggy "$prolog Checking docker image metadata for correct Hyrax version..."
-    docker_labels="$(docker inspect --format="{{ index .Config.Labels}}" "$d_id")"
-    loggy "$prolog docker_labels:"
-    loggy "$docker_labels"
-    loggy ""
 
     local version_label_key="org.opendap.hyrax.version"
     if test "$DOCKER_NAME" = "besd"
@@ -54,52 +106,32 @@ function check_version() {
     loggy "$prolog    version_label_key: $version_label_key"
     loggy "$prolog expected_version_str: $expected_version_str"
 
-    docker_version_label="$(docker inspect --format="{{ index .Config.Labels \"$version_label_key\" }}" "$d_id")"
-    docker_version_status=$?
-    loggy "docker_version_label: '$docker_version_label'"
-    if test "$expected_version_str" = "$docker_version_label"; then
-        loggy "$prolog SUCCESS!
-        The 'docker inspect' command for $d_id returned the expected_version_str value."
-    else
-        loggy "$prolog ERROR!
-        The value of the hyrax version string '$docker_version_label' found in the docker
-        inspect response does not match the expected_version_str env value '$expected_version_str'
-        in this production environment!"
-        return 1
+
+    check_image_labels "$d_id" "$version_label_key" "$expected_version_str"
+    status=$?
+    if test $status -ne 0
+    then
+        loggy "$prolog ERROR! The expected version string was not found in the docker image metadata."
+        return  $status
     fi
 
-    local some_page
+
     if test "$DOCKER_NAME" = "ngap"
     then
-        loggy "$HR1"
-        loggy "$prolog Checking NGAP landing page for correct Hyrax version."
-        some_page="$(docker exec -it $d_id bash -c "cat /usr/share/tomcat/webapps/$deployment_context/docs/ngap/ngap.html")"
-        # loggy "$prolog NGAP Landing Page: "
-        # loggy "$some_page"
-        echo "$some_page" | grep "$expected_version_str"
-        status=$?
+        check_file_in_image "$d_id" "/usr/share/tomcat/webapps/$deployment_context/docs/ngap/ngap.html" "$expected_version_str"
         if test $status -ne 0
         then
-            loggy "$prolog ERROR! The expected version string as not found in the NGAP landing page."
+            loggy "$prolog ERROR! The expected version string was not found in the file."
             return  $status
         fi
     fi
 
     if test $DOCKER_NAME != "besd"
     then
-        #####################################################################
-        # Check version.xsl
-        #
-        loggy "$HR1"
-        loggy "$prolog Checking version.xsl for correct Hyrax version, d_id: $d_id"
-        some_page="$(docker exec -it "$d_id" bash -c "cat /usr/share/tomcat/webapps/$deployment_context/xsl/version.xsl")"
-        #loggy "$prolog version.xsl: "
-        #loggy "$some_page"
-        echo "$some_page" | grep "$expected_version_str"
-        status=$?
+        check_file_in_image "$d_id" "/usr/share/tomcat/webapps/$deployment_context/xsl/version.xsl" "$expected_version_str"
         if test $status -ne 0
         then
-            loggy "$prolog ERROR! The expected version string as not found in the version.xsl file."
+            loggy "$prolog ERROR! The expected version string was not found in the file."
             return  $status
         fi
     fi
