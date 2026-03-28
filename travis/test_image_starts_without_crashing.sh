@@ -46,13 +46,17 @@ function check_version() {
 
 
     loggy "$prolog Checking docker image metadata for correct Hyrax version..."
-    # local version_label_key="org.opendap.$DOCKER_NAME.version"
-    local version_label_key="org.opendap.hyrax.version"
-    loggy "$prolog version_label_key: $version_label_key"
     docker_labels=$(docker inspect --format="{{ index .Config.Labels}}" "$d_id")
     loggy "$prolog docker_labels:"
     loggy "$docker_labels"
     loggy ""
+
+    local version_label_key="org.opendap.hyrax.version"
+    if test "$DOCKER_NAME" = "besd"
+    then
+        version_label_key="org.opendap.besdaemon.version"
+    fi
+    loggy "$prolog version_label_key: $version_label_key"
 
     docker_version_label=$(docker inspect --format="{{ index .Config.Labels \"$version_label_key\" }}" "$d_id")
     docker_version_status=$?
@@ -110,9 +114,10 @@ function check_version() {
 # Confirm that image launches without crashing at startup
 
 function test_startup() {
+    local prolog="test_startup() -"
     local image_tag="$1"
     local any_images_crashed
-    echo "# Test that image does not crash on startup"
+    loggy "$prolog Test that image does not crash on startup"
     docker run -d --name=travis_test_image "${image_tag}"
     
     # Wait to give the entrypoint script/application a chance to run
@@ -122,24 +127,20 @@ function test_startup() {
     # at startup. This will show up as an `Exited` message in `docker ps`
     any_images_crashed=$(docker ps -a | grep travis_test_image | grep Exited)
     if [ -n "$result" ]; then
-        echo "# Error: Image ${image_tag} failed at startup\n"
+        loggy "$prolog Error: Image '$image_tag' failed at startup"
         docker ps -a
-        echo "\n# Logs from failing test instance: \n"
-        docker logs travis_test_image
+        loggy "$prolog Logs from failing test instance: "
+        loggy "$(docker logs travis_test_image)"
 
         # Wait to give the logs a chance to print out before we exit
         sleep 10
         exit 1
     else
-        echo "# Success: Image '${image_tag}' did not crash on startup"
+        loggy "$prolog Success: Image '${image_tag}' did not crash on startup"
         check_version "travis_test_image" "ROOT" "$HYRAX_WEB_UI_VERSION"
         docker rm -f travis_test_image
     fi
 }
-
-
-
-
 
 
 test_startup $1
