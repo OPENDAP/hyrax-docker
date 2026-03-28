@@ -102,11 +102,12 @@ function check_version() {
     fi
     loggy "$prolog                   d_id: $d_id"
 
+    local status
+
     local deployment_context="opendap"
     if test "$DOCKER_NAME" = "ngap"; then deployment_context="ROOT"; fi
     loggy "$prolog     deployment_context: $deployment_context"
 
-    local status
 
     #################################################################################################
     # Target specific tweaking using global values
@@ -139,6 +140,7 @@ function check_version() {
     if test "$DOCKER_NAME" = "ngap"
     then
         check_file_in_image "$d_id" "/usr/share/tomcat/webapps/$deployment_context/docs/ngap/ngap.html" "$expected_version_str"
+        status=$?
         if test $status -ne 0
         then
             loggy "$prolog ERROR! The expected version string was not found in the file."
@@ -149,12 +151,14 @@ function check_version() {
     #################################################################
     # The service deployments except the besd have the OLFS installed
     # in Tomcat. We check the version.xsl static file for the things.
-    if test $DOCKER_NAME != "besd"
+    if test "$DOCKER_NAME" != "besd"
     then
-        check_file_in_image "$d_id" "/usr/share/tomcat/webapps/$deployment_context/xsl/version.xsl" "$expected_version_str"
+        local version_xsl="/usr/share/tomcat/webapps/$deployment_context/xsl/version.xsl"
+        check_file_in_image "$d_id" "$version_xsl" "$expected_version_str"
+        status=$?
         if test $status -ne 0
         then
-            loggy "$prolog ERROR! The expected version string was not found in the file."
+            loggy "$prolog ERROR! The expected version string was not found in the file: '$d_id::$version_xsl'"
             return  $status
         fi
     fi
