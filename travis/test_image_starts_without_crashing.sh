@@ -10,7 +10,13 @@ function loggy() {
     echo "$@" | awk '{ print "# "$0;}' >&2
 }
 
-function check_image_labels(){
+#########################################################################################################
+# check_image_label()
+#     Looks at the metadata of docker image 'd_id' ($1) using docker 'inspect'
+#     to retrieve the value of 'label_key' ($2) from the docker .Config.Labels
+#     The retrieved value is compared with the 'expected_value' ($3)
+#
+function check_image_label(){
     local prolog="check_image_labels() -"
     loggy "$HR2"
     loggy "$prolog BEGIN"
@@ -47,6 +53,11 @@ function check_image_labels(){
     return 0
 }
 
+#########################################################################################################
+# check_file_in_image()
+#     Looks inside docker image 'd_id' ($1) in the file
+#     named file_path ($2) for the string 'expected_value' ($3)
+#
 function check_file_in_image() {
     local prolog="check_file_in_image() -"
     loggy "$HR2"
@@ -57,18 +68,19 @@ function check_file_in_image() {
     local expected_value="$3"
 
     local status
-    local some_page
+    local some_file
 
-    loggy "$HR1"
-    loggy "$prolog Checking for $expected_value' in '$d_id:$file_path'"
-    some_page="$(docker exec -it "$d_id" bash -c "cat \"$file_path\"")"
-    # loggy "$prolog NGAP Landing Page: "
-    # loggy "$some_page"
-    echo "$some_page" | grep "$expected_value"
+    loggy "$prolog Checking for '$expected_value' in '$d_id::$file_path'"
+    some_file="$(docker exec -it "$d_id" bash -c "cat \"$file_path\"")"
+    # loggy "$prolog $d_id::$file_path: "
+    # loggy "$some_file"
+    echo "$some_file" | grep "$expected_value"
     status=$?
     if test $status -ne 0
     then
         loggy "$prolog ERROR! The expected value '$expected_value' was not found in the file '$file_path'"
+        loggy "$prolog $d_id::$file_path: "
+        loggy "$some_file"
         return  $status
     fi
     loggy "$prolog END"
@@ -117,7 +129,7 @@ function check_version() {
     loggy "$prolog      version_label_key: $version_label_key"
     loggy "$prolog   expected_version_str: $expected_version_str"
 
-    check_image_labels "$d_id" "$version_label_key" "$expected_version_str"
+    check_image_label "$d_id" "$version_label_key" "$expected_version_str"
     status=$?
     if test $status -ne 0
     then
