@@ -82,6 +82,8 @@ function check_file_in_image() {
         loggy "$prolog $d_id::$file_path: "
         loggy "$some_file"
         return  $status
+    else
+        loggy "$prolog SUCCESS! Found it!"
     fi
     loggy "$prolog END"
     loggy "$HR2"
@@ -127,6 +129,9 @@ function check_version() {
     loggy "$prolog      version_label_key: $version_label_key"
     loggy "$prolog   expected_version_str: $expected_version_str"
 
+    #################################################################
+    # The check the docker image metadata (in .Config.Labels) for
+    # our version information.
     check_image_label "$d_id" "$version_label_key" "$expected_version_str"
     status=$?
     if test $status -ne 0
@@ -149,12 +154,13 @@ function check_version() {
     fi
 
     #################################################################
-    # The service deployments except the besd have the OLFS installed
-    # in Tomcat. We check the version.xsl static file for the things.
+    # All the service deployments (except the besd) have the OLFS
+    # installed in Tomcat. We check the version.xsl static file for
+    # the things.
     if test "$DOCKER_NAME" != "besd"
     then
         local version_xsl="/usr/share/tomcat/webapps/$deployment_context/xsl/version.xsl"
-        check_file_in_image "$d_id" "$version_xsl" "$expected_version_str"
+        check_file_in_image "$d_id" "$version_xsl" "$HYRAX_WEB_UI_VERSION"
         status=$?
         if test $status -ne 0
         then
