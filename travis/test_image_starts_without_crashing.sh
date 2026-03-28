@@ -91,17 +91,20 @@ function check_version() {
     fi
     loggy "$prolog     deployment_context: $deployment_context"
 
-    local expected_version_str="$HYRAX_WEB_UI_VERSION"
     local status
-    local some_page
-
 
 
     local version_label_key="org.opendap.hyrax.version"
+    local expected_version_str="$HYRAX_WEB_UI_VERSION"
     if test "$DOCKER_NAME" = "besd"
     then
         version_label_key="org.opendap.besdaemon.version"
         expected_version_str="$BES_VERSION"
+    fi
+    if test "$DOCKER_NAME" = "olfs"
+    then
+        version_label_key="org.opendap.olfs.version"
+        expected_version_str="$OLFS_VERSION"
     fi
     loggy "$prolog    version_label_key: $version_label_key"
     loggy "$prolog expected_version_str: $expected_version_str"
