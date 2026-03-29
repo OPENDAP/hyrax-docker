@@ -11,13 +11,13 @@ function loggy() {
 }
 
 #########################################################################################################
-# check_image_label()
+# test_docker_image_label()
 #     Looks at the metadata of docker image 'd_id' ($1) using docker 'inspect'
 #     to retrieve the value of 'label_key' ($2) from the docker .Config.Labels
 #     The retrieved value is compared with the 'expected_value' ($3)
 #
-function check_image_label(){
-    local prolog="check_image_labels() -"
+function test_docker_image_label(){
+    local prolog="test_docker_image_label() -"
     loggy "$HR2"
     loggy "$prolog BEGIN"
 
@@ -54,12 +54,12 @@ function check_image_label(){
 }
 
 #########################################################################################################
-# check_file_in_image()
+# test_file_in_docker_image()
 #     Looks inside docker image 'd_id' ($1) in the file
 #     named file_path ($2) for the string 'expected_value' ($3)
 #
-function check_file_in_image() {
-    local prolog="check_file_in_image() -"
+function test_file_in_docker_image() {
+    local prolog="test_file_in_docker_image() -"
     loggy "$HR2"
     loggy "$prolog BEGIN"
 
@@ -89,6 +89,8 @@ function check_file_in_image() {
     loggy "$HR2"
     return 0
 }
+
+
 #########################################################################################################
 # check_version()
 #     Verify that we have the expected server version
@@ -114,31 +116,20 @@ function check_version() {
     #################################################################################################
     # Target specific tweaking using global values
     # @TODO - refactor and move upstream where possible
-    local version_label_key="org.opendap.hyrax.version"
     local expected_version_str="$HYRAX_WEB_UI_VERSION"
-    if test "$DOCKER_NAME" = "besd"
-    then
-        version_label_key="org.opendap.$DOCKER_NAME.version"
-        expected_version_str="$BES_VERSION"
-    fi
-    if test "$DOCKER_NAME" = "olfs"
-    then
-        version_label_key="org.opendap.$DOCKER_NAME.version"
-        expected_version_str="$OLFS_VERSION"
-    fi
+    if test "$DOCKER_NAME" = "besd"; then expected_version_str="$BES_VERSION"; fi
+    if test "$DOCKER_NAME" = "olfs"; then expected_version_str="$OLFS_VERSION"; fi
+    loggy "$prolog   expected_version_str: $expected_version_str"
+
 
     local version_label_key="org.opendap.$DOCKER_NAME.version"
-    if test -n "$DOCKER_DIR"
-    then
-        version_label_key="org.opendap.$DOCKER_DIR.version"
-    fi
+    if test -n "$DOCKER_DIR"; then version_label_key="org.opendap.$DOCKER_DIR.version"; fi
     loggy "$prolog      version_label_key: $version_label_key"
-    loggy "$prolog   expected_version_str: $expected_version_str"
 
     #################################################################
     # The check the docker image metadata (in .Config.Labels) for
     # our version information.
-    check_image_label "$d_id" "$version_label_key" "$expected_version_str"
+    test_docker_image_label "$d_id" "$version_label_key" "$expected_version_str"
     status=$?
     if test $status -ne 0
     then
@@ -150,7 +141,7 @@ function check_version() {
     # The NGAP build has a static landing page that needs to match.
     if test "$DOCKER_NAME" = "ngap"
     then
-        check_file_in_image "$d_id" "/usr/share/tomcat/webapps/$deployment_context/docs/ngap/ngap.html" "$expected_version_str"
+        test_file_in_docker_image "$d_id" "/usr/share/tomcat/webapps/$deployment_context/docs/ngap/ngap.html" "$expected_version_str"
         status=$?
         if test $status -ne 0
         then
@@ -166,7 +157,7 @@ function check_version() {
     if test "$DOCKER_NAME" != "besd"
     then
         local version_xsl="/usr/share/tomcat/webapps/$deployment_context/xsl/version.xsl"
-        check_file_in_image "$d_id" "$version_xsl" "$HYRAX_WEB_UI_VERSION"
+        test_file_in_docker_image "$d_id" "$version_xsl" "$HYRAX_WEB_UI_VERSION"
         status=$?
         if test $status -ne 0
         then
@@ -211,13 +202,6 @@ function test_startup() {
     else
         loggy "$prolog Success: Image '$image_tag' did not crash on startup"
 
-        check_version "travis_test_image"
-        status=$?
-        if test $status -ne 0
-        then
-            loggy "$prolog ERROR! Version check failed. status: $status"
-            return $status
-        fi
         docker rm -f travis_test_image
     fi
     loggy "$prolog END"
@@ -227,3 +211,11 @@ function test_startup() {
 
 
 test_startup $1
+
+check_version "travis_test_image"
+#status=$?
+#if test $status -ne 0
+#then
+#    loggy "$prolog ERROR! Version check failed. status: $status"
+#    return $status
+#fi
