@@ -155,8 +155,11 @@ function check_version() {
     if test "$DOCKER_NAME" = "olfs"; then expected_version_str="$OLFS_VERSION"; fi
     loggy "$prolog   expected_version_str: $expected_version_str"
 
-    local version_label_key="org.opendap.$DOCKER_NAME.version"
-    if test -n "$DOCKER_DIR"; then version_label_key="org.opendap.$DOCKER_DIR.version"; fi
+    local app_key="$DOCKER_NAME"
+    if test -n "$DOCKER_DIR"; then app_key="$DOCKER_DIR"; fi
+    if test "$app_key" = "ngap" ; then app_key="hyrax"; fi
+
+    local version_label_key="org.opendap.$app_key.version"
     loggy "$prolog      version_label_key: $version_label_key"
 
     #################################################################
