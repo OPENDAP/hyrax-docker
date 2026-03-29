@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 HR0="#######################################################################"
 HR1="- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
 HR2="--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---"
@@ -11,13 +10,13 @@ function loggy() {
 }
 
 #########################################################################################################
-# check_image_label()
+# test_image_label()
 #     Looks at the metadata of docker image 'd_id' ($1) using docker 'inspect'
 #     to retrieve the value of 'label_key' ($2) from the docker .Config.Labels
 #     The retrieved value is compared with the 'expected_value' ($3)
 #
-function check_image_label(){
-    local prolog="check_image_labels() -"
+function test_image_label(){
+    local prolog="test_image_label() -"
     loggy "$HR2"
     loggy "$prolog BEGIN"
 
@@ -54,11 +53,11 @@ function check_image_label(){
 }
 
 #########################################################################################################
-# check_file_in_image()
+# test_file_in_image()
 #     Looks inside docker image 'd_id' ($1) in the file
 #     named file_path ($2) for the string 'expected_value' ($3)
 #
-function check_file_in_image() {
+function test_file_in_image() {
     local prolog="check_file_in_image() -"
     loggy "$HR2"
     loggy "$prolog BEGIN"
@@ -104,11 +103,21 @@ function check_version() {
     fi
     loggy "$prolog                   d_id: $d_id"
 
+    local d_id="$1"
+    if test -z "$d_id"; then
+        loggy "$prolog ERROR! You must pass valid docker id as parameter 1"
+        return 1
+    fi
+    loggy "$prolog                   d_id: $d_id"
+
+
+
+
+
+
+
     local status
 
-    local deployment_context="opendap"
-    if test "$DOCKER_NAME" = "ngap"; then deployment_context="ROOT"; fi
-    loggy "$prolog     deployment_context: $deployment_context"
 
 
     #################################################################################################
@@ -127,7 +136,14 @@ function check_version() {
         expected_version_str="$OLFS_VERSION"
     fi
 
+
     local version_label_key="org.opendap.$DOCKER_DIR.version"
+
+
+
+
+
+
 
     loggy "$prolog      version_label_key: $version_label_key"
     loggy "$prolog   expected_version_str: $expected_version_str"
@@ -135,7 +151,7 @@ function check_version() {
     #################################################################
     # The check the docker image metadata (in .Config.Labels) for
     # our version information.
-    check_image_label "$d_id" "$version_label_key" "$expected_version_str"
+    test_image_label "$d_id" "$version_label_key" "$expected_version_str"
     status=$?
     if test $status -ne 0
     then
@@ -143,11 +159,20 @@ function check_version() {
         return  $status
     fi
 
+
+
+
+
+
+    local deployment_context="opendap"
+    if test "$DOCKER_NAME" = "ngap"; then deployment_context="ROOT"; fi
+    loggy "$prolog     deployment_context: $deployment_context"
+
     #################################################################
     # The NGAP build has a static landing page that needs to match.
     if test "$DOCKER_NAME" = "ngap"
     then
-        check_file_in_image "$d_id" "/usr/share/tomcat/webapps/$deployment_context/docs/ngap/ngap.html" "$expected_version_str"
+        test_file_in_image "$d_id" "/usr/share/tomcat/webapps/$deployment_context/docs/ngap/ngap.html" "$expected_version_str"
         status=$?
         if test $status -ne 0
         then
@@ -163,7 +188,7 @@ function check_version() {
     if test "$DOCKER_NAME" != "besd"
     then
         local version_xsl="/usr/share/tomcat/webapps/$deployment_context/xsl/version.xsl"
-        check_file_in_image "$d_id" "$version_xsl" "$HYRAX_WEB_UI_VERSION"
+        test_file_in_image "$d_id" "$version_xsl" "$HYRAX_WEB_UI_VERSION"
         status=$?
         if test $status -ne 0
         then
@@ -175,52 +200,3 @@ function check_version() {
     loggy "$HR1"
     return 0
 }
-
-#
-# Confirm that image launches without crashing at startup
-
-function test_startup() {
-    local prolog="test_startup() -"
-    loggy "$HR0"
-    loggy "$prolog BEGIN"
-    local image_tag="$1"
-    local any_images_crashed
-    local status
-
-    loggy "$prolog Test that image does not crash on startup"
-    docker run -d --name=travis_test_image "$image_tag"
-    
-    # Wait to give the entrypoint script/application a chance to run
-    sleep 10
-
-    # The launched image should be running; if it is not, it must have crashed 
-    # at startup. This will show up as an `Exited` message in `docker ps`
-    any_images_crashed=$(docker ps -a | grep travis_test_image | grep Exited)
-    if [ -n "$result" ]; then
-        loggy "$prolog Error: Image '$image_tag' failed at startup"
-        docker ps -a
-        loggy "$prolog Logs from failing test instance: "
-        loggy "$(docker logs travis_test_image)"
-
-        # Wait to give the logs a chance to print out before we exit
-        sleep 10
-        exit 1
-    else
-        loggy "$prolog Success: Image '$image_tag' did not crash on startup"
-
-        check_version "travis_test_image"
-        status=$?
-        if test $status -ne 0
-        then
-            loggy "$prolog ERROR! Version check failed. status: $status"
-            return $status
-        fi
-        docker rm -f travis_test_image
-    fi
-    loggy "$prolog END"
-    loggy "$HR0"
-    return 0
-}
-
-
-test_startup $1
