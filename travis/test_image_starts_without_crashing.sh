@@ -127,8 +127,11 @@ function check_version() {
         expected_version_str="$OLFS_VERSION"
     fi
 
-    local version_label_key="org.opendap.$DOCKER_DIR.version"
-
+    local version_label_key="org.opendap.$DOCKER_NAME.version"
+    if test -n "$DOCKER_DIR"
+    then
+        version_label_key="org.opendap.$DOCKER_DIR.version"
+    fi
     loggy "$prolog      version_label_key: $version_label_key"
     loggy "$prolog   expected_version_str: $expected_version_str"
 
