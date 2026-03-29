@@ -108,8 +108,6 @@ function test_file_in_docker_image() {
     # some_file="$(docker exec -it "$d_id" bash -c "cat \"$file_path\"")"
     some_file="$(docker run --rm --entrypoint cat "$d_id" "$file_path")"
 
-    docker cp $d_id:/path/in/container ./
-
     # loggy "$prolog $d_id::$file_path: "
     # loggy "$some_file"
     echo "$some_file" | grep "$expected_value"
