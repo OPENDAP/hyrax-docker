@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 HR0="#######################################################################"
 HR1="- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
 HR2="--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---"
@@ -16,7 +15,7 @@ function loggy() {
 #     to retrieve the value of 'label_key' ($2) from the docker .Config.Labels
 #     The retrieved value is compared with the 'expected_value' ($3)
 #
-function test_docker_image_label(){
+function test_docker_image_label() {
     local prolog="test_docker_image_label() -"
     loggy "$HR2"
     loggy "$prolog BEGIN"
@@ -58,7 +57,7 @@ function test_docker_image_label(){
 #     Looks inside docker image 'd_id' ($1) in the file
 #     named file_path ($2) for the string 'expected_value' ($3)
 #
-function test_file_in_docker_image() {
+function test_file_in_docker_image_OLD() {
     local prolog="test_file_in_docker_image() -"
     loggy "$HR2"
     loggy "$prolog BEGIN"
@@ -76,12 +75,11 @@ function test_file_in_docker_image() {
     # loggy "$some_file"
     echo "$some_file" | grep "$expected_value"
     status=$?
-    if test $status -ne 0
-    then
+    if test $status -ne 0; then
         loggy "$prolog ERROR! The expected value '$expected_value' was not found in the file '$file_path'"
         loggy "$prolog $d_id::$file_path: "
         loggy "$some_file"
-        return  $status
+        return $status
     else
         loggy "$prolog SUCCESS! Found it!"
     fi
@@ -89,7 +87,46 @@ function test_file_in_docker_image() {
     loggy "$HR2"
     return 0
 }
+#########################################################################################################
+# test_file_in_docker_image()
+#     Looks inside docker image 'd_id' ($1) in the file
+#     named file_path ($2) for the string 'expected_value' ($3)
+#
+function test_file_in_docker_image() {
+    local prolog="test_file_in_docker_image() -"
+    loggy "$HR2"
+    loggy "$prolog BEGIN"
 
+    local d_id="$1"
+    local file_path="$2"
+    local expected_value="$3"
+
+    local status
+    local some_file
+
+    loggy "$prolog Checking for '$expected_value' in '$d_id::$file_path'"
+    # some_file="$(docker exec -it "$d_id" bash -c "cat \"$file_path\"")"
+    some_file="$(docker run --rm --entrypoint cat "$d_id" "$file_path")"
+
+    docker cp $d_id:/path/in/container ./
+
+    # loggy "$prolog $d_id::$file_path: "
+    # loggy "$some_file"
+    echo "$some_file" | grep "$expected_value"
+    status=$?
+    if test $status -ne 0; then
+        loggy "$prolog ERROR! The expected value '$expected_value' was not found in the file '$file_path'"
+        loggy "$prolog $d_id::$file_path: "
+        loggy "$some_file"
+        return $status
+    else
+        loggy "$prolog SUCCESS! Found it!"
+    fi
+    loggy "$prolog END"
+    loggy "$HR2"
+    return 0
+}
+#docker cp $CONTAINER_ID:/path/in/container /path/on/host
 
 #########################################################################################################
 # check_version()
@@ -112,7 +149,6 @@ function check_version() {
     if test "$DOCKER_NAME" = "ngap"; then deployment_context="ROOT"; fi
     loggy "$prolog     deployment_context: $deployment_context"
 
-
     #################################################################################################
     # Target specific tweaking using global values
     # @TODO - refactor and move upstream where possible
@@ -120,7 +156,6 @@ function check_version() {
     if test "$DOCKER_NAME" = "besd"; then expected_version_str="$BES_VERSION"; fi
     if test "$DOCKER_NAME" = "olfs"; then expected_version_str="$OLFS_VERSION"; fi
     loggy "$prolog   expected_version_str: $expected_version_str"
-
 
     local version_label_key="org.opendap.$DOCKER_NAME.version"
     if test -n "$DOCKER_DIR"; then version_label_key="org.opendap.$DOCKER_DIR.version"; fi
@@ -131,22 +166,19 @@ function check_version() {
     # our version information.
     test_docker_image_label "$d_id" "$version_label_key" "$expected_version_str"
     status=$?
-    if test $status -ne 0
-    then
+    if test $status -ne 0; then
         loggy "$prolog ERROR! The expected version string was not found in the docker image metadata."
-        return  $status
+        return $status
     fi
 
     #################################################################
     # The NGAP build has a static landing page that needs to match.
-    if test "$DOCKER_NAME" = "ngap"
-    then
+    if test "$DOCKER_NAME" = "ngap"; then
         test_file_in_docker_image "$d_id" "/usr/share/tomcat/webapps/$deployment_context/docs/ngap/ngap.html" "$expected_version_str"
         status=$?
-        if test $status -ne 0
-        then
+        if test $status -ne 0; then
             loggy "$prolog ERROR! The expected version string was not found in the file."
-            return  $status
+            return $status
         fi
     fi
 
@@ -154,15 +186,13 @@ function check_version() {
     # All the service deployments (except the besd) have the OLFS
     # installed in Tomcat. We check the version.xsl static file for
     # the Hyrax version.
-    if test "$DOCKER_NAME" != "besd"
-    then
+    if test "$DOCKER_NAME" != "besd"; then
         local version_xsl="/usr/share/tomcat/webapps/$deployment_context/xsl/version.xsl"
         test_file_in_docker_image "$d_id" "$version_xsl" "$HYRAX_WEB_UI_VERSION"
         status=$?
-        if test $status -ne 0
-        then
+        if test $status -ne 0; then
             loggy "$prolog ERROR! The expected version string was not found in the file: '$d_id::$version_xsl'"
-            return  $status
+            return $status
         fi
     fi
     loggy "$prolog END"
@@ -183,11 +213,11 @@ function test_startup() {
 
     loggy "$prolog Test that image does not crash on startup"
     docker run -d --name=travis_test_image "$image_tag"
-    
+
     # Wait to give the entrypoint script/application a chance to run
     sleep 10
 
-    # The launched image should be running; if it is not, it must have crashed 
+    # The launched image should be running; if it is not, it must have crashed
     # at startup. This will show up as an `Exited` message in `docker ps`
     any_images_crashed=$(docker ps -a | grep travis_test_image | grep Exited)
     if [ -n "$result" ]; then
@@ -208,7 +238,6 @@ function test_startup() {
     loggy "$HR0"
     return 0
 }
-
 
 test_startup $1
 
