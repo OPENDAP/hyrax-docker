@@ -212,7 +212,7 @@ function test_startup() {
 
 test_startup $1
 
-check_version "travis_test_image"
+check_version "$OS_BUILD_VERSION_TAG"
 #status=$?
 #if test $status -ne 0
 #then
