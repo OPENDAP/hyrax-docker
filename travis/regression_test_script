@@ -10,6 +10,13 @@ set -e
 #           -i "$OS_BUILD_VERSION_TAG" \
 #           -l "deployed-image-regression-tests-$TRAVIS_JOB_NUMBER"
 #
+# This script starts the target docker image and then runs the
+# hyrax_regression_tests on the new server.
+#
+# !! NOTE !!
+# As written this script  leaves the docker container running so that downstream
+# service tests can be easily run.
+#
 HR0="#######################################################################"
 HR1="- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
 HR2="--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---"
