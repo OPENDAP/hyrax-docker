@@ -128,20 +128,54 @@ function test_file_in_docker_image() {
 
 
 #########################################################################################################
-# get_version_label_key()
-#   Uses an ugly little heuristic to determine the Docker .Config.Labels entry for the current build.
-#   This is complicated because some applications like ngap and hyrax_ncwms both have hyrax version
-#   in their Docker labels.
-function get_version_label_key(){
-    local prolog="get_version_label_key() -"
+# get_docker_label_version_key()
+#   Returns the purported  Docker .Config.Labels entry for the current application build.
+#   Relies on the global variable DOCKER_NAME and embodies some inside knowledge of the irregularities
+#   In our docker labeling scheme.In particular some applications like ngap and hyrax_ncwms use
+#   the "hyrax" version in their Docker labels.
+function get_docker_label_version_key(){
+    local prolog="get_docker_label_version_key() -"
     local app_key="$DOCKER_NAME"                             # default
     # if test -n "$DOCKER_DIR"; then app_key="$DOCKER_DIR"; fi # DOCKER_DIR if it's in use.
     if test "$app_key" = "ngap" -o "$app_key" = "hyrax_ncwms"; then app_key="hyrax"; fi   # ngap is Hyrax so....
 
-    local version_label_key="org.opendap.$app_key.version"
-    loggy "$prolog      version_label_key: $version_label_key"
-    echo "$version_label_key"
+    local label_version_key="org.opendap.$app_key.version"
+    loggy "$prolog label_version_key: $label_version_key"
+    echo "$label_version_key"
 }
+
+
+function get_expected_docker_label_version_value(){
+    local prolog="get_expected_docker_label_version_value() -"
+    #################################################################################################
+    # Target specific tweaking using global values
+    # @TODO - refactor and move upstream where possible
+    local expected_version_str="$HYRAX_WEB_UI_VERSION"
+    if test "$DOCKER_NAME" = "besd"; then expected_version_str="$BES_VERSION"; fi
+    if test "$DOCKER_NAME" = "olfs"; then expected_version_str="$OLFS_VERSION"; fi
+    loggy "$prolog   expected_version_str: $expected_version_str"
+    echo "$expected_version_str"
+}
+
+function check_docker_version_label(){
+
+    local label_version_key
+    label_version_key="$(get_docker_label_version_key)"
+    loggy "$prolog      version_label_key: $label_version_key"
+
+    #################################################################
+    # The check the docker image metadata (in .Config.Labels) for
+    # our version information.
+    test_docker_image_label "$d_id" "$label_version_key" "$expected_version_str"
+    status=$?
+    if test $status -ne 0; then
+        loggy "$prolog ERROR! The expected version string was not found in the docker image metadata."
+        return $status
+    fi
+
+}
+
+
 
 #########################################################################################################
 # check_version()
@@ -160,6 +194,7 @@ function check_version() {
 
     local status
 
+    # The default deployment context is "opendap" but the ngap application is deployed to "ROOT"
     local deployment_context="opendap"
     if test "$DOCKER_NAME" = "ngap"; then deployment_context="ROOT"; fi
     loggy "$prolog     deployment_context: $deployment_context"
@@ -167,23 +202,18 @@ function check_version() {
     #################################################################################################
     # Target specific tweaking using global values
     # @TODO - refactor and move upstream where possible
-    local expected_version_str="$HYRAX_WEB_UI_VERSION"
-    if test "$DOCKER_NAME" = "besd"; then expected_version_str="$BES_VERSION"; fi
-    if test "$DOCKER_NAME" = "olfs"; then expected_version_str="$OLFS_VERSION"; fi
+    local expected_version_str
+    expected_version_str="$(get_expected_docker_label_version_value)"
     loggy "$prolog   expected_version_str: $expected_version_str"
 
-    local app_key="$DOCKER_NAME"
-    if test -n "$DOCKER_DIR"; then app_key="$DOCKER_DIR"; fi
-    if test "$app_key" = "ngap" ; then app_key="hyrax"; fi
-
-    local version_label_key
-    version_label_key="$(get_version_label_key)"
-    loggy "$prolog      version_label_key: $version_label_key"
+    local label_version_key
+    label_version_key="$(get_docker_label_version_key)"
+    loggy "$prolog      label_version_key: $label_version_key"
 
     #################################################################
     # The check the docker image metadata (in .Config.Labels) for
     # our version information.
-    test_docker_image_label "$d_id" "$version_label_key" "$expected_version_str"
+    test_docker_image_label "$d_id" "$label_version_key" "$expected_version_str"
     status=$?
     if test $status -ne 0; then
         loggy "$prolog ERROR! The expected version string was not found in the docker image metadata."
@@ -217,38 +247,6 @@ function check_version() {
     loggy "$prolog END"
     loggy "$HR1"
     return 0
-}
-
-function check_ngap_docker_versions(){
-    local prolog="check_version() -"
-    loggy "$HR1"
-    loggy "$prolog BEGIN"
-
-    local d_id="$1"
-    if test -z "$d_id"; then
-        loggy "$prolog ERROR! You must pass valid docker id as parameter 1"
-        return 1
-    fi
-    loggy "$prolog                   d_id: $d_id"
-
-    local expected_version_str="$2"
-    if test -z "$expected_version_str"; then
-        loggy "$prolog ERROR! You must pass the expected Hyrax version string as parameter 2"
-        return 2
-    fi
-    loggy "$prolog                   d_id: $d_id"
-
-    local deployment_context="ROOT"
-    loggy "$prolog     deployment_context: $deployment_context"
-
-    test_file_in_docker_image "$d_id" "/usr/share/tomcat/webapps/$deployment_context/docs/ngap/ngap.html" "$expected_version_str"
-    status=$?
-    if test $status -ne 0; then
-        loggy "$prolog ERROR! The expected version string was not found in the file."
-        return $status
-    fi
-
-
 }
 
 
