@@ -133,6 +133,8 @@ function test_HyraxVersion_class_endpoints() {
     then
         loggy "$prolog ERROR! The expected version string as not found in the contents.html page."
         return  $status
+    else
+        loggy "$prolog SUCCESS! The the '$contents_url' response contained the version string: '$expected_hyrax_version'"
     fi
 
     #####################################################################
@@ -151,6 +153,8 @@ function test_HyraxVersion_class_endpoints() {
     then
         loggy "$prolog ERROR! The expected version string as not found in the Data Request Form page."
         return  $status
+    else
+        loggy "$prolog SUCCESS! The the '$ifh_url' response contained the version string: '$expected_hyrax_version'"
     fi
 
     loggy "$prolog END"
