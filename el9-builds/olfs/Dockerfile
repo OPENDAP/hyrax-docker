@@ -200,9 +200,9 @@ RUN set -e && echo "Installing HyraxVersion class..."  >&2
 COPY HyraxVersion.class "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/WEB-INF/classes/opendap/version/HyraxVersion.class"
 RUN set -e  && ls -l "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/WEB-INF/classes/opendap/version"  >&2
 
-RUN set -e && echo "Installing Hyrax Version: version.xsl..."  >&2
+RUN set -e && echo "Installing Hyrax Version: version.xsl"  >&2
 COPY version.xsl "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/xsl/version.xsl"
-RUN set -e  && ls -l "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/xsl/version.xsl"  >&2
+RUN set -e  && ls -l "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/xsl/version.xsl" && cat "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/xsl/version.xsl" >&2
 
 ################################################################
 
