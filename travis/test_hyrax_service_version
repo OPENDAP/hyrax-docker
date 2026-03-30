@@ -57,6 +57,148 @@ function test_hyrax_version_response(){
     return 0
 }
 
-# test_hyrax_service_version
+function check_contents_html_version(){
 
-test_hyrax_version_response $1 $2
+    local end_point_url="$1"
+    if test -z "$end_point_url"; then
+        loggy "$prolog ERROR! You must pass a Hyrax endpoint url string as parameter 2"
+        return 2
+    fi
+
+    local expected_hyrax_version="$2"
+    if test -z "$expected_hyrax_version"; then
+        loggy "$prolog ERROR! You must pass a Hyrax endpoint url string as parameter 3"
+        return 3
+    fi
+
+    local status
+    local contents_url="$end_point_url/hyrax/contents.html"
+
+    #####################################################################
+    # Check contents.html
+    #
+    loggy "$HR1"
+    loggy "$prolog Checking contents.html for correct Hyrax version."
+    some_page="$(curl -s -c cookies -b cookies -n "$NETRC_FILE" -L "$contents_url")"
+    # loggy "$prolog $contents_url: "
+    # loggy "$some_page"
+    echo "$some_page" | grep "$expected_hyrax_version"
+    status=$?
+    if test $status -ne 0
+    then
+        loggy "$prolog ERROR! The expected version string as not found in the contents.html page."
+        return  $status
+    fi
+}
+
+
+#########################################################################################################
+# test_HyraxVersion_class_endpoints()
+#     Verify that we have the expected server version
+function test_HyraxVersion_class_endpoints() {
+    local prolog="test_HyraxVersion_class_endpoints() -"
+    loggy "$HR0"
+    loggy "$prolog BEGIN"
+
+    local end_point_url="$1"
+    if test -z "$end_point_url"; then
+        loggy "$prolog ERROR! You must pass a Hyrax endpoint url string as parameter 2"
+        return 2
+    fi
+    loggy "$prolog end_point_url: $end_point_url"
+
+    local expected_hyrax_version="$2"
+    if test -z "$expected_hyrax_version"; then
+        loggy "$prolog ERROR! You must pass a Hyrax endpoint url string as parameter 3"
+        return 3
+    fi
+    loggy "$prolog expected_hyrax_version: $expected_hyrax_version"
+
+    local status
+    local some_page
+
+    #####################################################################
+    # Check contents.html
+    #
+    loggy "$HR1"
+    loggy "$prolog Checking contents.html for correct Hyrax version."
+    local contents_url="$end_point_url/hyrax/contents.html"
+    loggy "$prolog contents_url: $contents_url"
+    some_page="$(curl -s -c cookies -b cookies -n "$NETRC_FILE" -L "$contents_url")"
+    # loggy "$prolog $contents_url: "
+    # loggy "$some_page"
+    echo "$some_page" | grep "$expected_hyrax_version"
+    status=$?
+    if test $status -ne 0
+    then
+        loggy "$prolog ERROR! The expected version string as not found in the contents.html page."
+        return  $status
+    fi
+
+    #####################################################################
+    # Check DAP4 Data Request Form
+    #
+    loggy "$HR1"
+    loggy "$prolog Checking DAP4 Data Request Form page for correct version."
+    local ifh_url="$end_point_url/hyrax/data/nc/fnoc1.nc.dmr.html"
+    loggy "$prolog ifh_url: $ifh_url"
+    some_page="$(curl -s -c cookies -b cookies -n "$NETRC_FILE" -L "$ifh_url")"
+    # loggy "$prolog $ifh_url: "
+    # loggy "$some_page"
+    echo "$some_page" | grep "$expected_hyrax_version"
+    status=$?
+    if test $status -ne 0
+    then
+        loggy "$prolog ERROR! The expected version string as not found in the Data Request Form page."
+        return  $status
+    fi
+
+    loggy "$prolog END"
+    loggy "$HR0"
+    return 0
+}
+
+
+#########################################################################################################
+#########################################################################################################
+#########################################################################################################
+#########################################################################################################
+
+
+#############################################################################
+# Processing Command Line Options (Inline Execution)
+#
+prolog="test_docker_image_version[] -"
+
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    # Run the script invoked as an application,
+    loggy "$HR0"
+    loggy "$prolog BEGIN"
+
+    end_point_url="$1"
+    if test -z "$end_point_url"; then
+        loggy "$prolog ERROR! You must pass a Hyrax endpoint url string as parameter 2"
+        return 2
+    fi
+
+    expected_hyrax_version="$2"
+    if test -z "$expected_hyrax_version"; then
+        loggy "$prolog ERROR! You must pass a Hyrax endpoint url string as parameter 3"
+        return 3
+    fi
+
+
+    set -e
+    test_hyrax_version_response "$end_point_url" "$expected_hyrax_version"
+    test_HyraxVersion_class_endpoints   "$end_point_url" "$expected_hyrax_version"
+
+
+    loggy "$prolog END"
+    loggy "$HR0"
+else
+    # Otherwise...
+    # Just source it into the current shell.
+    loggy "$prolog SUCCESS! The test_docker_image_version functions have been loaded in to the current shell."
+fi
+
+

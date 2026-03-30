@@ -555,10 +555,10 @@ function run_the_tests() {
     loggy "$prolog wait_for_hyrax status: $wait_for_hyrax_status"
     if test $wait_for_hyrax_status -ne 0; then exit $wait_for_hyrax_status; fi
 
-    check_version "$DOCKER_ID" "$HYRAX_END_POINT" "$EXPECTED_HYRAX_VERSION"
-    local check_version_status=$?
-    loggy "$prolog check_version status: $check_version_status"
-    if test $check_version_status -ne 0; then exit $check_version_status; fi
+    $TRAVIS_BUILD_DIR/travis/test_hyrax_service_version "$HYRAX_END_POINT" "$EXPECTED_HYRAX_VERSION"
+    local test_status=$?
+    loggy "$prolog test_hyrax_service_version status: $test_status"
+    if test $test_status -ne 0; then exit $test_status; fi
 
     run_regression_tests "$TEST_IMAGE_NAME" "$HYRAX_END_POINT" "$DOCKER_ID"
     local run_regression_tests_status=$?
