@@ -89,6 +89,7 @@ RUN echo "TOMCAT_CONNECTION_TIMEOUT_MS: $TOMCAT_CONNECTION_TIMEOUT_MS"
 
 LABEL vendor="OPeNDAP"
 LABEL org.opendap.hyrax.version="$HYRAX_VERSION"
+LABEL org.opendap.ngap.version="ngap-$HYRAX_VERSION"
 LABEL org.opendap.hyrax.release-date="$RELEASE_DATE"
 LABEL org.opendap.hyrax.version.is-production="false"
 

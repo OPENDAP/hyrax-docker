@@ -245,7 +245,7 @@ EOF
 
 ################################################################################
 # make_hyrax_version_assets()
-#    Build the various Hyrax Verison assets for the OLFS that will be copied
+#    Build the various Hyrax Version assets for the OLFS that will be copied
 #    into the Hyrax builds by their respective Dockerfiles.
 #
 function make_hyrax_version_assets(){

@@ -24,40 +24,42 @@ RUN echo "# dnf_developer_tools_packages: $dnf_developer_tools_packages"
 
 ARG RELEASE_DATE
 ENV RELEASE_DATE=${RELEASE_DATE:-"$(date +%s)"}
-RUN echo "# RELEASE_DATE: ${RELEASE_DATE}"
+RUN echo "# RELEASE_DATE: $RELEASE_DATE"
 
 ARG TOMCAT_VERSION
 ENV TOMCAT_VERSION="${TOMCAT_VERSION:-"11.0.7"}"
-RUN echo "# TOMCAT_VERSION: ${TOMCAT_VERSION}"
-ENV TOMCAT_DISTRO="apache-tomcat-${TOMCAT_VERSION}"
+RUN echo "# TOMCAT_VERSION: $TOMCAT_VERSION"
+ENV TOMCAT_DISTRO="apache-tomcat-$TOMCAT_VERSION"
 COPY "${TOMCAT_DISTRO}.tar.gz" /
 RUN ls -l /apache-tomcat-*  >&2
 
 ARG HYRAX_VERSION
 ENV HYRAX_VERSION=${HYRAX_VERSION:-"snapshot"}
-RUN echo "# HYRAX_VERSION: ${HYRAX_VERSION}"
+RUN echo "# HYRAX_VERSION: $HYRAX_VERSION"
 
 ARG OLFS_VERSION
 ENV OLFS_VERSION="${OLFS_VERSION:-"unknown"}"
-RUN echo "# OLFS_VERSION: ${OLFS_VERSION}"
+RUN echo "# OLFS_VERSION: $OLFS_VERSION"
 
 ARG OLFS_DISTRO
 ENV OLFS_DISTRO="${OLFS_DISTRO:-"olfs-$OLFS_VERSION-$TARGET_OS-webapp"}"
 RUN echo "# OLFS_DISTRO: $OLFS_DISTRO"
-COPY $OLFS_DISTRO.tgz "/$OLFS_DISTRO.tgz"
+COPY "$OLFS_DISTRO.tgz" "/$OLFS_DISTRO.tgz"
 
 ARG ROBOTS_DISTRO
 ENV ROBOTS_DISTRO=${ROBOTS_DISTRO:-"robots-olfs-$OLFS_VERSION-$TARGET_OS-webapp"}
 RUN echo "# ROBOTS_DISTRO: $ROBOTS_DISTRO"
-COPY $ROBOTS_DISTRO.tgz /$ROBOTS_DISTRO.tgz
+COPY "$ROBOTS_DISTRO.tgz" "/$ROBOTS_DISTRO.tgz"
 
 ARG DEPLOYMENT_CONTEXT
 ENV DEPLOYMENT_CONTEXT=${DEPLOYMENT_CONTEXT:-"opendap"}
 RUN echo "# DEPLOYMENT_CONTEXT: $DEPLOYMENT_CONTEXT"
 
 LABEL vendor="OPeNDAP"
-LABEL org.opendap.olfs.version=${OLFS_VERSION}
-LABEL org.opendap.olfs.release-date=RELEASE_DATE
+LABEL org.opendap.olfs.version="$OLFS_VERSION"
+LABEL org.opendap.olfs.release-date="$RELEASE_DATE"
+LABEL org.opendap.hyrax.version="$HYRAX_VERSION"
+LABEL org.opendap.hyrax.release-date="$RELEASE_DATE"
 LABEL org.opendap.hyrax.version.is-production="false"
 
 
@@ -198,9 +200,9 @@ RUN set -e && echo "Installing HyraxVersion class..."  >&2
 COPY HyraxVersion.class "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/WEB-INF/classes/opendap/version/HyraxVersion.class"
 RUN set -e  && ls -l "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/WEB-INF/classes/opendap/version"  >&2
 
-RUN set -e && echo "Installing Hyrax Version: version.xsl..."  >&2
+RUN set -e && echo "Installing Hyrax Version: version.xsl"  >&2
 COPY version.xsl "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/xsl/version.xsl"
-RUN set -e  && ls -l "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/xsl/version.xsl"  >&2
+RUN set -e  && ls -l "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/xsl/version.xsl" && cat "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/xsl/version.xsl" >&2
 
 ################################################################
 

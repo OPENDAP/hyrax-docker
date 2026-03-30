@@ -50,7 +50,7 @@ set -e
 docker build \
     --build-arg TOMCAT_VERSION \
     --build-arg RELEASE_DATE \
-    --build-arg HYRAX_VERSION \
+    --build-arg HYRAX_VERSION="$HYRAX_WEB_UI_VERSION" \
     --build-arg LIBDAP_VERSION \
     --build-arg BES_VERSION \
     --build-arg OLFS_VERSION \
