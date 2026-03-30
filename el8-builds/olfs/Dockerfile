@@ -16,36 +16,36 @@ USER root
 
 RUN export NOW=`date +%s`
 ARG RELEASE_DATE
-ENV RELEASE_DATE ${RELEASE_DATE:-"${NOW}"}
-RUN echo "RELEASE_DATE: ${RELEASE_DATE}"
+ENV RELEASE_DATE="${RELEASE_DATE:-$NOW}"
+RUN echo "RELEASE_DATE: $RELEASE_DATE"
 
 ARG TOMCAT_VERSION
-ENV TOMCAT_VERSION ${TOMCAT_VERSION:-"9.0.64"}
+ENV TOMCAT_VERSION="${TOMCAT_VERSION:-"9.0.64"}"
 RUN echo "TOMCAT_VERSION: ${TOMCAT_VERSION}"
 ENV TOMCAT_DISTRO="apache-tomcat-${TOMCAT_VERSION}"
 COPY "${TOMCAT_DISTRO}.tar.gz" /
 RUN ls -l /apache-tomcat-*  >&2
 
 ARG HYRAX_VERSION
-ENV HYRAX_VERSION=${HYRAX_VERSION:-"snapshot"}
-RUN echo "HYRAX_VERSION: ${HYRAX_VERSION}"
+ENV HYRAX_VERSION="${HYRAX_VERSION:-"snapshot"}"
+RUN echo "HYRAX_VERSION: $HYRAX_VERSION"
 
 ARG OLFS_VERSION
-ENV OLFS_VERSION=${OLFS_VERSION:-"unknown"}
-RUN echo "OLFS_VERSION: ${OLFS_VERSION}"
+ENV OLFS_VERSION="${OLFS_VERSION:-"unknown"}"
+RUN echo "OLFS_VERSION: $OLFS_VERSION"
 
 ARG OLFS_DISTRO
-ENV OLFS_DISTRO=${OLFS_DISTRO:-"olfs-${OLFS_VERSION}-webapp"}
-RUN echo "OLFS_DISTRO: ${OLFS_DISTRO}"
-COPY ${OLFS_DISTRO}.tgz /${OLFS_DISTRO}.tgz
+ENV OLFS_DISTRO="${OLFS_DISTRO:-"olfs-${OLFS_VERSION}-webapp"}"
+RUN echo "OLFS_DISTRO: $OLFS_DISTRO"
+COPY "$OLFS_DISTRO.tgz" "/$OLFS_DISTRO.tgz"
 
 ARG ROBOTS_DISTRO
-ENV ROBOTS_DISTRO=${ROBOTS_DISTRO:-"robots-olfs-${OLFS_VERSION}-webapp"}
-RUN echo "ROBOTS_DISTRO: ${ROBOTS_DISTRO}"
-COPY ${ROBOTS_DISTRO}.tgz /${ROBOTS_DISTRO}.tgz
+ENV ROBOTS_DISTRO="${ROBOTS_DISTRO:-"robots-olfs-${OLFS_VERSION}-webapp"}"
+RUN echo "ROBOTS_DISTRO: $ROBOTS_DISTRO"
+COPY $ROBOTS_DISTRO.tgz /$ROBOTS_DISTRO.tgz
 
 ARG DEPLOYMENT_CONTEXT
-ENV DEPLOYMENT_CONTEXT=${DEPLOYMENT_CONTEXT:-"opendap"}
+ENV DEPLOYMENT_CONTEXT="${DEPLOYMENT_CONTEXT:-"opendap"}"
 RUN echo "# DEPLOYMENT_CONTEXT: $DEPLOYMENT_CONTEXT"
 
 LABEL vendor="OPeNDAP"
@@ -59,7 +59,7 @@ LABEL org.opendap.hyrax.version.is-production="false"
 # The --build-arg USE_NCWMS can be set to "true" in order to 
 # add the ncWMS application to the build.
 ARG USE_NCWMS
-ENV USE_NCWMS ${USE_NCWMS:-"false"}
+ENV USE_NCWMS="${USE_NCWMS:-"false"}"
 RUN set -e && \
     if [ $USE_NCWMS = "true" ];then echo "NCWMS: ENABLED"; else echo "NCWMS: DISABLED"; fi
 
@@ -69,7 +69,7 @@ RUN set -e && \
 # the URL: https://localhost:8080 if the environment variable NCWMS_BASE
 # is not in the shell from which the entrypoint.sh script is called.
 ARG NCWMS_BASE
-ENV NCWMS_BASE ${NCWMS_BASE:-"https://localhost:8080"}
+ENV NCWMS_BASE="${NCWMS_BASE:-"https://localhost:8080"}"
 RUN set -e && \
     if [ $USE_NCWMS = "true" ];then echo "NCWMS_BASE: {$NCWMS_BASE}"; fi
 
@@ -138,8 +138,8 @@ RUN set -e && systemctl enable tomcat
 #RUN firewall-cmd --add-port 8080/tcp --permanent
 #RUN firewall-cmd --reload
 
-ENV CATALINA_HOME /usr/share/tomcat
-ENV PATH $CATALINA_HOME/bin:$PATH
+ENV CATALINA_HOME="/usr/share/tomcat"
+ENV PATH="$CATALINA_HOME/bin:$PATH"
 RUN set -e && echo "CATALINA_HOME: ${CATALINA_HOME}" >&2
 
 # Install our modified server.xml so that the server compresses responses.
@@ -210,7 +210,7 @@ RUN rm -vf  /olfs*.tgz /robots*.tgz /apache*
 
 # set host for bes that olfs will contact - this is expected to be over docker's internal network
 ARG BES_HOST
-ENV BES_HOST ${BES_HOST:-besd}
+ENV BES_HOST="${BES_HOST:-besd}"
 RUN sed -i "s/localhost/${BES_HOST}/" ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/olfs.xml
 
 #
