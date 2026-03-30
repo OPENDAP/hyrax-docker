@@ -57,5 +57,6 @@ function test_hyrax_version_response(){
     return 0
 }
 
+# test_hyrax_service_version
 
 test_hyrax_version_response $1 $2

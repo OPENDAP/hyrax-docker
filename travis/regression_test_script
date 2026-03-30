@@ -294,7 +294,7 @@ function check_version() {
     #####################################################
     # Get Hyrax version response from the running server
     loggy "$prolog Retrieving Hyrax Version Response from: '$version_url'"
-    version_response="$(curl -s -c cookies -b cookies -n $NETRC_FILE -L "$version_url")"
+    version_response="$(curl -s -c cookies -b cookies -n "$NETRC_FILE" -L "$version_url")"
     loggy "$prolog Hyrax Version Response:"
     loggy "$version_response"
     loggy "$HR1"
@@ -380,7 +380,7 @@ function check_version() {
     #
     loggy "$HR1"
     loggy "$prolog Checking contents.html for correct Hyrax version."
-    some_page="$(curl -s -c cookies -b cookies -n $NETRC_FILE -L "$contents_url")"
+    some_page="$(curl -s -c cookies -b cookies -n "$NETRC_FILE" -L "$contents_url")"
     # loggy "$prolog $contents_url: "
     # loggy "$some_page"
     echo "$some_page" | grep "$expected_hyrax_version"
@@ -396,7 +396,7 @@ function check_version() {
     #
     loggy "$HR1"
     loggy "$prolog Checking DAP4 Data Request Form page for correct version."
-    some_page="$(curl -s -c cookies -b cookies -n $NETRC_FILE -L "$ifh_url")"
+    some_page="$(curl -s -c cookies -b cookies -n "$NETRC_FILE" -L "$ifh_url")"
     # loggy "$prolog $ifh_url: "
     # loggy "$some_page"
     echo "$some_page" | grep "$expected_hyrax_version"

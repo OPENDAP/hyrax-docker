@@ -264,7 +264,7 @@ function test_hyrax_version_response(){
 #############################################################################
 # Processing Command Line Options (Inline Execution)
 #
-prolog="version_test_docker_image[] -"
+prolog="test_docker_image_version[] -"
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     # Run the script invoked as an application,
@@ -287,7 +287,7 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 else
     # Otherwise...
     # Just source it into the current shell.
-    loggy "$prolog SUCCESS! The version_test_docker_image functions have been loaded in to the current shell."
+    loggy "$prolog SUCCESS! The test_docker_image_version functions have been loaded in to the current shell."
 fi
 
 
