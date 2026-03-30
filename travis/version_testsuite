@@ -186,7 +186,7 @@ function check_version() {
     #################################################################
     # All the service deployments (except the besd) have the OLFS
     # installed in Tomcat. We check the version.xsl static file for
-    # the Hyrax version.
+    # the Hyrax version (not the OLFS version, at least in that location)
     if test "$DOCKER_NAME" != "besd"; then
         local version_xsl="/usr/share/tomcat/webapps/$deployment_context/xsl/version.xsl"
         test_file_in_docker_image "$d_id" "$version_xsl" "$HYRAX_WEB_UI_VERSION"

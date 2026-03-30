@@ -46,7 +46,9 @@ COPY ${ROBOTS_DISTRO}.tgz /${ROBOTS_DISTRO}.tgz
 
 LABEL vendor="OPeNDAP"
 LABEL org.opendap.olfs.version=${OLFS_VERSION}
-LABEL org.opendap.olfs.release-date=RELEASE_DATE
+LABEL org.opendap.olfs.release-date="$RELEASE_DATE"
+LABEL org.opendap.hyrax.version="$HYRAX_VERSION"
+LABEL org.opendap.hyrax.release-date="$RELEASE_DATE"
 LABEL org.opendap.hyrax.version.is-production="false"
 
 
