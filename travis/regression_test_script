@@ -409,7 +409,6 @@ function run_the_tests() {
     loggy "$prolog test_hyrax_service_version status: $test_status"
     if test $test_status -ne 0; then exit $test_status; fi
 
-
     test_beslog2json "$DOCKER_ID"
     local test_beslog2json_status=$?
     loggy "$prolog test_beslog2json status: $test_beslog2json_status"

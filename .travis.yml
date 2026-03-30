@@ -119,6 +119,8 @@ jobs:
         - echo "Running Test Scripts"
         - ./travis/test_docker_image_version "$OS_BUILD_VERSION_TAG"
         - ./travis/regression_test_script -i "$OS_SNAPSHOT_IMAGE_TAG" -l "$TESTS_LOG_BASE" -V "$HYRAX_WEB_UI_VERSION"
+        - $TRAVIS_BUILD_DIR/travis/test_hyrax_service_version "http://localhost:8080/opendap" "$HYRAX_WEB_UI_VERSION"
+
 
     - stage: BUILD
       name: "Build opendap/besd"
