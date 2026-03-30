@@ -73,8 +73,8 @@ function test_file_in_docker_image() {
     loggy "$prolog Checking for '$expected_value' in '$d_id::$file_path'"
     some_file="$(docker run --rm --entrypoint cat "$d_id" "$file_path")"
 
-    loggy "$prolog $d_id::$file_path: "
-    loggy "$some_file"
+    #loggy "$prolog $d_id::$file_path: "
+    #loggy "$some_file"
 
     echo "$some_file" | grep "$expected_value"
     status=$?
