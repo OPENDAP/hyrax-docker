@@ -127,7 +127,7 @@ function get_expected_docker_label_version_value(){
 #     Examine the .Config.Labels metadata in "d_id" and test that the application version for our
 # application is correct.
 function test_docker_version_label(){
-    local prolog="check_docker_version_label() -"
+    local prolog="test_docker_version_label() -"
 
     local d_id="$1"
     if test -z "$d_id"; then
@@ -160,7 +160,7 @@ function test_docker_version_label(){
 #     Examine the Hyrax deployment in "d_id" and check the value of the Hyrax version strings
 # in the expected locations.
 function test_docker_hyrax_versions() {
-    local prolog="check_version() -"
+    local prolog="test_docker_hyrax_versions() -"
     loggy "$HR1"
     loggy "$prolog BEGIN"
 
