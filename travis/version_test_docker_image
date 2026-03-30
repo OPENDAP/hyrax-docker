@@ -52,41 +52,7 @@ function test_docker_image_label() {
     return 0
 }
 
-#########################################################################################################
-# test_file_in_docker_image()
-#     Looks inside docker image 'd_id' ($1) in the file
-#     named file_path ($2) for the string 'expected_value' ($3)
-#
-function test_file_in_docker_image_OLD() {
-    local prolog="test_file_in_docker_image() -"
-    loggy "$HR2"
-    loggy "$prolog BEGIN"
 
-    local d_id="$1"
-    local file_path="$2"
-    local expected_value="$3"
-
-    local status
-    local some_file
-
-    loggy "$prolog Checking for '$expected_value' in '$d_id::$file_path'"
-    some_file="$(docker exec -it "$d_id" bash -c "cat \"$file_path\"")"
-    # loggy "$prolog $d_id::$file_path: "
-    # loggy "$some_file"
-    echo "$some_file" | grep "$expected_value"
-    status=$?
-    if test $status -ne 0; then
-        loggy "$prolog ERROR! The expected value '$expected_value' was not found in the file '$file_path'"
-        loggy "$prolog $d_id::$file_path: "
-        loggy "$some_file"
-        return $status
-    else
-        loggy "$prolog SUCCESS! Found it!"
-    fi
-    loggy "$prolog END"
-    loggy "$HR2"
-    return 0
-}
 #########################################################################################################
 # test_file_in_docker_image()
 #     Looks inside docker image 'd_id' ($1) in the file
@@ -105,7 +71,6 @@ function test_file_in_docker_image() {
     local some_file
 
     loggy "$prolog Checking for '$expected_value' in '$d_id::$file_path'"
-    # some_file="$(docker exec -it "$d_id" bash -c "cat \"$file_path\"")"
     some_file="$(docker run --rm --entrypoint cat "$d_id" "$file_path")"
 
     # loggy "$prolog $d_id::$file_path: "
@@ -295,67 +260,34 @@ function test_hyrax_version_response(){
     return 0
 }
 
+
 #############################################################################
 # Processing Command Line Options (Inline Execution)
 #
-docker_image_id=
-test_hyrax_service=
-NETRC_FILE=
-HYRAX_END_POINT="http://localhost:8080/opendap"
-expected_version=
-
-while getopts "hD:Sn:e:V:" OPTION; do
-    case $OPTION in
-        # The echo in the -h case is formated this way for output readability. Please don't ruin it.
-        h)
-            usage
-            exit 0
-            ;;
-        D)
-            docker_image_id="$OPTARG"
-            ;;
-        S)
-            test_hyrax_service="true"
-            ;;
-        e)
-            HYRAX_END_POINT="$OPTARG"
-            ;;
-        V)
-            expected_version="$OPTARG"
-            ;;
-        n)
-            NETRC_FILE="--netrc-file ${OPTARG}"
-            ;;
-        *)
-            loggy "Incorrect options provided"
-            exit 1
-            ;;
-    esac
-done
-
-shift $(($OPTIND - 1))
-TEST_NAMES="$@"
-
-
-
+prolog="version_test_docker_image[] -"
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     # Run the script invoked as an application,
-    set -e
-    if test -n "$docker_image_id"
+    loggy "$HR0"
+    loggy "$prolog BEGIN"
+
+    docker_image_id="$1"
+    if test -z "$docker_image_id"
     then
-        test_docker_version_label "$docker_image_id"
-        test_docker_hyrax_versions "$docker_image_id"
+        loggy "ERROR! You must supply a docker id to use theis script."
+        exit 1
     fi
 
-    if test "$test_hyrax_service" = "true"
-    then
-        test_hyrax_version_response "$HYRAX_END_POINT"
-    fi
+    set -e
+    test_docker_version_label "$docker_image_id"
+    test_docker_hyrax_versions "$docker_image_id"
+
+    loggy "$prolog END"
+    loggy "$HR0"
 else
     # Otherwise...
     # Just source it into the current shell.
-    loggy "$prolog SUCCESS! The version_testsuite functions have been loaded in to the current shell."
+    loggy "$prolog SUCCESS! The version_test_docker_image functions have been loaded in to the current shell."
 fi
 
 
@@ -366,5 +298,4 @@ fi
 
 
 
-test_docker_version_label "$1"
-test_docker_hyrax_versions "$1"
+
