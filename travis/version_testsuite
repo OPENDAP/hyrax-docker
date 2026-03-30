@@ -189,7 +189,7 @@ function check_version() {
     # the Hyrax version.
     if test "$DOCKER_NAME" != "besd"; then
         local version_xsl="/usr/share/tomcat/webapps/$deployment_context/xsl/version.xsl"
-        test_file_in_docker_image "$d_id" "$version_xsl" "$HYRAX_WEB_UI_VERSION"
+        test_file_in_docker_image "$d_id" "$version_xsl" "$expected_version_str"
         status=$?
         if test $status -ne 0; then
             loggy "$prolog ERROR! The expected version string was not found in the file: '$d_id::$version_xsl'"
