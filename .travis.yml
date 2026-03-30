@@ -115,8 +115,9 @@ jobs:
           --tag "$OS_BUILD_VERSION_TAG"
           "$DOCKER_NAME"
         - docker image ls -a
-        - cd ..
-        - echo "Running Test Script"
+        - cd "$TRAVIS_BUILD_DIR"
+        - echo "Running Test Scripts"
+        - ../travis/test_docker_image_version "$OS_BUILD_VERSION_TAG"
         - ./travis/regression_test_script -i "$OS_SNAPSHOT_IMAGE_TAG" -l "$TESTS_LOG_BASE" -V "$HYRAX_WEB_UI_VERSION"
 
     - stage: BUILD
@@ -138,8 +139,10 @@ jobs:
           --tag "$OS_BUILD_VERSION_TAG"
           "$DOCKER_NAME"
         - docker image ls -a
-        - ../travis/test_image_starts_without_crashing.sh "$OS_BUILD_VERSION_TAG"
-        - ../travis/test_docker_image_version "$OS_BUILD_VERSION_TAG"
+        - cd "$TRAVIS_BUILD_DIR"
+        - echo "Running Test Scripts"
+        - ./travis/test_docker_image_version "$OS_BUILD_VERSION_TAG"
+        - ./travis/test_image_starts_without_crashing.sh "$OS_BUILD_VERSION_TAG"
 
     - stage: BUILD
       name: "Build opendap/hyrax_ncwms"
@@ -171,8 +174,10 @@ jobs:
           --tag "$OS_BUILD_VERSION_TAG"
           "$DOCKER_DIR"
         - docker image ls -a
-        - ../travis/test_image_starts_without_crashing.sh "$OS_BUILD_VERSION_TAG"
-        - ../travis/test_docker_image_version "$OS_BUILD_VERSION_TAG"
+        - cd "$TRAVIS_BUILD_DIR"
+        - echo "Running Test Scripts"
+        - ./travis/test_image_starts_without_crashing.sh "$OS_BUILD_VERSION_TAG"
+        - ./travis/test_docker_image_version "$OS_BUILD_VERSION_TAG"
 
 
     - stage: BUILD
@@ -200,8 +205,10 @@ jobs:
           --tag "$OS_SNAPSHOT_IMAGE_TAG"
           --tag "$OS_BUILD_VERSION_TAG" olfs
         - docker image ls -a
-        - ../travis/test_image_starts_without_crashing.sh "$OS_BUILD_VERSION_TAG"
-        - ../travis/test_docker_image_version "$OS_BUILD_VERSION_TAG"
+        - cd "$TRAVIS_BUILD_DIR"
+        - echo "Running Test Scripts"
+        - ./travis/test_image_starts_without_crashing.sh "$OS_BUILD_VERSION_TAG"
+        - ./travis/test_docker_image_version "$OS_BUILD_VERSION_TAG"
 
     - stage: BUILD
       name: "Build opendap/hyrax:ngap"
@@ -213,8 +220,10 @@ jobs:
         - show_version
         - set -e && ./build-hyrax-ngap.sh
         - docker image ls -a
-        - ../travis/test_image_starts_without_crashing.sh "$OS_BUILD_VERSION_TAG"
-        - ../travis/test_docker_image_version "$OS_BUILD_VERSION_TAG"
+        - cd "$TRAVIS_BUILD_DIR"
+        - echo "Running Test Scripts"
+        - ./travis/test_image_starts_without_crashing.sh "$OS_BUILD_VERSION_TAG"
+        - ./travis/test_docker_image_version "$OS_BUILD_VERSION_TAG"
 
     - stage: TEST_DEPLOYED_IMAGE
       name: "Test Deployed Image"
