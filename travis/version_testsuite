@@ -157,12 +157,26 @@ function get_expected_docker_label_version_value(){
     echo "$expected_version_str"
 }
 
-function check_docker_version_label(){
+#########################################################################################################
+# test_docker_version_label()
+#     Examine the .Config.Labels metadata in "d_id" and test that the application version for our
+# application is correct.
+function test_docker_version_label(){
+    local prolog="check_docker_version_label() -"
+
+    local d_id="$1"
+    if test -z "$d_id"; then
+        loggy "$prolog ERROR! You must pass valid docker id as parameter 1"
+        return 1
+    fi
+    loggy "$prolog                   d_id: $d_id"
 
     local label_version_key
     label_version_key="$(get_docker_label_version_key)"
-    loggy "$prolog      version_label_key: $label_version_key"
+    loggy "$prolog      label_version_key: $label_version_key"
 
+    local expected_version_str
+    expected_version_str="$(get_expected_docker_label_version_value)"
     #################################################################
     # The check the docker image metadata (in .Config.Labels) for
     # our version information.
@@ -176,11 +190,11 @@ function check_docker_version_label(){
 }
 
 
-
 #########################################################################################################
-# check_version()
-#     Verify that we have the expected server version
-function check_version() {
+# test_docker_hyrax_version()
+#     Examine the Hyrax deployment in "d_id" and check the value of the Hyrax version strings
+# in the expected locations.
+function test_docker_hyrax_versions() {
     local prolog="check_version() -"
     loggy "$HR1"
     loggy "$prolog BEGIN"
@@ -199,26 +213,9 @@ function check_version() {
     if test "$DOCKER_NAME" = "ngap"; then deployment_context="ROOT"; fi
     loggy "$prolog     deployment_context: $deployment_context"
 
-    #################################################################################################
-    # Target specific tweaking using global values
-    # @TODO - refactor and move upstream where possible
     local expected_version_str
     expected_version_str="$(get_expected_docker_label_version_value)"
     loggy "$prolog   expected_version_str: $expected_version_str"
-
-    local label_version_key
-    label_version_key="$(get_docker_label_version_key)"
-    loggy "$prolog      label_version_key: $label_version_key"
-
-    #################################################################
-    # The check the docker image metadata (in .Config.Labels) for
-    # our version information.
-    test_docker_image_label "$d_id" "$label_version_key" "$expected_version_str"
-    status=$?
-    if test $status -ne 0; then
-        loggy "$prolog ERROR! The expected version string was not found in the docker image metadata."
-        return $status
-    fi
 
     #################################################################
     # The NGAP build has a static landing page that needs to match.
@@ -250,5 +247,5 @@ function check_version() {
 }
 
 
-
-check_version "$1"
+test_docker_version_label "$1"
+test_docker_hyrax_versions "$1"
