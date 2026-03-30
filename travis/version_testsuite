@@ -126,6 +126,23 @@ function test_file_in_docker_image() {
 }
 #docker cp $CONTAINER_ID:/path/in/container /path/on/host
 
+
+#########################################################################################################
+# get_version_label_key()
+#   Uses an ugly little heuristic to determine the Docker .Config.Labels entry for the current build.
+#   This is complicated because some applications like ngap and hyrax_ncwms both have hyrax version
+#   in their Docker labels.
+function get_version_label_key(){
+    local prolog="get_version_label_key() -"
+    local app_key="$DOCKER_NAME"                             # default
+    # if test -n "$DOCKER_DIR"; then app_key="$DOCKER_DIR"; fi # DOCKER_DIR if it's in use.
+    if test "$app_key" = "ngap" -o "$app_key" = "hyrax_ncwms"; then app_key="hyrax"; fi   # ngap is Hyrax so....
+
+    local version_label_key="org.opendap.$app_key.version"
+    loggy "$prolog      version_label_key: $version_label_key"
+    echo "$version_label_key"
+}
+
 #########################################################################################################
 # check_version()
 #     Verify that we have the expected server version
@@ -159,7 +176,8 @@ function check_version() {
     if test -n "$DOCKER_DIR"; then app_key="$DOCKER_DIR"; fi
     if test "$app_key" = "ngap" ; then app_key="hyrax"; fi
 
-    local version_label_key="org.opendap.$app_key.version"
+    local version_label_key
+    version_label_key="$(get_version_label_key)"
     loggy "$prolog      version_label_key: $version_label_key"
 
     #################################################################
@@ -200,5 +218,39 @@ function check_version() {
     loggy "$HR1"
     return 0
 }
+
+function check_ngap_docker_versions(){
+    local prolog="check_version() -"
+    loggy "$HR1"
+    loggy "$prolog BEGIN"
+
+    local d_id="$1"
+    if test -z "$d_id"; then
+        loggy "$prolog ERROR! You must pass valid docker id as parameter 1"
+        return 1
+    fi
+    loggy "$prolog                   d_id: $d_id"
+
+    local expected_version_str="$2"
+    if test -z "$expected_version_str"; then
+        loggy "$prolog ERROR! You must pass the expected Hyrax version string as parameter 2"
+        return 2
+    fi
+    loggy "$prolog                   d_id: $d_id"
+
+    local deployment_context="ROOT"
+    loggy "$prolog     deployment_context: $deployment_context"
+
+    test_file_in_docker_image "$d_id" "/usr/share/tomcat/webapps/$deployment_context/docs/ngap/ngap.html" "$expected_version_str"
+    status=$?
+    if test $status -ne 0; then
+        loggy "$prolog ERROR! The expected version string was not found in the file."
+        return $status
+    fi
+
+
+}
+
+
 
 check_version "$1"
