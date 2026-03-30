@@ -410,12 +410,6 @@ function run_the_tests() {
     loggy "$prolog run_regression_tests status: $run_regression_tests_status"
     if test $run_regression_tests_status -ne 0; then exit $run_regression_tests_status; fi
 
-    # We run this here because we have a running Hyrax server to interrogate.
-    #$TRAVIS_BUILD_DIR/travis/test_hyrax_service_version "$HYRAX_END_POINT" "$EXPECTED_HYRAX_VERSION"
-    #local test_status=$?
-    #loggy "$prolog test_hyrax_service_version status: $test_status"
-    #if test $test_status -ne 0; then exit $test_status; fi
-
     test_beslog2json "$DOCKER_ID"
     local test_beslog2json_status=$?
     loggy "$prolog test_beslog2json status: $test_beslog2json_status"
