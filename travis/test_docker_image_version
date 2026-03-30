@@ -75,7 +75,7 @@ function test_file_in_docker_image() {
 
     loggy "$prolog $d_id::$file_path: "
     loggy "$some_file"
-    swet +e
+    set +e
     echo "$some_file" | grep "$expected_value"
     status=$?
     if test $status -ne 0; then
