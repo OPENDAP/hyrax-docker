@@ -58,6 +58,8 @@ function test_hyrax_version_response(){
 }
 
 function check_contents_html_version(){
+    local prolog="check_contents_html_version() -"
+    loggy "$prolog BEGIN"
 
     local end_point_url="$1"
     if test -z "$end_point_url"; then
@@ -89,6 +91,7 @@ function check_contents_html_version(){
         loggy "$prolog ERROR! The expected version string as not found in the contents.html page."
         return  $status
     fi
+    loggy "$prolog END"
 }
 
 
@@ -172,7 +175,7 @@ function test_HyraxVersion_class_endpoints() {
 #############################################################################
 # Processing Command Line Options (Inline Execution)
 #
-prolog="test_docker_image_version[] -"
+prolog="test_hyrax_service_version[] -"
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     # Run the script invoked as an application,
@@ -202,7 +205,7 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 else
     # Otherwise...
     # Just source it into the current shell.
-    loggy "$prolog SUCCESS! The test_docker_image_version functions have been loaded in to the current shell."
+    loggy "$prolog SUCCESS! The test_hyrax_service_version functions have been loaded in to the current shell."
 fi
 
 
