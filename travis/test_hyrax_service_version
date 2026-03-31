@@ -25,57 +25,6 @@ function loggy() {
     echo "$@" | awk '{ print "# "$0;}' >&2
 }
 
-#############################################################################
-# test_hyrax_version_response()
-# Test the Hyrax version response document for the
-# expected version string.
-function test_hyrax_version_response(){
-    local prolog="test_hyrax_version_response() -"
-    loggy "$HR1"
-    loggy "$prolog BEGIN"
-
-    local end_point_url="$1"
-    loggy "$prolog         end_point_url: $end_point_url"
-
-    local expected_version_str="$2"
-    loggy "$prolog  expected_version_str: $expected_version_str"
-
-
-    local version_url="$end_point_url/hyrax/version"
-    loggy "$prolog           version_url: $end_point_url"
-
-    #####################################################
-    # Get Hyrax version response from the running server
-    loggy "$prolog Retrieving Hyrax Version Response from: '$version_url'"
-    version_response="$(curl -s -c cookies -b cookies -n $NETRC_FILE -L "$version_url")"
-    loggy "$prolog Hyrax Version Response:"
-    loggy "$version_response"
-    loggy "$HR1"
-
-    ############################################################
-    # Verify Hyrax Version Injection
-    #   Get this line from the version response:
-    #       <Hyrax version="##########" />
-    #   and then use awk to get the actual value of ##########
-    local hyrax_version_value
-    hyrax_version_value="$(echo "$version_response" | grep "<Hyrax version" | awk '{split($0, a, "\""); print a[2];}')"
-    loggy "$prolog hyrax_version_response: $hyrax_version_value"
-    loggy "$prolog expected_hyrax_version: $expected_version_str"
-    if test "$expected_version_str" == "$hyrax_version_value"; then
-        loggy "$prolog SUCCESS!
-        The value of the Hyrax version returned in the Hyrax version response from the tested docker image matches the
-        expected_hyrax_version value."
-    else
-        loggy "$prolog ERROR!
-        The value of the hyrax version string '$hyrax_version_value' returned in the version
-        response does not match the expected_hyrax_version env value '$expected_version_str'
-        in this production environment!"
-        return 1
-    fi
-    loggy "$prolog END"
-    loggy "$HR1"
-    return 0
-}
 
 #############################################################################
 # test_response_content()
@@ -83,6 +32,7 @@ function test_hyrax_version_response(){
 # expected_hyrax_version string
 function test_response_content(){
     local prolog="test_response_content() -"
+    loggy "$HR1"
     loggy "$prolog BEGIN"
 
     local test_url="$1"
@@ -116,8 +66,63 @@ function test_response_content(){
     else
         loggy "$prolog SUCCESS!  The test url: '$test_url' response contained the expected string: '$expected_string'"
     fi
+    loggy "$prolog END"
+    return 0
+}
+
+#############################################################################
+# test_hyrax_version_response()
+# Test the Hyrax version response document for the
+# expected version string.
+function test_hyrax_version_response(){
+    local prolog="test_hyrax_version_response() -"
+    loggy "$HR1"
+    loggy "$prolog BEGIN"
+
+    local end_point_url="$1"
+    loggy "$prolog         end_point_url: $end_point_url"
+
+    local expected_version_str="$2"
+    loggy "$prolog  expected_version_str: $expected_version_str"
+
+
+    local version_url="$end_point_url/hyrax/version"
+    loggy "$prolog           version_url: $version_url"
+
+    #####################################################
+    # Get Hyrax version response from the running server
+    loggy "$prolog Retrieving Hyrax Version Response from: '$version_url'"
+    local version_response
+    version_response="$(curl -s -c cookies -b cookies -n $NETRC_FILE -L "$version_url")"
+    loggy "$prolog Hyrax Version Response:"
+    loggy "$version_response"
+    loggy "$HR1"
+
+    ############################################################
+    # Verify Hyrax Version Injection
+    #   Get this line from the version response:
+    #       <Hyrax version="##########" />
+    #   and then use awk to get the actual value of ##########
+    local hyrax_version_value
+    hyrax_version_value="$(echo "$version_response" | grep "<Hyrax version" | awk '{split($0, a, "\""); print a[2];}')"
+    loggy "$prolog hyrax_version_response: $hyrax_version_value"
+    loggy "$prolog expected_hyrax_version: $expected_version_str"
+    if test "$expected_version_str" == "$hyrax_version_value"; then
+        loggy "$prolog SUCCESS!
+        The value of the Hyrax version returned in the Hyrax version response from the tested docker image matches the
+        expected_hyrax_version value."
+    else
+        loggy "$prolog ERROR!
+        The value of the hyrax version string '$hyrax_version_value' returned in the version
+        response does not match the expected_hyrax_version env value '$expected_version_str'
+        in this production environment!"
+        return 1
+    fi
+
+    test_response_content   "$version_url" "$expected_version_str"
 
     loggy "$prolog END"
+    loggy "$HR1"
     return 0
 }
 
@@ -145,8 +150,6 @@ function test_HyraxVersion_class_endpoints() {
     loggy "$prolog expected_hyrax_version: $expected_hyrax_version"
 
     local status
-#    local some_page
-
 
     #####################################################################
     # Check contents.html
@@ -155,25 +158,6 @@ function test_HyraxVersion_class_endpoints() {
     local contents_url="$end_point_url/hyrax/contents.html"
     loggy "$prolog Using contents_url: $contents_url"
     test_response_content "$contents_url" "$expected_hyrax_version"
-
-#    loggy "$HR1"
-#    loggy "$prolog Checking contents.html for correct Hyrax version."
-#    local contents_url="$end_point_url/hyrax/contents.html"
-#    loggy "$prolog contents_url: $contents_url"
-#    some_page="$(curl -s -c cookies -b cookies -n "$NETRC_FILE" -L "$contents_url")"
-    # loggy "$prolog $contents_url: "
-    # loggy "$some_page"
-#    echo "$some_page" | grep "$expected_hyrax_version"
-#    status=$?
-#    if test $status -ne 0
-#    then
-#        loggy "$prolog ERROR! The expected version string as not found in the contents.html page."
-#        return  $status
-#    else
-#        loggy "$prolog SUCCESS! The '$contents_url' response contained the version string: '$expected_hyrax_version'"
-#    fi
-
-
 
 
     #####################################################################
@@ -184,19 +168,6 @@ function test_HyraxVersion_class_endpoints() {
     local ifh_url="$end_point_url/hyrax/data/nc/fnoc1.nc.dmr.html"
     loggy "$prolog Using ifh_url: $ifh_url"
     test_response_content "$ifh_url" "$expected_hyrax_version"
-
-#    some_page="$(curl -s -c cookies -b cookies -n "$NETRC_FILE" -L "$ifh_url")"
-    # loggy "$prolog $ifh_url: "
-    # loggy "$some_page"
-#    echo "$some_page" | grep "$expected_hyrax_version"
-#    status=$?
-#    if test $status -ne 0
-#    then
-#        loggy "$prolog ERROR! The expected version string as not found in the Data Request Form page."
-#        return  $status
-#    else
-#        loggy "$prolog SUCCESS! The the '$ifh_url' response contained the version string: '$expected_hyrax_version'"
-#    fi
 
     loggy "$prolog END"
     loggy "$HR0"
@@ -236,6 +207,7 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     set -e
     test_hyrax_version_response "$end_point_url" "$expected_hyrax_version"
     test_HyraxVersion_class_endpoints   "$end_point_url" "$expected_hyrax_version"
+
 
 
     loggy "$prolog END"
