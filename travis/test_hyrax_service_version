@@ -78,11 +78,11 @@ function test_hyrax_version_response(){
 }
 
 #############################################################################
-# check_contents_html_version()
+# test_response_content()
 # Test one of the contents.html responses (dynamic) for the presence of the
 # expected_hyrax_version string
 function test_response_content(){
-    local prolog="check_contents_html_version() -"
+    local prolog="test_response_content() -"
     loggy "$prolog BEGIN"
 
     local test_url="$1"
@@ -132,15 +132,15 @@ function test_HyraxVersion_class_endpoints() {
 
     local end_point_url="$1"
     if test -z "$end_point_url"; then
-        loggy "$prolog ERROR! You must pass a Hyrax endpoint url string as parameter 2"
-        return 2
+        loggy "$prolog ERROR! You must pass a Hyrax endpoint url string as parameter 1"
+        return 1
     fi
     loggy "$prolog end_point_url: $end_point_url"
 
     local expected_hyrax_version="$2"
     if test -z "$expected_hyrax_version"; then
-        loggy "$prolog ERROR! You must pass a Hyrax endpoint url string as parameter 3"
-        return 3
+        loggy "$prolog ERROR! You must pass a Hyrax endpoint url string as parameter 2"
+        return 2
     fi
     loggy "$prolog expected_hyrax_version: $expected_hyrax_version"
 
@@ -153,7 +153,7 @@ function test_HyraxVersion_class_endpoints() {
     #
     loggy "$prolog Checking a contents.html page for the expected version string."
     local contents_url="$end_point_url/hyrax/contents.html"
-    loggy "$prolog contents_url: $contents_url"
+    loggy "$prolog Using contents_url: $contents_url"
     test_response_content "$contents_url" "$expected_hyrax_version"
 
 #    loggy "$HR1"
@@ -180,9 +180,10 @@ function test_HyraxVersion_class_endpoints() {
     # Check DAP4 Data Request Form
     #
     loggy "$HR1"
-    test_response_content "$ifh_url" "$expected_hyrax_version"
     loggy "$prolog Checking DAP4 Data Request Form page for correct version."
-    loggy "$prolog ifh_url: $ifh_url"
+    local ifh_url="$end_point_url/hyrax/data/nc/fnoc1.nc.dmr.html"
+    loggy "$prolog Using ifh_url: $ifh_url"
+    test_response_content "$ifh_url" "$expected_hyrax_version"
 
 #    some_page="$(curl -s -c cookies -b cookies -n "$NETRC_FILE" -L "$ifh_url")"
     # loggy "$prolog $ifh_url: "
