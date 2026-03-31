@@ -243,12 +243,3 @@ else
     loggy "$prolog SUCCESS! The test_docker_image_version functions have been loaded in to the current shell."
 fi
 
-
-
-
-
-
-
-
-
-

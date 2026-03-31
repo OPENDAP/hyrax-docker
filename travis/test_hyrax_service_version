@@ -52,13 +52,14 @@ function test_response_content(){
     local some_page
 
     #####################################################################
-    # Check contents.html
-    #
+    # Retrieve the response foe test_url and check for the presence of
+    # expected_string within.
     loggy "$prolog Checking '$test_url' for correct the expected string: '$expected_string'"
     some_page="$(curl -s -c cookies -b cookies -n "$NETRC_FILE" -L "$test_url")"
 
     if test -n "$verbose"
     then
+        # Show the response when in verbose mode.
         loggy "$prolog response document: "
         loggy "$some_page"
     fi
@@ -76,36 +77,12 @@ function test_response_content(){
     return 0
 }
 
-#############################################################################
-# test_hyrax_version_response()
-# Test the Hyrax version response document for the
-# expected version string.
-function test_hyrax_version_response(){
-    local prolog="test_hyrax_version_response() -"
-    loggy "$HR1"
-    loggy "$prolog BEGIN"
-
-    local end_point_url="$1"
-    loggy "$prolog         end_point_url: $end_point_url"
-
-    local expected_version_str="$2"
-    loggy "$prolog  expected_version_str: $expected_version_str"
-
-    local version_url="$end_point_url/hyrax/version"
-    loggy "$prolog           version_url: $version_url"
-
-    local version_response_str="<Hyrax version=\"$expected_hyrax_version\""
-    test_response_content   "$version_url" "$version_response_str"
-
-    loggy "$prolog END"
-    loggy "$HR1"
-    return 0
-}
-
 
 #############################################################################
-# test_HyraxVersion_class_endpoints()
-#     Verify that we have the expected server version
+# test_hyrax_service_endpoints()
+#     Verify that we have the expected server versions showing up in the
+# Hyrax version response, the contents.html pages (navigation pages) and in
+# the Data Request Form pages.
 function test_hyrax_service_endpoints() {
     local prolog="test_hyrax_service_endpoints() -"
     loggy "$HR0"
@@ -132,10 +109,10 @@ function test_hyrax_service_endpoints() {
     loggy "$prolog Checking a Hyrax version response page for the expected version string."
 
     local version_url="$end_point_url/hyrax/version"
-    loggy "$prolog           version_url: $version_url"
+    loggy "$prolog           version_url: '$version_url'"
 
     local version_response_str="<Hyrax version=\"$expected_hyrax_version\""
-    loggy "$prolog  version_response_str: $version_response_str"
+    loggy "$prolog  version_response_str: '$version_response_str'"
 
     test_response_content   "$version_url" "$version_response_str"
 
@@ -146,10 +123,10 @@ function test_hyrax_service_endpoints() {
     loggy "$prolog Checking a contents.html page for the expected version string."
 
     local contents_url="$end_point_url/hyrax/contents.html"
-    loggy "$prolog Using contents_url: $contents_url"
+    loggy "$prolog Using contents_url: '$contents_url'"
 
     local contents_version="OPeNDAP Hyrax ($expected_hyrax_version)"
-    loggy "$prolog Using contents_version: $contents_version"
+    loggy "$prolog Using contents_version: '$contents_version'"
 
     test_response_content "$contents_url" "$contents_version"
 
@@ -157,14 +134,13 @@ function test_hyrax_service_endpoints() {
     #####################################################################
     # Check DAP4 Data Request Form
     #
-    loggy "$HR1"
     loggy "$prolog Checking DAP4 Data Request Form page for correct version."
 
     local ifh_url="$end_point_url/hyrax/data/nc/fnoc1.nc.dmr.html"
-    loggy "$prolog Using ifh_url: $ifh_url"
+    loggy "$prolog Using ifh_url: '$ifh_url'"
 
     local ifh_version="OPeNDAP Hyrax ($expected_hyrax_version)"
-    loggy "$prolog Using ifh_version: $ifh_version"
+    loggy "$prolog Using ifh_version: '$ifh_version'"
 
     test_response_content "$ifh_url" "$ifh_version"
 
