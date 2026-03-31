@@ -118,8 +118,9 @@ function test_hyrax_version_response(){
         in this production environment!"
         return 1
     fi
+    local version_str="<Hyrax version=\"$expected_hyrax_version\""
 
-    test_response_content   "$version_url" "$expected_version_str"
+    test_response_content   "$version_url" "$version_str"
 
     loggy "$prolog END"
     loggy "$HR1"
