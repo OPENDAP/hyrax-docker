@@ -29,8 +29,10 @@ function loggy() {
 
 #############################################################################
 # test_response_content()
-# Test one of the contents.html responses (dynamic) for the presence of the
-# expected_hyrax_version string
+# This function dereferences $test_url and then uses grep to search the
+# response document for the $expected_string. If the $expected_string is
+# found in the response then the test is a success. If the $expected_string
+# is not found in response then the test fails.
 function test_response_content(){
     local prolog="test_response_content() -"
     loggy "$HR1"
@@ -80,9 +82,10 @@ function test_response_content(){
 
 #############################################################################
 # test_hyrax_service_endpoints()
-#     Verify that we have the expected server versions showing up in the
-# Hyrax version response, the contents.html pages (navigation pages) and in
-# the Data Request Form pages.
+#     Verify that we have the expected server versions showing up in:
+#  - The Hyrax version response
+#  - The contents.html pages (blue-bar navigation pages)
+#  - The Data Request Form pages.
 function test_hyrax_service_endpoints() {
     local prolog="test_hyrax_service_endpoints() -"
     loggy "$HR0"
