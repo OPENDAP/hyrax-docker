@@ -85,42 +85,11 @@ function test_hyrax_version_response(){
     local expected_version_str="$2"
     loggy "$prolog  expected_version_str: $expected_version_str"
 
-
     local version_url="$end_point_url/hyrax/version"
     loggy "$prolog           version_url: $version_url"
 
-    #####################################################
-    # Get Hyrax version response from the running server
-    loggy "$prolog Retrieving Hyrax Version Response from: '$version_url'"
-    local version_response
-    version_response="$(curl -s -c cookies -b cookies -n $NETRC_FILE -L "$version_url")"
-    loggy "$prolog Hyrax Version Response:"
-    loggy "$version_response"
-    loggy "$HR1"
-
-    ############################################################
-    # Verify Hyrax Version Injection
-    #   Get this line from the version response:
-    #       <Hyrax version="##########" />
-    #   and then use awk to get the actual value of ##########
-    local hyrax_version_value
-    hyrax_version_value="$(echo "$version_response" | grep "<Hyrax version" | awk '{split($0, a, "\""); print a[2];}')"
-    loggy "$prolog hyrax_version_response: $hyrax_version_value"
-    loggy "$prolog expected_hyrax_version: $expected_version_str"
-    if test "$expected_version_str" == "$hyrax_version_value"; then
-        loggy "$prolog SUCCESS!
-        The value of the Hyrax version returned in the Hyrax version response from the tested docker image matches the
-        expected_hyrax_version value."
-    else
-        loggy "$prolog ERROR!
-        The value of the hyrax version string '$hyrax_version_value' returned in the version
-        response does not match the expected_hyrax_version env value '$expected_version_str'
-        in this production environment!"
-        return 1
-    fi
-    local version_str="<Hyrax version=\"$expected_hyrax_version\""
-
-    test_response_content   "$version_url" "$version_str"
+    local version_response_str="<Hyrax version=\"$expected_hyrax_version\""
+    test_response_content   "$version_url" "$version_response_str"
 
     loggy "$prolog END"
     loggy "$HR1"
@@ -131,7 +100,7 @@ function test_hyrax_version_response(){
 #########################################################################################################
 # test_HyraxVersion_class_endpoints()
 #     Verify that we have the expected server version
-function test_HyraxVersion_class_endpoints() {
+function test_version_from_hyrax_service_endpoints() {
     local prolog="test_HyraxVersion_class_endpoints() -"
     loggy "$HR0"
     loggy "$prolog BEGIN"
@@ -150,14 +119,29 @@ function test_HyraxVersion_class_endpoints() {
     fi
     loggy "$prolog expected_hyrax_version: $expected_hyrax_version"
 
-    local status
+
+    #####################################################################
+    # Check The Hyrax Version Response
+    #
+    loggy "$prolog Checking a Hyrax version response page for the expected version string."
+
+    local version_url="$end_point_url/hyrax/version"
+    loggy "$prolog           version_url: $version_url"
+
+    local version_response_str="<Hyrax version=\"$expected_hyrax_version\""
+    loggy "$prolog  version_response_str: $version_response_str"
+
+    test_response_content   "$version_url" "$version_response_str"
+
 
     #####################################################################
     # Check contents.html
     #
     loggy "$prolog Checking a contents.html page for the expected version string."
+
     local contents_url="$end_point_url/hyrax/contents.html"
     loggy "$prolog Using contents_url: $contents_url"
+
     test_response_content "$contents_url" "$expected_hyrax_version"
 
 
@@ -166,8 +150,10 @@ function test_HyraxVersion_class_endpoints() {
     #
     loggy "$HR1"
     loggy "$prolog Checking DAP4 Data Request Form page for correct version."
+
     local ifh_url="$end_point_url/hyrax/data/nc/fnoc1.nc.dmr.html"
     loggy "$prolog Using ifh_url: $ifh_url"
+
     test_response_content "$ifh_url" "$expected_hyrax_version"
 
     loggy "$prolog END"
@@ -185,31 +171,28 @@ function test_HyraxVersion_class_endpoints() {
 #############################################################################
 # Processing Command Line Options (Inline Execution)
 #
+
 prolog="test_hyrax_service_version[] -"
+
+end_point_url="$1"
+if test -z "$end_point_url"; then
+    loggy "$prolog ERROR! You must pass a Hyrax endpoint url string as parameter 1"
+    return 1
+fi
+
+expected_hyrax_version="$2"
+if test -z "$expected_hyrax_version"; then
+    loggy "$prolog ERROR! You must pass a Hyrax endpoint url string as parameter 2"
+    return 2
+fi
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     # Run the script invoked as an application,
     loggy "$HR0"
     loggy "$prolog BEGIN"
 
-    end_point_url="$1"
-    if test -z "$end_point_url"; then
-        loggy "$prolog ERROR! You must pass a Hyrax endpoint url string as parameter 2"
-        return 2
-    fi
-
-    expected_hyrax_version="$2"
-    if test -z "$expected_hyrax_version"; then
-        loggy "$prolog ERROR! You must pass a Hyrax endpoint url string as parameter 3"
-        return 3
-    fi
-
-
     set -e
-    test_hyrax_version_response "$end_point_url" "$expected_hyrax_version"
-    test_HyraxVersion_class_endpoints   "$end_point_url" "$expected_hyrax_version"
-
-
+    test_version_from_hyrax_service_endpoints  "$end_point_url" "$expected_hyrax_version"
 
     loggy "$prolog END"
     loggy "$HR0"
