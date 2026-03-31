@@ -1,4 +1,17 @@
 #!/bin/bash
+#############################################################################
+# test_docker_image_version
+#
+# Travis invocation:
+#
+#  - ./travis/test_docker_image_version "$OS_BUILD_VERSION_TAG"
+#
+# This script examines an OPeNDAP docker image to see if the version numbers
+# of the components have been correctly injected into the image by our CICD.
+#
+# The docker image does not need to be running in a contsainer to run this
+# test as the image is interrogated directly.
+#
 
 HR0="#######################################################################"
 HR1="- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
