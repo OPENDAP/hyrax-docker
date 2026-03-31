@@ -187,10 +187,11 @@ function test_docker_hyrax_versions() {
     #################################################################
     # The NGAP build has a static landing page that needs to match.
     if test "$DOCKER_NAME" = "ngap"; then
-        test_file_in_docker_image "$d_id" "/usr/share/tomcat/webapps/$deployment_context/docs/ngap/ngap.html" "$expected_version_str"
+        local ngap_html="/usr/share/tomcat/webapps/$deployment_context/docs/ngap/ngap.html"
+        test_file_in_docker_image "$d_id" "$ngap_html" "$expected_version_str"
         status=$?
         if test $status -ne 0; then
-            loggy "$prolog ERROR! The expected version string was not found in the file."
+            loggy "$prolog ERROR! The expected version string was not found in: '$ngap_html'"
             return $status
         fi
     fi

@@ -90,6 +90,8 @@ function check_contents_html_version(){
     then
         loggy "$prolog ERROR! The expected version string as not found in the contents.html page."
         return  $status
+    else
+        loggy "$prolog SUCCESS!  The contents.html response contained the expected_hyrax_version: '$expected_hyrax_version'"
     fi
     loggy "$prolog END"
 }
