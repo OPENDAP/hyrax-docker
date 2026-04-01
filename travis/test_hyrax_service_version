@@ -158,29 +158,29 @@ function test_hyrax_service_endpoints() {
 #########################################################################################################
 #########################################################################################################
 
-
-#############################################################################
-# Processing Command Line Options (Inline Execution)
-#
-
 prolog="test_hyrax_service_version[] -"
 
-end_point_url="$1"
-if test -z "$end_point_url"; then
-    loggy "$prolog ERROR! You must pass a Hyrax endpoint url string as parameter 1"
-    return 1
-fi
-
-expected_hyrax_version="$2"
-if test -z "$expected_hyrax_version"; then
-    loggy "$prolog ERROR! You must pass a Hyrax endpoint url string as parameter 2"
-    return 2
-fi
-
+#############################################################################
+# Run or source? What doing?
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     # Run the script invoked as an application,
     loggy "$HR0"
     loggy "$prolog BEGIN"
+
+    #############################################################################
+    # Processing Command Line Options
+    #
+    end_point_url="$1"
+    if test -z "$end_point_url"; then
+        loggy "$prolog ERROR! You must pass a Hyrax endpoint url string as parameter 1"
+        return 1
+    fi
+
+    expected_hyrax_version="$2"
+    if test -z "$expected_hyrax_version"; then
+        loggy "$prolog ERROR! You must pass a Hyrax endpoint url string as parameter 2"
+        return 2
+    fi
 
     set -e
     test_hyrax_service_endpoints  "$end_point_url" "$expected_hyrax_version"

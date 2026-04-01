@@ -9,7 +9,7 @@
 # This script examines an OPeNDAP docker image to see if the version numbers
 # of the components have been correctly injected into the image by our CICD.
 #
-# The docker image does not need to be running in a contsainer to run this
+# The docker image does not need to be running in a container to run this
 # test as the image is interrogated directly.
 #
 
@@ -25,7 +25,7 @@ function loggy() {
 #########################################################################################################
 # test_docker_image_label()
 #     Looks at the metadata of docker image 'd_id' ($1) using docker 'inspect'
-#     to retrieve the value of 'label_key' ($2) from the docker .Config.Labels
+#     to retrieve the value of 'label_key' ($2) from the docker ".Config.Labels"
 #     The retrieved value is compared with the 'expected_value' ($3)
 #
 function test_docker_image_label() {
@@ -34,8 +34,22 @@ function test_docker_image_label() {
     loggy "$prolog BEGIN"
 
     local d_id="$1"
+    if test -z "$d_id"; then
+        loggy "$prolog ERROR! You must pass valid docker id as parameter 1"
+        return 1
+    fi
+
     local label_key="$2"
+    if test -z "$label_key"; then
+        loggy "$prolog ERROR! You must a docker label key name as parameter 2"
+        return 2
+    fi
+
     local expected_value="$3"
+    if test -z "$expected_value"; then
+        loggy "$prolog ERROR! You must pass the expected value as parameter 3"
+        return 3
+    fi
 
     local docker_labels
     local status
@@ -65,11 +79,16 @@ function test_docker_image_label() {
     return 0
 }
 
-
 #########################################################################################################
 # test_file_in_docker_image()
 #     Looks inside docker image 'd_id' ($1) in the file
 #     named file_path ($2) for the string 'expected_value' ($3)
+#
+# This is accomplished by starting the container with "--rm" in order to 'cat'
+# the target file.
+#
+# The "--rm" switch causes the automatic removal of the container and its associated
+# anonymous volumes when the "cat" command exits.
 #
 function test_file_in_docker_image() {
     local prolog="test_file_in_docker_image() -"
@@ -77,22 +96,35 @@ function test_file_in_docker_image() {
     loggy "$prolog BEGIN"
 
     local d_id="$1"
+    if test -z "$d_id"; then
+        loggy "$prolog ERROR! You must pass valid docker id as parameter 1"
+        return 1
+    fi
     local file_path="$2"
-    local expected_value="$3"
+    if test -z "$file_path"; then
+        loggy "$prolog ERROR! You must pass a fully qualified file path as 2"
+        return 3
+    fi
+
+    local search_value="$3"
+    if test -z "$search_value"; then
+        loggy "$prolog ERROR! You must pass the search value as parameter 3"
+        return 3
+    fi
 
     local status
     local some_file
 
-    loggy "$prolog Checking for '$expected_value' in '$d_id::$file_path'"
+    loggy "$prolog Checking for '$search_value' in '$d_id::$file_path'"
     some_file="$(docker run --rm --entrypoint cat "$d_id" "$file_path")"
 
     #loggy "$prolog $d_id::$file_path: "
     #loggy "$some_file"
 
-    echo "$some_file" | grep "$expected_value"
+    echo "$some_file" | grep "$search_value"
     status=$?
     if test $status -ne 0; then
-        loggy "$prolog ERROR! The expected value '$expected_value' was not found in the file '$file_path'"
+        loggy "$prolog ERROR! The expected value '$search_value' was not found in the file '$file_path'"
         loggy "$prolog $d_id::$file_path: "
         loggy "$some_file"
         return $status
@@ -104,28 +136,38 @@ function test_file_in_docker_image() {
     loggy "$HR2"
     return 0
 }
-#docker cp $CONTAINER_ID:/path/in/container /path/on/host
-
 
 #########################################################################################################
 # get_docker_label_version_key()
-#   Returns the purported  Docker .Config.Labels entry for the current application build.
-#   Relies on the global variable DOCKER_NAME and embodies some inside knowledge of the irregularities
-#   In our docker labeling scheme.In particular some applications like ngap and hyrax_ncwms use
-#   the "hyrax" version in their Docker labels.
-function get_docker_label_version_key(){
+#    Returns the purported Docker ".Config.Labels" version keyname for the current application build.
+#
+# Relies on the global variable DOCKER_NAME and embodies some inside knowledge of the irregularities
+# I
+# n our docker labeling scheme.In particular some applications like ngap and hyrax_ncwms use
+# the "hyrax" version in their Docker labels.
+#
+function get_docker_label_version_key() {
     local prolog="get_docker_label_version_key() -"
-    local app_key="$DOCKER_NAME"                             # default
+    local app_key="$DOCKER_NAME" # default
     # if test -n "$DOCKER_DIR"; then app_key="$DOCKER_DIR"; fi # DOCKER_DIR if it's in use.
-    if test "$app_key" = "ngap" -o "$app_key" = "hyrax_ncwms"; then app_key="hyrax"; fi   # ngap is Hyrax so....
+    if test "$app_key" = "ngap" -o "$app_key" = "hyrax_ncwms"; then app_key="hyrax"; fi # ngap is Hyrax so....
 
     local label_version_key="org.opendap.$app_key.version"
     loggy "$prolog label_version_key: $label_version_key"
     echo "$label_version_key"
 }
 
-
-function get_expected_docker_label_version_value(){
+#########################################################################################################
+# get_expected_docker_label_version_value()
+#    Returns the value of the docker label version string for the current application build.
+#
+# Relies on the global variable DOCKER_NAME. BES_VERSION. OLFS_VERSION, and HYRAX_WEB_UI_VERSION.
+#
+# This function embodies some inside knowledge of the irregularities in our
+# docker labeling scheme. In particular the olfs and besd applications use their version specific
+# version values (and not the Hyrax version) in their Docker ".Config.Labels"  metadata labels.
+#
+function get_expected_docker_label_version_value() {
     local prolog="get_expected_docker_label_version_value() -"
     #################################################################################################
     # Target specific tweaking using global values
@@ -139,9 +181,10 @@ function get_expected_docker_label_version_value(){
 
 #########################################################################################################
 # test_docker_version_label()
-#     Examine the .Config.Labels metadata in "d_id" and test that the application version for our
-# application is correct.
-function test_docker_version_label(){
+#     Examine the .Config.Labels metadata in "d_id" and test that the application version for the
+# current application build is correct.
+#
+function test_docker_version_label() {
     local prolog="test_docker_version_label() -"
 
     local d_id="$1"
@@ -169,11 +212,11 @@ function test_docker_version_label(){
 
 }
 
-
 #########################################################################################################
 # test_docker_hyrax_version()
 #     Examine the Hyrax deployment in "d_id" and check the value of the Hyrax version strings
 # in the expected locations.
+#
 function test_docker_hyrax_versions() {
     local prolog="test_docker_hyrax_versions() -"
     loggy "$HR1"
@@ -211,8 +254,9 @@ function test_docker_hyrax_versions() {
 
     #################################################################
     # All the service deployments (except the besd) have the OLFS
-    # installed in Tomcat. We check the version.xsl static file for
-    # the Hyrax version (not the OLFS version, at least in that location)
+    # installed in Tomcat. For these we check the version.xsl static
+    # file for the Hyrax version (not the OLFS version, at least in
+    # that location)
     if test "$DOCKER_NAME" != "besd"; then
         local version_xsl="/usr/share/tomcat/webapps/$deployment_context/xsl/version.xsl"
         test_file_in_docker_image "$d_id" "$version_xsl" "$HYRAX_WEB_UI_VERSION"
@@ -228,18 +272,22 @@ function test_docker_hyrax_versions() {
 }
 
 #############################################################################
-# Processing Command Line Options (Inline Execution)
-#
+#############################################################################
+#############################################################################
+
 prolog="test_docker_image_version[] -"
 
+#############################################################################
+# Run or source? What doing?
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     # Run the script invoked as an application,
     loggy "$HR0"
     loggy "$prolog BEGIN"
 
+    # #################################
+    # Processing Command Line Option
     docker_image_id="$1"
-    if test -z "$docker_image_id"
-    then
+    if test -z "$docker_image_id"; then
         loggy "ERROR! You must supply a docker id to use theis script."
         exit 1
     fi
@@ -255,4 +303,3 @@ else
     # Just source it into the current shell.
     loggy "$prolog SUCCESS! The test_docker_image_version functions have been loaded in to the current shell."
 fi
-
