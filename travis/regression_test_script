@@ -14,8 +14,8 @@ set -e
 # hyrax_regression_tests on the new server.
 #
 # !! NOTE !!
-# As written this script  leaves the docker container running so that downstream
-# service tests can be easily run.
+#   As written this script leaves the tested hyrax docker container
+#   running so that downstream service tests can be easily run.
 #
 HR0="#######################################################################"
 HR1="- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
