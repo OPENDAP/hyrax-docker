@@ -435,6 +435,8 @@ loggy "$prolog             TEST_NAMES: $TEST_NAMES"
 loggy "$prolog         TESTS_LOG_BASE: $TESTS_LOG_BASE"
 loggy "$prolog              DOCKER_ID: $DOCKER_ID"
 
+#############################################################################
+# Run or source? What doing?
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     # Run the script invoked as an application,
     set -e
