@@ -38,7 +38,9 @@ function test_startup() {
         sleep 10
         exit 1
     else
-        loggy "$prolog Success: Image '$image_tag' did not crash on startup"
+        loggy "$prolog Success: Image '$image_tag' did not crash on startup."
+        loggy "$prolog Docker logs:"
+        loggy "$(docker logs travis_test_image)"
 
         docker rm -f travis_test_image
     fi
