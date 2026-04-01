@@ -5,7 +5,7 @@
 # set -v # "set -o verbose" Prints shell input lines as they are read.
 # set -x # "set -o xtrace"  Print command traces before executing command.
 # set -e #  Exit on error.
-export debug="false"
+export debug="${verbose:-"false"}"
 
 export SYSTEM_ID="${INSTANCE_ID:-"undetermined"}"
 export LOG_KEY_PREFIX="${LOG_KEY_PREFIX:-"hyrax-"}"
@@ -88,7 +88,7 @@ function get_aws_instance_id() {
   startup_log "Checking for AWS instance-id by requesting: $aws_instance_id_url"
 
   set +e # This cURL command may fail, and that's ok.
-  http_status"=$(curl -s -w "%{http_code}" --max-time 5 -o "$id_file" -L "$aws_instance_id_url")"
+  http_status="$(curl -s -w "%{http_code}" --max-time 5 -o "$id_file" -L "$aws_instance_id_url")"
   curl_status=$?
   set -e
 
@@ -496,7 +496,11 @@ if test $status -ne 0; then
   error_log "ERROR: Failed to start BES: $status"
   #exit $status
 fi
-besd_pid="$(ps aux | grep /usr/bin/besdaemon | grep -v grep | awk '{print $2;}' -)"
+process_list="$(ps aux)"
+startup_log "process_list:"
+startup_log "$process_list"
+besd_pid="$(echo "$process_list" | grep /usr/bin/besdaemon | grep -v grep | awk '{print $2;}' -)"
+#besd_pid="$(ps aux | grep /usr/bin/besdaemon | grep -v grep | awk '{print $2;}' -)"
 startup_log "The besd is UP! [pid: $besd_pid]"
 
 #-------------------------------------------------------------------------------
