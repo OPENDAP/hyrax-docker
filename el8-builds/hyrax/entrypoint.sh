@@ -158,7 +158,11 @@ if test $status -ne 0 ; then
     echo "ERROR: Failed to start BES: $status" >&2
     exit $status
 fi
-besd_pid=`ps aux | grep /usr/bin/besdaemon | grep -v grep | awk '{print $2;}' - `
+process_list="$(ps aux)"
+startup_log "process_list:"
+startup_log "$process_list"
+besd_pid="$(echo "$process_list" | grep "/bin/besdaemon" | grep -v grep | awk '{print $2;}' -)"
+#besd_pid=`ps aux | grep /usr/bin/besdaemon | grep -v grep | awk '{print $2;}' - `
 echo "The besd is UP! [pid: ${besd_pid}]" >&2
 
 #-------------------------------------------------------------------------------
