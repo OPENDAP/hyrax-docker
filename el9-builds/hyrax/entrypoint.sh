@@ -148,23 +148,6 @@ fi
 
 loggy "JAVA VERSION: $( java -version 2>&1 )"
 
-loggy "Checking for awscli"
-set +e
-which_output="$(eval "which aws" 2>&1)"
-status=$?
-set -e
-loggy "$which_output"
-if test $status -ne 0
-then
-    loggy "WARNING: AWS CLI not detected on PATH, may not be installed."
-else
-    aws configure list
-    status=$?
-    if test $status -ne 0 ; then
-        loggy "WARNING: Problem with AWS CLI configuration! (status: $status)"
-    fi
-fi
-
 loggy "PythonVersion (again): $( python3 --version 2>&1 )"
 
 #-------------------------------------------------------------------------------

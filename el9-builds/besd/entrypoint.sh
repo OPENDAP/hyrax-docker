@@ -41,17 +41,7 @@ loggy "SLEEP_INTERVAL: $SLEEP_INTERVAL seconds."
 # As set in Dockerfile
 export BES_USER=${BES_USER:-"bes_user"}
 
-#AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:-<not set>}"
-#loggy "AWS_SECRET_ACCESS_KEY is ${AWS_SECRET_ACCESS_KEY}"
-#
-#AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID:-<not set>}"
-#loggy "AWS_ACCESS_KEY_ID is ${AWS_ACCESS_KEY_ID}"
-#
-#AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION:-<not set>}"
-#loggy "AWS_DEFAULT_REGION is ${AWS_DEFAULT_REGION}"
-
-
-while getopts "e:sdi:k:r:" opt; do
+while getopts "e:sd" opt; do
   case $opt in
     e)
       SERVER_HELP_EMAIL=$OPTARG
@@ -64,18 +54,6 @@ while getopts "e:sdi:k:r:" opt; do
     d)
       debug=true;
       loggy "Debug is enabled";
-      ;;
-    k)
-      AWS_SECRET_ACCESS_KEY="${OPTARG}"
-      loggy "Found command line value for AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}";
-      ;;
-    i)
-      AWS_ACCESS_KEY_ID="${OPTARG}"
-      loggy "Found command line value for AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}";
-      ;;
-    r)
-      AWS_DEFAULT_REGION="${OPTARG}"
-      loggy "Found command line value for AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}";
       ;;
     \?)
       loggy "Invalid option: -$OPTARG"
@@ -92,24 +70,6 @@ while getopts "e:sdi:k:r:" opt; do
 done
 
 ################################################################################
-loggy "Checking AWS CLI: "
-set +e
-aws_bin="$(which aws 2>&1)"
-ab_status=$?
-set -e
-if test $ab_status -ne 0; then
-    loggy "WARNING: It appears that the AWS CLI is not installed. Not found on '$PATH' ('which' status: $ab_status, msg: $aws_bin)"
-else
-    acl="$(aws configure list 2>&1)"
-    acl_status=$?
-    loggy "$acl"
-    if test $acl_status -ne 0; then
-      loggy "WARNING: Problem with AWS CLI! ('aws' status: $acl_status msg: $acl)"
-    fi
-fi
-# loggy "$@"
-
-
 # modify bes.conf based on environment variables before startup. These are set in 
 # the Docker file to "not_set" and are overriden by the commandline here
 #

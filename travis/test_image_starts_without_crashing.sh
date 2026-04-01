@@ -41,7 +41,9 @@ function test_startup() {
         loggy "$prolog Success: Image '$image_tag' did not crash on startup."
         loggy "$prolog Docker logs:"
         loggy "$(docker logs travis_test_image)"
-
+        loggy ""
+        loggy ""
+        loggy ""
         docker rm -f travis_test_image
     fi
     loggy "$prolog END"
