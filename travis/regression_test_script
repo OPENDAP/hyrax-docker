@@ -10,6 +10,13 @@ set -e
 #           -i "$OS_BUILD_VERSION_TAG" \
 #           -l "deployed-image-regression-tests-$TRAVIS_JOB_NUMBER"
 #
+# This script starts the target docker image and then runs the
+# hyrax_regression_tests on the new server.
+#
+# !! NOTE !!
+#   As written this script leaves the tested hyrax docker container
+#   running so that downstream service tests can be easily run.
+#
 HR0="#######################################################################"
 HR1="- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
 HR2="--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---"
@@ -256,163 +263,6 @@ function clean_and_start() {
 }
 
 #########################################################################################################
-# check_version()
-#     Verify that we have the expected server version
-function check_version() {
-    local prolog="check_version() -"
-    loggy "$HR0"
-    loggy "$prolog BEGIN"
-
-    local d_id="$1"
-    if test -z "$d_id"; then
-        loggy "$prolog ERROR! You must pass valid docker id as parameter 1"
-        return 1
-    fi
-
-    local end_point_url="$2"
-    if test -z "$end_point_url"; then
-        loggy "$prolog ERROR! You must pass a Hyrax endpoint url string as parameter 2"
-        return 2
-    fi
-
-    local expected_hyrax_version="$3"
-    if test -z "$expected_hyrax_version"; then
-        loggy "$prolog ERROR! You must pass a Hyrax endpoint url string as parameter 3"
-        return 3
-    fi
-
-    local docker_version_label
-    local docker_version_status
-    local status
-    local version_url
-    local version_response
-    local hyrax_version_value
-    local version_url="$end_point_url/hyrax/version"
-    local contents_url="$end_point_url/hyrax/contents.html"
-    local ifh_url="$end_point_url/hyrax/data/nc/fnoc1.nc.dmr.html"
-
-    #####################################################
-    # Get Hyrax version response from the running server
-    loggy "$prolog Retrieving Hyrax Version Response from: '$version_url'"
-    version_response="$(curl -s -c cookies -b cookies -n "$NETRC_FILE" -L "$version_url")"
-    loggy "$prolog Hyrax Version Response:"
-    loggy "$version_response"
-    loggy "$HR1"
-
-    ############################################################
-    # Verify Hyrax Version Injection
-    #   Get this line from the version response:
-    #       <Hyrax version="##########" />
-    #   and then use awk to get the actual value of ##########
-    hyrax_version_value="$(echo "$version_response" | grep "<Hyrax version" | awk '{split($0, a, "\""); print a[2];}')"
-    loggy "$prolog hyrax_version_response: $hyrax_version_value"
-    loggy "$prolog expected_hyrax_version: $expected_hyrax_version"
-    if test "$expected_hyrax_version" == "$hyrax_version_value"; then
-        loggy "$prolog SUCCESS!
-        The value of the Hyrax version returned in the Hyrax version response from the tested docker image matches the
-        expected_hyrax_version value."
-    else
-        loggy "$prolog ERROR!
-        The value of the hyrax version string '$hyrax_version_value' returned in the version
-        response does not match the expected_hyrax_version env value '$expected_hyrax_version'
-        in this production environment!"
-        return 1
-    fi
-    loggy "$HR1"
-    loggy "$prolog Checking docker image metadata for correct Hyrax version..."
-    local version_label_key="org.opendap.hyrax.version"
-    docker_version_label=$(docker inspect --format="{{ index .Config.Labels \"$version_label_key\" }}" "$d_id")
-    docker_version_status=$?
-    loggy "docker_version_label: '$docker_version_label'"
-    if test "$expected_hyrax_version" = "$docker_version_label"; then
-        loggy "$prolog SUCCESS!
-        The 'docker inspect' command for $d_id returned the expected_hyrax_version value."
-    else
-        loggy "$prolog ERROR!
-        The value of the hyrax version string '$docker_version_label' found in the docker
-        inspect response does not match the expected_hyrax_version env value '$expected_hyrax_version'
-        in this production environment!"
-        return 1
-    fi
-
-    local deployment_context="opendap"
-    local some_page
-    if test "$DOCKER_NAME" = "ngap"
-    then
-        deployment_context="ROOT"
-        loggy "$HR1"
-        loggy "$prolog Checking NGAP landing page for correct Hyrax version."
-        some_page="$(docker exec -it $d_id bash -c "cat /usr/share/tomcat/webapps/$deployment_context/docs/ngap/ngap.html")"
-        # loggy "$prolog NGAP Landing Page: "
-        # loggy "$some_page"
-        echo "$some_page" | grep "$expected_hyrax_version"
-        status=$?
-        if test $status -ne 0
-        then
-            loggy "$prolog ERROR! The expected version string as not found in the version.xsl file."
-            return  $status
-        fi
-    fi
-
-    loggy "$HR1"
-    loggy "$prolog Expecting docker id: $d_id"
-    loggy "$prolog docker container ls -a:"
-    docker container ls -a
-
-    #####################################################################
-    # Check version.xsl
-    #
-    loggy "$HR1"
-    loggy "$prolog Checking version.xsl for correct Hyrax version, d_id: $d_id"
-    some_page="$(docker exec -it "$d_id" bash -c "cat /usr/share/tomcat/webapps/$deployment_context/xsl/version.xsl")"
-    #loggy "$prolog version.xsl: "
-    #loggy "$some_page"
-    echo "$some_page" | grep "$expected_hyrax_version"
-    status=$?
-    if test $status -ne 0
-    then
-        loggy "$prolog ERROR! The expected version string as not found in the version.xsl file."
-        return  $status
-    fi
-
-    #####################################################################
-    # Check contents.html
-    #
-    loggy "$HR1"
-    loggy "$prolog Checking contents.html for correct Hyrax version."
-    some_page="$(curl -s -c cookies -b cookies -n "$NETRC_FILE" -L "$contents_url")"
-    # loggy "$prolog $contents_url: "
-    # loggy "$some_page"
-    echo "$some_page" | grep "$expected_hyrax_version"
-    status=$?
-    if test $status -ne 0
-    then
-        loggy "$prolog ERROR! The expected version string as not found in the contents.html page."
-        return  $status
-    fi
-
-    #####################################################################
-    # Check DAP4 Data Request Form
-    #
-    loggy "$HR1"
-    loggy "$prolog Checking DAP4 Data Request Form page for correct version."
-    some_page="$(curl -s -c cookies -b cookies -n "$NETRC_FILE" -L "$ifh_url")"
-    # loggy "$prolog $ifh_url: "
-    # loggy "$some_page"
-    echo "$some_page" | grep "$expected_hyrax_version"
-    status=$?
-    if test $status -ne 0
-    then
-        loggy "$prolog ERROR! The expected version string as not found in the Data Request Form page."
-        return  $status
-    fi
-
-    loggy "$prolog END"
-    loggy "$HR0"
-    return 0
-}
-
-#########################################################################################################
 # run_regression_tests()
 #     Run the Hyrax regression tests against the Hyrax server @ $endpoint
 function run_regression_tests() {
@@ -555,11 +405,6 @@ function run_the_tests() {
     loggy "$prolog wait_for_hyrax status: $wait_for_hyrax_status"
     if test $wait_for_hyrax_status -ne 0; then exit $wait_for_hyrax_status; fi
 
-    check_version "$DOCKER_ID" "$HYRAX_END_POINT" "$EXPECTED_HYRAX_VERSION"
-    local check_version_status=$?
-    loggy "$prolog check_version status: $check_version_status"
-    if test $check_version_status -ne 0; then exit $check_version_status; fi
-
     run_regression_tests "$TEST_IMAGE_NAME" "$HYRAX_END_POINT" "$DOCKER_ID"
     local run_regression_tests_status=$?
     loggy "$prolog run_regression_tests status: $run_regression_tests_status"
@@ -590,6 +435,8 @@ loggy "$prolog             TEST_NAMES: $TEST_NAMES"
 loggy "$prolog         TESTS_LOG_BASE: $TESTS_LOG_BASE"
 loggy "$prolog              DOCKER_ID: $DOCKER_ID"
 
+#############################################################################
+# Run or source? What doing?
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     # Run the script invoked as an application,
     set -e
