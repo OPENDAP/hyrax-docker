@@ -103,11 +103,12 @@ fi
 
 
 # Start the BES daemon process
-# /usr/bin/besdaemon -i /usr -c /etc/bes/bes.conf -r /var/run/bes.pid
-/usr/bin/besctl start;
+loggy "Calling 'besctl start'"
+/usr/bin/besctl start > ./besctl.log 2>&1
 status=$?
+loggy "$(cat ./besctl.log)"
 if [ $status -ne 0 ]; then
-    echo "Failed to start BES: $status" >&2
+    loggy "ERROR: Failed to start BES: $status"
     exit $status
 fi
 

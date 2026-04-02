@@ -454,7 +454,7 @@ bes_username=$BES_USER
 bes_uid=$(id -u ${bes_username})
 bes_gid=$(id -g ${bes_username})
 startup_log "Launching besd [uid: ${bes_uid} gid: ${bes_gid}]"
-/usr/bin/besctl start 2>&1 > ./besctl.log # dropped debug control -d "/dev/null,timing"  - ndp 10/12/2023
+/usr/bin/besctl start > ./besctl.log 2>&1 # dropped debug control -d "/dev/null,timing"  - ndp 10/12/2023
 status=$?
 startup_log $(cat ./besctl.log)
 if test $status -ne 0; then
