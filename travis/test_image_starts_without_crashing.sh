@@ -19,10 +19,10 @@ function test_startup() {
     local stopped_images
     local status
 
-    local d_name="travis_test_image"
+    local d_id="travis_test_image"
 
     loggy "$prolog Test that image does not crash on startup"
-    docker run -d --name="$d_name" "$image_tag"
+    docker run -d --name="$d_id" "$image_tag"
 
     # Wait to give the entrypoint script/application a chance to run
     local wait_seconds=10
@@ -31,7 +31,7 @@ function test_startup() {
 
     # The launched image should be running; if it is not, it must have crashed
     # at startup. This will show up as an `Exited` message in `docker ps`
-    stopped_images=$(docker ps -a | grep "$d_name" | grep Exited)
+    stopped_images=$(docker ps -a | grep "$d_id" | grep Exited)
     loggy "$prolog Stopped images:"
     loggy "$stopped_images"
     if [ -n "$stopped_images" ]; then
@@ -39,20 +39,19 @@ function test_startup() {
         loggy "$prolog docker ps -a:"
         loggy "$(docker ps -a)"
         loggy "$prolog Docker logs from failed instance: "
-        loggy "$(docker logs "$d_name")"
+        loggy "$(docker logs "$d_id")"
         loggy "$prolog EXITING NOW."
         loggy "$HR0"
         # Wait to give the logs a chance to print out before we exit
         sleep 2
         exit 1
     else
-        loggy "$prolog Success: Image '$image_tag' did not crash on startup."
+        loggy "$prolog SUCCESS: Image '$image_tag' is still running after $wait_seconds seconds."
         loggy "$prolog Docker logs:"
         loggy "$(docker logs travis_test_image)"
         loggy ""
-        loggy ""
-        loggy ""
-        docker rm -f travis_test_image
+        loggy "$prolog Removing test container: $d_id"
+        loggy "$(docker rm -f "$d_id")"
     fi
     loggy "$prolog END"
     loggy "$HR0"
