@@ -102,6 +102,10 @@ if [ $FOLLOW_SYMLINKS != "not_set" ]; then
 fi
 
 
+# Where is my precious? Is the precious on the path?
+BESD="$(which besdaemon)"
+loggy "The besdaemon is here: $BESD"
+
 # Start the BES daemon process
 loggy "Calling 'besctl start'"
 /usr/bin/besctl start > ./besctl.log 2>&1
@@ -112,17 +116,18 @@ if [ $status -ne 0 ]; then
     exit $status
 fi
 
+
 process_list="$(ps aux)"
-echo "process_list:"
-echo "$process_list"
-besd_pid="$(echo "$process_list" | grep "/usr/bin/besdaemon" | grep -v grep | awk '{print $2;}' -)"
+loggy "process_list:"
+loggy "$process_list"
+besd_pid="$(echo "$process_list" | grep "$BESD" | grep -v grep | awk '{print $2;}' -)"
 #besd_pid=`ps aux | grep /usr/bin/besdaemon | grep -v grep | awk '{print $2;}' - `
 if test -z "$besd_pid"
 then
-    echo "ERROR! Failed to acquire a PID for the besdaemon process. The BES may not have started. EXITING NOW!"
+    loggy "ERROR!  Failed to acquire a PID for the besdaemon process. The BES may not have started. (Elapsed $SECONDS seconds) EXITING NOW!"
     exit 1
 fi
-echo "The besdaemon is UP! pid: $besd_pid"  >&2
+loggy "The besdaemon is UP! pid: $besd_pid"
 
 echo "BES Has Arrived..."  >&2
 
