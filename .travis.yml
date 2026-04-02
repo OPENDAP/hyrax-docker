@@ -82,7 +82,7 @@ stages:
 jobs:
   include:
     # BUILD_AND_TEST
-    - stage: disabled
+    - stage: BUILD_AND_TEST
       name: "Build and Test opendap/hyrax"
       script:
         - export DOCKER_NAME="hyrax"
@@ -148,7 +148,7 @@ jobs:
         - ./travis/test_docker_image_version "$OS_BUILD_VERSION_TAG"
 
     # BUILD
-    - stage: disabled
+    - stage: BUILD
       name: "Build opendap/hyrax_ncwms"
       script:
         - export DOCKER_NAME="hyrax_ncwms"
@@ -215,7 +215,7 @@ jobs:
         - ./travis/test_docker_image_version "$OS_BUILD_VERSION_TAG"
 
     # BUILD
-    - stage: disabled
+    - stage: BUILD
       name: "Build opendap/hyrax:ngap"
       script:
         - cd "$TARGET_OS-builds"
