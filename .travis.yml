@@ -184,7 +184,7 @@ jobs:
         - ./travis/test_docker_image_version "$OS_BUILD_VERSION_TAG"
 
     # BUILD
-    - stage: disabled
+    - stage: BUILD
       name: "Build opendap/olfs"
       script:
         - export DOCKER_NAME="olfs"
