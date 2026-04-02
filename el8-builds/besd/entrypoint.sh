@@ -116,6 +116,11 @@ echo "process_list:"
 echo "$process_list"
 besd_pid="$(echo "$process_list" | grep "/bin/besdaemon" | grep -v grep | awk '{print $2;}' -)"
 #besd_pid=`ps aux | grep /usr/bin/besdaemon | grep -v grep | awk '{print $2;}' - `
+if test -z "$besd_pid"
+then
+    echo "ERROR! Failed to acquire a PID for the besdaemon process. The BES may not have started. EXITING NOW!"
+    exit 1
+fi
 echo "The besdaemon is UP! pid: $besd_pid"  >&2
 
 echo "BES Has Arrived..."  >&2

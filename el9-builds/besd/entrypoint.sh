@@ -61,9 +61,6 @@ while getopts "e:sd" opt; do
       loggy " -e xxx where xxx is the email address of the admin contact for the server."
       loggy " -s When present causes the BES to follow symbolic links."
       loggy " -d Enables debugging output for this script."
-      loggy " -i xxx Where xxx is an AWS CLI AWS_ACCESS_KEY_ID."
-      loggy " -k xxx Where xxx is an AWS CLI AWS_SECRET_ACCESS_KEY."
-      loggy " -r xxx Where xxx is an AWS CLI AWS_DEFAULT_REGION."
       exit 2;
       ;;
   esac
@@ -106,7 +103,13 @@ loggy "process_list:"
 loggy "$process_list"
 besd_pid="$(echo "$process_list" | grep "/bin/besdaemon" | grep -v grep | awk '{print $2;}' -)"
 #besd_pid=`ps aux | grep /usr/bin/besdaemon | grep -v grep | awk '{print $2;}' - `
+if test -z "$besd_pid"
+then
+    loggy "ERROR! Failed to acquire a PID for the besdaemon process. The BES may not have started. EXITING NOW!"
+    exit 1
+fi
 loggy "The besdaemon is UP! pid: $besd_pid"
+
 start_time=
 start_time="$(date  "+%s")"
 loggy "The BES Has Arrived...(time: $start_time, SLEEP_INTERVAL: $SLEEP_INTERVAL)"
