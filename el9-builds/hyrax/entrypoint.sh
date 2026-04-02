@@ -186,7 +186,7 @@ then
     exit 1
 fi
 
-loggy "The besd is UP! [pid: $besd_pid]"
+loggy "The besdaemon is UP! [pid: $besd_pid]"
 
 #-------------------------------------------------------------------------------
 # Start Tomcat process

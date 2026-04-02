@@ -153,39 +153,43 @@ loggy "PythonVersion: "$(python3 --version)
 # Start the BES daemon process
 # /usr/bin/besdaemon -i /usr -c /etc/bes/bes.conf -r /var/run/bes.pid
 
-# BES_USER set in base bes_core docker image
-bes_username=${BES_USER:-"bes_user"}
-bes_uid=$(id -u ${bes_username})
-echo "bes_uid: ${bes_uid}"
-bes_gid=$(id -g ${bes_username})
-echo "bes_gid: ${bes_gid}"
+#-------------------------------------------------------------------------------
+# We use 'echo' in the following because downstream code is expecting this
+# output to be a key value pair, so none of that loggy() stuff
+bes_username="$BES_USER"
+bes_uid="$(id -u ${bes_username})"
+echo "bes_uid: $bes_uid"
+bes_gid="$(id -g ${bes_username})"
+echo "bes_gid: $bes_gid"
+
+#-------------------------------------------------------------------------------
+# Start the BES
 
 # Where is my precious? Is the precious on the path?
 BESD="$(which besdaemon)"
 loggy "The besdaemon is here: $BESD"
 
-# Start the BES daemon process
-loggy "Calling 'besctl start'"
+# Start using besctl
+loggy "Launching besd [uid: $bes_uid gid: $bes_gid]"
 /usr/bin/besctl start > ./besctl.log 2>&1
 status=$?
 loggy "$(cat ./besctl.log)"
-if [ $status -ne 0 ]; then
-    loggy "ERROR: Failed to start BES: $status"
-    exit $status
+if test $status -ne 0; then
+  loggy "ERROR: Failed to start BES: $status"
+  exit $status
 fi
-
 
 process_list="$(ps aux)"
-loggy "process_list:"
+loggy "process_list via 'ps aux':"
 loggy "$process_list"
-besd_pid="$(loggy "$process_list" | grep "$BESD" | grep -v grep | awk '{print $2;}' -)"
-#besd_pid=`ps aux | grep /usr/bin/besdaemon | grep -v grep | awk '{print $2;}' - `
+besd_pid="$(echo "$process_list" | grep "$BESD" | grep -v grep | awk '{print $2;}' -)"
 if test -z "$besd_pid"
 then
-    loggy "ERROR!  Failed to acquire a PID for the besdaemon process. The BES may not have started. (Elapsed $SECONDS seconds) EXITING NOW!"
+    loggy "ERROR! Failed to acquire a PID for the besdaemon process. The BES did not start. EXITING NOW!"
     exit 1
 fi
-loggy "The besdaemon is UP! pid: $besd_pid"
+
+loggy "The besdaemon is UP! [pid: $besd_pid]"
 
 #-------------------------------------------------------------------------------
 # Start Tomcat process

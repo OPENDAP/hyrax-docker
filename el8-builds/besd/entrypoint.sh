@@ -101,6 +101,14 @@ if [ $FOLLOW_SYMLINKS != "not_set" ]; then
     sed -i "s/^BES.Catalog.catalog.FollowSymLinks=No/BES.Catalog.catalog.FollowSymLinks=Yes/" /etc/bes/bes.conf
 fi
 
+#-------------------------------------------------------------------------------
+# We use 'echo' in the following because downstream code is expecting this
+# output to be a key value pair, so none of that loggy() stuff
+bes_username=$BES_USER
+bes_uid=$(id -u "$bes_username")
+bes_gid=$(id -g "$bes_username")
+echo "bes_uid: $bes_uid"
+echo "bes_gid: $bes_gid"
 
 # Where is my precious? Is the precious on the path?
 BESD="$(which besdaemon)"
@@ -116,15 +124,13 @@ if [ $status -ne 0 ]; then
     exit $status
 fi
 
-
 process_list="$(ps aux)"
 loggy "process_list:"
 loggy "$process_list"
 besd_pid="$(echo "$process_list" | grep "$BESD" | grep -v grep | awk '{print $2;}' -)"
-#besd_pid=`ps aux | grep /usr/bin/besdaemon | grep -v grep | awk '{print $2;}' - `
 if test -z "$besd_pid"
 then
-    loggy "ERROR!  Failed to acquire a PID for the besdaemon process. The BES may not have started. (Elapsed $SECONDS seconds) EXITING NOW!"
+    loggy "ERROR! Failed to acquire a PID for the besdaemon process. The BES did not start. (Elapsed $SECONDS seconds) EXITING NOW!"
     exit 1
 fi
 loggy "The besdaemon is UP! pid: $besd_pid"

@@ -103,7 +103,6 @@ if [ $status -ne 0 ]; then
     exit $status
 fi
 
-
 process_list="$(ps aux)"
 loggy "process_list:"
 loggy "$process_list"
