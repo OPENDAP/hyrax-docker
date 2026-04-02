@@ -23,7 +23,9 @@ function test_startup() {
     docker run -d --name=travis_test_image "$image_tag"
 
     # Wait to give the entrypoint script/application a chance to run
-    sleep 10
+    local wait_seconds=10
+    loggy "$prolog Waiting for $wait_seconds to ensure that '$image_tag' has a chance to start."
+    sleep $wait_seconds
 
     # The launched image should be running; if it is not, it must have crashed
     # at startup. This will show up as an `Exited` message in `docker ps`
