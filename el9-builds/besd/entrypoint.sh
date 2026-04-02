@@ -101,7 +101,7 @@ fi
 process_list="$(ps aux)"
 loggy "process_list:"
 loggy "$process_list"
-besd_pid="$(echo "$process_list" | grep "/bin/besdaemon" | grep -v grep | awk '{print $2;}' -)"
+besd_pid="$(echo "$process_list" | grep "/usr/bin/besdaemon" | grep -v grep | awk '{print $2;}' -)"
 #besd_pid=`ps aux | grep /usr/bin/besdaemon | grep -v grep | awk '{print $2;}' - `
 if test -z "$besd_pid"
 then
