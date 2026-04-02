@@ -30,8 +30,8 @@ function test_startup() {
     sleep $wait_seconds
 
     # The launched image should be running; if it is not, it must have crashed
-    # at startup. This will show up as an `Exited` message in `docker ps`
-    stopped_images=$(docker ps -a | grep "$d_id" | grep Exited)
+    # at startup. This will show up in the list of exited containers
+    stopped_images=$(docker ps --filter "status=exited" | grep "$d_id" )
     loggy "$prolog Stopped images:"
     loggy "$stopped_images"
     if [ -n "$stopped_images" ]; then
