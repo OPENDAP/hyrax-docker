@@ -110,7 +110,7 @@ loggy "$process_list"
 besd_pid="$(echo "$process_list" | grep "$BESD" | grep -v grep | awk '{print $2;}' -)"
 if test -z "$besd_pid"
 then
-    loggy "ERROR!  Failed to acquire a PID for the besdaemon process. The BES may not have started. (Elapsed $SECONDS seconds) EXITING NOW!"
+    loggy "ERROR! Failed to acquire a PID for the besdaemon process. The BES did not start. (Elapsed $SECONDS seconds) EXITING NOW!"
     exit 1
 fi
 loggy "The besdaemon is UP! pid: $besd_pid"

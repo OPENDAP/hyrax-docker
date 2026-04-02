@@ -164,29 +164,29 @@ echo "bes_gid: $bes_gid"
 
 # Where is my precious? Is the precious on the path?
 BESD="$(which besdaemon)"
-startup_log "The besdaemon is here: $BESD"
+loggy "The besdaemon is here: $BESD"
 
 # Start using besctl
-startup_log "Launching besd [uid: $bes_uid gid: $bes_gid]"
+loggy "Launching besd [uid: $bes_uid gid: $bes_gid]"
 /usr/bin/besctl start > ./besctl.log 2>&1
 status=$?
-startup_log "$(cat ./besctl.log)"
+loggy "$(cat ./besctl.log)"
 if test $status -ne 0; then
-  error_log "ERROR: Failed to start BES: $status"
+  loggy "ERROR: Failed to start BES: $status"
   exit $status
 fi
 
 process_list="$(ps aux)"
-startup_log "process_list via 'ps aux':"
-startup_log "$process_list"
+loggy "process_list via 'ps aux':"
+loggy "$process_list"
 besd_pid="$(echo "$process_list" | grep "$BESD" | grep -v grep | awk '{print $2;}' -)"
 if test -z "$besd_pid"
 then
-    startup_log "ERROR! Failed to acquire a PID for the besdaemon process. The BES may not have started. EXITING NOW!"
+    loggy "ERROR! Failed to acquire a PID for the besdaemon process. The BES did not start. EXITING NOW!"
     exit 1
 fi
 
-startup_log "The besd is UP! [pid: $besd_pid]"
+loggy "The besd is UP! [pid: $besd_pid]"
 
 #-------------------------------------------------------------------------------
 # Start Tomcat process

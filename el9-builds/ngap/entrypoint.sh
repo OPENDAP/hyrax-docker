@@ -508,7 +508,7 @@ startup_log "$process_list"
 besd_pid="$(echo "$process_list" | grep "$BESD" | grep -v grep | awk '{print $2;}' -)"
 if test -z "$besd_pid"
 then
-    startup_log "ERROR! Failed to acquire a PID for the besdaemon process. The BES may not have started. EXITING NOW!"
+    startup_log "ERROR! Failed to acquire a PID for the besdaemon process. The BES did not start. EXITING NOW!"
     exit 1
 fi
 
