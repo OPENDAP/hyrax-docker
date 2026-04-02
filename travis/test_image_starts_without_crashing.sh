@@ -35,14 +35,14 @@ function test_startup() {
     loggy "$prolog Stopped images:"
     loggy "$stopped_images"
     if [ -n "$stopped_images" ]; then
-        loggy "$prolog Error: Image '$image_tag' failed at startup"
+        loggy "$prolog ERROR - Image '$image_tag' failed at startup"
         loggy "$prolog docker ps -a:"
         loggy "$(docker ps -a)"
         loggy "$prolog Docker logs from failed instance: "
         loggy "$(docker logs "$d_name")"
+        loggy "$prolog EXITING NOW."
         loggy "$HR0"
         # Wait to give the logs a chance to print out before we exit
-        sleep 5
         exit 1
     else
         loggy "$prolog Success: Image '$image_tag' did not crash on startup."
