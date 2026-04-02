@@ -20,17 +20,17 @@ loggy "$BANNER";
 loggy "Greetings, I am $(whoami).";
 
 
-loggy "PythonVersion: $(python3 --version)"
+loggy "PythonVersion: $(python3 --version 2>&1)"
 
 if [ -n "$SERVER_HELP_EMAIL" ] 
 then
-    loggy "Found exisiting SERVER_HELP_EMAIL: $SERVER_HELP_EMAIL"
+    loggy "Found existing SERVER_HELP_EMAIL: $SERVER_HELP_EMAIL"
 else 
     SERVER_HELP_EMAIL="not_set"
     loggy "SERVER_HELP_EMAIL is $SERVER_HELP_EMAIL"
 fi
 if [ -n "$FOLLOW_SYMLINKS" ] ; then
-    loggy "Found exisiting FOLLOW_SYMLINKS: $FOLLOW_SYMLINKS"
+    loggy "Found existing FOLLOW_SYMLINKS: $FOLLOW_SYMLINKS"
 else 
     FOLLOW_SYMLINKS="not_set";
     loggy "FOLLOW_SYMLINKS is $FOLLOW_SYMLINKS"
@@ -122,7 +122,7 @@ echo "bes_gid: $bes_gid"
 # Where is my precious? Is the precious on the path?
 BESD="$(which besdaemon)"
 status=$?
-if $status -ne 0
+if [ $status -ne 0 ]
 then
     loggy "ERROR - Failed to locate besdaemon on the PATH: $PATH"
     exit $status
