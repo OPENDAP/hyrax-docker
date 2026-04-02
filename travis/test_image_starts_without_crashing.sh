@@ -30,8 +30,8 @@ function test_startup() {
     sleep $wait_seconds
 
     # The launched image should be running; if it is not, it must have crashed
-    # at startup. This will show up as an `Exited` message in `docker ps`
-    stopped_images=$(docker ps --filter "status=exited" | grep "$d_id")
+    # at startup. This will show up in the list of exited containers
+    stopped_images=$(docker ps --filter "status=exited" | grep "$d_id" )
     loggy "$prolog Stopped images:"
     loggy "$stopped_images"
     if [ -n "$stopped_images" ]; then
@@ -46,13 +46,12 @@ function test_startup() {
         sleep 2
         exit 1
     else
-        loggy "$prolog Success: Image '$image_tag' did not crash on startup."
+        loggy "$prolog SUCCESS: Image '$image_tag' is still running after $wait_seconds seconds."
         loggy "$prolog Docker logs:"
         loggy "$(docker logs travis_test_image)"
         loggy ""
-        loggy ""
         loggy "$prolog Removing test container: $d_id"
-        docker rm -f "$d_id"
+        loggy "$(docker rm -f "$d_id")"
     fi
     loggy "$prolog END"
     loggy "$HR0"
