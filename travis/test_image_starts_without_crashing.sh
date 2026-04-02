@@ -43,6 +43,7 @@ function test_startup() {
         loggy "$prolog EXITING NOW."
         loggy "$HR0"
         # Wait to give the logs a chance to print out before we exit
+        sleep 2
         exit 1
     else
         loggy "$prolog Success: Image '$image_tag' did not crash on startup."
