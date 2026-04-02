@@ -164,6 +164,12 @@ echo "bes_gid: $bes_gid"
 
 # Where is my precious? Is the precious on the path?
 BESD="$(which besdaemon)"
+status=$?
+if $status -ne 0
+then
+    loggy "ERROR - Failed to locate besdaemon on the PATH: $PATH"
+    exit $status
+fi
 loggy "The besdaemon is here: $BESD"
 
 # Start using besctl
