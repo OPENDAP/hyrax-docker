@@ -17,6 +17,7 @@ function loggy(){
     echo  "$@" | awk -v prolog="$prolog" '{ print "# " prolog " " $0;}'  >&2
 }
 
+SECONDS=0
 loggy "$HR0"
 loggy "$BANNER"
 loggy "Greetings, I am $(whoami) (uid: $UID)"
@@ -105,7 +106,7 @@ besd_pid="$(echo "$process_list" | grep "/usr/bin/besdaemon" | grep -v grep | aw
 #besd_pid=`ps aux | grep /usr/bin/besdaemon | grep -v grep | awk '{print $2;}' - `
 if test -z "$besd_pid"
 then
-    loggy "ERROR! Failed to acquire a PID for the besdaemon process. The BES may not have started. EXITING NOW!"
+    loggy "ERROR!  Failed to acquire a PID for the besdaemon process. The BES may not have started. (Elapsed $SECONDS seconds) EXITING NOW!"
     exit 1
 fi
 loggy "The besdaemon is UP! pid: $besd_pid"
