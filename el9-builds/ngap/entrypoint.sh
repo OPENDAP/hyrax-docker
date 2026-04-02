@@ -506,7 +506,6 @@ process_list="$(ps aux)"
 startup_log "process_list via 'ps aux':"
 startup_log "$process_list"
 besd_pid="$(echo "$process_list" | grep "$BESD" | grep -v grep | awk '{print $2;}' -)"
-#besd_pid=`ps aux | grep /usr/bin/besdaemon | grep -v grep | awk '{print $2;}' - `
 if test -z "$besd_pid"
 then
     startup_log "ERROR! Failed to acquire a PID for the besdaemon process. The BES may not have started. EXITING NOW!"

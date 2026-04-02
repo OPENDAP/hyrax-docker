@@ -160,26 +160,33 @@ bes_gid="$(id -g ${bes_username})"
 echo "bes_gid: $bes_gid"
 
 #-------------------------------------------------------------------------------
-# Start the BES daemon process
-# /usr/bin/besdaemon -i /usr -c /etc/bes/bes.conf -r /var/run/bes.pid (old way)
-loggy "Launching besd..."
-/usr/bin/besctl start
+# Start the BES
+
+# Where is my precious? Is the precious on the path?
+BESD="$(which besdaemon)"
+startup_log "The besdaemon is here: $BESD"
+
+# Start using besctl
+startup_log "Launching besd [uid: $bes_uid gid: $bes_gid]"
+/usr/bin/besctl start > ./besctl.log 2>&1
 status=$?
-if test $status -ne 0 ; then
-    loggy "ERROR: Failed to start BES: $status"
-    exit $status
+startup_log "$(cat ./besctl.log)"
+if test $status -ne 0; then
+  error_log "ERROR: Failed to start BES: $status"
+  exit $status
 fi
+
 process_list="$(ps aux)"
-echo "process_list:"
-echo "$process_list"
-besd_pid="$(echo "$process_list" | grep "/bin/besdaemon" | grep -v grep | awk '{print $2;}' -)"
-#besd_pid=`ps aux | grep /usr/bin/besdaemon | grep -v grep | awk '{print $2;}' - `
+startup_log "process_list via 'ps aux':"
+startup_log "$process_list"
+besd_pid="$(echo "$process_list" | grep "$BESD" | grep -v grep | awk '{print $2;}' -)"
 if test -z "$besd_pid"
 then
-    loggy "ERROR! Failed to acquire a PID for the besdaemon process. The BES may not have started. EXITING NOW!"
+    startup_log "ERROR! Failed to acquire a PID for the besdaemon process. The BES may not have started. EXITING NOW!"
     exit 1
 fi
-loggy "The besd is UP! [pid: $besd_pid]"
+
+startup_log "The besd is UP! [pid: $besd_pid]"
 
 #-------------------------------------------------------------------------------
 # Start Tomcat process
