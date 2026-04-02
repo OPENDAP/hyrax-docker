@@ -139,16 +139,16 @@ echo "BES Has Arrived..."  >&2
 
 while /bin/true; do
     sleep 60
-    besd_ps=`ps -f $besd_pid`;
+    besd_ps="$(ps -f "$besd_pid")"
     BESD_STATUS=$?
     if [ $BESD_STATUS -ne 0 ]; then
-        echo "BESD_STATUS: $BESD_STATUS bes_pid:$bes_pid" >&2
+        echo "BESD_STATUS: $BESD_STATUS bes_pid: $besd_pid" >&2
         echo "The BES daemon appears to have died! Exiting."  >&2
-        exit -1;
+        exit $BESD_STATUS;
     fi
     if [ $debug = true ];then 
         echo "-------------------------------------------------------------------" >&2
         date >&2
-        echo "BESD_STATUS: $BESD_STATUS  besd_pid:$besd_pid" >&2
+        echo "BESD_STATUS: $BESD_STATUS  besd_pid: $besd_pid" >&2
     fi
 done 

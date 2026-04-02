@@ -194,11 +194,11 @@ loggy "The besdaemon is UP! [pid: $besd_pid]"
 #-------------------------------------------------------------------------------
 # Start Tomcat process
 #
-export OLFS_CONF="${CATALINA_HOME}/webapps/opendap/WEB-INF/conf"
+export OLFS_CONF="$CATALINA_HOME/webapps/opendap/WEB-INF/conf"
 # mv ${OLFS_CONF}/logback.xml ${OLFS_CONF}/logback.xml.OFF
 loggy "Starting Tomcat..."
 #systemctl start tomcat
-${CATALINA_HOME}/bin/startup.sh 2>&1 > /var/log/tomcat/console.log &
+$CATALINA_HOME/bin/startup.sh > /var/log/tomcat/console.log 2>&1  &
 status=$?
 tomcat_pid=$!
 if test $status -ne 0 ; then
@@ -207,18 +207,18 @@ if test $status -ne 0 ; then
 fi
 # When we launch tomcat the initial pid gets "retired" because it spawns a
 # secondary processes.
-initial_pid="${tomcat_pid}"
+initial_pid="$tomcat_pid"
 loggy "Tomcat started, initial pid: ${initial_pid}"
 while test $initial_pid -eq $tomcat_pid
 do
     sleep 1
     tomcat_ps=$(ps aux | grep tomcat | grep -v grep)
-    loggy "tomcat_ps: ${tomcat_ps}"
-    tomcat_pid=$(echo ${tomcat_ps} | awk '{print $2}')
-    loggy "tomcat_pid: ${tomcat_pid}"
+    loggy "tomcat_ps: $tomcat_ps"
+    tomcat_pid=$(echo "$tomcat_ps" | awk '{print $2}')
+    loggy "tomcat_pid: $tomcat_pid"
 done
 # New pid and we should be good to go.
-loggy "Tomcat is UP! pid: ${tomcat_pid}"
+loggy "Tomcat is UP! pid: $tomcat_pid"
 
 # TEMPORARY
 /cleanup_files.sh >&2 &
@@ -228,20 +228,20 @@ loggy "Hyrax Has Arrived..."
 loggy "--------------------------------------------------------------------"
 #-------------------------------------------------------------------------------
 while /bin/true; do
-    sleep ${SLEEP_INTERVAL}
+    sleep $SLEEP_INTERVAL
     loggy "Checking Hyrax Operational State..."
-    besd_ps=`ps -f $besd_pid`
+    besd_ps="$(ps -f "$besd_pid")"
     BESD_STATUS=$?
-    loggy "BESD_STATUS: ${BESD_STATUS}"
+    loggy "BESD_STATUS: $BESD_STATUS"
 
-    tomcat_ps=$(ps -f "${tomcat_pid}")
+    tomcat_ps="$(ps -f "$tomcat_pid")"
     TOMCAT_STATUS=$?
-    loggy "TOMCAT_STATUS: ${TOMCAT_STATUS}"
+    loggy "TOMCAT_STATUS: $TOMCAT_STATUS"
 
     if test $BESD_STATUS -ne 0 ; then
-        loggy "BESD_STATUS: $BESD_STATUS bes_pid:$bes_pid"
+        loggy "BESD_STATUS: $BESD_STATUS bes_pid: $besd_pid"
         loggy "The BES daemon appears to have died! Exiting."
-        exit 1
+        exit $BESD_STATUS
     fi
     if test $TOMCAT_STATUS -ne 0 ; then
         loggy "TOMCAT_STATUS: $TOMCAT_STATUS tomcat_pid:$tomcat_pid"
@@ -255,12 +255,12 @@ while /bin/true; do
         loggy "localhost.log [BEGIN]"
         cat /usr/share/tomcat/logs/localhost* >&2
         loggy "localhost.log [END]"
-        exit 2
+        exit $TOMCAT_STATUS
     fi
     
     if test "${DEBUG}" = "true" ; then
         loggy "-------------------------------------------------------------------"  >&2
-        date >&2
+        loggy "$(date)"
         loggy "BESD_STATUS: $BESD_STATUS  besd_pid:$besd_pid"
         loggy "TOMCAT_STATUS: $TOMCAT_STATUS tomcat_pid:$tomcat_pid"
     fi

@@ -487,7 +487,7 @@ startup_log "Starting tomcat/olfs..."
 # mv ${OLFS_CONF_DIR}/logback.xml ${OLFS_CONF_DIR}/logback.xml.OFF
 #systemctl start tomcat
 
-${CATALINA_HOME}/bin/startup.sh 2>&1 >/var/log/tomcat/console.log &
+$CATALINA_HOME/bin/startup.sh > /var/log/tomcat/console.log  2>&1  &
 status=$?
 tomcat_pid=$!
 if test $status -ne 0; then
@@ -535,7 +535,7 @@ while /bin/true; do
     heartbeat_log "Checking Hyrax Operational State. service_uptime: ${suptime} hours";
   fi
 
-  besd_ps=$(ps -f $besd_pid)
+  besd_ps="$(ps -f "$besd_pid")"
   BESD_STATUS=$?
 
   if test "$debug" = "true"; then
@@ -546,17 +546,17 @@ while /bin/true; do
   fi
 
   if test $BESD_STATUS -ne 0; then
-    error_log "BESD_STATUS: $BESD_STATUS bes_pid:$bes_pid"
-    error_log "The BES daemon appears to have died! Exiting. (service_uptime: ${suptime} hours)"
+    error_log "BESD_STATUS: $BESD_STATUS bes_pid: $besd_pid"
+    error_log "The BES daemon appears to have died! Exiting. (service_uptime: $suptime hours)"
     exit $BESD_STATUS
   fi
 
   tomcat_ps=$(ps -f "${tomcat_pid}")
   TOMCAT_STATUS=$?
-  if test "$debug" = "true"; then heartbeat_log "TOMCAT_STATUS: ${TOMCAT_STATUS}"; fi
+  if test "$debug" = "true"; then heartbeat_log "TOMCAT_STATUS: $TOMCAT_STATUS"; fi
   if test $TOMCAT_STATUS -ne 0; then
     error_log "TOMCAT_STATUS: $TOMCAT_STATUS tomcat_pid:$tomcat_pid"
-    error_log "Tomcat appears to have died! Exiting.  (service_uptime: ${suptime} hours)"
+    error_log "ERROR tomcat appears to have died! Exiting.  (service_uptime: $suptime hours)"
     # write_tomcat_logs 100 5 # [number of log lines to grab from each file] [time to sleep after sending]
     exit $TOMCAT_STATUS
   fi
