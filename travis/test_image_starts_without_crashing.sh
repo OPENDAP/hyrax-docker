@@ -16,7 +16,7 @@ function test_startup() {
     loggy "$HR0"
     loggy "$prolog BEGIN"
     local image_tag="$1"
-    local any_images_crashed
+    local stopped_images
     local status
 
     loggy "$prolog Test that image does not crash on startup"
@@ -29,8 +29,10 @@ function test_startup() {
 
     # The launched image should be running; if it is not, it must have crashed
     # at startup. This will show up as an `Exited` message in `docker ps`
-    any_images_crashed=$(docker ps -a | grep travis_test_image | grep Exited)
-    if [ -n "$result" ]; then
+    stopped_images=$(docker ps -a | grep travis_test_image | grep Exited)
+    loggy "$prolog Stopped images:"
+    loggy "$stopped_images"
+    if [ -n "$stopped_images" ]; then
         loggy "$prolog Error: Image '$image_tag' failed at startup"
         docker ps -a
         loggy "$prolog Logs from failing test instance: "
