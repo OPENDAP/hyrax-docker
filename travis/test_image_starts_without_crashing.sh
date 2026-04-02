@@ -26,7 +26,7 @@ function test_startup() {
 
     # Wait to give the entrypoint script/application a chance to run
     local wait_seconds=10
-    loggy "$prolog Waiting for $wait_seconds to ensure that '$image_tag' has a chance to start."
+    loggy "$prolog Waiting for $wait_seconds seconds to ensure that '$image_tag' has a chance to start."
     sleep $wait_seconds
 
     # The launched image should be running; if it is not, it must have crashed
