@@ -5,7 +5,7 @@
 # set -v # "set -o verbose" Prints shell input lines as they are read.
 # set -x # "set -o xtrace"  Print command traces before executing command.
 # set -e #  Exit on error.
-export debug="false"
+export debug="${verbose:-"false"}"
 
 export SYSTEM_ID="${INSTANCE_ID:-"undetermined"}"
 export LOG_KEY_PREFIX="${LOG_KEY_PREFIX:-"hyrax-"}"
@@ -88,7 +88,7 @@ function get_aws_instance_id() {
   startup_log "Checking for AWS instance-id by requesting: $aws_instance_id_url"
 
   set +e # This cURL command may fail, and that's ok.
-  http_status"=$(curl -s -w "%{http_code}" --max-time 5 -o "$id_file" -L "$aws_instance_id_url")"
+  http_status="$(curl -s -w "%{http_code}" --max-time 5 -o "$id_file" -L "$aws_instance_id_url")"
   curl_status=$?
   set -e
 
@@ -488,15 +488,36 @@ fi
 bes_username="$BES_USER"
 bes_uid="$(id -u ${bes_username})"
 bes_gid="$(id -g ${bes_username})"
+
+# Where is my precious? Is the precious on the path?
+BESD="$(which besdaemon)"
+status=$?
+if test $status -ne 0
+then
+    error_log "ERROR - Failed to locate besdaemon on the PATH: $PATH"
+    exit $status
+fi
+startup_log "The besdaemon is here: $BESD"
+
 startup_log "Launching besd [uid: $bes_uid gid: $bes_gid]"
-/usr/bin/besctl start > ./besctl.log  2>&1 # dropped debug control -d "/dev/null,timing"  - ndp 10/12/2023
+/usr/bin/besctl start > ./besctl.log 2>&1
 status=$?
 startup_log "$(cat ./besctl.log)"
 if test $status -ne 0; then
   error_log "ERROR: Failed to start BES: $status"
-  #exit $status
+  exit $status
 fi
-besd_pid="$(ps aux | grep /usr/bin/besdaemon | grep -v grep | awk '{print $2;}' -)"
+
+process_list="$(ps aux)"
+startup_log "process_list via 'ps aux':"
+startup_log "$process_list"
+besd_pid="$(echo "$process_list" | grep "$BESD" | grep -v grep | awk '{print $2;}' -)"
+if test -z "$besd_pid"
+then
+    startup_log "ERROR! Failed to acquire a PID for the besdaemon process. The BES did not start. EXITING NOW!"
+    exit 1
+fi
+
 startup_log "The besd is UP! [pid: $besd_pid]"
 
 #-------------------------------------------------------------------------------

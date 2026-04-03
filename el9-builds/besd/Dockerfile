@@ -80,7 +80,7 @@ WORKDIR /
 # the installation of the (not as yet installed) but super useful
 # developer tools packages :) ndp
 RUN set -e \
-    && dnf update -y \
+    && dnf upgrade -y \
     && dnf install -y $dnf_runtime_packages \
     && echo "#!/bin/bash" > /install-dev-tools \
     && echo "dnf install -y $dnf_developer_tools_packages" > /install-dev-tools \

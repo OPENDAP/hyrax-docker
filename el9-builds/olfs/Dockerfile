@@ -87,7 +87,7 @@ RUN set -e && \
 # Installing utils for debugging convenience.
 #
 RUN set -e \
-    && dnf update -y \
+    && dnf upgrade -y \
     && echo "#!/bin/bash" > /install-dev-tools \
     && echo "dnf install -y $dnf_developer_tools_packages" > /install-dev-tools \
     && chmod 755 /install-dev-tools \

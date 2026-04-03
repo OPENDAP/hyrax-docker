@@ -175,7 +175,7 @@ function get_expected_docker_label_version_value() {
     local expected_version_str="$HYRAX_WEB_UI_VERSION"
     if test "$DOCKER_NAME" = "besd"; then expected_version_str="$BES_VERSION"; fi
     if test "$DOCKER_NAME" = "olfs"; then expected_version_str="$OLFS_VERSION"; fi
-    loggy "$prolog   expected_version_str: $expected_version_str"
+    loggy "$prolog expected_version_str: $expected_version_str"
     echo "$expected_version_str"
 }
 
@@ -192,11 +192,11 @@ function test_docker_version_label() {
         loggy "$prolog ERROR! You must pass valid docker id as parameter 1"
         return 1
     fi
-    loggy "$prolog                   d_id: $d_id"
+    loggy "$prolog                 d_id: $d_id"
 
     local label_version_key
     label_version_key="$(get_docker_label_version_key)"
-    loggy "$prolog      label_version_key: $label_version_key"
+    loggy "$prolog    label_version_key: $label_version_key"
 
     local expected_version_str
     expected_version_str="$(get_expected_docker_label_version_value)"
