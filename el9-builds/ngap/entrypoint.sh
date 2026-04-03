@@ -492,7 +492,7 @@ bes_gid="$(id -g ${bes_username})"
 # Where is my precious? Is the precious on the path?
 BESD="$(which besdaemon)"
 status=$?
-if $status -ne 0
+if test $status -ne 0
 then
     error_log "ERROR - Failed to locate besdaemon on the PATH: $PATH"
     exit $status
