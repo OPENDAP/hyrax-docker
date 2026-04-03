@@ -79,12 +79,8 @@ WORKDIR /
 # Update the OS and create a handy executable shell scipt to simplify
 # the installation of the (not as yet installed) but super useful
 # developer tools packages :) ndp
-# switch: --disableplugin=system_upgrade,needs_restarting silences
-# errors caused by unistalled python bindings in the lean docker
-# image.
-
 RUN set -e \
-    && dnf --disableplugin=system_upgrade,needs_restarting update -y \
+    && dnf upgrade -y \
     && dnf install -y $dnf_runtime_packages \
     && echo "#!/bin/bash" > /install-dev-tools \
     && echo "dnf install -y $dnf_developer_tools_packages" > /install-dev-tools \
