@@ -52,6 +52,7 @@ show_version
 loggy "Getting Tomcat distro..."
 get_tomcat_distro "$DOCKER_NAME" "$TOMCAT_VERSION"
 
+# @TODO Why are we getting Apache RPMs from OPeNDAP's build bucket? Why not lastest APR from Apache??
 loggy "Getting Apache APR..."
 s3_get_apache_apr_distro \
     "$S3_BUILD_BUCKET" \
@@ -66,13 +67,6 @@ s3_get_olfs_ngap_distro \
   "$OLFS_VERSION" \
   "$TARGET_OS" 2>&1
 
-#s3_get_openssl_distro \
-#    "$S3_BUILD_BUCKET" \
-#    "$DOCKER_DIR" \
-#    "$OPENSSL_VERSION" \
-#    "$TARGET_OS" \
-#    "$ADD_DEBUG_RPMS"
-#
 
 # Make the HyraxVersion assets to be injected into the docker image.
 make_hyrax_version_assets "$HYRAX_WEB_UI_VERSION"
