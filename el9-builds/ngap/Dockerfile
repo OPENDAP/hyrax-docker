@@ -161,8 +161,9 @@ RUN set -e \
     && chmod 755 /install-dev-tools \
 #
 ######################################################################
-# Rocky9 comes with built in curl-minimal. For our puposes we want
-# want the full package (I think, probably need to verify).
+# Rocky9 comes with built-in curl-minimal. For our purposes we want
+# the full package.
+# @TODO Can we live with curl-minimal? If so, drop this install stage.
 # The '--allowerasing' parameter enables dnf to erase curl-minimal
 # and then install the full package.
 #
@@ -205,7 +206,8 @@ RUN set -e \
 # to build so we install those here.
 # We also enable the CodeReady Builder repo so we can get the
 # libtirpc-devel package.
-#
+# @TODO Remove this install stage when we stop compiling on in this build.
+#   This install stage is a prerequisite for compiling source later in this Dockerfile.
 # RUN set -e \
     && echo "$HR" >&2 \
     # The CRB (CodeReady Builder) repository has to be enabled to get the libtirpc-devel package.
@@ -262,11 +264,12 @@ RUN set -e \
 # Confirm that the besd service starts at boot
 RUN echo "besdaemon is here: $(which besdaemon)" \
     && echo "whoami: $(whoami)" \
-    && BESD_COUNT=$(chkconfig --list | grep besd) \
+    && BESD_COUNT="$(chkconfig --list | grep besd)" \
     && if [ -z "$BESD_COUNT" ]; then \
         echo "Error: besd service not configured to run on startup. Exiting."; \
         exit 1; \
     fi \
+    && echo "Test starting bes" \
     && besctl start \
     && besctl stop
 
@@ -328,7 +331,7 @@ RUN set -e \
 ###########################################################################################
 #
 # Build and Install the Tomcat Native-APR library.
-# @TODO This building should be done elsewhere and brought in
+# @TODO Building the Tomcat Native-APR library should be done elsewhere and copied in, if possible
 #
 RUN set -e \
     && echo "$HR" >&2 \
@@ -364,7 +367,7 @@ RUN set -e \
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 ENV ROOT=/dev/shm
 
-# NGAP package uses the OLFS_VERSION number. jhrg 4/2/21
+# OLFS NGAP package uses the OLFS_VERSION number.
 RUN set -e \
     && echo "$HR" \
     && echo "Installing the latest NGAP distribution ($NGAP_DISTRO)." >&2 \
@@ -418,8 +421,12 @@ RUN set -e \
     && echo "org.redisson.level = FINE" >> "$CATALINA_HOME/conf/logging.properties" \
     && echo "org.apache.catalina.core.level = FINE" >> "$CATALINA_HOME/conf/logging.properties" \
     && echo "org.apache.catalina.session.level = FINE" >> "$CATALINA_HOME/conf/logging.properties"
-#
+##
+# Is this really a best practice? Hoovering up the libraries from the OLFS GitHub repo?
+# @TODO Figure out a better (less static) way to get these Redisson and related libraries.
+# @TODO Like maybe prefetch the "latest" Redisson stuff from wherever these were acquired and copy them in.
 # Install Redisson Session Manager jars into the Tomcat: ${CATALINA_HOME}/lib
+#
 RUN set -e \
     && echo "$HR" >&2 \
     && echo "Installing Redisson Session Manager jar files into this image. Cloning OLFS..." >&2 \
