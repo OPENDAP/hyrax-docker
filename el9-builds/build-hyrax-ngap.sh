@@ -69,6 +69,7 @@ s3_get_olfs_ngap_distro \
 
 loggy "Getting Redisson Jars."
 loggy "$(gradle downloadRedisson)"
+loggy "ls -l ./ngap/redission"
 loggy "$(ls -l ./ngap/redission)"
 
 # Make the HyraxVersion assets to be injected into the docker image.
