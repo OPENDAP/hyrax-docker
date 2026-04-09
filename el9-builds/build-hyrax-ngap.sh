@@ -60,13 +60,16 @@ s3_get_apache_apr_distro \
     "$APACHE_APR_VERSION" \
     "$ADD_DEBUG_RPMS"
 
-loggy "GettingNGAP/OLFS distribution."
+loggy "Getting NGAP/OLFS distribution."
 s3_get_olfs_ngap_distro \
   "$S3_BUILD_BUCKET" \
   "$DOCKER_DIR" \
   "$OLFS_VERSION" \
   "$TARGET_OS" 2>&1
 
+loggy "Getting Redisson Jars."
+loggy "$(gradle downloadRedisson)"
+ls -l ./ngap/redission
 
 # Make the HyraxVersion assets to be injected into the docker image.
 make_hyrax_version_assets "$HYRAX_WEB_UI_VERSION"
