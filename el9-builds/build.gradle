@@ -1,0 +1,34 @@
+plugins {
+    id 'java'
+}
+
+repositories {
+    mavenCentral()
+}
+
+// Custom configuration to isolate the download jars
+configurations {
+    redissonDownload
+}
+
+dependencies {
+    // This pulls the Redisson Tomcat 11 integration and all its dependencies
+    // 'latest.release' ensures you always get the most recent version
+    redissonDownload "org.redisson:redisson-tomcat-11:latest.release"
+
+    // Also include redisson-all if you need the full bundle,
+    // though the tomcat-11 jar usually brings in what's necessary.
+    redissonDownload "org.redisson:redisson:latest.release"
+}
+
+tasks.register('downloadRedisson', Copy) {
+    group = 'custom'
+    description = 'Downloads Redisson JARs for Tomcat 11 lib directory'
+
+    from configurations.redissonDownload
+    into "ngap/redission"
+
+    doLast {
+        println "JARs downloaded to: ngap/redission"
+    }
+}
