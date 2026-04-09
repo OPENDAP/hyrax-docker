@@ -10,8 +10,6 @@ dist: jammy
 language: python
 python:
   - "3.12"
-jdk:
-  - openjdk17
 
 
 services:
@@ -219,6 +217,7 @@ jobs:
     # BUILD
     - stage: BUILD
       name: "Build opendap/hyrax:ngap"
+      jdk: openjdk17
       script:
         - cd "$TARGET_OS-builds"
         - export DOCKER_NAME="ngap"
