@@ -50,6 +50,8 @@ RUN echo "# dnf_runtime_packages: $dnf_runtime_packages"
 # @TODO Build the Tomcat Native APR outside of this Dockerfile and bring in the compiled result.
 # The CRB (CodeReady Builder) repository has to be
 # enabled to get the libtirpc-devel package.
+# 'apr-devel' and 'apr-util-devel' Are the Apache Portable
+# Runtime libraries used to compile the Tomcat Native APR
 ENV dnf_build_the_things_packages="libtirpc libtirpc-devel libuuid libuuid-devel openssl openssl-devel apr-devel apr-util-devel"
 RUN echo "# dnf_build_the_things_packages: $dnf_build_the_things_packages"
 
@@ -126,19 +128,6 @@ RUN echo "# NGAP_DISTRO: $NGAP_DISTRO"
 COPY "$NGAP_DISTRO.tgz" "/$NGAP_DISTRO.tgz"
 
 ############################################################
-# @TODO Do we need this? YES! (but from dnf please)
-# @TODO Is this duplicating the compile Tomcat Native APR?? NO!
-# Retrieving from dnf.
-#
-#ARG APACHE_APR_VERSION
-#ENV APACHE_APR_VERSION="${APACHE_APR_VERSION:-"1.7.6-1"}"
-#RUN echo "# Apache APR version: $APACHE_APR_VERSION"
-#
-#ARG APACHE_APR_RPM
-#ENV APACHE_APR_RPM="${APACHE_APR_RPM:-"apr-$APACHE_APR_VERSION.x86_64.rpm"}"
-#RUN echo "# APACHE_APR_RPM: $APACHE_APR_RPM"
-#COPY "$APACHE_APR_RPM" apr-devel-* apr-debuginfo-* /
-#RUN ls -l /apr-* >&2
 
 ARG TOMCAT_CONNECTION_TIMEOUT_MS
 ENV TOMCAT_CONNECTION_TIMEOUT_MS="${TOMCAT_CONNECTION_TIMEOUT_MS:-"1000000"}"
@@ -276,22 +265,6 @@ RUN echo "besdaemon is here: $(which besdaemon)" \
     && echo "Test starting bes" \
     && besctl start \
     && besctl stop
-
-################################################################
-# Install the Apache-Portable-Runtime (Apache APR)
-#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
-#RUN set -e \
-#    && echo "$HR" >&2 \
-#    && echo "Installing the Apache APR rpm: $APACHE_APR_RPM" >&2 \
-#    && ls -l ./apr*  >&2\
-#    && dnf -y install ./apr-*.rpm  >&2\
-#    && echo "# The 'dnf install' command exited with status: $?" >&2 \
-#    && dnf list installed | grep apr >&2 \
-#    && rm -f "./$APACHE_APR_RPM" \
-#    && dnf clean all \
-#    && echo "Apache APR is installed." >&2 \
-#    && echo "$HR" >&2#
-
 
 ################################################################
 # Install and Setup Tomcat
