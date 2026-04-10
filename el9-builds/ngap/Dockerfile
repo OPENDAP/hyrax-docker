@@ -427,14 +427,14 @@ RUN set -e \
 # @TODO Like maybe prefetch the "latest" Redisson stuff from wherever these were acquired and copy them in.
 # Install Redisson Session Manager jars into the Tomcat: ${CATALINA_HOME}/lib
 #
-RUN echo "Copying redisson all" >&2
+RUN echo "Copying all redisson libraries" >&2
 COPY lib/redisson*  "$CATALINA_HOME/lib/"
 
-RUN echo "$HR2" >&2 && echo "Copying elasticache client" >&2
+RUN echo "$HR2" >&2 && echo "Copying elasticache cluster client libs" >&2
 COPY lib/elasticache-java-cluster-client*  "$CATALINA_HOME/lib/"
 
 RUN set -e \
-    && echo "Setting Tomcat library permissions" >&2 \
+    && echo "Normalizing Tomcat library permissions" >&2 \
     && chown -R tomcat:tomcat "$CATALINA_HOME/lib"
 RUN set -e && echo "ls -l $CATALINA_HOME/lib/" && ls -l "$CATALINA_HOME/lib/"
 
