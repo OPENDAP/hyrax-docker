@@ -67,16 +67,22 @@ s3_get_olfs_ngap_distro \
   "$OLFS_VERSION" \
   "$TARGET_OS" 2>&1
 
-loggy "Getting Redisson Jars."
+loggy "$HR1"
+loggy "Retrieving Redisson Jars."
+lib_dir="./ngap/lib"
+loggy "lib_dir: $lib_dir"
+loggy "ls -l ./ngap"
+loggy "$(ls -l "./ngap")"
 loggy "$(gradle downloadRedisson)"
-loggy "ls -l ./ngap/redission"
-loggy "$(ls -l ./ngap/redission)"
-# TODO Copy the redisson libraries into ./ngap and modify ./ngap/Dockerfile to  use them.
+loggy "ls -l $lib_dir"
+loggy "$(ls -l "$lib_dir")"
+loggy "$HR1"
 
 
 # Make the HyraxVersion assets to be injected into the docker image.
 make_hyrax_version_assets "$HYRAX_WEB_UI_VERSION"
 
+loggy "Running 'docker build ... $DOCKER_NAME'"
 set -e
 docker build \
    --build-arg TOMCAT_VERSION \
