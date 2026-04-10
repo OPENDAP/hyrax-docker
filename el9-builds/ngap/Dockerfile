@@ -427,6 +427,9 @@ RUN set -e \
 # @TODO Like maybe prefetch the "latest" Redisson stuff from wherever these were acquired and copy them in.
 # Install Redisson Session Manager jars into the Tomcat: ${CATALINA_HOME}/lib
 #
+COPY redission/redission*  "$CATALINA_HOME/lib"
+RUN set -e && ls -l $CATALINA_HOME/lib"
+
 RUN set -e \
     && echo "$HR" >&2 \
     && echo "Installing Redisson Session Manager jar files into this image. Cloning OLFS..." >&2 \
@@ -438,10 +441,10 @@ RUN set -e \
     && echo "$HR2" >&2 \
     && echo "Copying elasticache client" >&2 \
     && cp -v "olfs/resources/ngap/lib/elasticache-java-cluster-client-1.1.2.jar" "$CATALINA_HOME/lib" \
-    && echo "Copying redisson all" >&2 \
-    && cp -v "olfs/resources/ngap/lib/redisson-all-3.50.0.jar" "$CATALINA_HOME/lib" \
-    && echo "Copying redisson Session Manager TC11" >&2 \
-    && cp -v "olfs/resources/ngap/lib/redisson-tomcat-11-3.50.0.jar" "$CATALINA_HOME/lib" \
+#    && echo "Copying redisson all" >&2 \
+#    && cp -v "olfs/resources/ngap/lib/redisson-all-3.50.0.jar" "$CATALINA_HOME/lib" \
+#    && echo "Copying redisson Session Manager TC11" >&2 \
+#   && cp -v "olfs/resources/ngap/lib/redisson-tomcat-11-3.50.0.jar" "$CATALINA_HOME/lib" \
     && chown -R tomcat:tomcat "$CATALINA_HOME/lib" \
     && rm -rfv olfs \
     && echo "$HR" >&2

@@ -21,11 +21,14 @@ dependencies {
     // though the tomcat-11 jar usually brings in what's necessary.
    // redissonDownload "org.redisson:redisson:latest.release"
     redissonDownload "org.redisson:redisson:3.+"
+
+    // The Amazon ElastiCache Cluster Client
+    redissonDownload 'com.amazonaws:elasticache-java-cluster-client:1.+'
 }
 
 tasks.register('downloadRedisson', Copy) {
     group = 'custom'
-    description = 'Downloads Redisson JARs for Tomcat 11 lib directory'
+    description = 'Downloads Elsatic Cache Client and the Redisson JARs for Tomcat 11 lib directory'
 
     from configurations.redissonDownload
     into "ngap/redission"
