@@ -30,7 +30,7 @@ tasks.register('dependencyLibrariesDownload', Copy) {
     group = 'custom'
     description = 'Downloads dependency libraries ( Elastic Cache Cluster Client and the Redisson JARs for Tomcat 11 lib) directory'
 
-    from configurations.redissonDownload
+    from configurations.dependencyLibrariesDownload
     into "ngap/lib"
 
     doLast {
