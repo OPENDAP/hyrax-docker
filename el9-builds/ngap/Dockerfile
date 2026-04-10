@@ -421,22 +421,18 @@ RUN set -e \
     && echo "org.redisson.level = FINE" >> "$CATALINA_HOME/conf/logging.properties" \
     && echo "org.apache.catalina.core.level = FINE" >> "$CATALINA_HOME/conf/logging.properties" \
     && echo "org.apache.catalina.session.level = FINE" >> "$CATALINA_HOME/conf/logging.properties"
+
 ##
-# Is this really a best practice? Hoovering up the libraries from the OLFS GitHub repo?
-# @TODO Figure out a better (less static) way to get these Redisson and related libraries.
-# @TODO Like maybe prefetch the "latest" Redisson stuff from wherever these were acquired and copy them in.
 # Install Redisson Session Manager jars into the Tomcat: ${CATALINA_HOME}/lib
 #
-RUN echo "Copying all redisson libraries" >&2
-COPY lib/redisson*  "$CATALINA_HOME/lib/"
-
-RUN echo "$HR2" >&2 && echo "Copying elasticache cluster client libs" >&2
-COPY lib/elasticache-java-cluster-client*  "$CATALINA_HOME/lib/"
+RUN echo "Copying all redisson and elasticache-cluster-client libs" >&2
+COPY lib/redisson* lib/elasticache-java-cluster-client*  "$CATALINA_HOME/lib/"
 
 RUN set -e \
     && echo "Normalizing Tomcat library permissions" >&2 \
-    && chown -R tomcat:tomcat "$CATALINA_HOME/lib"
-RUN set -e && echo "ls -l $CATALINA_HOME/lib/" && ls -l "$CATALINA_HOME/lib/"
+    && chown -R tomcat:tomcat "$CATALINA_HOME/lib" \
+    && echo "ls -l $CATALINA_HOME/lib/" \
+    && ls -l "$CATALINA_HOME/lib/"
 
 ################################################################
 #
