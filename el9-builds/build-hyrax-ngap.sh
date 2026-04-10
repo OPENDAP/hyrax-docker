@@ -76,6 +76,8 @@ loggy "$(ls -l "./ngap")"
 loggy "$(gradle downloadRedisson)"
 loggy "ls -l $lib_dir"
 loggy "$(ls -l "$lib_dir")"
+loggy "ls -l ./ngap"
+loggy "$(ls -l "./ngap")"
 loggy "$HR1"
 
 
