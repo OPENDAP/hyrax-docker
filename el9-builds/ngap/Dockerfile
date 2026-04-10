@@ -276,15 +276,22 @@ RUN echo "besdaemon is here: $(which besdaemon)" \
 ################################################################
 # Install the Apache-Portable-Runtime (Apache APR)
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
+#RUN set -e \
+#    && echo "$HR" >&2 \
+#    && echo "Installing the Apache APR rpm: $APACHE_APR_RPM" >&2 \
+#    && ls -l ./apr*  >&2\
+#    && dnf -y install ./apr-*.rpm  >&2\
+#    && echo "# The 'dnf install' command exited with status: $?" >&2 \
+#    && dnf list installed | grep apr >&2 \
+#    && rm -f "./$APACHE_APR_RPM" \
+#    && dnf clean all \
+#    && echo "Apache APR is installed." >&2 \
+#    && echo "$HR" >&2
+
 RUN set -e \
     && echo "$HR" >&2 \
-    && echo "Installing the Apache APR rpm: $APACHE_APR_RPM" >&2 \
-    && ls -l ./apr*  >&2\
-    && dnf -y install ./apr-*.rpm  >&2\
-    && echo "# The 'dnf install' command exited with status: $?" >&2 \
-    && dnf list installed | grep apr >&2 \
-    && rm -f "./$APACHE_APR_RPM" \
-    && dnf clean all \
+    && echo "Installing the Apache APR using dnf" >&2 \
+    && sudo dnf install -y apr apr-devel apr-util apr-util-devel \
     && echo "Apache APR is installed." >&2 \
     && echo "$HR" >&2
 
