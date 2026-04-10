@@ -71,6 +71,8 @@ loggy "Getting Redisson Jars."
 loggy "$(gradle downloadRedisson)"
 loggy "ls -l ./ngap/redission"
 loggy "$(ls -l ./ngap/redission)"
+# TODO Copy the redisson libraries into ./ngap and modify ./ngap/Dockerfile to  use them.
+
 
 # Make the HyraxVersion assets to be injected into the docker image.
 make_hyrax_version_assets "$HYRAX_WEB_UI_VERSION"
