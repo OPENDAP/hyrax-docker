@@ -432,7 +432,7 @@ RUN echo "ls -l ." && ls -l .
 RUN echo "ls -l lib" && ls -l lib
 
 COPY lib/redission*  "$CATALINA_HOME/lib/"
-RUN set -e && ls -l $CATALINA_HOME/lib/"
+RUN set -e && ls -l "$CATALINA_HOME/lib/"
 
 RUN set -e \
     && echo "$HR" >&2 \
