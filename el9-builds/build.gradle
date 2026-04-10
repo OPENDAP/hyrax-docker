@@ -31,9 +31,9 @@ tasks.register('downloadRedisson', Copy) {
     description = 'Downloads Elsatic Cache Client and the Redisson JARs for Tomcat 11 lib directory'
 
     from configurations.redissonDownload
-    into "ngap/redission"
+    into "ngap/lib"
 
     doLast {
-        println "JARs downloaded to: ngap/redission"
+        println "JARs downloaded to: ngap/lib"
     }
 }
