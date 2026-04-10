@@ -427,7 +427,7 @@ RUN set -e \
 # @TODO Like maybe prefetch the "latest" Redisson stuff from wherever these were acquired and copy them in.
 # Install Redisson Session Manager jars into the Tomcat: ${CATALINA_HOME}/lib
 #
-COPY redission/redission*  "$CATALINA_HOME/lib"
+COPY ngap/redission/redission*  "$CATALINA_HOME/lib"
 RUN set -e && ls -l $CATALINA_HOME/lib"
 
 RUN set -e \
