@@ -68,16 +68,12 @@ s3_get_olfs_ngap_distro \
   "$TARGET_OS" 2>&1
 
 loggy "$HR1"
-loggy "Retrieving Redisson Jars."
-lib_dir="./ngap/lib"
+loggy "Retrieving Java dependency libraries. (Redisson and ElasticCache Cluster Client Jars)"
+lib_dir="$DOCKER_DIR/lib"
 loggy "lib_dir: $lib_dir"
-loggy "ls -l ./ngap"
-loggy "$(ls -l "./ngap")"
-loggy "$(gradle downloadRedisson)"
+loggy "$(gradle dependencyLibrariesDownload)"
 loggy "ls -l $lib_dir"
 loggy "$(ls -l "$lib_dir")"
-loggy "ls -l ./ngap"
-loggy "$(ls -l "./ngap")"
 loggy "$HR1"
 
 
