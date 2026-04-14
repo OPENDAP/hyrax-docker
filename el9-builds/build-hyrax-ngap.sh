@@ -52,14 +52,6 @@ show_version
 loggy "Getting Tomcat distro..."
 get_tomcat_distro "$DOCKER_NAME" "$TOMCAT_VERSION"
 
-# @TODO Why are we getting Apache RPMs from OPeNDAP's build bucket? Why not lastest APR from Apache??
-loggy "Getting Apache APR..."
-s3_get_apache_apr_distro \
-    "$S3_BUILD_BUCKET" \
-    "$DOCKER_DIR" \
-    "$APACHE_APR_VERSION" \
-    "$ADD_DEBUG_RPMS"
-
 loggy "GettingNGAP/OLFS distribution."
 s3_get_olfs_ngap_distro \
   "$S3_BUILD_BUCKET" \
