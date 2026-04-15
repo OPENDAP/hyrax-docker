@@ -120,10 +120,6 @@ ARG OLFS_VERSION
 ENV OLFS_VERSION="${OLFS_VERSION:-"unknown"}"
 RUN echo "# OLFS_VERSION: $OLFS_VERSION"
 
-ARG REDIS_VERSION
-ENV REDIS_VERSION="redisson-3.50.0"
-RUN echo "# REDIS_VERSION: $REDIS_VERSION"
-
 ARG NGAP_DISTRO
 ENV NGAP_DISTRO="${NGAP_DISTRO:-"ngap-$OLFS_VERSION-$TARGET_OS-webapp"}"
 RUN echo "# NGAP_DISTRO: $NGAP_DISTRO"
@@ -406,7 +402,7 @@ RUN set -e \
 # Install Redisson Session Manager jars into the Tomcat: ${CATALINA_HOME}/lib
 #
 RUN echo "Copying all redisson and elasticache-cluster-client libs" >&2
-COPY lib/redisson* lib/elasticache-java-cluster-client*  "$CATALINA_HOME/lib/"
+COPY lib/redisson* lib/slf4j* lib/elasticache-java-cluster-client*  "$CATALINA_HOME/lib/"
 
 RUN set -e \
     && echo "Normalizing Tomcat library permissions" >&2 \
