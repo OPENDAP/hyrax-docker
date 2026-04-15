@@ -402,7 +402,8 @@ RUN set -e \
 # Install Redisson Session Manager jars into the Tomcat: ${CATALINA_HOME}/lib
 #
 RUN echo "Copying all redisson and elasticache-cluster-client libs" >&2
-COPY lib/redisson* lib/slf4j* lib/elasticache-java-cluster-client*  "$CATALINA_HOME/lib/"
+COPY lib/*  "$CATALINA_HOME/lib/"
+# COPY lib/redisson* lib/slf4j* lib/elasticache-java-cluster-client*  "$CATALINA_HOME/lib/"
 
 RUN set -e \
     && echo "Normalizing Tomcat library permissions" >&2 \
