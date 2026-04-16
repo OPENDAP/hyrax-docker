@@ -38,7 +38,8 @@ ENV java_version="java-21-openjdk"
 # 'ps' (aka procps) is used by besctl and entrypoint.sh
 # 'bc' is used entrypoint.sh and cleanup_files.sh
 # 'apr' and 'apr-util' Are the Apache Portable Runtime
-#   libraries used by the compiled the Tomcat Native APR
+#   libraries used to compile and run the Tomcat Native
+#   APR
 ENV dnf_runtime_packages="which unzip jq procps bc chkconfig apr apr-util"
 RUN echo "# dnf_runtime_packages: $dnf_runtime_packages"
 
@@ -50,7 +51,8 @@ RUN echo "# dnf_runtime_packages: $dnf_runtime_packages"
 # @TODO Build the Tomcat Native APR outside of this Dockerfile and bring in the compiled result.
 # The CRB (CodeReady Builder) repository has to be
 # enabled to get the libtirpc-devel package.
-# 'apr-devel' and 'apr-util-devel' Are the Apache Portable
+# 'apr-devel' and 'apr-util-devel' Are the developer
+# packages (includes etc) for the Apache Portable
 # Runtime libraries used to compile the Tomcat Native APR
 ENV dnf_build_the_things_packages="libtirpc libtirpc-devel libuuid libuuid-devel openssl openssl-devel apr-devel apr-util-devel"
 RUN echo "# dnf_build_the_things_packages: $dnf_build_the_things_packages"
@@ -117,10 +119,6 @@ RUN BES_VERSION_FOUND=$(cat bes_VERSION); \
 ARG OLFS_VERSION
 ENV OLFS_VERSION="${OLFS_VERSION:-"unknown"}"
 RUN echo "# OLFS_VERSION: $OLFS_VERSION"
-
-ARG REDIS_VERSION
-ENV REDIS_VERSION="redisson-3.50.0"
-RUN echo "# REDIS_VERSION: $REDIS_VERSION"
 
 ARG NGAP_DISTRO
 ENV NGAP_DISTRO="${NGAP_DISTRO:-"ngap-$OLFS_VERSION-$TARGET_OS-webapp"}"
@@ -399,30 +397,19 @@ RUN set -e \
     && echo "org.redisson.level = FINE" >> "$CATALINA_HOME/conf/logging.properties" \
     && echo "org.apache.catalina.core.level = FINE" >> "$CATALINA_HOME/conf/logging.properties" \
     && echo "org.apache.catalina.session.level = FINE" >> "$CATALINA_HOME/conf/logging.properties"
+
 ##
-# Is this really a best practice? Hoovering up the libraries from the OLFS GitHub repo?
-# @TODO Figure out a better (less static) way to get these Redisson and related libraries.
-# @TODO Like maybe prefetch the "latest" Redisson stuff from wherever these were acquired and copy them in.
 # Install Redisson Session Manager jars into the Tomcat: ${CATALINA_HOME}/lib
 #
+RUN echo "Copying all redisson and elasticache-cluster-client libs" >&2
+COPY lib/*  "$CATALINA_HOME/lib/"
+# COPY lib/redisson* lib/slf4j* lib/elasticache-java-cluster-client*  "$CATALINA_HOME/lib/"
+
 RUN set -e \
-    && echo "$HR" >&2 \
-    && echo "Installing Redisson Session Manager jar files into this image. Cloning OLFS..." >&2 \
-    && git clone https://github.com/OPENDAP/olfs \
-    #&& git clone --depth 1 https://github.com/OPENDAP/olfs \
-    && cd olfs \
-    && git checkout el9 \
-    && cd .. \
-    && echo "$HR2" >&2 \
-    && echo "Copying elasticache client" >&2 \
-    && cp -v "olfs/resources/ngap/lib/elasticache-java-cluster-client-1.1.2.jar" "$CATALINA_HOME/lib" \
-    && echo "Copying redisson all" >&2 \
-    && cp -v "olfs/resources/ngap/lib/redisson-all-3.50.0.jar" "$CATALINA_HOME/lib" \
-    && echo "Copying redisson Session Manager TC11" >&2 \
-    && cp -v "olfs/resources/ngap/lib/redisson-tomcat-11-3.50.0.jar" "$CATALINA_HOME/lib" \
+    && echo "Normalizing Tomcat library permissions" >&2 \
     && chown -R tomcat:tomcat "$CATALINA_HOME/lib" \
-    && rm -rfv olfs \
-    && echo "$HR" >&2
+    && echo "ls -l $CATALINA_HOME/lib/" \
+    && ls -l "$CATALINA_HOME/lib/"
 
 ################################################################
 #

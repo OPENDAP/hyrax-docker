@@ -1,0 +1,44 @@
+plugins {
+    id 'java'
+}
+
+repositories {
+    mavenCentral()
+}
+
+// Custom configuration to isolate the download jars
+configurations {
+    dependencyLibrariesDownload
+}
+
+dependencies {
+    // This pulls the Redisson Tomcat 11 integration and all its dependencies
+    // 'latest.release' ensures you always get the most recent version
+    // redissonDownload "org.redisson:redisson-tomcat-11:latest.release"
+    dependencyLibrariesDownload "org.redisson:redisson-tomcat-11:3.+"
+    // dependencyLibrariesDownload "org.redisson:redisson-tomcat-11:latest.release"
+
+    // Also include redisson-all if you need the full bundle,
+    // though the tomcat-11 jar usually brings in what's necessary.
+    // redissonDownload "org.redisson:redisson:latest.release"
+    dependencyLibrariesDownload "org.redisson:redisson:3.+"
+    //dependencyLibrariesDownload "org.redisson:redisson:latest.release"
+
+
+
+
+    // The Amazon ElasticCache Cluster Client
+    dependencyLibrariesDownload 'com.amazonaws:elasticache-java-cluster-client:1.+'
+}
+
+tasks.register('dependencyLibrariesDownload', Copy) {
+    group = 'custom'
+    description = 'Downloads dependency libraries ( Elastic Cache Cluster Client and the Redisson JARs for Tomcat 11 lib) directory'
+
+    from configurations.dependencyLibrariesDownload
+    into "ngap/lib"
+
+    doLast {
+        println "JARs downloaded to: ngap/lib"
+    }
+}
