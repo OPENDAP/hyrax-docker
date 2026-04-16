@@ -15,14 +15,14 @@ dependencies {
     // This pulls the Redisson Tomcat 11 integration and all its dependencies
     // 'latest.release' ensures you always get the most recent version
     // redissonDownload "org.redisson:redisson-tomcat-11:latest.release"
-    //  dependencyLibrariesDownload "org.redisson:redisson-tomcat-11:3.+"
-    dependencyLibrariesDownload "org.redisson:redisson-tomcat-11:latest.release"
+    dependencyLibrariesDownload "org.redisson:redisson-tomcat-11:3.+"
+    // dependencyLibrariesDownload "org.redisson:redisson-tomcat-11:latest.release"
 
     // Also include redisson-all if you need the full bundle,
     // though the tomcat-11 jar usually brings in what's necessary.
     // redissonDownload "org.redisson:redisson:latest.release"
-    // dependencyLibrariesDownload "org.redisson:redisson:3.+"
-    dependencyLibrariesDownload "org.redisson:redisson:latest.release"
+    dependencyLibrariesDownload "org.redisson:redisson:3.+"
+    //dependencyLibrariesDownload "org.redisson:redisson:latest.release"
 
 
 
