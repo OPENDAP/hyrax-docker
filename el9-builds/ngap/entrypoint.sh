@@ -507,14 +507,6 @@ if test $status -ne 0; then
   error_log "ERROR: Failed to start BES: $status"
   exit $status
 fi
-<<<<<<< HEAD
-process_list="$(ps aux)"
-startup_log "process_list:"
-startup_log "$process_list"
-besd_pid="$(echo "$process_list" | grep "//bin/besdaemon" | grep -v grep | awk '{print $2;}' -)"
-#besd_pid="$(ps aux | grep /usr/bin/besdaemon | grep -v grep | awk '{print $2;}' -)"
-=======
-
 process_list="$(ps aux)"
 startup_log "process_list via 'ps aux':"
 startup_log "$process_list"
@@ -524,8 +516,6 @@ then
     startup_log "ERROR! Failed to acquire a PID for the besdaemon process. The BES did not start. EXITING NOW!"
     exit 1
 fi
-
->>>>>>> master
 startup_log "The besd is UP! [pid: $besd_pid]"
 
 #-------------------------------------------------------------------------------
