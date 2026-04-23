@@ -179,7 +179,7 @@ startup_log "OLFS_CONF_DIR: $OLFS_CONF_DIR"
 export TOMCAT_CONTEXT_FILE="/usr/share/tomcat/conf/context.xml"
 startup_log "TOMCAT_CONTEXT_FILE: $TOMCAT_CONTEXT_FILE"
 
-export TOMCAT_REDISSON_FILE="/usr/share/tomcat/conf/redisson.json"
+export TOMCAT_REDISSON_FILE="/usr/share/tomcat/conf/redisson.yaml"
 startup_log "TOMCAT_REDISSON_FILE: $TOMCAT_REDISSON_FILE"
 
 export NCWMS_BASE="${NCWMS_BASE:-"https://localhost:8080"}"
@@ -356,7 +356,7 @@ fi
 #
 # Test if the bes.conf env variable is set (by way of not unset) and not empty
 if test -n "$TOMCAT_REDISSON_XML"; then
-  startup_log "Writing Tomcat redisson.json file: $TOMCAT_REDISSON_FILE"
+  startup_log "Writing Tomcat redisson.yaml file: $TOMCAT_REDISSON_FILE"
   echo "$TOMCAT_REDISSON_XML" > "$TOMCAT_REDISSON_FILE"
   chown tomcat:tomcat "$TOMCAT_REDISSON_FILE"
   startup_log "$( ls -l "$TOMCAT_REDISSON_FILE" )"
