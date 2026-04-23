@@ -52,13 +52,6 @@ show_version
 loggy "Getting Tomcat distro..."
 get_tomcat_distro "$DOCKER_NAME" "$TOMCAT_VERSION"
 
-loggy "Getting Apache APR..."
-s3_get_apache_apr_distro \
-    "$S3_BUILD_BUCKET" \
-    "$DOCKER_DIR" \
-    "$APACHE_APR_VERSION" \
-    "$ADD_DEBUG_RPMS"
-
 loggy "GettingNGAP/OLFS distribution."
 s3_get_olfs_ngap_distro \
   "$S3_BUILD_BUCKET" \
@@ -66,17 +59,20 @@ s3_get_olfs_ngap_distro \
   "$OLFS_VERSION" \
   "$TARGET_OS" 2>&1
 
-#s3_get_openssl_distro \
-#    "$S3_BUILD_BUCKET" \
-#    "$DOCKER_DIR" \
-#    "$OPENSSL_VERSION" \
-#    "$TARGET_OS" \
-#    "$ADD_DEBUG_RPMS"
-#
+loggy "$HR1"
+loggy "Retrieving Java dependency libraries. (Redisson and ElasticCache Cluster Client Jars)"
+lib_dir="$DOCKER_DIR/lib"
+loggy "lib_dir: $lib_dir"
+loggy "$(gradle dependencyLibrariesDownload)"
+loggy "ls -l $lib_dir"
+loggy "$(ls -l "$lib_dir")"
+loggy "$HR1"
+
 
 # Make the HyraxVersion assets to be injected into the docker image.
 make_hyrax_version_assets "$HYRAX_WEB_UI_VERSION"
 
+loggy "Running 'docker build ... $DOCKER_NAME'"
 set -e
 docker build \
    --build-arg TOMCAT_VERSION \

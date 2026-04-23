@@ -453,16 +453,37 @@ fi
 bes_username=$BES_USER
 bes_uid=$(id -u ${bes_username})
 bes_gid=$(id -g ${bes_username})
-startup_log "Launching besd [uid: ${bes_uid} gid: ${bes_gid}]"
-/usr/bin/besctl start 2>&1 > ./besctl.log # dropped debug control -d "/dev/null,timing"  - ndp 10/12/2023
+
+# Where is my precious? Is the precious on the path?
+BESD="$(which besdaemon)"
 status=$?
-startup_log $(cat ./besctl.log)
+if test $status -ne 0
+then
+    error_log "ERROR - Failed to locate besdaemon on the PATH: $PATH"
+    exit $status
+fi
+startup_log "The besdaemon is here: $BESD"
+
+startup_log "Launching besd [uid: $bes_uid gid: $bes_gid]"
+/usr/bin/besctl start > ./besctl.log 2>&1
+status=$?
+startup_log "$(cat ./besctl.log)"
 if test $status -ne 0; then
   error_log "ERROR: Failed to start BES: $status"
   exit $status
 fi
-besd_pid=$(ps aux | grep /usr/bin/besdaemon | grep -v grep | awk '{print $2;}' -)
-startup_log "The besd is UP! [pid: ${besd_pid}]"
+
+process_list="$(ps aux)"
+startup_log "process_list via 'ps aux':"
+startup_log "$process_list"
+besd_pid="$(echo "$process_list" | grep "$BESD" | grep -v grep | awk '{print $2;}' -)"
+if test -z "$besd_pid"
+then
+    startup_log "ERROR! Failed to acquire a PID for the besdaemon process. The BES did not start. EXITING NOW!"
+    exit 1
+fi
+
+startup_log "The besd is UP! [pid: $besd_pid]"
 
 #-------------------------------------------------------------------------------
 # Start Tomcat process
@@ -472,7 +493,7 @@ startup_log "Starting tomcat/olfs..."
 # mv ${OLFS_CONF_DIR}/logback.xml ${OLFS_CONF_DIR}/logback.xml.OFF
 #systemctl start tomcat
 
-${CATALINA_HOME}/bin/startup.sh 2>&1 >/var/log/tomcat/console.log &
+$CATALINA_HOME/bin/startup.sh > /var/log/tomcat/console.log  2>&1  &
 status=$?
 tomcat_pid=$!
 if test $status -ne 0; then
@@ -520,7 +541,7 @@ while /bin/true; do
     heartbeat_log "Checking Hyrax Operational State. service_uptime: ${suptime} hours";
   fi
 
-  besd_ps=$(ps -f $besd_pid)
+  besd_ps="$(ps -f "$besd_pid")"
   BESD_STATUS=$?
 
   if test "$debug" = "true"; then
@@ -531,17 +552,17 @@ while /bin/true; do
   fi
 
   if test $BESD_STATUS -ne 0; then
-    error_log "BESD_STATUS: $BESD_STATUS bes_pid:$bes_pid"
-    error_log "The BES daemon appears to have died! Exiting. (service_uptime: ${suptime} hours)"
+    error_log "BESD_STATUS: $BESD_STATUS bes_pid: $besd_pid"
+    error_log "The BES daemon appears to have died! Exiting. (service_uptime: $suptime hours)"
     exit $BESD_STATUS
   fi
 
   tomcat_ps=$(ps -f "${tomcat_pid}")
   TOMCAT_STATUS=$?
-  if test "$debug" = "true"; then heartbeat_log "TOMCAT_STATUS: ${TOMCAT_STATUS}"; fi
+  if test "$debug" = "true"; then heartbeat_log "TOMCAT_STATUS: $TOMCAT_STATUS"; fi
   if test $TOMCAT_STATUS -ne 0; then
     error_log "TOMCAT_STATUS: $TOMCAT_STATUS tomcat_pid:$tomcat_pid"
-    error_log "Tomcat appears to have died! Exiting.  (service_uptime: ${suptime} hours)"
+    error_log "ERROR tomcat appears to have died! Exiting.  (service_uptime: $suptime hours)"
     # write_tomcat_logs 100 5 # [number of log lines to grab from each file] [time to sleep after sending]
     exit $TOMCAT_STATUS
   fi

@@ -97,12 +97,12 @@ function read_build_recipe() {
     HYRAX_BUILD_NUMBER="$(expr $TRAVIS_BUILD_NUMBER - $TRAVIS_HYRAX_BUILD_OFFSET)"
     HYRAX_VERSION="$HYRAX_RELEASE_VERSION-$HYRAX_BUILD_NUMBER"
 
-    TARGET_OS="${TARGET_OS:-$(echo "$build_recipe" | grep "TARGET_OS" | awk '{print $2;}')}"
-    TOMCAT_MAJOR_VERSION="${TOMCAT_MAJOR_VERSION:-$(echo "$build_recipe" | grep "TOMCAT_MAJOR_VERSION" | awk '{print $2;}')}"
-    LIBDAP_VERSION=${LIBDAP_VERSION:-$(echo "$build_recipe" | grep libdap4 | sed "s/libdap4-//g"| awk '{print $1;}')}
-    BES_VERSION=${BES_VERSION:-$(echo "$build_recipe" | grep bes | sed "s/bes-//g" | awk '{print $1;}')}
-    OLFS_VERSION=${OLFS_VERSION:-"$(echo "$build_recipe" | grep olfs | sed "s/olfs-//g" | awk '{print $1;}')"}
-    RELEASE_DATE=${RELEASE_DATE:-$(echo "$build_recipe" | grep hyrax | awk '{print $2;}')}
+    TARGET_OS="${TARGET_OS:-"$(echo "$build_recipe" | grep "TARGET_OS" | awk '{print $2;}')"}"
+    TOMCAT_MAJOR_VERSION="${TOMCAT_MAJOR_VERSION:-"$(echo "$build_recipe" | grep "TOMCAT_MAJOR_VERSION" | awk '{print $2;}')"}"
+    LIBDAP_VERSION="${LIBDAP_VERSION:-"$(echo "$build_recipe" | grep libdap4 | sed "s/libdap4-//g"| awk '{print $1;}')"}"
+    BES_VERSION="${BES_VERSION:-"$(echo "$build_recipe" | grep bes | sed "s/bes-//g" | awk '{print $1;}')"}"
+    OLFS_VERSION="${OLFS_VERSION:-"$(echo "$build_recipe" | grep olfs | sed "s/olfs-//g" | awk '{print $1;}')"}"
+    RELEASE_DATE="${RELEASE_DATE:-"$(echo "$build_recipe" | grep hyrax | awk '{print $2;}')"}"
     TEST_DEPLOYMENT="${TEST_DEPLOYMENT:-"$(get_test_deployment_tag "$build_recipe_file")"}"
     BES_CORE_IMAGE_TAG="opendap/bes_core:$BES_VERSION-$TARGET_OS"
 
@@ -690,7 +690,8 @@ function s3_pull(){
 #    $3 - The APR version number ##.##.##-##
 #    $4 - A debug flag, if present (i.e. not empty string) then the devel and
 #         debuginfo rpm files for Apache APR will be retrieved as well.
-#
+# @TODO Why are we getting the Apache APR (Apache Portable Runtime) from the OPeNDAP S3 bucket?
+#   Shouldn't we be getting "latest" from Apache? Fix.
 function s3_get_apache_apr_distro() {
     loggy "${HR2}"
     loggy "TASK: s3_get_apache_apr_distro()"
@@ -724,69 +725,6 @@ function s3_get_apache_apr_distro() {
     set +e
     loggy ""
     return 0
-}
-
-################################################################################
-#
-# s3_get_apache_apr_distro() - Get the rpm and war files need for a Hyrax installation
-#    from the identified S3 bucket.
-#    $1 - The AWS S3 bucket from which to pull the Hyrax components
-#    $2 - The directory into which to place the Hyrax components.
-#    $3 - The APR version number ##.##.##-##
-#    $4 - A debug flag, if present (i.e. not empty string) then the devel and
-#         debuginfo rpm files for Apache APR will be retrieved as well.
-#
-function s3_get_openssl_distro() {
-    loggy "${HR2}"
-    loggy "TASK: s3_get_openssl_distro()"
-    local s3_bucket="${1}"
-    loggy "         s3_bucket: ${s3_bucket}"
-    local target_dir="${2}"
-    loggy "        target_dir: ${target_dir}"
-    local openssl_version="${3}"
-    loggy "    openssl_version: ${openssl_version}"
-    local larch="${4}"
-    loggy "linux_architecture: ${larch}"
-    local debug="${5}"
-    loggy "             debug: ${debug}"
-
-    set -e
-
-    loggy "Cleaning up..."
-    rm -fv "${target_dir}/*.rpm"
-
-    loggy ""
-    s3_pull "${s3_bucket}" \
-            "openssl-${openssl_version}.${larch}.x86_64.rpm" \
-            "${target_dir}"
-
-    s3_pull "${s3_bucket}" \
-            "openssl-libs-${openssl_version}.${larch}.x86_64.rpm" \
-            "${target_dir}"
-
-    s3_pull "${s3_bucket}" \
-            "openssl-devel-${openssl_version}.${larch}.x86_64.rpm" \
-            "${target_dir}"
-
-    set +e
-    loggy ""
-    return 0
-}
-
-function curl_pull(){
-    local release_url="${1}"
-    local target_file="${2}"
-    local target_dir="${3}"
-
-    local target_url="${release_url}/${target_file}"
-    loggy "$HR3"
-    loggy "curl_pull(), retrieving:"
-    loggy "  target_file: ${target_file}"
-    loggy "  release_url: ${release_url}"
-    loggy "   target_url: ${target_url}"
-    curl -s -L -o "${target_dir}/${target_file}" "${target_url}"
-    loggy "$(ls -l "${target_dir}/${target_file}")"
-    loggy ""
 }
 
 
@@ -868,43 +806,6 @@ function s3_get_olfs_distro() {
             "robots-olfs-$olfs_version-$target_os-webapp.tgz" \
             "$target_dir"
     set +e
-    loggy "$prolog END"
-    return 0
-}
-
-
-################################################################################
-#
-# curl_get_olfs_distro() - Get the rpm and war files need for a Hyrax installation
-#    from the identified S3 bucket.
-#    $2 - The directory into which to place the Hyrax components.
-#    $3 - The olfs version number ##.##.##-##
-#
-function curl_get_olfs_distro() {
-    local prolog="curl_get_olfs_distro() -"
-    loggy "${HR}"
-    loggy "$prolog BEGIN"
-    local target_dir="${1}"
-    loggy "$prolog         target_dir: ${target_dir}"
-    local olfs_version="${2}"
-    loggy "$prolog      olfs_version: ${olfs_version}"
-
-    release_url="${ARCHIVE_HOST}/pub/olfs"
-    loggy "$prolog release_url: ${release_url}"
-
-    set -e
-    loggy "$prolog Cleaning up..."
-    rm -fv "${target_dir}/olfs*.tgz"
-    rm -fv "${target_dir}/robots-olfs*.tgz"
-
-    target_file="olfs-${olfs_version}-webapp.tgz"
-    curl_pull "${release_url}" "${target_file}" "${target_dir}"
-
-    target_file="robots-olfs-${olfs_version}-webapp.tgz"
-    curl_pull "${release_url}" "${target_file}" "${target_dir}"
-
-    set +e
-    loggy ""
     loggy "$prolog END"
     return 0
 }

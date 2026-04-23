@@ -148,23 +148,6 @@ fi
 
 loggy "JAVA VERSION: $( java -version 2>&1 )"
 
-loggy "Checking for awscli"
-set +e
-which_output="$(eval "which aws" 2>&1)"
-status=$?
-set -e
-loggy "$which_output"
-if test $status -ne 0
-then
-    loggy "WARNING: AWS CLI not detected on PATH, may not be installed."
-else
-    aws configure list
-    status=$?
-    if test $status -ne 0 ; then
-        loggy "WARNING: Problem with AWS CLI configuration! (status: $status)"
-    fi
-fi
-
 loggy "PythonVersion (again): $( python3 --version 2>&1 )"
 
 #-------------------------------------------------------------------------------
@@ -177,17 +160,39 @@ bes_gid="$(id -g ${bes_username})"
 echo "bes_gid: $bes_gid"
 
 #-------------------------------------------------------------------------------
-# Start the BES daemon process
-# /usr/bin/besdaemon -i /usr -c /etc/bes/bes.conf -r /var/run/bes.pid (old way)
-loggy "Launching besd..."
-/usr/bin/besctl start
+# Start the BES
+
+# Where is my precious? Is the precious on the path?
+BESD="$(which besdaemon)"
 status=$?
-if test $status -ne 0 ; then
-    loggy "ERROR: Failed to start BES: $status"
+if test $status -ne 0
+then
+    loggy "ERROR - Failed to locate besdaemon on the PATH: $PATH"
     exit $status
 fi
-besd_pid="$(ps aux | grep "/usr/bin/besdaemon" | grep -v grep | awk '{print $2;}' - )"
-loggy "The besd is UP! [pid: $besd_pid]"
+loggy "The besdaemon is here: $BESD"
+
+# Start using besctl
+loggy "Launching besd [uid: $bes_uid gid: $bes_gid]"
+/usr/bin/besctl start > ./besctl.log 2>&1
+status=$?
+loggy "$(cat ./besctl.log)"
+if test $status -ne 0; then
+  loggy "ERROR: Failed to start BES: $status"
+  exit $status
+fi
+
+process_list="$(ps aux)"
+loggy "process_list via 'ps aux':"
+loggy "$process_list"
+besd_pid="$(echo "$process_list" | grep "$BESD" | grep -v grep | awk '{print $2;}' -)"
+if test -z "$besd_pid"
+then
+    loggy "ERROR! Failed to acquire a PID for the besdaemon process. The BES did not start. EXITING NOW!"
+    exit 1
+fi
+
+loggy "The besdaemon is UP! [pid: $besd_pid]"
 
 #-------------------------------------------------------------------------------
 # Start Tomcat process

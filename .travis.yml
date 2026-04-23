@@ -7,7 +7,8 @@
 #
 dist: jammy
 
-language: python
+language: java
+
 python:
   - "3.12"
 
@@ -81,6 +82,7 @@ stages:
 
 jobs:
   include:
+    # BUILD_AND_TEST
     - stage: BUILD_AND_TEST
       name: "Build and Test opendap/hyrax"
       script:
@@ -122,6 +124,7 @@ jobs:
         - $TRAVIS_BUILD_DIR/travis/test_hyrax_service_version "http://localhost:8080/opendap" "$HYRAX_WEB_UI_VERSION"
 
 
+    # BUILD
     - stage: BUILD
       name: "Build opendap/besd"
       script:
@@ -146,6 +149,7 @@ jobs:
         - ./travis/test_image_starts_without_crashing.sh "$OS_BUILD_VERSION_TAG"
         - ./travis/test_docker_image_version "$OS_BUILD_VERSION_TAG"
 
+    # BUILD
     - stage: BUILD
       name: "Build opendap/hyrax_ncwms"
       script:
@@ -181,7 +185,7 @@ jobs:
         - ./travis/test_image_starts_without_crashing.sh "$OS_BUILD_VERSION_TAG"
         - ./travis/test_docker_image_version "$OS_BUILD_VERSION_TAG"
 
-
+    # BUILD
     - stage: BUILD
       name: "Build opendap/olfs"
       script:
@@ -212,8 +216,10 @@ jobs:
         - ./travis/test_image_starts_without_crashing.sh "$OS_BUILD_VERSION_TAG"
         - ./travis/test_docker_image_version "$OS_BUILD_VERSION_TAG"
 
+    # BUILD
     - stage: BUILD
       name: "Build opendap/hyrax:ngap"
+      jdk: openjdk17
       script:
         - cd "$TARGET_OS-builds"
         - export DOCKER_NAME="ngap"

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 ###############################################################################################
-# 
+#
 # Dockerfile for the NGAP deployment Hyrax container
 #
 # Some shell state reference:
@@ -37,7 +37,10 @@ ENV java_version="java-21-openjdk"
 # 'awscli' is used by entrypoint.sh
 # 'ps' (aka procps) is used by besctl and entrypoint.sh
 # 'bc' is used entrypoint.sh and cleanup_files.sh
-ENV dnf_runtime_packages="which unzip jq procps bc chkconfig"
+# 'apr' and 'apr-util' Are the Apache Portable Runtime
+#   libraries used to compile and run the Tomcat Native
+#   APR
+ENV dnf_runtime_packages="which unzip jq procps bc chkconfig apr apr-util"
 RUN echo "# dnf_runtime_packages: $dnf_runtime_packages"
 
 
@@ -48,7 +51,10 @@ RUN echo "# dnf_runtime_packages: $dnf_runtime_packages"
 # @TODO Build the Tomcat Native APR outside of this Dockerfile and bring in the compiled result.
 # The CRB (CodeReady Builder) repository has to be
 # enabled to get the libtirpc-devel package.
-ENV dnf_build_the_things_packages="libtirpc libtirpc-devel libuuid libuuid-devel openssl openssl-devel"
+# 'apr-devel' and 'apr-util-devel' Are the developer
+# packages (includes etc) for the Apache Portable
+# Runtime libraries used to compile the Tomcat Native APR
+ENV dnf_build_the_things_packages="libtirpc libtirpc-devel libuuid libuuid-devel openssl openssl-devel apr-devel apr-util-devel"
 RUN echo "# dnf_build_the_things_packages: $dnf_build_the_things_packages"
 
 #####################################################
@@ -114,27 +120,12 @@ ARG OLFS_VERSION
 ENV OLFS_VERSION="${OLFS_VERSION:-"unknown"}"
 RUN echo "# OLFS_VERSION: $OLFS_VERSION"
 
-ARG REDIS_VERSION
-ENV REDIS_VERSION="redisson-3.50.0"
-RUN echo "# REDIS_VERSION: $REDIS_VERSION"
-
 ARG NGAP_DISTRO
 ENV NGAP_DISTRO="${NGAP_DISTRO:-"ngap-$OLFS_VERSION-$TARGET_OS-webapp"}"
 RUN echo "# NGAP_DISTRO: $NGAP_DISTRO"
 COPY "$NGAP_DISTRO.tgz" "/$NGAP_DISTRO.tgz"
 
 ############################################################
-# @TODO Do we need this?
-# @TODO Is this duplicating the compile Tomcat Native APR??
-ARG APACHE_APR_VERSION
-ENV APACHE_APR_VERSION="${APACHE_APR_VERSION:-"1.7.6-1"}"
-RUN echo "# Apache APR version: $APACHE_APR_VERSION"
-
-ARG APACHE_APR_RPM
-ENV APACHE_APR_RPM="${APACHE_APR_RPM:-"apr-$APACHE_APR_VERSION.x86_64.rpm"}"
-RUN echo "# APACHE_APR_RPM: $APACHE_APR_RPM"
-COPY "$APACHE_APR_RPM" apr-devel-* apr-debuginfo-* /
-RUN ls -l /apr-* >&2
 
 ARG TOMCAT_CONNECTION_TIMEOUT_MS
 ENV TOMCAT_CONNECTION_TIMEOUT_MS="${TOMCAT_CONNECTION_TIMEOUT_MS:-"1000000"}"
@@ -155,14 +146,15 @@ WORKDIR /
 # the installation of the (not as yet installed) but super useful
 # developer tools packages :) ndp
 RUN set -e \
-    && dnf update -y \
+    && dnf upgrade -y \
     && echo "#!/bin/bash" > /install-dev-tools \
     && echo "dnf install -y $dnf_developer_tools_packages" > /install-dev-tools \
     && chmod 755 /install-dev-tools \
 #
 ######################################################################
-# Rocky9 comes with built in curl-minimal. For our puposes we want
-# want the full package (I think, probably need to verify).
+# Rocky9 comes with built-in curl-minimal. For our purposes we want
+# the full package.
+# @TODO Can we live with curl-minimal? If so, drop this install stage.
 # The '--allowerasing' parameter enables dnf to erase curl-minimal
 # and then install the full package.
 #
@@ -205,7 +197,8 @@ RUN set -e \
 # to build so we install those here.
 # We also enable the CodeReady Builder repo so we can get the
 # libtirpc-devel package.
-#
+# @TODO Remove this install stage when we stop compiling on in this build.
+#   This install stage is a prerequisite for compiling source later in this Dockerfile.
 # RUN set -e \
     && echo "$HR" >&2 \
     # The CRB (CodeReady Builder) repository has to be enabled to get the libtirpc-devel package.
@@ -262,28 +255,14 @@ RUN set -e \
 # Confirm that the besd service starts at boot
 RUN echo "besdaemon is here: $(which besdaemon)" \
     && echo "whoami: $(whoami)" \
-    && BESD_COUNT=$(chkconfig --list | grep besd) \
+    && BESD_COUNT="$(chkconfig --list | grep besd)" \
     && if [ -z "$BESD_COUNT" ]; then \
         echo "Error: besd service not configured to run on startup. Exiting."; \
         exit 1; \
     fi \
+    && echo "Test starting bes" \
     && besctl start \
     && besctl stop
-
-################################################################
-# Install the Apache-Portable-Runtime (Apache APR)
-#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
-RUN set -e \
-    && echo "$HR" >&2 \
-    && echo "Installing the Apache APR rpm: $APACHE_APR_RPM" >&2 \
-    && ls -l ./apr*  >&2\
-    && dnf -y install ./apr-*.rpm  >&2\
-    && echo "# The 'dnf install' command exited with status: $?" >&2 \
-    && dnf list installed | grep apr >&2 \
-    && rm -f "./$APACHE_APR_RPM" \
-    && dnf clean all \
-    && echo "Apache APR is installed." >&2 \
-    && echo "$HR" >&2
 
 ################################################################
 # Install and Setup Tomcat
@@ -328,7 +307,7 @@ RUN set -e \
 ###########################################################################################
 #
 # Build and Install the Tomcat Native-APR library.
-# @TODO This building should be done elsewhere and brought in
+# @TODO Building the Tomcat Native-APR library should be done elsewhere and copied in, if possible
 #
 RUN set -e \
     && echo "$HR" >&2 \
@@ -364,7 +343,7 @@ RUN set -e \
 #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 ENV ROOT=/dev/shm
 
-# NGAP package uses the OLFS_VERSION number. jhrg 4/2/21
+# OLFS NGAP package uses the OLFS_VERSION number.
 RUN set -e \
     && echo "$HR" \
     && echo "Installing the latest NGAP distribution ($NGAP_DISTRO)." >&2 \
@@ -418,26 +397,19 @@ RUN set -e \
     && echo "org.redisson.level = FINE" >> "$CATALINA_HOME/conf/logging.properties" \
     && echo "org.apache.catalina.core.level = FINE" >> "$CATALINA_HOME/conf/logging.properties" \
     && echo "org.apache.catalina.session.level = FINE" >> "$CATALINA_HOME/conf/logging.properties"
-#
+
+##
 # Install Redisson Session Manager jars into the Tomcat: ${CATALINA_HOME}/lib
+#
+RUN echo "Copying all redisson and elasticache-cluster-client libs" >&2
+COPY lib/*  "$CATALINA_HOME/lib/"
+# COPY lib/redisson* lib/slf4j* lib/elasticache-java-cluster-client*  "$CATALINA_HOME/lib/"
+
 RUN set -e \
-    && echo "$HR" >&2 \
-    && echo "Installing Redisson Session Manager jar files into this image. Cloning OLFS..." >&2 \
-    && git clone https://github.com/OPENDAP/olfs \
-    #&& git clone --depth 1 https://github.com/OPENDAP/olfs \
-    && cd olfs \
-    && git checkout el9 \
-    && cd .. \
-    && echo "$HR2" >&2 \
-    && echo "Copying elasticache client" >&2 \
-    && cp -v "olfs/resources/ngap/lib/elasticache-java-cluster-client-1.1.2.jar" "$CATALINA_HOME/lib" \
-    && echo "Copying redisson all" >&2 \
-    && cp -v "olfs/resources/ngap/lib/redisson-all-3.50.0.jar" "$CATALINA_HOME/lib" \
-    && echo "Copying redisson Session Manager TC11" >&2 \
-    && cp -v "olfs/resources/ngap/lib/redisson-tomcat-11-3.50.0.jar" "$CATALINA_HOME/lib" \
+    && echo "Normalizing Tomcat library permissions" >&2 \
     && chown -R tomcat:tomcat "$CATALINA_HOME/lib" \
-    && rm -rfv olfs \
-    && echo "$HR" >&2
+    && echo "ls -l $CATALINA_HOME/lib/" \
+    && ls -l "$CATALINA_HOME/lib/"
 
 ################################################################
 #

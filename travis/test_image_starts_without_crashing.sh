@@ -16,33 +16,50 @@ function test_startup() {
     loggy "$HR0"
     loggy "$prolog BEGIN"
     local image_tag="$1"
-    local any_images_crashed
+    local stopped_images
     local status
 
+    local d_id="travis_test_image"
+
     loggy "$prolog Test that image does not crash on startup"
-    docker run -d --name=travis_test_image "$image_tag"
+    docker run -d --name="$d_id" "$image_tag"
 
     # Wait to give the entrypoint script/application a chance to run
-    sleep 10
+    local wait_seconds=10
+    loggy "$prolog Waiting for $wait_seconds seconds to ensure that '$image_tag' has a chance to start."
+    sleep $wait_seconds
 
     # The launched image should be running; if it is not, it must have crashed
-    # at startup. This will show up as an `Exited` message in `docker ps`
-    any_images_crashed=$(docker ps -a | grep travis_test_image | grep Exited)
-    if [ -n "$result" ]; then
-        loggy "$prolog Error: Image '$image_tag' failed at startup"
-        docker ps -a
-        loggy "$prolog Logs from failing test instance: "
-        loggy "$(docker logs travis_test_image)"
-
+    # at startup. This will show up in the list of exited containers
+    stopped_images=$(docker ps --filter "status=exited" | grep "$d_id" )
+    loggy "$prolog Stopped images:"
+    loggy "$stopped_images"
+    if [ -n "$stopped_images" ]; then
+        loggy "$prolog ERROR - Image '$image_tag' failed at startup"
+        loggy "$prolog docker ps -a:"
+        loggy "$(docker ps -a)"
+        loggy "$prolog Docker logs from failed instance: "
+        loggy "$(docker logs "$d_id")"
+        loggy "$prolog EXITING NOW."
+        loggy "$HR0"
         # Wait to give the logs a chance to print out before we exit
-        sleep 10
+        sleep 2
         exit 1
     else
+<<<<<<< HEAD
         loggy "$prolog Success: Image '$image_tag' did not crash on startup."
         loggy "$prolog Docker logs:"
         loggy "$(docker logs travis_test_image)"
 
         docker rm -f travis_test_image
+=======
+        loggy "$prolog SUCCESS: Image '$image_tag' is still running after $wait_seconds seconds."
+        loggy "$prolog Docker logs:"
+        loggy "$(docker logs travis_test_image)"
+        loggy ""
+        loggy "$prolog Removing test container: $d_id"
+        loggy "$(docker rm -f "$d_id")"
+>>>>>>> master
     fi
     loggy "$prolog END"
     loggy "$HR0"
