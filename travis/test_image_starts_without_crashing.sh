@@ -46,20 +46,12 @@ function test_startup() {
         sleep 2
         exit 1
     else
-<<<<<<< HEAD
-        loggy "$prolog Success: Image '$image_tag' did not crash on startup."
-        loggy "$prolog Docker logs:"
-        loggy "$(docker logs travis_test_image)"
-
-        docker rm -f travis_test_image
-=======
         loggy "$prolog SUCCESS: Image '$image_tag' is still running after $wait_seconds seconds."
         loggy "$prolog Docker logs:"
         loggy "$(docker logs travis_test_image)"
         loggy ""
         loggy "$prolog Removing test container: $d_id"
         loggy "$(docker rm -f "$d_id")"
->>>>>>> master
     fi
     loggy "$prolog END"
     loggy "$HR0"
