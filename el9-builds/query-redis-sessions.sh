@@ -81,6 +81,23 @@ extract_millis() {
   fi
 }
 
+decode_possible_double_json_streing() {
+  local raw="$1"
+  [[ -z "$raw" || "$raw" == "(nil} "]] && { echo ""; return; }
+
+  if have_cmd jq; then
+    printf '%s\n' "$raw" | jq -r '
+      def dejson:
+        try fromjson catch .;
+      . | dejson | dejson
+    ' 2>/dev/null || printf '%s\n' "$raw"
+  else
+    printf '%s\n' "$raw" \
+      | sed 's/^"//; s/"$//' \
+      | sed 's//"/"/g' \
+      | sed 's/^"//; s/"$//'
+  fi
+}
 #############################################
 # Fetch keys into an array (safe)
 #############################################
@@ -94,11 +111,13 @@ for k in "${keys[@]}"; do
   [[ -z "${k:-}" ]] && continue
   if [[ -z "${seen[$k]:-}" ]]; then
     seen["$k"]=1
+    echo "$k"
     unique_keys+=("$k")
   fi
 done
 echo "Found ${#unique_keys[@]} unique keys"
 
+set +e
 #############################################
 # Emit CSV header
 #############################################
@@ -113,7 +132,6 @@ for key in "${unique_keys[@]}"; do
   # Extract SID as last colon-delimited token
   sid="${key##*:}"
 
-
   # Pull fields
   ct_raw=$("${REDIS[@]}" HGET "$key" session:creationTime)
   lat_raw=$("${REDIS[@]}" HGET "$key" session:lastAccessedTime)
@@ -121,6 +139,7 @@ for key in "${unique_keys[@]}"; do
   mii=$("${REDIS[@]}" HGET "$key" session:maxInactiveInterval)
   valid=$("${REDIS[@]}" HGET "$key" session:isValid)
   return_url=$("${REDIS[@]}" HGET "$key" session:return_to_url)
+  printf 'return_to_url:[%s]\n' "$return_url"
   ttl=$("${REDIS[@]}" TTL "$key")
 
   # Parse millis
@@ -146,4 +165,4 @@ for key in "${unique_keys[@]}"; do
 done
 
 echo "Wrote  $OUT_CSV"
-CSV 
+# CSV
