@@ -64,12 +64,12 @@ loggy "Retrieving Java dependency libraries. (Redisson and ElasticCache Cluster 
 lib_dir="$DOCKER_DIR/lib"
 loggy "lib_dir: $lib_dir"
 set -e
-gradle_log="$(gradle dependencyLibrariesDownload 2>&1 )"
+loggy "$(gradle dependencyLibrariesDownload 2>&1)"
+set +e
 loggy "$gradle_log"
 loggy "ls -l $lib_dir"
 loggy "$(ls -l "$lib_dir")"
 loggy "$HR1"
-set +e
 
 # Make the HyraxVersion assets to be injected into the docker image.
 make_hyrax_version_assets "$HYRAX_WEB_UI_VERSION"
