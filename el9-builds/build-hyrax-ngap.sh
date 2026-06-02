@@ -52,7 +52,7 @@ show_version
 loggy "Getting Tomcat distro..."
 get_tomcat_distro "$DOCKER_NAME" "$TOMCAT_VERSION"
 
-loggy "GettingNGAP/OLFS distribution."
+loggy "Getting NGAP/OLFS distribution."
 s3_get_olfs_ngap_distro \
   "$S3_BUILD_BUCKET" \
   "$DOCKER_DIR" \
@@ -64,7 +64,7 @@ loggy "Retrieving Java dependency libraries. (Redisson and ElasticCache Cluster 
 lib_dir="$DOCKER_DIR/lib"
 loggy "lib_dir: $lib_dir"
 set -e
-gradle_log=$"(gradle dependencyLibrariesDownload 2>&1 )"
+gradle_log="$(gradle dependencyLibrariesDownload 2>&1 )"
 loggy "$gradle_log"
 loggy "ls -l $lib_dir"
 loggy "$(ls -l "$lib_dir")"
