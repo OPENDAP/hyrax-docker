@@ -61,12 +61,17 @@ s3_get_olfs_ngap_distro \
 
 loggy "$HR1"
 loggy "Retrieving Java dependency libraries. (Redisson and ElasticCache Cluster Client Jars)"
+gradle_task_name="dependencyLibrariesDownload"
 lib_dir="$DOCKER_DIR/lib"
 loggy "lib_dir: $lib_dir"
-set -e
-loggy "$(gradle dependencyLibrariesDownload 2>&1)"
-set +e
+gradle_log="$(gradle "$gradle_task_name" 2>&1)"
+gradle_status=$?
 loggy "$gradle_log"
+if test $gradle_status -ne 0
+then
+    echo "ERROR: Gradle Task '$gradle_task_name' FAILED. status: $gradle_status Exiting..."
+    exit $gradle_status
+fi
 loggy "ls -l $lib_dir"
 loggy "$(ls -l "$lib_dir")"
 loggy "$HR1"

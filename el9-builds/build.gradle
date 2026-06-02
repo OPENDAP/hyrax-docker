@@ -29,7 +29,7 @@ dependencies {
     dependencyLibrariesDownload "org.redisson:redisson:latest.release"
 
     // The Jackson libraries
-    dependencyLibrariesDownload "com.fasterxml.jackson.core:jackson-core:2.21.+"
+    dependencyLibrariesDownload "com.fasterxml.jackson.core:jackson-core:2.21"
     dependencyLibrariesDownload "com.fasterxml.jackson.core:jackson-annotations:2.+"
     dependencyLibrariesDownload "com.fasterxml.jackson.core:jackson-databind:2.+"
 
