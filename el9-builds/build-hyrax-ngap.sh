@@ -52,7 +52,7 @@ show_version
 loggy "Getting Tomcat distro..."
 get_tomcat_distro "$DOCKER_NAME" "$TOMCAT_VERSION"
 
-loggy "GettingNGAP/OLFS distribution."
+loggy "Getting NGAP/OLFS distribution."
 s3_get_olfs_ngap_distro \
   "$S3_BUILD_BUCKET" \
   "$DOCKER_DIR" \
@@ -60,14 +60,22 @@ s3_get_olfs_ngap_distro \
   "$TARGET_OS" 2>&1
 
 loggy "$HR1"
-loggy "Retrieving Java dependency libraries. (Redisson and ElasticCache Cluster Client Jars)"
+loggy "Gradle: Retrieving Java dependency libraries. (Redisson and ElasticCache Cluster Client Jars)"
+gradle_task_name="dependencyLibrariesDownload"
 lib_dir="$DOCKER_DIR/lib"
 loggy "lib_dir: $lib_dir"
-loggy "$(gradle dependencyLibrariesDownload)"
+gradle_log="$(gradle "$gradle_task_name" 2>&1)"
+gradle_status=$?
+loggy "$gradle_log"
+if test $gradle_status -ne 0
+then
+    loggy "ERROR: Gradle Task '$gradle_task_name' FAILED. status: $gradle_status Exiting..."
+    loggy ""; loggy ""; loggy ""; loggy ""; loggy ""; loggy ""; loggy ""; loggy "";
+    exit $gradle_status
+fi
 loggy "ls -l $lib_dir"
 loggy "$(ls -l "$lib_dir")"
 loggy "$HR1"
-
 
 # Make the HyraxVersion assets to be injected into the docker image.
 make_hyrax_version_assets "$HYRAX_WEB_UI_VERSION"
