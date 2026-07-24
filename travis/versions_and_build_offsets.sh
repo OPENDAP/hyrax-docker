@@ -19,7 +19,7 @@ loggy "HYRAX_RELEASE_VERSION: $HYRAX_RELEASE_VERSION" >&2
 
 # This is the TravisCI build number when the
 # last formal hyrax release was built.
-export TRAVIS_HYRAX_BUILD_OFFSET=3884
+export TRAVIS_HYRAX_BUILD_OFFSET=3886
 
 if [ "$TRAVIS_PULL_REQUEST" != "false" ]
 then
