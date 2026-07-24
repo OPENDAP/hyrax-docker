@@ -15,7 +15,7 @@ loggy "BEGIN $HR"
 
 # This is the current Hyrax release version
 export HYRAX_RELEASE_VERSION=1.18.0
-loggy "#     HYRAX_RELEASE_VERSION: $HYRAX_RELEASE_VERSION" >&2
+loggy "HYRAX_RELEASE_VERSION: $HYRAX_RELEASE_VERSION" >&2
 
 # This is the TravisCI build number when the
 # last formal hyrax release was built.
