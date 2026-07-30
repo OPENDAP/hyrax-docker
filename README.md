@@ -1,15 +1,12 @@
 # Hyrax docker
 
-## Current Version: <font style="font-size: 300%;">**Hyrax-1.18.0**</font> [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21541138.svg)](https://doi.org/10.5281/zenodo.21541138)
+Current Version: **Hyrax-1.18.0** 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14015000.svg)](https://doi.org/10.5281/zenodo.14015000)
 
-**Hyrax-1.18.0** on RHEL9 is composed of:
-
-|                                                                                    ||
-|:----------------------------------------------------------------------------------:| :---:|
-| **[OLFS version 1.19.0](https://github.com/OPENDAP/olfs/releases/tag/1.19.0-1)** | [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21540577.svg)](https://doi.org/10.5281/zenodo.21540577)|
-| **[BES version 3.22.0](https://github.com/OPENDAP/bes/releases/tag/3.22.0-0)** |[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21540512.svg)](https://doi.org/10.5281/zenodo.21540512)|
-| **[libdap4 version 3.22.0](https://github.com/OPENDAP/libdap4/releases/tag/3.22.0)** | [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21540505.svg)](https://doi.org/10.5281/zenodo.21540505)|
-
+**Hyrax** is composed of
+* **[OLFS](https://github.com/OPENDAP/olfs/releases/latest)** [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1125140.svg)](https://doi.org/10.5281/zenodo.1125140)
+* **[BES](https://github.com/OPENDAP/bes/releases/latest)** [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1013917.svg)](https://doi.org/10.5281/zenodo.1013917)
+* **[libdap4](https://github.com/OPENDAP/libdap4/releases/latest)** [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1013914.svg)](https://doi.org/10.5281/zenodo.1013914)
 
 ## <a name="contents"></a>Contents
 * [Overview](#overview)
