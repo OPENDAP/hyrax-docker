@@ -4,9 +4,12 @@ Current Version: **Hyrax-1.18.0**
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14015000.svg)](https://doi.org/10.5281/zenodo.14015000)
 
 **Hyrax** is composed of
-* **[OLFS](https://github.com/OPENDAP/olfs/releases/latest)** [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1125140.svg)](https://doi.org/10.5281/zenodo.1125140)
-* **[BES](https://github.com/OPENDAP/bes/releases/latest)** [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1013917.svg)](https://doi.org/10.5281/zenodo.1013917)
-* **[libdap4](https://github.com/OPENDAP/libdap4/releases/latest)** [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1013914.svg)](https://doi.org/10.5281/zenodo.1013914)
+
+| | |
+| ---: | :---: |
+| **[OLFS](https://github.com/OPENDAP/olfs/releases/latest)** | [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1125140.svg)](https://doi.org/10.5281/zenodo.1125140) |
+| **[BES](https://github.com/OPENDAP/bes/releases/latest)** | [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1013917.svg)](https://doi.org/10.5281/zenodo.1013917) |
+| **[libdap4](https://github.com/OPENDAP/libdap4/releases/latest)** | [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1013914.svg)](https://doi.org/10.5281/zenodo.1013914) |
 
 ## <a name="contents"></a>Contents
 * [Overview](#overview)
