@@ -1,7 +1,6 @@
-# Hyrax docker
+# Hyrax docker [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14015000.svg)](https://doi.org/10.5281/zenodo.14015000)
 
-Current Version: **Hyrax-1.18.0** 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14015000.svg)](https://doi.org/10.5281/zenodo.14015000)
+_Current Hyrax Release Version: **Hyrax-1.18.0**_
 
 **Hyrax** is composed of
 
