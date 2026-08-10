@@ -35,8 +35,6 @@ loggy "SERVER_HELP_EMAIL: ${SERVER_HELP_EMAIL}"
 export FOLLOW_SYMLINKS=${FOLLOW_SYMLINKS:-"false"}
 loggy "FOLLOW_SYMLINKS: ${FOLLOW_SYMLINKS}"
 
-export NCWMS_BASE=${NCWMS_BASE:-"https://localhost:8080"}
-loggy "NCWMS_BASE: ${NCWMS_BASE}"
 
 # AWS ##########################################################################
 loggy "$HR2"
@@ -60,7 +58,7 @@ loggy "   AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}"
 
 export DEBUG=${DEBUG:-false}
 
-while getopts "de:sn:i:k:r:" opt; do
+while getopts "de:si:k:r:" opt; do
   loggy "Processing command line opt: ${opt}"
   case $opt in
     e)
@@ -70,10 +68,6 @@ while getopts "de:sn:i:k:r:" opt; do
     s)
       export FOLLOW_SYMLINKS="Yes"
       loggy "Set FollowSymLinks to: ${FOLLOW_SYMLINKS}"
-      ;;
-    n)
-      export NCWMS_BASE=$OPTARG
-      loggy "Set ncWMS public facing service base to : ${NCWMS_BASE}"
       ;;
     d)
       DEBUG=true
@@ -114,18 +108,7 @@ if test "${DEBUG}" = "true" ; then
     ls -l "$CATALINA_HOME" "$CATALINA_HOME/bin"  >&2
 fi
 
-if test "${DEBUG}" = "true" ; then
-    loggy "NCWMS: Using NCWMS_BASE: ${NCWMS_BASE}"  >&2
-    loggy "NCWMS: Setting ncWMS access URLs in viewers.xml (if needed)."  >&2
-    ls -l "${VIEWERS_XML}"
-fi
 
-
-sed -i "s+@NCWMS_BASE@+$NCWMS_BASE+g" ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml
-if test "${DEBUG}" = "true" ; then
-    loggy "${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml"  >&2
-    cat ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml >&2
-fi
 
 #-------------------------------------------------------------------------------
 # modify bes.conf based on environment variables before startup.

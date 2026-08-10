@@ -56,23 +56,6 @@ LABEL org.opendap.hyrax.release-date="$RELEASE_DATE"
 LABEL org.opendap.hyrax.version.is-production="false"
 
 
-# The --build-arg USE_NCWMS can be set to "true" in order to 
-# add the ncWMS application to the build.
-ARG USE_NCWMS
-ENV USE_NCWMS="${USE_NCWMS:-"false"}"
-RUN set -e && \
-    if [ $USE_NCWMS = "true" ];then echo "NCWMS: ENABLED"; else echo "NCWMS: DISABLED"; fi
-
-#
-# The --build-arg NCWMS_BASE can be set to the base URL for ncWMS.
-# The entrypoint.sh code defaults it to
-# the URL: https://localhost:8080 if the environment variable NCWMS_BASE
-# is not in the shell from which the entrypoint.sh script is called.
-ARG NCWMS_BASE
-ENV NCWMS_BASE="${NCWMS_BASE:-"https://localhost:8080"}"
-RUN set -e && \
-    if [ $USE_NCWMS = "true" ];then echo "NCWMS_BASE: {$NCWMS_BASE}"; fi
-
 
 ################################################################
 # Update and install the needful.
@@ -213,21 +196,7 @@ ARG BES_HOST
 ENV BES_HOST="${BES_HOST:-besd}"
 RUN sed -i "s/localhost/${BES_HOST}/" ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/olfs.xml
 
-#
-# Setting NCWMS_HOST to the protocol, host, and port 
-# section of the publicly acessible URL of the 
-# ncWMS service. Using localhost is all well and good
-# for testing but this needs to be settable at 
-# build time for sure and maybe even docker runtime? 
-#
-COPY olfs_viewers.xml /tmp/olfs_viewers.xml
-RUN set -e \
-    && if [ $USE_NCWMS = "true" ]; then \
-        mv /tmp/olfs_viewers.xml ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml; \
-    else \
-        echo "Skipping OLFS/ncWMS confguration installation."; \
-    fi
-    
+
 ###
 # Expose ports
 ###

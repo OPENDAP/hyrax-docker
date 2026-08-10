@@ -3,7 +3,7 @@ version: '3'
 services:
   olfs:
     build: 
-        context: ./olfs
+        context: ../../el8-builds/olfs
         args:
             USE_NCWMS: "true"
     env_file: ${PWD}/local.env
@@ -16,7 +16,7 @@ services:
      - ./logs:/usr/local/tomcat/webapps/opendap/WEB-INF/conf/logs
     # command: -n http://localhost:8080 # This will be the publicly accessible host for ncWMS
   besd:
-    build: ./besd
+    build: ../../el8-builds/besd
     env_file: ${PWD}/local.env
     image: besd:snapshot
     ports:

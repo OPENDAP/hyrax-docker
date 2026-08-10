@@ -19,7 +19,6 @@ _Current Hyrax Release Version: **Hyrax-1.18.0**_
   * [hyrax](#hyrax-image)
   * [besd](#besd-image)
   * [olfs](#olfs-image)
-  * [ncwms](#ncwms-image)
 * [Docker-Compose](#dockercompose)
   * [hyrax](#hyrax-yml)
   * [hyrax-wms](#hyrax-wms-yml)
@@ -32,22 +31,13 @@ _Current Hyrax Release Version: **Hyrax-1.18.0**_
 ## <a name="overview"></a>Overview
 
 The hyrax-docker project can build the following Docker images:
-* **hyrax**- A complete Hyrax server in a single container. It may be
-    built with or without a bundled ncWMS.
+* **hyrax**- A complete Hyrax server in a single container.
 * **besd** - The BackEndServer (BES) component of Hyrax.  
 * **olfs** - The OLFS component of Hyrax, a Java Web Application deployed in 
 Apache Tomcat.
-* **ncwms** - The ncWMS application from our friends at the [Reading
-    e-Science Centre](http://www.met.reading.ac.uk/resc/home/).
-* **ngap** - A specialization of the Hyrax server for deployment in
-the NASA cloud. This variant is dependent on the injection of 
-numerous configuration information at launch an is unlikely to be 
-of use to people whoa are not directly involved with the NGAP
-project.
 
 
-Each of these images can be run standalone. The **besd**, **olfs**,
-and the **ncwms** images may be combined via docker compose or ansible. 
+Each of these images can be run standalone. The **besd**, and the **olfs** images may be combined via docker compose or ansible. 
 
 >Note: We build and upload our official release containers 
 > to Docker Hub. We also produce and publish to Docker Hub 
@@ -80,7 +70,6 @@ More elaborate instructions may be found below in this document.
 
 _Hyrax Docker Hub Pages_
 - [**Hyrax Data Server**](https://cloud.docker.com/u/opendap/repository/docker/opendap/hyrax)
-- [**Hyrax Data Server + ncWMS2**](https://cloud.docker.com/u/opendap/repository/docker/opendap/hyrax_ncmws)
 - [**besd**](https://cloud.docker.com/u/opendap/repository/docker/opendap/besd)
 - [**olfs**](https://cloud.docker.com/u/opendap/repository/docker/opendap/olfs)
 
@@ -136,24 +125,6 @@ To run the container:
 ```
 docker run -d -h hyrax -p 8080:8080 --name=hyrax_container hyrax_image
 ```
-
-To run the container with ncWMS you'll need to tell the server where the ncWMS service is located.
-This can be done by utilizing the container's **<tt>-n</tt>** paramter to specify the endpoint like this:
-```
-docker run -d -h hyrax -p 8080:8080 --name=hyrax_container hyrax_image -n http://localhost:8080
-```
-
-> **TIP:** The value of **<tt>-n</tt>** should be the outward facing domain 
-name / IP address of your Docker container. If you are running a 
-container on your local system, then the example value of 
-**<tt>http://localhost:8080 </tt>** should work well. If your Hyrax container is
-running elsewhere (in AWS for example) you'll have to sort out what
-the value should be. If the **<tt>-n</tt>**  parameter is omitted from 
-the **<tt>docker run</tt>** command then the value used will be the 
-value of **<tt>--build-arg NCWMS_BASE</tt>** from the **<tt>docker build</tt>** 
-command. If no **<tt>NCWMS_BASE</tt>** was specified in the 
-**<tt>docker build</tt>** command then the value defaults to 
-**<tt>https://localhost:8080 </tt>** (note that this is an HTTPS transport URL)
 
 To configure the _hyrax\_container_ so the server is accessible using
 a port other than 8080, such as port 80, the default port for HTTP.
@@ -232,24 +203,6 @@ docker run \
    -n http://localhost:8080
 ```
 
-#### Example - Run Hyrax & ncWMS, collect logs, serve local data.
-```
-cd hyrax-docker/hyrax-latest
-docker build -t hyrax_ncwms --build-arg USE_NCWMS=true --no-cache hyrax
-prefix=`pwd`
-docker run \
-   --name hyrax \
-   --publish 8080:8080 \
-   --volume $prefix/local_data:/usr/share/hyrax \
-   --volume $prefix/logs:/var/log/tomcat \
-   --volume $prefix/logs:/var/lib/tomcat/webapps/opendap/WEB-INF/conf/logs \
-   --volume $prefix/logs:/var/log/bes \
-   --volume $prefix/logs:/root/.ncWMS2/logs \
-   hyrax_ncwms \
-   -e support@erehwon.edu \
-   -s \
-   -n http://localhost:8080
-```
 
 ### docker-compose
 The docker compose files contain volume mounts that collect the various server logs onto the local file system. There also (disabled) examples of using mounts to map the BES cache onto the host filesystem and to supplant the default BES configuration with one from the host filesystem.
@@ -282,19 +235,6 @@ two_container_times   n=100, min=   82.90,  mean=  126.42 +/- 13.23,  max=  133.
 This image contains a complete Hyrax server. Currently based on
 **CentOS-7** and **Tomcat-7** installed using _yum_.
 
-#### build arguments
-
-* **USE_NCMWS** - Setting the value of the argument to "true"
-(`--build-arg USE_NCWMS=true`) will cause the ncWMS application to be
-included in the container.
-
-* **DEVELOPER_MODE** - Setting the value of the argument to "true"
-(`--build-arg DEVELOPER_MODE=true`) instructs the build to insert
-default authentication credentials into the ncWMS admin interface so
-that it maybe be accessed in the running container. Otherwise the
-ncWMS admin page is unreachable and not required as its configuration
-is copied into the image during the build.
-
 #### Environment Variables and Command Line Arguments
 
 * **SERVER_HELP_EMAIL (`-e`)** - The email address of the support
@@ -303,26 +243,19 @@ person for the service. This will be returned in error and help pages.
 * **FOLLOW_SYMLINKS (`-s`)** - Instructs the server to follow symbolic
   links in the file system.
 
-* **NCWMS_BASE (`-n`)** - The system needs to know the publicly
-accessible service base for the ncWMS (something like
-http://yourhost:8080). If all you want is to test it on your local
-system then the value of http://localhost:8080 will suffice.
-
 * **JAVA_OPTS** - If JAVA_OPTS is defined in the container runtime 
-environment, tomcat/olfs/ncWMS will include those options in the 
+environment, tomcat/olfs will include those options in the 
 service start up.  There are many options that could be passed. Of 
-particular note is –Xmx which sets the amount of memory available. 
-ncWMS will not work properly with low memory limits. JAVA_OPTS can 
-be set by normal methods: on the docker run command line, or in 
-docker-compose configuration or in your own container layer if you 
-build on the provided containers. (This from Gareth 11 Sept 2017.)
+particular note is –Xmx which sets the amount of memory available.  
+* JAVA_OPTS can be set by normal methods: on the docker run command line, 
+or in docker-compose configuration or in your own container layer if you 
+build on the provided containers.
 
 #### Command Line Examples:
 
 ##### Command Line Options Example
 Launch Hyrax using command line switches to set the admin email to
-(`-e support@erehwon.edu`), enable symbolic link traversal (`-s`),
-and set the ncWMS service base to (`-n http://foo.bar.com:8080`)
+(`-e support@erehwon.edu`), enable symbolic link traversal (`-s`)
 
 ```
 docker run                      \
@@ -330,15 +263,13 @@ docker run                      \
     --publish 8080:8080         \
     hyrax_image                 \
     -e support@erehwon.edu      \
-    -s                          \
-    -n http://foo.bar.com:8080
+    -s                          
 ```
 
 ##### Environment Variables Example
 Launch Hyrax using command line defined environment variables to set
 the admin email to (`-e SERVER_HELP_EMAIL=support@foo.com`), enable
-symbolic link traversal (`-s`), and set the ncWMS service base to
-(`-e NCWMS_BASE=http://foo.bar.com`)
+symbolic link traversal (`-s`).
 
 ```
 docker run \
@@ -346,7 +277,6 @@ docker run \
     --publish 8080:8080 \
     --env FOLLOW_SYMLINKS=true \
     --env SERVER_HELP_EMAIL=support@foo.com \
-    --env NCWMS_BASE=http://foo.bar.com \
     hyrax_image
 ```
 
@@ -457,11 +387,11 @@ _Annontation:_
 
 ### <a name="besd-image"> besd
 
-**_Note_**: The _besd_, _olfs_, and _ncWMS_ containers are tested only minimally
-by us at thsi time (Nov 2018) and are really for specialized cases wehre fine-grained
+**_Note_**: The _besd_ and the _olfs_ containers are tested only minimally
+by us at this time (Nov 2018) and are really for specialized cases where fine-grained
 control over the server tiers is needed. You'll need to build these containers yourself.
 
-This CentOS-7 based image contains just the BES component of the Hyrax server.
+This RHEL9 based image contains just the BES component of the Hyrax server.
 
 #### build arguments (_none_)
 
@@ -501,63 +431,9 @@ the OLFS web application.
 
 > NOTE: _This image does not run Tomcat in its 'security' mode_
 
-#### build arguments
-
-* **USE_NCMWS** - Setting the value of the argument to "true"
- (`--build-arg USE_NCWMS=true`) will cause the OLFS to be configured
- to provide ncWMS links, but will not include the ncWMS application in
- the image.
-
-#### Environment Variables and Command Line arguments
-
-* **NCWMS_BASE (`-n`)** - The system needs to know the publicly
-accessible service base for ncWMS (something like
-http://yourhost:8080). If all you want is to test it on your local
-system then the default value of http://localhost:8080 will suffice.
-
-#### Command Line Examples:
-
-Launch the olfs using command line switches to set the ncWMS service
-base to (`-n http://foo.bar.com:8080`)
-
-```
-docker run --name olfs -p 8080:8080 olfs_image -n http://foo.bar.com:8080
-```
-
-Launch the olfs using command line defined environment variables to
-set the ncWMS service base to (`-e NCWMS_BASE=http://foo.bar.com`)
-
-```
-docker run --name besd -p 8080:8080 -e NCWMS_BASE=http://foo.bar.com olfs_image
-```
-
-### <a name="ncwms-image"> ncwms
-
-This image, based on the official Tomcat:8 image, contains just the
-ncWMS-2.2.2 web application.
-
-> NOTE: _This image does not run Tomcat in its 'security' mode_
-
-#### build arguments
-
-* **DEVELOPER_MODE** - Setting the value of the argument to "true"
- (`--build-arg DEVELOPER_MODE=true`) instructs the build to insert
- default authentication credentials into the ncWMS admin interface so
- that it maybe be accessed in the running container. Otherwise the
- ncWMS admin page is unreachable as it is not required at runtime. Its
- configuration is copied into the image during the build.
-
 #### Environment Variables and Command Line arguments
 _None_
 
-#### Command Line Examples:
-
-Launch the ncwms using command line switches to set the ncWMS service
-base to (`-n http://foo.bar.com:8080`)
-
-```
-docker run --name ncwms -p 8080:8080 ncwms_image
-```
 
 ## <a name="dockercompose"> Docker-Compose 
 
@@ -576,17 +452,6 @@ and the BES are mapped to the `./logs` directory.
 **Start:** `docker-compose -f hyrax.yml up`
 
 **Stop:** `docker-compose -f hyrax.yml down --remove-orphans`
-
-### <a name="hyrax-wms-yml"> hyrax_wms.yml
-
-This builds and launches a composed Hyrax made up of a single
-**besd**, a single **olfs**, and a single **ncWMS* container. Log
-directories for the OLFS, Tomcat, and the BES are mapped the `./logs`
-directory.
-
-**Start:** `docker-compose -f hyrax_wms.yml up`
-
-**Stop:** `docker-compose -f hyrax_wms.yml down --remove-orphans`
 
 ### <a name="developer-yml"> developer.yml 
 

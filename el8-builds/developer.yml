@@ -7,7 +7,6 @@ services:
         context: ./olfs
         args:
             DEVELOPER_MODE: "true"
-            USE_NCWMS: "true"
     env_file: ${PWD}/local.env
     image: olfs:snapshot
     ports:
@@ -28,16 +27,3 @@ services:
     #  - ./cache:/var/cache/bes  # maps the BES cache directory to the local filesystem
     #  - ./conf:/etc/bes # Maps a local BES configuration directory onto the bes in docker.
     # command: -e admin_contact@email.org -s
-  ncwms:
-    build: 
-        context: ./ncWMS
-        args:
-            DEVELOPER_MODE: "true"
-    env_file: ${PWD}/local.env
-    image: ncwms:latest
-    ports:
-     - "8080:8080"
-    tty: true
-    volumes:
-     - ./logs/ncwms_tomcat:/usr/local/tomcat/logs
-     - ./logs/ncwms:/root/.ncWMS2/logs
