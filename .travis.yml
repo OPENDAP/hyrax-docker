@@ -150,7 +150,7 @@ jobs:
         - ./travis/test_docker_image_version "$OS_BUILD_VERSION_TAG"
 
     # BUILD
-    - stage: BUILD
+    - stage: never
       name: "Build opendap/hyrax_ncwms"
       script:
         - export DOCKER_NAME="hyrax_ncwms"
