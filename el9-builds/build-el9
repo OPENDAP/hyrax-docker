@@ -1181,7 +1181,6 @@ function pull_then_tag_and_push_new_tag(){
 #
 # The Docker images for:
 #    opendap/hyrax:HYRAX_BUILD_VERSION
-#    opendap/hyrax_ncwms:HYRAX_BUILD_VERSION
 #    opendap/besd:BES_BUILD_VERSION
 #    opendap/olfs:OLFS_BUILD_VERSION
 #
@@ -1226,9 +1225,6 @@ function mk_easy_docker_release(){
 
     pull_then_tag_and_push_new_tag "opendap/hyrax:${HYRAX_VERSION}" "opendap/hyrax:${hyrax_release_version}"
     pull_then_tag_and_push_new_tag "opendap/hyrax:${HYRAX_VERSION}" "opendap/hyrax:latest"
-
-    pull_then_tag_and_push_new_tag "opendap/hyrax_ncwms:${HYRAX_VERSION}" "opendap/hyrax_ncwms:${hyrax_release_version}"
-    pull_then_tag_and_push_new_tag "opendap/hyrax_ncwms:${HYRAX_VERSION}" "opendap/hyrax_ncwms:latest"
 
     pull_then_tag_and_push_new_tag "opendap/besd:${BES_VERSION}" "opendap/besd:${bes_release_version}"
     pull_then_tag_and_push_new_tag "opendap/besd:${BES_VERSION}" "opendap/besd:latest"

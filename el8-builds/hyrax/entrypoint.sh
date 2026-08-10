@@ -91,8 +91,6 @@ while getopts "de:si:k:r:" opt; do
       loggy "options: [-e xxx] [-n yyy] [-s] [-d] [-i xxx] [-k xxx] [-r xxx]"
       loggy " -e xxx where xxx is the email address of the admin contact for the server."
       loggy " -s When present causes the BES to follow symbolic links."
-      loggy " -n yyy where yyy is the protocol, server and port part "  >&2
-      loggy "    of the ncWMS service (for example http://foo.com:8090)."  >&2
       loggy " -d Enables debugging output for this script."  >&2
       loggy " -i xxx Where xxx is an AWS CLI AWS_ACCESS_KEY_ID."
       loggy " -k xxx Where xxx is an AWS CLI AWS_SECRET_ACCESS_KEY."

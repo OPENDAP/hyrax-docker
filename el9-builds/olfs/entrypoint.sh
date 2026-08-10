@@ -26,24 +26,14 @@ loggy "PythonVersion: $(python3 --version)"
 export SLEEP_INTERVAL="${SLEEP_INTERVAL:-60}"
 loggy "SLEEP_INTERVAL: $SLEEP_INTERVAL seconds."
 
-export NCWMS_BASE="${NCWMS_BASE:-"https://localhost:8080"}"
-loggy "NCWMS_BASE: $NCWMS_BASE"
-
-while getopts "n:d" opt; do
+while getopts "d" opt; do
   case $opt in
-    n)
-      NCWMS_BASE=$OPTARG
-      loggy "Using commandline NCWMS_BASE: $NCWMS_BASE"
-      ;;
     d)
       debug="true";
       loggy "Debug is enabled";
       ;;
     \?)
       loggy "Invalid option: -$OPTARG"
-      loggy "options: [-n ncwms_base_url] [-d] "
-      loggy " -n xxx where xxx is the protocol, server and port part "
-      loggy "    of the ncWMS service (for example http://foo.com:8090/)."
       loggy " -d Enables debugging output for this script."
       loggy "EXITING NOW"
       exit 2;
@@ -54,14 +44,6 @@ done
 if test "$debug" = true ; then
     loggy "CATALINA_HOME: ${CATALINA_HOME}"
     loggy "$(ls -l "$CATALINA_HOME" "$CATALINA_HOME/bin")"
-    loggy "NCWMS_BASE: ${NCWMS_BASE}"
-    loggy "Setting ncWMS access URLs in viewers.xml (if needed)."
-fi
-
-sed -i "s+@NCWMS_BASE@+$NCWMS_BASE+g" ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml;
-if test "$debug" = true ; then
-    loggy "${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml"
-    loggy "$(cat "$CATALINA_HOME/webapps/opendap/WEB-INF/conf/viewers.xml")"
 fi
 
 export OLFS_CONF="$CATALINA_HOME/webapps/opendap/WEB-INF/conf"

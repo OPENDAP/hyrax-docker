@@ -143,14 +143,14 @@ function test_file_in_docker_image() {
 #
 # Relies on the global variable DOCKER_NAME and embodies some inside knowledge of the irregularities
 # I
-# n our docker labeling scheme.In particular some applications like ngap and hyrax_ncwms use
+# n our docker labeling scheme. In particular some applications like ngap use
 # the "hyrax" version in their Docker labels.
 #
 function get_docker_label_version_key() {
     local prolog="get_docker_label_version_key() -"
     local app_key="$DOCKER_NAME" # default
     # if test -n "$DOCKER_DIR"; then app_key="$DOCKER_DIR"; fi # DOCKER_DIR if it's in use.
-    if test "$app_key" = "ngap" -o "$app_key" = "hyrax_ncwms"; then app_key="hyrax"; fi # ngap is Hyrax so....
+    if test "$app_key" = "ngap" ; then app_key="hyrax"; fi # ngap is Hyrax so....
 
     local label_version_key="org.opendap.$app_key.version"
     loggy "$prolog label_version_key: $label_version_key"

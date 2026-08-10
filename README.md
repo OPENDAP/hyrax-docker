@@ -314,7 +314,6 @@ docker run \
     --volume /etc/bes:/etc/bes \
     --env FOLLOW_SYMLINKS=true \
     --env SERVER_HELP_EMAIL=support@foo.com \
-    --env NCWMS_BASE=http://foo.bar.com \
     hyrax_image
 ```
 ### Advanced Examples
@@ -333,7 +332,6 @@ docker run \
     --volume /tmp/logs:/var/log/bes \
     --env FOLLOW_SYMLINKS=true \
     --env SERVER_HELP_EMAIL=support@foo.com \
-    --env NCWMS_BASE=http://foo.bar.com \
     hyrax_image
 ```
 _Annontation:_
@@ -357,7 +355,6 @@ docker run \
     --volume /tmp/logs:/var/log/bes \
     --env FOLLOW_SYMLINKS=true \
     --env SERVER_HELP_EMAIL=support@foo.com \
-    --env NCWMS_BASE=http://foo.bar.com \
     hyrax_image
 ```
 _Annontation:_
@@ -377,7 +374,6 @@ docker run \
     --volume /tmp/logs:/var/log/bes \
     --env FOLLOW_SYMLINKS=true \
     --env SERVER_HELP_EMAIL=support@foo.com \
-    --env NCWMS_BASE=http://foo.bar.com \
     hyrax_image
 ```
 _Annontation:_

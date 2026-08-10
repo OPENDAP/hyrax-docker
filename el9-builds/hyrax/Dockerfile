@@ -116,22 +116,6 @@ LABEL org.opencontainers.image.authors="support@opendap.org"
 USER root
 WORKDIR /
 
-#
-# The --build-arg USE_NCWMS can be set to "true" in order to 
-# add the ncWMS application to the build.
-ARG USE_NCWMS
-ENV USE_NCWMS=${USE_NCWMS:-"false"}
-RUN if [ "$USE_NCWMS" = "true" ];then echo "# NCWMS: ENABLED"; else echo "# NCWMS: DISABLED"; fi
-
-#
-# The --build-arg NCWMS_BASE can be set to the base URL for ncWMS.
-# The entrypoint.sh code defaults it to
-# the URL: https://localhost:8080 if the environment variable NCWMS_BASE
-# is not in the shell from which the entrypoint.sh script is called.
-ARG NCWMS_BASE
-ENV NCWMS_BASE=${NCWMS_BASE:-"https://localhost:8080"}
-RUN if [ "$USE_NCWMS" = "true" ];then echo "# NCWMS_BASE: $NCWMS_BASE"; fi
-
 
 ARG DEVELOPER_MODE
 ENV DEVELOPER_MODE=${DEVELOPER_MODE:-"false"}
@@ -286,50 +270,6 @@ RUN set -e \
     && chown -R tomcat:tomcat "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/WEB-INF/conf/logs" \
     && chmod 700 "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/WEB-INF/conf/logs"
 
-################################################################
-# retrieve and install the ncWMS web application
-#  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
-
-ARG NCWMS_VERSION
-ENV NCWMS_VERSION=${NCWMS_VERSION:-"2.5.2"}
-RUN echo "# NCWMS_VERSION: $NCWMS_VERSION"
-ENV NCWMS_WAR_URL="https://github.com/Reading-eScience-Centre/ncwms/releases/download/ncwms-$NCWMS_VERSION/ncWMS2.war"
-RUN echo "# NCWMS_WAR_URL: $NCWMS_WAR_URL"
-
-RUN if [ "$USE_NCWMS" = "true" ]; then \
-        echo "# Installing ncWMS." \
-        curl -sfSL "$NCWMS_WAR_URL" -o "/dev/shm/ncWMS.war" \
-        unzip -o "/dev/shm/ncWMS.war" -d "$CATALINA_HOME/webapps/ncWMS2/" \
-        rm -rf /dev/shm/*; \
-    else \
-        echo "# ncWMS will NOT be installed."; \
-    fi
-
-# set a default ncWMS admin if DEVELOPER_MODE is enabled.
-RUN if [ "$DEVELOPER_MODE" = "true" ] && [ "$USE_NCWMS" = "true" ]; then \
-        echo "# DEVELOPER MODE: Adding ncWMS admin credentials"; \
-        sed -i 'sX</tomcat-users>X<role rolename="ncWMS-admin"/> <user username="admin" password="admin" roles="ncWMS-admin"/> </tomcat-users>X' $CATALINA_HOME/conf/tomcat-users.xml; \
-    else \
-        echo "# No ncWMS admin credentials installed."; \
-    fi
-    
-#
-# make ncWMS work without further configuration 
-# We will need to adjust this target if we
-# decide to run as a different (not root) user.
-COPY ncWMS_config.xml /root/.ncWMS2/config.xml
-RUN  chmod +r /root/.ncWMS2/config.xml
-
-COPY olfs_viewers.xml /tmp/olfs_viewers.xml
-RUN if [ "$USE_NCWMS" = "true" ]; then \
-        # If we're installing ncWMS then we copy 
-        # to the server a viewers.xml which has
-        # been templated so that the ncWMS host can be installed 
-        # at startup.
-        mv /tmp/olfs_viewers.xml "$CATALINA_HOME/webapps/$DEPLOYMENT_CONTEXT/WEB-INF/conf/viewers.xml"; \
-    else \
-        echo "# Skipping OLFS/ncWMS configuration installation."; \
-    fi
 
 ################################################################
 #

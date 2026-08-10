@@ -182,9 +182,6 @@ startup_log "TOMCAT_CONTEXT_FILE: $TOMCAT_CONTEXT_FILE"
 export TOMCAT_REDISSON_FILE="/usr/share/tomcat/conf/redisson.yaml"
 startup_log "TOMCAT_REDISSON_FILE: $TOMCAT_REDISSON_FILE"
 
-export NCWMS_BASE="${NCWMS_BASE:-"https://localhost:8080"}"
-startup_log "NCWMS_BASE: $NCWMS_BASE"
-
 ################################################################################
 if test -n "$AWS_ACCESS_KEY_ID"; then
   startup_log "AWS_ACCESS_KEY_ID: HAS BEEN SET"
@@ -370,7 +367,7 @@ fi
 #
 #
 
-while getopts "e:sn:dk:i:r:" opt; do
+while getopts "e:sdk:i:r:" opt; do
   startup_log "Processing command line opt: $opt"
   case "$opt" in
   d)
@@ -384,10 +381,6 @@ while getopts "e:sn:dk:i:r:" opt; do
   s)
     export FOLLOW_SYMLINKS="Yes"
     startup_log "Set FOLLOW_SYMLINKS: $FOLLOW_SYMLINKS"
-    ;;
-  n)
-    export NCWMS_BASE=$OPTARG
-    startup_log "Set NCWMS_BASE: $NCWMS_BASE"
     ;;
   k)
     export AWS_SECRET_ACCESS_KEY="$OPTARG"
@@ -407,8 +400,6 @@ while getopts "e:sn:dk:i:r:" opt; do
     echo "options: [-e xxx] [-n yyy] [-s] [-d] [-i xxx] [-k xxx] [-r xxx]" >&2
     echo " -e xxx where xxx is the email address of the admin contact for the server." >&2
     echo " -s When present causes the BES to follow symbolic links." >&2
-    echo " -n yyy where yyy is the protocol, server and port part " >&2
-    echo "    of the ncWMS service (for example https://foo.com:8090)." >&2
     echo " -d Enables debugging output for this script." >&2
     echo " -i xxx Where xxx is an AWS CLI AWS_ACCESS_KEY_ID." >&2
     echo " -k xxx Where xxx is an AWS CLI AWS_SECRET_ACCESS_KEY." >&2
@@ -429,25 +420,6 @@ if test "$debug" = "true"; then
   startup_log "$(ls -l "$CATALINA_HOME/bin")"
 fi
 
-################################################################################
-#
-#  Configuring NcWMS
-#
-VIEWERS_XML="$OLFS_CONF_DIR/viewers.xml"
-if test "$debug" = "true"; then
-  startup_log "NCWMS: Using NCWMS_BASE: $NCWMS_BASE"
-  startup_log "NCWMS: Setting ncWMS access URLs in viewers.xml (if needed)."
-  startup_log "$(ls -l "$VIEWERS_XML")"
-fi
-
-if test -f "$VIEWERS_XML"; then
-  sed -i "s+@NCWMS_BASE@+$NCWMS_BASE+g" "$VIEWERS_XML"
-fi
-
-if test "$debug" = "true"; then
-  startup_log "$VIEWERS_XML: "
-  startup_log "$(cat "$VIEWERS_XML")"
-fi
 ################################################################################
 
 ################################################################################
