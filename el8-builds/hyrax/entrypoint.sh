@@ -35,8 +35,6 @@ loggy "SERVER_HELP_EMAIL: ${SERVER_HELP_EMAIL}"
 export FOLLOW_SYMLINKS=${FOLLOW_SYMLINKS:-"false"}
 loggy "FOLLOW_SYMLINKS: ${FOLLOW_SYMLINKS}"
 
-export NCWMS_BASE=${NCWMS_BASE:-"https://localhost:8080"}
-loggy "NCWMS_BASE: ${NCWMS_BASE}"
 
 # AWS ##########################################################################
 loggy "$HR2"
@@ -60,7 +58,7 @@ loggy "   AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}"
 
 export DEBUG=${DEBUG:-false}
 
-while getopts "de:sn:i:k:r:" opt; do
+while getopts "de:si:k:r:" opt; do
   loggy "Processing command line opt: ${opt}"
   case $opt in
     e)
@@ -70,10 +68,6 @@ while getopts "de:sn:i:k:r:" opt; do
     s)
       export FOLLOW_SYMLINKS="Yes"
       loggy "Set FollowSymLinks to: ${FOLLOW_SYMLINKS}"
-      ;;
-    n)
-      export NCWMS_BASE=$OPTARG
-      loggy "Set ncWMS public facing service base to : ${NCWMS_BASE}"
       ;;
     d)
       DEBUG=true
@@ -97,8 +91,6 @@ while getopts "de:sn:i:k:r:" opt; do
       loggy "options: [-e xxx] [-n yyy] [-s] [-d] [-i xxx] [-k xxx] [-r xxx]"
       loggy " -e xxx where xxx is the email address of the admin contact for the server."
       loggy " -s When present causes the BES to follow symbolic links."
-      loggy " -n yyy where yyy is the protocol, server and port part "  >&2
-      loggy "    of the ncWMS service (for example http://foo.com:8090)."  >&2
       loggy " -d Enables debugging output for this script."  >&2
       loggy " -i xxx Where xxx is an AWS CLI AWS_ACCESS_KEY_ID."
       loggy " -k xxx Where xxx is an AWS CLI AWS_SECRET_ACCESS_KEY."
@@ -114,18 +106,7 @@ if test "${DEBUG}" = "true" ; then
     ls -l "$CATALINA_HOME" "$CATALINA_HOME/bin"  >&2
 fi
 
-if test "${DEBUG}" = "true" ; then
-    loggy "NCWMS: Using NCWMS_BASE: ${NCWMS_BASE}"  >&2
-    loggy "NCWMS: Setting ncWMS access URLs in viewers.xml (if needed)."  >&2
-    ls -l "${VIEWERS_XML}"
-fi
 
-
-sed -i "s+@NCWMS_BASE@+$NCWMS_BASE+g" ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml
-if test "${DEBUG}" = "true" ; then
-    loggy "${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml"  >&2
-    cat ${CATALINA_HOME}/webapps/opendap/WEB-INF/conf/viewers.xml >&2
-fi
 
 #-------------------------------------------------------------------------------
 # modify bes.conf based on environment variables before startup.
