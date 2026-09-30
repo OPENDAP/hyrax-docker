@@ -525,7 +525,25 @@ startup_log "Tomcat is UP! pid: $tomcat_pid"
 #-------------------------------------------------------------------------------
 # Get the bes log, make it json, and send it to stdout
 #
+if test -f "$BES_LOG_FILE"
+then
+    startup_log "The file '$BES_LOG_FILE' exists. w00t!"
+else
+    startup_log "The file '$BES_LOG_FILE' is missing. :("
+    touch "$BES_LOG_FILE"
+    startup_log "Created '$BES_LOG_FILE'"
+    chown "$BES_USER":"$BES_USER" "$BES_LOG_FILE"
+fi
+startup_log "$(ls -l "$BES_LOG_FILE")"
+
+startup_log "Tailing '$BES_LOG_FILE' into beslog2json.py"
 tail -f "$BES_LOG_FILE" | beslog2json.py --prefix "$LOG_KEY_PREFIX" &
+status=$?
+if test $status -ne 0
+then
+    startup_log "ERROR - Tailed to start log tailing!"
+    exit $status
+fi
 
 start_time=
 now=
