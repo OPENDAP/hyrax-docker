@@ -538,12 +538,20 @@ startup_log "$(ls -l "$BES_LOG_FILE")"
 
 startup_log "Tailing '$BES_LOG_FILE' into beslog2json.py"
 tail -f "$BES_LOG_FILE" | beslog2json.py --prefix "$LOG_KEY_PREFIX" &
-status=$?
-if test $status -ne 0
-then
-    startup_log "ERROR - Tailed to start log tailing!"
-    exit $status
+JSON_LOG_PIPE=$!
+# Give it a second to run/initialize
+sleep 1
+
+# Check if the process is still running
+if ps -p $JSON_LOG_PIPE > /dev/null 2>&1; then
+    echo "The command 'tail -f \"$BES_LOG_FILE\" | beslog2json.py --prefix \"$LOG_KEY_PREFIX\"' and  started successfully (PID: $PIPE_PID)"
+else
+    echo "The command 'tail -f \"$BES_LOG_FILE\" | beslog2json.py --prefix \"$LOG_KEY_PREFIX\"' failed shortly after launch"
+    # We could exit here!
+    # exit 1
 fi
+
+
 
 start_time=
 now=
