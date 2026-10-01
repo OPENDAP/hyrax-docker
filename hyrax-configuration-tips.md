@@ -40,9 +40,7 @@ The `maxCmds` value indicates how many BES commands the OLFS will send be fore d
 ```
 BES.MaxVariableSize.bytes = 2104533975
 ```
-For a long time we had the `BES.MaxVariableSize.bytes value set to just below 2GB because of limitations in the libdap4 and bes "`counting" code. These may have been fixed!
-
-Now this is really about memory utilization. You can figure that, at least in NGAP, that the `beslistener` handling a request will consume about 2x the memory needed to hold the largest variable in the request.
+This is really about managing memory utilization. You can figure that, at least in NGAP, that the `beslistener` handling a request will consume about 2x the memory needed to hold the largest variable in the request.
 
 So if we set the value to 72GB:
 ```
