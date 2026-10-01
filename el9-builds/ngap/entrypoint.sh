@@ -544,9 +544,9 @@ sleep 1
 
 # Check if the process is still running
 if ps -p $JSON_LOG_PIPE > /dev/null 2>&1; then
-    echo "The command 'tail -f \"$BES_LOG_FILE\" | beslog2json.py --prefix \"$LOG_KEY_PREFIX\"' and  started successfully (PID: $PIPE_PID)"
+    startup_log "The command 'tail -f \"$BES_LOG_FILE\" | beslog2json.py --prefix \"$LOG_KEY_PREFIX\"' and  started successfully (PID: $PIPE_PID)"
 else
-    echo "The command 'tail -f \"$BES_LOG_FILE\" | beslog2json.py --prefix \"$LOG_KEY_PREFIX\"' failed shortly after launch"
+    error_log "ERROR - The command 'tail -f \"$BES_LOG_FILE\" | beslog2json.py --prefix \"$LOG_KEY_PREFIX\"' failed shortly after launch"
     # We could exit here!
     # exit 1
 fi
