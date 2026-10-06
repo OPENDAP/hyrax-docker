@@ -74,35 +74,81 @@ function error_log() {
 
 ##########################################################################
 # get_instance_id()
-# Try to get the AWS instance-id and if that fails make up a unique one.
+# Try to get the AWS instance-id using the IMDSv1 way and if that
+# fails make up a unique one.
 #
 function get_aws_instance_id() {
-  local aws_instance_id_url
-  local id_file
-  local http_status
-  local curl_status
-  local instance_id
+    local aws_instance_id_url
+    local id_file
+    local http_status
+    local curl_status
+    local instance_id
 
-  aws_instance_id_url="http://169.254.169.254/latest/meta-data/instance-id"
-  id_file="./instance-id.txt"
-  startup_log "Checking for AWS instance-id by requesting: $aws_instance_id_url"
+    aws_instance_id_url="http://169.254.169.254/latest/meta-data/instance-id"
+    id_file="./instance-id.txt"
+    startup_log "Checking for AWS instance-id by requesting: $aws_instance_id_url"
 
-  set +e # This cURL command may fail, and that's ok.
-  http_status="$(curl -s -w "%{http_code}" --max-time 5 -o "$id_file" -L "$aws_instance_id_url")"
-  curl_status=$?
-  set -e
+    set +e # This cURL command may fail, and that's ok.
+    http_status="$(curl -s -w "%{http_code}" --max-time 5 -o "$id_file" -L "$aws_instance_id_url")"
+    curl_status=$?
+    set -e
 
-  startup_log "curl_status: $curl_status"
-  startup_log "http_status: $http_status"
-  if test $curl_status -ne 0 || test "$http_status" -gt 400; then
-    startup_log "WARNING! Failed to determine the AWS instance-d by requesting: $aws_instance_id_url (curl_status: $curl_status http_status: $http_status)"
-    startup_log "Inventing a random instance-id value."
-    instance_id="h-$(python3 -c 'import uuid; print(str(uuid.uuid4()))')"
-  else
-    instance_id="$(cat $id_file)"
-  fi
-  startup_log "Using instance_id: $instance_id"
-  echo "$instance_id"
+    startup_log "curl_status: $curl_status"
+    startup_log "http_status: $http_status"
+    if test $curl_status -ne 0 || test "$http_status" -gt 400; then
+        startup_log "WARNING! Failed to determine the AWS instance-d by requesting: $aws_instance_id_url (curl_status: $curl_status http_status: $http_status)"
+        startup_log "Inventing a random instance-id value."
+        instance_id="h-$(python3 -c 'import uuid; print(str(uuid.uuid4()))')"
+    else
+        instance_id="$(cat $id_file)"
+    fi
+    startup_log "Using instance_id: $instance_id"
+    echo "$instance_id"
+}
+
+##########################################################################
+# get_instance_id_new()
+# Try to get the AWS instance-id using the IMDSv2 way.
+# If that fails make up a unique one.
+#
+function get_aws_instance_id_new() {
+
+    local aws_link_local_ip="http://169.254.169.254"
+    local aws_token_link="$aws_link_local_ip/latest/api/token"
+    local aws_iid_link="$aws_link_local_ip/latest/meta-data/instance-id"
+    local id_file="./instance-id.txt"
+    local tmp_token
+    local http_status
+    local curl_status
+    local instance_id
+
+    # Acquire an IMDSv2 access token
+    set +e  # This cURL command may fail, and that's ok.
+    tmp_token=$(curl -s -X PUT "$aws_token_link" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
+    set -e
+    if test -z "$tmp_token"
+    then
+        error_log "ERROR: Failed to acquire 'aws-ec2-metadata-token' from '$aws_token_link'"
+    fi
+
+    # Query the instance ID using the token
+    set +e # This cURL command may fail, and that's ok.
+    http_status="$(curl -s -L -w "%{http_code}" --max-time 5 -o "$id_file"  -H "X-aws-ec2-metadata-token: $tmp_token" "$aws_iid_link")"
+    curl_status=$?
+    set -e
+    startup_log "curl_status: $curl_status"
+    startup_log "http_status: $http_status"
+    if test $curl_status -ne 0 || test "$http_status" -gt 400; then
+        error_log "ERROR: Failed to determine the AWS instance-d by requesting: $aws_iid_link (curl_status: $curl_status http_status: $http_status)"
+        startup_log "Inventing a random instance-id value."
+        instance_id="h-$(python3 -c 'import uuid; print(str(uuid.uuid4()))')"
+    else
+        instance_id="$(cat $id_file)"
+    fi
+
+    startup_log "Using instance_id: $instance_id"
+    echo "$instance_id"
+
 }
 ##########################################################################
 # write_tomcat_logs()
@@ -143,7 +189,7 @@ set -e
 startup_log "PythonVersion: $(python3 --version)"
 
 ################################################################################
-SYSTEM_ID="$(get_aws_instance_id)"
+SYSTEM_ID="$(get_aws_instance_id_new)"
 
 ################################################################################
 startup_log "Checking AWS CLI: "
@@ -547,8 +593,7 @@ if ps -p $JSON_LOG_PIPE > /dev/null 2>&1; then
     startup_log "The command 'tail -f \"$BES_LOG_FILE\" | beslog2json.py --prefix \"$LOG_KEY_PREFIX\"' and  started successfully (PID: $PIPE_PID)"
 else
     error_log "ERROR - The command 'tail -f \"$BES_LOG_FILE\" | beslog2json.py --prefix \"$LOG_KEY_PREFIX\"' failed shortly after launch"
-    # We could exit here!
-    # exit 1
+    exit 1
 fi
 
 
