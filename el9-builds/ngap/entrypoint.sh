@@ -117,6 +117,7 @@ function get_aws_instance_id_new() {
     local aws_token_link="$aws_link_local_ip/latest/api/token"
     local aws_iid_link="$aws_link_local_ip/latest/meta-data/instance-id"
     local id_file="./instance-id.txt"
+    local tmp_token_file="./token.txt"
     local tmp_token
     local http_status
     local curl_status
@@ -124,11 +125,16 @@ function get_aws_instance_id_new() {
 
     # Acquire an IMDSv2 access token
     set +e  # This cURL command may fail, and that's ok.
-    tmp_token=$(curl -s -X PUT "$aws_token_link" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
+    http_status=$(curl -s -w "%{http_code}" -X PUT "$aws_token_link" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600" -o "$tmp_token_file")
+    curl_status=$?
     set -e
-    if test -z "$tmp_token"
+    startup_log "curl_status: $curl_status"
+    startup_log "http_status: $http_status"
+    if test $curl_status -ne 0 || test "$http_status" -ge 400
     then
-        error_log "ERROR: Failed to acquire 'aws-ec2-metadata-token' from '$aws_token_link'"
+        error_log "ERROR: Failed to acquire 'aws-ec2-metadata-token' from '$aws_token_link' (curl_status: $curl_status http_status: $http_status)"
+    else
+        tmp_token="$(cat "$tmp_token_file")"
     fi
 
     # Query the instance ID using the token
@@ -138,7 +144,7 @@ function get_aws_instance_id_new() {
     set -e
     startup_log "curl_status: $curl_status"
     startup_log "http_status: $http_status"
-    if test $curl_status -ne 0 || test "$http_status" -gt 400; then
+    if test $curl_status -ne 0 || test "$http_status" -ge 400; then
         error_log "ERROR: Failed to determine the AWS instance-d by requesting: $aws_iid_link (curl_status: $curl_status http_status: $http_status)"
         startup_log "Inventing a random instance-id value."
         instance_id="h-$(python3 -c 'import uuid; print(str(uuid.uuid4()))')"
