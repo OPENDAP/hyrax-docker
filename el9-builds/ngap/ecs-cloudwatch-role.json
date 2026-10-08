@@ -1,0 +1,22 @@
+{
+    "Statement": [
+        {
+            "Action": [
+                "cloudwatch:PutMetricData",
+                "ec2:DescribeVolumes",
+                "ec2:DescribeTags",
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:DescribeLogGroups",
+                "logs:DescribeLogStreams",
+                "logs:PutLogEvents",
+                "logs:GetLogEvents",
+                "logs:FilterLogEvents"
+            ],
+            "Effect": "Allow",
+            "Resource": "*",
+            "Sid": "CloudWatchInstanceLogging"
+        }
+    ],
+    "Version": "2012-10-17"
+}

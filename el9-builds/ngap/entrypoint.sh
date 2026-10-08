@@ -16,6 +16,9 @@ fi
 # As set in Dockerfile
 export BES_USER=${BES_USER:-"bes_user"}
 
+#
+export BESLOG2JSON_PID=
+
 ##########################################################################
 #
 # Functions
@@ -74,35 +77,87 @@ function error_log() {
 
 ##########################################################################
 # get_instance_id()
-# Try to get the AWS instance-id and if that fails make up a unique one.
+# Try to get the AWS instance-id using the IMDSv1 way and if that
+# fails make up a unique one.
 #
 function get_aws_instance_id() {
-  local aws_instance_id_url
-  local id_file
-  local http_status
-  local curl_status
-  local instance_id
+    local aws_instance_id_url
+    local id_file
+    local http_status
+    local curl_status
+    local instance_id
 
-  aws_instance_id_url="http://169.254.169.254/latest/meta-data/instance-id"
-  id_file="./instance-id.txt"
-  startup_log "Checking for AWS instance-id by requesting: $aws_instance_id_url"
+    aws_instance_id_url="http://169.254.169.254/latest/meta-data/instance-id"
+    id_file="./instance-id.txt"
+    startup_log "Checking for AWS instance-id by requesting: $aws_instance_id_url"
 
-  set +e # This cURL command may fail, and that's ok.
-  http_status="$(curl -s -w "%{http_code}" --max-time 5 -o "$id_file" -L "$aws_instance_id_url")"
-  curl_status=$?
-  set -e
+    set +e # This cURL command may fail, and that's ok.
+    http_status="$(curl -s -w "%{http_code}" --max-time 5 -o "$id_file" -L "$aws_instance_id_url")"
+    curl_status=$?
+    set -e
 
-  startup_log "curl_status: $curl_status"
-  startup_log "http_status: $http_status"
-  if test $curl_status -ne 0 || test "$http_status" -gt 400; then
-    startup_log "WARNING! Failed to determine the AWS instance-d by requesting: $aws_instance_id_url (curl_status: $curl_status http_status: $http_status)"
-    startup_log "Inventing a random instance-id value."
-    instance_id="h-$(python3 -c 'import uuid; print(str(uuid.uuid4()))')"
-  else
-    instance_id="$(cat $id_file)"
-  fi
-  startup_log "Using instance_id: $instance_id"
-  echo "$instance_id"
+    startup_log "curl_status: $curl_status"
+    startup_log "http_status: $http_status"
+    if test $curl_status -ne 0 || test "$http_status" -gt 400; then
+        startup_log "WARNING! Failed to determine the AWS instance-d by requesting: $aws_instance_id_url (curl_status: $curl_status http_status: $http_status)"
+        startup_log "Inventing a random instance-id value."
+        instance_id="h-$(python3 -c 'import uuid; print(str(uuid.uuid4()))')"
+    else
+        instance_id="$(cat $id_file)"
+    fi
+    startup_log "Using instance_id: $instance_id"
+    echo "$instance_id"
+}
+
+##########################################################################
+# get_instance_id_new()
+# Try to get the AWS instance-id using the IMDSv2 way.
+# If that fails make up a unique one.
+#
+function get_aws_instance_id_new() {
+
+    local aws_link_local_ip="http://169.254.169.254"
+    local aws_token_link="$aws_link_local_ip/latest/api/token"
+    local aws_iid_link="$aws_link_local_ip/latest/meta-data/instance-id"
+    local id_file="./instance-id.txt"
+    local tmp_token_file="./token.txt"
+    local tmp_token
+    local http_status
+    local curl_status
+    local instance_id
+
+    # Acquire an IMDSv2 access token
+    set +e  # This cURL command may fail, and that's ok.
+    http_status=$(curl -s -w "%{http_code}" -X PUT "$aws_token_link" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600" -o "$tmp_token_file")
+    curl_status=$?
+    set -e
+    startup_log "curl_status: $curl_status"
+    startup_log "http_status: $http_status"
+    if test $curl_status -ne 0 || test "$http_status" -ge 400
+    then
+        error_log "ERROR: Failed to acquire 'aws-ec2-metadata-token' from '$aws_token_link' (curl_status: $curl_status http_status: $http_status)"
+    else
+        tmp_token="$(cat "$tmp_token_file")"
+    fi
+
+    # Query the instance ID using the token
+    set +e # This cURL command may fail, and that's ok.
+    http_status="$(curl -s -L -w "%{http_code}" --max-time 5 -o "$id_file"  -H "X-aws-ec2-metadata-token: $tmp_token" "$aws_iid_link")"
+    curl_status=$?
+    set -e
+    startup_log "curl_status: $curl_status"
+    startup_log "http_status: $http_status"
+    if test $curl_status -ne 0 || test "$http_status" -ge 400; then
+        error_log "ERROR: Failed to determine the AWS instance-d by requesting: $aws_iid_link (curl_status: $curl_status http_status: $http_status)"
+        startup_log "Inventing a random instance-id value."
+        instance_id="h-$(python3 -c 'import uuid; print(str(uuid.uuid4()))')"
+    else
+        instance_id="$(cat $id_file)"
+    fi
+
+    startup_log "Using instance_id: $instance_id"
+    echo "$instance_id"
+
 }
 ##########################################################################
 # write_tomcat_logs()
@@ -125,6 +180,66 @@ function write_tomcat_logs() {
     sleep $wait_time
 }
 
+
+
+##########################################################################
+# check_beslog2json()
+#
+function check_beslog2json(){
+    # Check if the beslog2json process is still running
+    if ps -p "$BESLOG2JSON_PID" > /dev/null 2>&1; then
+        return 0
+    else
+        local bl2j_pid
+        bl2j_pid=$(ps aux | grep beslog2json.py | grep -v grep | awk '{print $2;}')
+        if test -n "$bl2j_pid"
+        then
+            error_log "It looks like beslog2json.py has a new PID: $bl2j_pid"
+            # We could update the BESLOG2JSON_PID value and roll with it...
+            # BESLOG2JSON_PID="$bl2j_pid"
+            # return 0
+        else
+            error_log "ERROR - The beslog2json.py pipe is no longer running"
+        fi
+
+
+        if test -n "$EXIT_ON_LOG_TAIL_FAIL"
+        then
+            error_log "ERROR - The beslog2json log pipe process failed. EXITING NOW!"
+            exit 1
+        fi
+
+        return 1
+    fi
+}
+
+##########################################################################
+# start_beslog2json()
+#
+function start_beslog2json() {
+    #-------------------------------------------------------------------------------
+    # Get the bes log, make it json, and send it to stdout
+    #
+    if test -f "$BES_LOG_FILE"
+    then
+        startup_log "The file '$BES_LOG_FILE' exists. w00t!"
+    else
+        startup_log "The file '$BES_LOG_FILE' is missing. :("
+        touch "$BES_LOG_FILE"
+        startup_log "Created '$BES_LOG_FILE'"
+        chown "$BES_USER":"$BES_USER" "$BES_LOG_FILE"
+    fi
+    startup_log "$(ls -l "$BES_LOG_FILE")"
+
+    startup_log "Tailing '$BES_LOG_FILE' into beslog2json.py"
+    tail -f "$BES_LOG_FILE" | beslog2json.py --prefix "$LOG_KEY_PREFIX" &
+    BESLOG2JSON_PID=$!
+    # Give it a second to run/initialize
+    sleep 1
+
+    check_beslog2json
+}
+
 ##########################################################################
 ##########################################################################
 ##########################################################################
@@ -143,7 +258,7 @@ set -e
 startup_log "PythonVersion: $(python3 --version)"
 
 ################################################################################
-SYSTEM_ID="$(get_aws_instance_id)"
+SYSTEM_ID="$(get_aws_instance_id_new)"
 
 ################################################################################
 startup_log "Checking AWS CLI: "
@@ -226,6 +341,28 @@ startup_log "SERVER_HELP_EMAIL: $SERVER_HELP_EMAIL"
 
 export FOLLOW_SYMLINKS="${FOLLOW_SYMLINKS:-"not_set"}"
 startup_log "FOLLOW_SYMLINKS: $FOLLOW_SYMLINKS"
+
+
+
+################################################################################
+# Report on EXIT_ON_LOG_TAIL_FAIL var
+# Should be set in the environment by launcher.
+#
+if test -n "$EXIT_ON_LOG_TAIL_FAIL"; then
+  startup_log "WARNING: IF THE beslog2json PROCESS EXITS THIS CONTAINER WILL EXIT"
+else
+  startup_log "IF THE beslog2json PROCESS THE CONTAINER WILL PERSIST."
+fi
+
+################################################################################
+# Report on AUTO_RESTART_JSON_LOG var
+# Should be set in the environment by launcher.
+#
+if test -n "$AUTO_RESTART_JSON_LOG"; then
+  startup_log "The beslog2json process will be restarted if it exits"
+else
+  startup_log "The beslog2json process will NOT be restarted if it exits."
+fi
 
 ################################################################################
 # Inject one set of credentials into .netrc
@@ -525,7 +662,26 @@ startup_log "Tomcat is UP! pid: $tomcat_pid"
 #-------------------------------------------------------------------------------
 # Get the bes log, make it json, and send it to stdout
 #
-tail -f "$BES_LOG_FILE" | beslog2json.py --prefix "$LOG_KEY_PREFIX" &
+if test -f "$BES_LOG_FILE"
+then
+    startup_log "The file '$BES_LOG_FILE' exists. w00t!"
+else
+    startup_log "The file '$BES_LOG_FILE' is missing. :("
+    touch "$BES_LOG_FILE"
+    startup_log "Created '$BES_LOG_FILE'"
+    chown "$BES_USER":"$BES_USER" "$BES_LOG_FILE"
+fi
+startup_log "$(ls -l "$BES_LOG_FILE")"
+
+
+#-------------------------------------------------------------------------------
+#
+# Starts a background job that tails the bes.log file into our friend
+# beslog2json.py to produce json encoded log output on stdout
+#
+start_beslog2json
+
+
 
 start_time=
 now=
@@ -569,6 +725,14 @@ while /bin/true; do
     error_log "Tomcat appears to have died! Exiting.  (service_uptime: $suptime hours)"
     # write_tomcat_logs 100 5 # [number of log lines to grab from each file] [time to sleep after sending]
     #exit $TOMCAT_STATUS
+  fi
+
+  check_beslog2json
+  status=$?
+  if test "$status" -ne 0 && test -n "$AUTO_RESTART_JSON_LOG"
+  then
+      error_log "ERROR - The beslog2json process failed. RESTARTING."
+      start_beslog2json
   fi
 
 done
