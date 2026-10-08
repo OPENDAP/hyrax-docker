@@ -254,8 +254,6 @@ function start_beslog2json() {
     check_beslog2json
 }
 
-
-
 ##########################################################################
 ##########################################################################
 ##########################################################################
@@ -723,7 +721,7 @@ while /bin/true; do
 
   check_beslog2json
   status=$?
-  if $status -ne 0 && test -n "$AUTO_RESTART_JSON_LOG"
+  if test "$status" -ne 0 && test -n "$AUTO_RESTART_JSON_LOG"
   then
       error_log "ERROR - The beslog2json process failed. RESTARTING."
       start_beslog2json
