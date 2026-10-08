@@ -19,20 +19,6 @@ export BES_USER=${BES_USER:-"bes_user"}
 #
 export BESLOG2JSON_PID=
 
-# Should be set in the environment by launcher.
-if test -n "$EXIT_ON_LOG_TAIL_FAIL"; then
-  startup_log "WARNING: IF THE beslog2json PROCESS EXITS THIS CONTAINER WILL EXIT"
-else
-  startup_log "IF THE beslog2json PROCESS THE CONTAINER WILL PERSIST."
-fi
-
-# Should be set in the environment by launcher.
-if test -n "$AUTO_RESTART_JSON_LOG"; then
-  startup_log "The beslog2json process will be restarted if it exits"
-else
-  startup_log "The beslog2json process will NOT be restarted if it exits."
-fi
-
 ##########################################################################
 #
 # Functions
@@ -355,6 +341,28 @@ startup_log "SERVER_HELP_EMAIL: $SERVER_HELP_EMAIL"
 
 export FOLLOW_SYMLINKS="${FOLLOW_SYMLINKS:-"not_set"}"
 startup_log "FOLLOW_SYMLINKS: $FOLLOW_SYMLINKS"
+
+
+
+################################################################################
+# Report on EXIT_ON_LOG_TAIL_FAIL var
+# Should be set in the environment by launcher.
+#
+if test -n "$EXIT_ON_LOG_TAIL_FAIL"; then
+  startup_log "WARNING: IF THE beslog2json PROCESS EXITS THIS CONTAINER WILL EXIT"
+else
+  startup_log "IF THE beslog2json PROCESS THE CONTAINER WILL PERSIST."
+fi
+
+################################################################################
+# Report on AUTO_RESTART_JSON_LOG var
+# Should be set in the environment by launcher.
+#
+if test -n "$AUTO_RESTART_JSON_LOG"; then
+  startup_log "The beslog2json process will be restarted if it exits"
+else
+  startup_log "The beslog2json process will NOT be restarted if it exits."
+fi
 
 ################################################################################
 # Inject one set of credentials into .netrc
