@@ -204,15 +204,27 @@ function check_beslog2json(){
     if ps -p "$BESLOG2JSON_PID" > /dev/null 2>&1; then
         return 0
     else
-        error_log "ERROR - The beslog2json.py pipe is no longer running"
+        local bl2j_pid
+        bl2j_pid=$(ps aux | grep beslog2json.py | grep -v grep | awk '{print $2;}')
+        if test -n "$bl2j_pid"
+        then
+            error_log "It looks like beslog2json.py has a new PID: $bl2j_pid"
+            # We could update the BESLOG2JSON_PID value and roll with it...
+            # BESLOG2JSON_PID="$bl2j_pid"
+            # return 0
+        else
+            error_log "ERROR - The beslog2json.py pipe is no longer running"
+        fi
+
+
         if test -n "$EXIT_ON_LOG_TAIL_FAIL"
         then
             error_log "ERROR - The beslog2json log pipe process failed. EXITING NOW!"
             exit 1
         fi
+
         return 1
     fi
-    return 0
 }
 
 ##########################################################################
