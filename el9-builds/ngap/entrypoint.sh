@@ -19,6 +19,20 @@ export BES_USER=${BES_USER:-"bes_user"}
 #
 export BESLOG2JSON_PID=
 
+# Should be set in the environment by launcher.
+if test -n "$EXIT_ON_LOG_TAIL_FAIL"; then
+  startup_log "WARNING: IF THE beslog2json PROCESS EXITS THIS CONTAINER WILL EXIT"
+else
+  startup_log "IF THE beslog2json PROCESS THE CONTAINER WILL PERSIST."
+fi
+
+# Should be set in the environment by launcher.
+if test -n "$AUTO_RESTART_JSON_LOG"; then
+  startup_log "The beslog2json process will be restarted if it exits"
+else
+  startup_log "The beslog2json process will NOT be restarted if it exits."
+fi
+
 ##########################################################################
 #
 # Functions
@@ -253,21 +267,6 @@ set_log_key_names
 #loggy "entrypoint.sh  command line: \"$@\""
 startup_log "########################### HYRAX #################################"
 startup_log "Greetings, I am $(whoami)."
-
-# Should be set in the environment by launcher.
-if test -n "$EXIT_ON_LOG_TAIL_FAIL"; then
-  startup_log "WARNING: IF THE beslog2json PROCESS EXITS THIS CONTAINER WILL EXIT"
-else
-  startup_log "IF THE beslog2json PROCESS THE CONTAINER WILL PERSIST."
-fi
-
-# Should be set in the environment by launcher.
-if test -n "$AUTO_RESTART_JSON_LOG"; then
-  startup_log "The beslog2json process will be restarted if it exits"
-else
-  startup_log "The beslog2json process will NOT be restarted if it exits."
-fi
-
 set -e
 #set -x
 startup_log "PythonVersion: $(python3 --version)"
