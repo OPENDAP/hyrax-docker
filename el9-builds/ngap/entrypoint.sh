@@ -202,12 +202,12 @@ function write_tomcat_logs() {
 function check_beslog2json(){
     # Check if the beslog2json process is still running
     if ps -p "$BESLOG2JSON_PID" > /dev/null 2>&1; then
-        startup_log "The command 'tail -f \"$BES_LOG_FILE\" | beslog2json.py --prefix \"$LOG_KEY_PREFIX\"' and  started successfully (PID: $PIPE_PID)"
+        return 0
     else
-        error_log "ERROR - The command 'tail -f \"$BES_LOG_FILE\" | beslog2json.py --prefix \"$LOG_KEY_PREFIX\"' failed shortly after launch"
+        error_log "ERROR - The beslog2json.py pipe is no longer running"
         if test -n "$EXIT_ON_LOG_TAIL_FAIL"
         then
-            error_log "ERROR - The beslog2json process failed. EXITING NOW!"
+            error_log "ERROR - The beslog2json log pipe process failed. EXITING NOW!"
             exit 1
         fi
         return 1
@@ -241,7 +241,6 @@ function start_beslog2json() {
 
     check_beslog2json
 }
-
 
 
 
@@ -656,19 +655,13 @@ else
 fi
 startup_log "$(ls -l "$BES_LOG_FILE")"
 
-startup_log "Tailing '$BES_LOG_FILE' into beslog2json.py"
-tail -f "$BES_LOG_FILE" | beslog2json.py --prefix "$LOG_KEY_PREFIX" &
-JSON_LOG_PIPE=$!
-# Give it a second to run/initialize
-sleep 1
 
-# Check if the process is still running
-if ps -p $JSON_LOG_PIPE > /dev/null 2>&1; then
-    startup_log "The command 'tail -f \"$BES_LOG_FILE\" | beslog2json.py --prefix \"$LOG_KEY_PREFIX\"' and  started successfully (PID: $PIPE_PID)"
-else
-    error_log "ERROR - The command 'tail -f \"$BES_LOG_FILE\" | beslog2json.py --prefix \"$LOG_KEY_PREFIX\"' failed shortly after launch"
-    exit 1
-fi
+#-------------------------------------------------------------------------------
+#
+# Starts a background job that tails the bes.log file into our friend
+# beslog2json.py to produce json encoded log output on stdout
+#
+start_beslog2json
 
 
 
