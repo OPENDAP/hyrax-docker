@@ -23,7 +23,7 @@ export BESLOG2JSON_PID=
 if test -n "$EXIT_ON_LOG_TAIL_FAIL"; then
   startup_log "WARNING: IF THE beslog2json PROCESS EXITS THIS CONTAINER WILL EXIT"
 else
-  startup_log "IF THE beslog2json PROCESS THE CONTAINER WILL PERSIST."
+  startup_log "IF THE beslog2json PROCESS EXITS, THE CONTAINER WILL PERSIST."
 fi
 
 # Should be set in the environment by launcher.
