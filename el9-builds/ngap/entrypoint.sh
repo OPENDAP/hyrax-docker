@@ -16,6 +16,23 @@ fi
 # As set in Dockerfile
 export BES_USER=${BES_USER:-"bes_user"}
 
+#
+export BESLOG2JSON_PID=
+
+# Should be set in the environment by launcher.
+if test -n "$EXIT_ON_LOG_TAIL_FAIL"; then
+  startup_log "WARNING: IF THE beslog2json PROCESS EXITS THIS CONTAINER WILL EXIT"
+else
+  startup_log "IF THE beslog2json PROCESS THE CONTAINER WILL PERSIST."
+fi
+
+# Should be set in the environment by launcher.
+if test -n "$AUTO_RESTART_JSON_LOG"; then
+  startup_log "The beslog2json process will be restarted if it exits"
+else
+  startup_log "The beslog2json process will NOT be restarted if it exits."
+fi
+
 ##########################################################################
 #
 # Functions
@@ -176,6 +193,57 @@ function write_tomcat_logs() {
     error_log "localhost.log [END]"
     sleep $wait_time
 }
+
+
+
+##########################################################################
+# check_beslog2json()
+#
+function check_beslog2json(){
+    # Check if the beslog2json process is still running
+    if ps -p "$BESLOG2JSON_PID" > /dev/null 2>&1; then
+        startup_log "The command 'tail -f \"$BES_LOG_FILE\" | beslog2json.py --prefix \"$LOG_KEY_PREFIX\"' and  started successfully (PID: $PIPE_PID)"
+    else
+        error_log "ERROR - The command 'tail -f \"$BES_LOG_FILE\" | beslog2json.py --prefix \"$LOG_KEY_PREFIX\"' failed shortly after launch"
+        if test -n "$EXIT_ON_LOG_TAIL_FAIL"
+        then
+            error_log "ERROR - The beslog2json process failed. EXITING NOW!"
+            exit 1
+        fi
+        return 1
+    fi
+    return 0
+}
+
+##########################################################################
+# start_beslog2json()
+#
+function start_beslog2json() {
+    #-------------------------------------------------------------------------------
+    # Get the bes log, make it json, and send it to stdout
+    #
+    if test -f "$BES_LOG_FILE"
+    then
+        startup_log "The file '$BES_LOG_FILE' exists. w00t!"
+    else
+        startup_log "The file '$BES_LOG_FILE' is missing. :("
+        touch "$BES_LOG_FILE"
+        startup_log "Created '$BES_LOG_FILE'"
+        chown "$BES_USER":"$BES_USER" "$BES_LOG_FILE"
+    fi
+    startup_log "$(ls -l "$BES_LOG_FILE")"
+
+    startup_log "Tailing '$BES_LOG_FILE' into beslog2json.py"
+    tail -f "$BES_LOG_FILE" | beslog2json.py --prefix "$LOG_KEY_PREFIX" &
+    BESLOG2JSON_PID=$!
+    # Give it a second to run/initialize
+    sleep 1
+
+    check_beslog2json
+}
+
+
+
 
 ##########################################################################
 ##########################################################################
@@ -646,6 +714,14 @@ while /bin/true; do
     error_log "Tomcat appears to have died! Exiting.  (service_uptime: $suptime hours)"
     # write_tomcat_logs 100 5 # [number of log lines to grab from each file] [time to sleep after sending]
     #exit $TOMCAT_STATUS
+  fi
+
+  check_beslog2json
+  status=$?
+  if $status -ne 0 && test -n "$AUTO_RESTART_JSON_LOG"
+  then
+      error_log "ERROR - The beslog2json process failed. RESTARTING."
+      start_beslog2json
   fi
 
 done
