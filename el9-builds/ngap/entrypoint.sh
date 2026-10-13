@@ -202,7 +202,6 @@ function check_beslog2json(){
             error_log "ERROR - The beslog2json.py pipe is no longer running"
         fi
 
-
         if test -n "$EXIT_ON_LOG_TAIL_FAIL"
         then
             error_log "ERROR - The beslog2json log pipe process failed. EXITING NOW!"
@@ -351,7 +350,7 @@ startup_log "FOLLOW_SYMLINKS: $FOLLOW_SYMLINKS"
 if test -n "$EXIT_ON_LOG_TAIL_FAIL"; then
   startup_log "WARNING: IF THE beslog2json PROCESS EXITS THIS CONTAINER WILL EXIT"
 else
-  startup_log "IF THE beslog2json PROCESS THE CONTAINER WILL PERSIST."
+  startup_log "IF THE beslog2json PROCESS EXITS THE DOCKER CONTAINER WILL PERSIST."
 fi
 
 ################################################################################
