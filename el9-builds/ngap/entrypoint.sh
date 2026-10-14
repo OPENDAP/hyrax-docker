@@ -5,6 +5,15 @@
 # set -v # "set -o verbose" Prints shell input lines as they are read.
 # set -x # "set -o xtrace"  Print command traces before executing command.
 # set -e #  Exit on error.
+
+# If set to a non-empty value, the container will exit if the log tail fails. Unset 
+# by default. jhrg 10/14/26
+# EXIT_ON_LOG_TAIL_FAIL
+
+# If set to a non-empty value, the beslog2json.py script will restart when the entrypoint.sh
+# loop sees that it has exited. Unset by default. jhrg 10/14/26
+# AUTO_RESTART_JSON_LOG
+
 export debug="${verbose:-"false"}"
 
 export SYSTEM_ID="${INSTANCE_ID:-"undetermined"}"
