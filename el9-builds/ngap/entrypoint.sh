@@ -245,7 +245,9 @@ function start_beslog2json() {
     # Give it a second to run/initialize
     sleep 1
 
+    set +e
     check_beslog2json
+    set -e
 }
 
 ##########################################################################
