@@ -735,6 +735,7 @@ while /bin/true; do
     #exit $TOMCAT_STATUS
   fi
 
+  set +e
   check_beslog2json
   status=$?
   if test "$status" -ne 0 && test -n "$AUTO_RESTART_JSON_LOG"
@@ -742,6 +743,7 @@ while /bin/true; do
       error_log "ERROR - The beslog2json process failed. RESTARTING."
       start_beslog2json
   fi
+  set -e
 
 done
 #-------------------------------------------------------------------------------
