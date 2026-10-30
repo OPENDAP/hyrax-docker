@@ -85,45 +85,11 @@ function error_log() {
 }
 
 ##########################################################################
-# get_instance_id()
-# Try to get the AWS instance-id using the IMDSv1 way and if that
-# fails make up a unique one.
-#
-function get_aws_instance_id() {
-    local aws_instance_id_url
-    local id_file
-    local http_status
-    local curl_status
-    local instance_id
-
-    aws_instance_id_url="http://169.254.169.254/latest/meta-data/instance-id"
-    id_file="./instance-id.txt"
-    startup_log "Checking for AWS instance-id by requesting: $aws_instance_id_url"
-
-    set +e # This cURL command may fail, and that's ok.
-    http_status="$(curl --max-time 5 -s -w "%{http_code}" -o "$id_file" -L "$aws_instance_id_url")"
-    curl_status=$?
-    set -e
-
-    startup_log "curl_status: $curl_status"
-    startup_log "http_status: $http_status"
-    if test $curl_status -ne 0 || test "$http_status" -gt 400; then
-        startup_log "WARNING! Failed to determine the AWS instance-d by requesting: $aws_instance_id_url (curl_status: $curl_status http_status: $http_status)"
-        startup_log "Inventing a random instance-id value."
-        instance_id="h-$(python3 -c 'import uuid; print(str(uuid.uuid4()))')"
-    else
-        instance_id="$(cat $id_file)"
-    fi
-    startup_log "Using instance_id: $instance_id"
-    echo "$instance_id"
-}
-
-##########################################################################
 # get_instance_id_new()
 # Try to get the AWS instance-id using the IMDSv2 way.
 # If that fails make up a unique one.
 #
-function get_aws_instance_id_new() {
+function get_aws_instance_id() {
 
     local aws_link_local_ip="http://169.254.169.254"
     local aws_token_link="$aws_link_local_ip/latest/api/token"
@@ -157,7 +123,7 @@ function get_aws_instance_id_new() {
     startup_log "curl_status: $curl_status"
     startup_log "http_status: $http_status"
     if test $curl_status -ne 0 || test "$http_status" -ge 400; then
-        error_log "ERROR: Failed to determine the AWS instance-d by requesting: $aws_iid_link (curl_status: $curl_status http_status: $http_status)"
+        error_log "ERROR: Failed to determine the AWS instance-id by requesting: $aws_iid_link (curl_status: $curl_status http_status: $http_status)"
         startup_log "Inventing a random instance-id value."
         instance_id="h-$(python3 -c 'import uuid; print(str(uuid.uuid4()))')"
     else
@@ -268,7 +234,7 @@ set -e
 startup_log "PythonVersion: $(python3 --version)"
 
 ################################################################################
-SYSTEM_ID="$(get_aws_instance_id_new)"
+SYSTEM_ID="$(get_aws_instance_id)"
 
 ################################################################################
 startup_log "Checking AWS CLI: "
@@ -626,7 +592,7 @@ tomcat_pid=$!
 initial_pid="$tomcat_pid"
 startup_log "Tomcat started, initial pid: $initial_pid"
 while test $initial_pid -eq "$tomcat_pid"; do
-# FIXME - What happens if this never resolves? infintie loopy.
+# FIXME - What happens if this never resolves? infinite loopy!
   sleep 1
   tomcat_ps="$(ps aux | grep "/usr/share/tomcat" | grep -v grep)"
   startup_log "tomcat_ps: $tomcat_ps"
@@ -672,7 +638,7 @@ start_time="$(date  "+%s")"
 startup_log "Hyrax Has Arrived...(time: $start_time SLEEP_INTERVAL: $SLEEP_INTERVAL)"
 #-------------------------------------------------------------------------------
 while /bin/true; do
-  sleep $SLEEP_INTERVAL
+  sleep "$SLEEP_INTERVAL"
 
   # Compute service_uptime in hours
   now="$(date  "+%s")"
