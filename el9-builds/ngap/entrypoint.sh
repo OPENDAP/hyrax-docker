@@ -580,7 +580,7 @@ startup_log "Starting tomcat/olfs..."
 
 # FIXME - Stop running tomcat as root. This will mean that we'll also have to
 #          adjust all the file permissions/owner ship for the files used by Tomcat.
-tomcat "$CATALINA_HOME"/bin/startup.sh > "/var/log/tomcat/console.log"  2>&1 &
+"$CATALINA_HOME"/bin/startup.sh > "/var/log/tomcat/console.log"  2>&1 &
 tomcat_pid=$!
 #if test $status -ne 0; then
 #  error_log "ERROR: Failed to start Tomcat: $status"
