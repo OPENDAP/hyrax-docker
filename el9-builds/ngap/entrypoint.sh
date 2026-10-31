@@ -211,9 +211,9 @@ function start_beslog2json() {
     # Give it a second to run/initialize
     sleep 1
 
-    set +e
     check_beslog2json
-    set -e
+    local status=$?
+    return $status
 }
 
 ##########################################################################
@@ -579,7 +579,7 @@ startup_log "Starting tomcat/olfs..."
 # mv "$OLFS_CONF_DIR/logback.xml" "$OLFS_CONF_DIR/logback.xml.OFF"
 
 # FIXME - Stop running tomcat as root. This will mean that we'll also have to
-#          adjust all the file permissions/owner ship for the files used by Tomcat.
+#          adjust all the file permissions/ownership for the files used by Tomcat.
 "$CATALINA_HOME"/bin/startup.sh > "/var/log/tomcat/console.log"  2>&1 &
 tomcat_pid=$!
 #if test $status -ne 0; then
@@ -627,7 +627,15 @@ startup_log "$(ls -l "$BES_LOG_FILE")"
 # beslog2json.py to produce json encoded log output on stdout
 #
 start_beslog2json
-
+status=$?
+if test "$status" -ne 0
+then
+    error_log "ERROR! The log tail with beslog2json.py did not appear to start."
+    #
+    # FIXME - Since this is outside of the run until fail loop below, do we want exit if the
+    #  log tail dies not start? Asking for a friend...
+    #
+fi
 
 
 start_time=
@@ -637,6 +645,10 @@ start_time="$(date  "+%s")"
 #-------------------------------------------------------------------------------
 startup_log "Hyrax Has Arrived...(time: $start_time SLEEP_INTERVAL: $SLEEP_INTERVAL)"
 #-------------------------------------------------------------------------------
+# We set the shell to not exit on error.
+# We will exit if things go south.
+# We want the logs, and by handling our errors we get them.
+set +e
 while /bin/true; do
   sleep "$SLEEP_INTERVAL"
 
@@ -674,7 +686,6 @@ while /bin/true; do
     exit $TOMCAT_STATUS
   fi
 
-  set +e
   check_beslog2json
   status=$?
   if test "$status" -ne 0 && test -n "$AUTO_RESTART_JSON_LOG"
@@ -682,7 +693,6 @@ while /bin/true; do
       error_log "ERROR - The beslog2json process failed. RESTARTING."
       start_beslog2json
   fi
-  set -e
 
 done
 #-------------------------------------------------------------------------------
