@@ -85,45 +85,11 @@ function error_log() {
 }
 
 ##########################################################################
-# get_instance_id()
-# Try to get the AWS instance-id using the IMDSv1 way and if that
-# fails make up a unique one.
-#
-function get_aws_instance_id() {
-    local aws_instance_id_url
-    local id_file
-    local http_status
-    local curl_status
-    local instance_id
-
-    aws_instance_id_url="http://169.254.169.254/latest/meta-data/instance-id"
-    id_file="./instance-id.txt"
-    startup_log "Checking for AWS instance-id by requesting: $aws_instance_id_url"
-
-    set +e # This cURL command may fail, and that's ok.
-    http_status="$(curl -s -w "%{http_code}" --max-time 5 -o "$id_file" -L "$aws_instance_id_url")"
-    curl_status=$?
-    set -e
-
-    startup_log "curl_status: $curl_status"
-    startup_log "http_status: $http_status"
-    if test $curl_status -ne 0 || test "$http_status" -gt 400; then
-        startup_log "WARNING! Failed to determine the AWS instance-d by requesting: $aws_instance_id_url (curl_status: $curl_status http_status: $http_status)"
-        startup_log "Inventing a random instance-id value."
-        instance_id="h-$(python3 -c 'import uuid; print(str(uuid.uuid4()))')"
-    else
-        instance_id="$(cat $id_file)"
-    fi
-    startup_log "Using instance_id: $instance_id"
-    echo "$instance_id"
-}
-
-##########################################################################
 # get_instance_id_new()
 # Try to get the AWS instance-id using the IMDSv2 way.
 # If that fails make up a unique one.
 #
-function get_aws_instance_id_new() {
+function get_aws_instance_id() {
 
     local aws_link_local_ip="http://169.254.169.254"
     local aws_token_link="$aws_link_local_ip/latest/api/token"
@@ -137,7 +103,7 @@ function get_aws_instance_id_new() {
 
     # Acquire an IMDSv2 access token
     set +e  # This cURL command may fail, and that's ok.
-    http_status=$(curl -s -w "%{http_code}" -X PUT "$aws_token_link" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600" -o "$tmp_token_file")
+    http_status=$(curl --max-time 5 -s -w "%{http_code}" -X PUT "$aws_token_link" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600" -o "$tmp_token_file")
     curl_status=$?
     set -e
     startup_log "curl_status: $curl_status"
@@ -151,13 +117,13 @@ function get_aws_instance_id_new() {
 
     # Query the instance ID using the token
     set +e # This cURL command may fail, and that's ok.
-    http_status="$(curl -s -L -w "%{http_code}" --max-time 5 -o "$id_file"  -H "X-aws-ec2-metadata-token: $tmp_token" "$aws_iid_link")"
+    http_status="$(curl --max-time 5 -s -L -w "%{http_code}" -o "$id_file"  -H "X-aws-ec2-metadata-token: $tmp_token" "$aws_iid_link")"
     curl_status=$?
     set -e
     startup_log "curl_status: $curl_status"
     startup_log "http_status: $http_status"
     if test $curl_status -ne 0 || test "$http_status" -ge 400; then
-        error_log "ERROR: Failed to determine the AWS instance-d by requesting: $aws_iid_link (curl_status: $curl_status http_status: $http_status)"
+        error_log "ERROR: Failed to determine the AWS instance-id by requesting: $aws_iid_link (curl_status: $curl_status http_status: $http_status)"
         startup_log "Inventing a random instance-id value."
         instance_id="h-$(python3 -c 'import uuid; print(str(uuid.uuid4()))')"
     else
@@ -204,9 +170,9 @@ function check_beslog2json(){
         if test -n "$bl2j_pid"
         then
             error_log "It looks like beslog2json.py has a new PID: $bl2j_pid"
-            # We could update the BESLOG2JSON_PID value and roll with it...
-            # BESLOG2JSON_PID="$bl2j_pid"
-            # return 0
+            # We update the BESLOG2JSON_PID value and roll with it...
+            BESLOG2JSON_PID="$bl2j_pid"
+            return 0
         else
             error_log "ERROR - The beslog2json.py pipe is no longer running"
         fi
@@ -240,12 +206,14 @@ function start_beslog2json() {
     startup_log "$(ls -l "$BES_LOG_FILE")"
 
     startup_log "Tailing '$BES_LOG_FILE' into beslog2json.py"
-    tail -f "$BES_LOG_FILE" | beslog2json.py --prefix "$LOG_KEY_PREFIX" &
+    tail -F "$BES_LOG_FILE" | beslog2json.py --prefix "$LOG_KEY_PREFIX" &
     BESLOG2JSON_PID=$!
     # Give it a second to run/initialize
     sleep 1
 
     check_beslog2json
+    local status=$?
+    return $status
 }
 
 ##########################################################################
@@ -266,7 +234,7 @@ set -e
 startup_log "PythonVersion: $(python3 --version)"
 
 ################################################################################
-SYSTEM_ID="$(get_aws_instance_id_new)"
+SYSTEM_ID="$(get_aws_instance_id)"
 
 ################################################################################
 startup_log "Checking AWS CLI: "
@@ -304,22 +272,6 @@ startup_log "TOMCAT_CONTEXT_FILE: $TOMCAT_CONTEXT_FILE"
 
 export TOMCAT_REDISSON_FILE="/usr/share/tomcat/conf/redisson.yaml"
 startup_log "TOMCAT_REDISSON_FILE: $TOMCAT_REDISSON_FILE"
-
-################################################################################
-if test -n "$AWS_ACCESS_KEY_ID"; then
-  startup_log "AWS_ACCESS_KEY_ID: HAS BEEN SET"
-else
-  startup_log "AWS_ACCESS_KEY_ID: HAS NOT BEEN SET"
-fi
-
-if test -n "$AWS_SECRET_ACCESS_KEY"; then
-  startup_log "AWS_SECRET_ACCESS_KEY: HAS BEEN SET"
-else
-  startup_log "AWS_SECRET_ACCESS_KEY: HAS NOT BEEN SET"
-fi
-
-export AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION:-"us-west-2"}"
-startup_log "AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION"
 
 ################################################################################
 export NGAP_CERTIFICATE_FILE="/usr/share/tomcat/conf/NGAP-CA-certificate.crt"
@@ -472,7 +424,7 @@ fi
 #
 # Test if the bes.conf env variable is set (by way of not unset) and not empty
 if test -n "$NGAP_CERTIFICATE_CHAIN"; then
-  startup_log "Writing credentials chain file: $NGAP_CREDENTIALS_CHAIN_FILE"
+  startup_log "Writing credentials chain file: $NGAP_CERTIFICATE_CHAIN_FILE"
   echo "$NGAP_CERTIFICATE_CHAIN" > "$NGAP_CERTIFICATE_CHAIN_FILE"
   startup_log "$( ls -l "$NGAP_CERTIFICATE_CHAIN_FILE" )"
   # startup_log "$(cat "$NGAP_CERTIFICATE_CHAIN_FILE" )"
@@ -502,7 +454,7 @@ if test -n "$TOMCAT_REDISSON_XML"; then
   echo "$TOMCAT_REDISSON_XML" > "$TOMCAT_REDISSON_FILE"
   chown tomcat:tomcat "$TOMCAT_REDISSON_FILE"
   startup_log "$( ls -l "$TOMCAT_REDISSON_FILE" )"
-  startup_log "$(cat "$TOMCAT_REDISSON_FILE" )"
+  # startup_log "$(cat "$TOMCAT_REDISSON_FILE" )"
 fi
 ################################################################################
 
@@ -512,7 +464,7 @@ fi
 #
 #
 
-while getopts "e:sdk:i:r:" opt; do
+while getopts "e:sd" opt; do
   startup_log "Processing command line opt: $opt"
   case "$opt" in
   d)
@@ -527,28 +479,13 @@ while getopts "e:sdk:i:r:" opt; do
     export FOLLOW_SYMLINKS="Yes"
     startup_log "Set FOLLOW_SYMLINKS: $FOLLOW_SYMLINKS"
     ;;
-  k)
-    export AWS_SECRET_ACCESS_KEY="$OPTARG"
-    startup_log "Set AWS_SECRET_ACCESS_KEY"
-    ;;
-  i)
-    export AWS_ACCESS_KEY_ID="$OPTARG"
-    startup_log "Set AWS_ACCESS_KEY_ID"
-    ;;
-  r)
-    export AWS_DEFAULT_REGION="$OPTARG"
-    startup_log "Set AWS_DEFAULT_REGION"
-    ;;
 
   \?)
     echo  "Invalid option: -$OPTARG" >&2
-    echo "options: [-e xxx] [-n yyy] [-s] [-d] [-i xxx] [-k xxx] [-r xxx]" >&2
+    echo "options: [-e xxx] [-s] [-d]" >&2
     echo " -e xxx where xxx is the email address of the admin contact for the server." >&2
     echo " -s When present causes the BES to follow symbolic links." >&2
     echo " -d Enables debugging output for this script." >&2
-    echo " -i xxx Where xxx is an AWS CLI AWS_ACCESS_KEY_ID." >&2
-    echo " -k xxx Where xxx is an AWS CLI AWS_SECRET_ACCESS_KEY." >&2
-    echo " -r xxx Where xxx is an AWS CLI AWS_DEFAULT_REGION." >&2
     echo "EXITING NOW" >&2
     exit 2
     ;;
@@ -564,7 +501,6 @@ if test "$debug" = "true"; then
   startup_log "CATALINA_HOME/bin: $CATALINA_HOME/bin"
   startup_log "$(ls -l "$CATALINA_HOME/bin")"
 fi
-
 ################################################################################
 
 ################################################################################
@@ -642,20 +578,23 @@ startup_log "Starting tomcat/olfs..."
 
 # mv "$OLFS_CONF_DIR/logback.xml" "$OLFS_CONF_DIR/logback.xml.OFF"
 
+# FIXME - Stop running tomcat as root. This will mean that we'll also have to
+#          adjust all the file permissions/ownership for the files used by Tomcat.
 "$CATALINA_HOME"/bin/startup.sh > "/var/log/tomcat/console.log"  2>&1 &
-status=$?
 tomcat_pid=$!
-if test $status -ne 0; then
-  error_log "ERROR: Failed to start Tomcat: $status"
-  #exit $status
-fi
+#if test $status -ne 0; then
+#  error_log "ERROR: Failed to start Tomcat: $status"
+#  exit $status
+#fi
+
 # When we launch tomcat the initial pid gets "retired" because it spawns a
 # secondary processes.
 initial_pid="$tomcat_pid"
 startup_log "Tomcat started, initial pid: $initial_pid"
 while test $initial_pid -eq "$tomcat_pid"; do
+# FIXME - What happens if this never resolves? infinite loopy!
   sleep 1
-  tomcat_ps="$(ps aux | grep tomcat | grep -v grep)"
+  tomcat_ps="$(ps aux | grep "/usr/share/tomcat" | grep -v grep)"
   startup_log "tomcat_ps: $tomcat_ps"
   tomcat_pid=$(echo "$tomcat_ps" | awk '{print $2}')
   startup_log "tomcat_pid: $tomcat_pid"
@@ -688,7 +627,16 @@ startup_log "$(ls -l "$BES_LOG_FILE")"
 # beslog2json.py to produce json encoded log output on stdout
 #
 start_beslog2json
-
+status=$?
+if test "$status" -ne 0
+then
+    error_log "ERROR! The log tail with beslog2json.py did not appear to start."
+    #
+    # FIXME - Since this is outside of the run until fail loop below, do we want to
+    #  call exit if the log tail fails to start? Asking for a friend...
+    #
+    # exit 1
+fi
 
 
 start_time=
@@ -698,8 +646,12 @@ start_time="$(date  "+%s")"
 #-------------------------------------------------------------------------------
 startup_log "Hyrax Has Arrived...(time: $start_time SLEEP_INTERVAL: $SLEEP_INTERVAL)"
 #-------------------------------------------------------------------------------
+# We set the shell to not exit on error.
+# We will exit if things go south.
+# We want the logs, and by handling our errors we get them.
+set +e
 while /bin/true; do
-  sleep $SLEEP_INTERVAL
+  sleep "$SLEEP_INTERVAL"
 
   # Compute service_uptime in hours
   now="$(date  "+%s")"
@@ -722,7 +674,7 @@ while /bin/true; do
   if test $BESD_STATUS -ne 0; then
     error_log "BESD_STATUS: $BESD_STATUS besd_pid:$besd_pid"
     error_log "The BES daemon appears to have died! Exiting. (service_uptime: $suptime hours)"
-    #exit $BESD_STATUS
+    exit $BESD_STATUS
   fi
 
   tomcat_ps="$(ps -f "$tomcat_pid")"
@@ -731,8 +683,8 @@ while /bin/true; do
   if test $TOMCAT_STATUS -ne 0; then
     error_log "TOMCAT_STATUS: $TOMCAT_STATUS tomcat_pid:$tomcat_pid"
     error_log "Tomcat appears to have died! Exiting.  (service_uptime: $suptime hours)"
-    # write_tomcat_logs 100 5 # [number of log lines to grab from each file] [time to sleep after sending]
-    #exit $TOMCAT_STATUS
+    write_tomcat_logs 100 5 # [number of log lines to grab from each file] [time to sleep after sending]
+    exit $TOMCAT_STATUS
   fi
 
   check_beslog2json
