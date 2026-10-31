@@ -632,9 +632,10 @@ if test "$status" -ne 0
 then
     error_log "ERROR! The log tail with beslog2json.py did not appear to start."
     #
-    # FIXME - Since this is outside of the run until fail loop below, do we want exit if the
-    #  log tail dies not start? Asking for a friend...
+    # FIXME - Since this is outside of the run until fail loop below, do we want to
+    #  call exit if the log tail fails to start? Asking for a friend...
     #
+    # exit 1
 fi
 
 
