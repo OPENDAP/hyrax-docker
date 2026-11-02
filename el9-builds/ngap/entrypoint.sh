@@ -591,14 +591,13 @@ tomcat_pid=$!
 
 # When we launch tomcat the initial pid gets "retired" because it spawns a
 # secondary processes.
+max_laps=5
+lap=0
 initial_pid="$tomcat_pid"
 startup_log "Tomcat started, initial pid: $initial_pid"
-while test $initial_pid -eq "$tomcat_pid"; do
-# FIXME - What happens if this never resolves? infinite loopy!
+while test $initial_pid -eq "$tomcat_pid" && test $lap -lt $max_laps; do
   sleep 1
-  tomcat_ps="$(ps aux | grep "/usr/share/tomcat" | grep -v grep)"
-  startup_log "tomcat_ps: $tomcat_ps"
-  tomcat_pid=$(echo "$tomcat_ps" | awk '{print $2}')
+  tomcat_pid="$(pgrep -f "org.apache.catalina.startup.Bootstrap")"
   startup_log "tomcat_pid: $tomcat_pid"
 done
 # New pid and we should be good to go.
