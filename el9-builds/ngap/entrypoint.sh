@@ -542,6 +542,7 @@ bes_username="$BES_USER"
 bes_uid="$(id -u ${bes_username})"
 bes_gid="$(id -g ${bes_username})"
 
+set +e
 # Where is my precious? Is the precious on the path?
 BESD="$(which besdaemon)"
 status=$?
@@ -570,6 +571,7 @@ then
     exit 1
 fi
 startup_log "The besd is UP! [pid: $besd_pid]"
+set -e
 
 #-------------------------------------------------------------------------------
 # Start Tomcat process
@@ -626,6 +628,7 @@ startup_log "$(ls -l "$BES_LOG_FILE")"
 # Starts a background job that tails the bes.log file into our friend
 # beslog2json.py to produce json encoded log output on stdout
 #
+set +e
 start_beslog2json
 status=$?
 if test "$status" -ne 0
