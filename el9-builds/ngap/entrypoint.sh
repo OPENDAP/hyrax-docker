@@ -576,6 +576,7 @@ set -e
 #-------------------------------------------------------------------------------
 # Start Tomcat process
 #
+set +e
 startup_log "Starting tomcat/olfs..."
 
 # mv "$OLFS_CONF_DIR/logback.xml" "$OLFS_CONF_DIR/logback.xml.OFF"
@@ -595,14 +596,14 @@ max_laps=5
 lap=0
 initial_pid="$tomcat_pid"
 startup_log "Tomcat started, initial pid: $initial_pid"
-while test $initial_pid -eq "$tomcat_pid" && test $lap -lt $max_laps; do
+while test "$initial_pid" -eq "$tomcat_pid" && test "$lap" -lt "$max_laps"; do
   sleep 1
   tomcat_pid="$(pgrep -f "org.apache.catalina.startup.Bootstrap")"
   startup_log "tomcat_pid: $tomcat_pid"
   (( lap++ ))
 done
 # New pid and we should be good to go.
-startup_log "Tomcat is UP! pid: $tomcat_pid"
+startup_log "Tomcat is UP! pid: $tomcat_pid found on lap: $lap"
 
 # TEMPORARY ###################################################################
 /cleanup_files.sh >&2 &
