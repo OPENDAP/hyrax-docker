@@ -599,6 +599,7 @@ while test $initial_pid -eq "$tomcat_pid" && test $lap -lt $max_laps; do
   sleep 1
   tomcat_pid="$(pgrep -f "org.apache.catalina.startup.Bootstrap")"
   startup_log "tomcat_pid: $tomcat_pid"
+  (( lap++ ))
 done
 # New pid and we should be good to go.
 startup_log "Tomcat is UP! pid: $tomcat_pid"
