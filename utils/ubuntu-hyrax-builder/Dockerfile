@@ -48,7 +48,8 @@ RUN set -e \
 RUN set -e \
     && apt-get install -y  grep emacs vim bzip2 libbz2-dev
 RUN set -e \
-    && apt-get install -y curl libreadline-dev
+    && apt-get install -y curl libreadline-dev \
+    && apt-get install libhiredis libhiredis-dev
 
 # These GDAL Things
 #/usr/bin/ld: cannot find -lIlmImf --> libopenexr-dev
