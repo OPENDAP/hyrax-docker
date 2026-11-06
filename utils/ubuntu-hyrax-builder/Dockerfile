@@ -49,7 +49,7 @@ RUN set -e \
     && apt-get install -y  grep emacs vim bzip2 libbz2-dev
 RUN set -e \
     && apt-get install -y curl libreadline-dev \
-    && apt-get install -y libhiredis-dev \
+    && apt-get install -y libhiredis-dev
 
 # These GDAL Things
 #/usr/bin/ld: cannot find -lIlmImf --> libopenexr-dev
@@ -135,8 +135,7 @@ RUN set -e \
 
 # RUN ls -l /usr/libexec/
 
-RUN export BUILD_DATE=`date +%s`
-RUN echo "# BUILD_DATE: $BUILD_DATE"
+RUN export BUILD_DATE="$(date +%s)" && echo "# BUILD_DATE: $BUILD_DATE"
 
 RUN cat /etc/os-release | grep VERSION= | grep -Eo '[0-9]+(\.[0-9]+){0,}' > OS_VERSION
 
