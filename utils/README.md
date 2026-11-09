@@ -48,7 +48,7 @@ sudo ./test-rh9
 `hyrax-docker/utils/build-rhel9/aws-ecs-rocky9-yum-inventory.txt`
 
 
-# EL8 Build
+## EL8 Build
 Like the EL9 build but uses: 
 * hyrax-docker/utils/mk_rocky8_hyrax_builder
 * hyrax-docker/utils/rocky8_hyrax_builder/Dockerfile (and others)
@@ -56,11 +56,11 @@ Like the EL9 build but uses:
 
 
 # How to update the builder images in production.
-At the time of this writing, there are no CICD tasks to produce and test these images. What follows is the haand built way.
-##
+At the time of this writing, there are no CICD tasks to produce and test these images. What follows is the hand built way.
+
 ## Make a hyrax-docker branch
-Change to that branch and use it for what follows.
-* If you need to modify the DOcker file(s) in order to change something, now would be the time
+Change to your new branch and use it for what follows.
+* If you need to modify the Docker file(s) in order to change something, now would be the time
 * If you only need to update the builder image(s) to get the lastest patches just move on. 
 
 ## Build The Image
@@ -85,7 +85,10 @@ export image_tag="opendap/rocky9_hyrax_builder:MyTestImage
 ```
 Where `foofoo` is the DockerHub user id and `booboo` is _foofoo_'s DockerHub password.
 ## Make a libdap4 & BES branches
-In libdap4 and the BES repos:
+
+### libdap4
+#### FIXME 
+
 ### BES
 In the bes/.travis.yml file update the BUILDER_BASE_IMAGE for each build to match your newly published test images:
 
