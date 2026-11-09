@@ -78,7 +78,7 @@ export image_tag="opendap/rocky9_hyrax_builder:MyTestImage
 ```
 
 ## Push The Image
-By supplying valued DockerHub credentials you will cause the scripts to push the image after it's built:
+By supplying valid DockerHub credentials you will cause the scripts to push the image after it's built:
 ```bash
 export image_tag="opendap/rocky9_hyrax_builder:MyTestImage
 ./mk_rocky9_hyrax_builder foofoo booboo
