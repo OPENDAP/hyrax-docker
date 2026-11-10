@@ -85,7 +85,7 @@ export image_tag="opendap/rocky9_hyrax_builder:MyTestImage
 ./mk_rocky9_hyrax_builder foofoo booboo
 ```
 Where `foofoo` is the DockerHub user id and `booboo` is _foofoo_'s DockerHub password.
-## Make a libdap4 & BES branches
+## Make a branch and test the images
 
 ### libdap4
 
