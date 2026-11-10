@@ -90,18 +90,15 @@ Where `foofoo` is the DockerHub user id and `booboo` is _foofoo_'s DockerHub pas
 ### libdap4
 
 * Make a branch and change to it
-* .travis.yml - search for "hyrax_builder:latest" and update what you find as needed for your test builder image tag.
+* In the _libdap4/.travis.yml_ file search for "hyrax_builder:latest" and update what you find as needed for your test builder image tag.
 * Push your branch changes.
-
-## Make PRs for your branch
-And then watch for smoke.
-
-
-
-#### FIXME 
+* Make a PR for your branch
+* Watch for smoke.
 
 ### BES
-In the bes/.travis.yml file update the BUILDER_BASE_IMAGE for each build to match your newly published test images:
+* Make a branch and change to it
+
+* In the bes/.travis.yml file update the BUILDER_BASE_IMAGE for each build to match your newly published test images:
 
 ```bash
     export BUILDER_BASE_IMAGE="opendap/rocky8_hyrax_builder:MyTestImage"
@@ -110,19 +107,24 @@ In the bes/.travis.yml file update the BUILDER_BASE_IMAGE for each build to matc
 ```bash
     export BUILDER_BASE_IMAGE="opendap/rocky9_hyrax_builder:MyTestImage"
 ```
-Push your changes.
+* Push your changes.
+* Make a PR for your branch.
+* And then watch for smoke.
 
-## Make PRs for those branches
-And then watch for smoke.
+# Finishing up
 
-If/When it all works then: 
-* Retag your test image be latest:
+If/When it all works (aka no smoke) and you are satisfied with the changes to your _hyrax-docker_ branch, then proceed to the following.
+
+* Retag your test image be "latest".
 : `opendap/rocky9_hyrax_builder:MyTestImage` --> `opendap/rocky9_hyrax_builder:latest`
 
 * Push that `latest` tag to DockerHub
-* Merge your hyrax-docker branch to master. This will capture you changes, but only the regular CICD activities will happen. The "builder" images will not be built by TravisCI.
+
+* Merge your _hyrax-docker_ branch to _master_. This will capture your changes, but only the regular CICD activities will happen. The "builder" images will not be built by TravisCI.
+
 * You can then close the libdap4 and BES PRs without merging, and delete the associated branches.
-* Watch for smoke from the TravisCI builds on master for the libdap4 and BES.
+
+* Watch for smoke from the TravisCI builds on master for the libdap4 and BES after you make these changes.
 
 
 
