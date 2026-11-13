@@ -1,3 +1,23 @@
+
+---
+## Hyrax-1.18.1 November 12, 2026
+
+### Hyrax General
+* Retired ncWMS integration from el9 production rules. Also a 
+general ncWS purgative
+
+### NGAP image
+* Check for failure of the beslog2json.py pipe and restart if configured to do so.  (#186)
+* Remove AWS creds support (aws cli is not installed)
+* Better tomcat startup and pid detection
+* Checking for bes.log issues on container startup.
+* Updated get_instance_id code for using the IMDSv2 way
+
+### CICD
+* Added "--max-time 5" to all cURL invocations
+* Switched to "tail -F" for the log tailing
+
+
 ---
 # **Hyrax-1.18.0**:
 

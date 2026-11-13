@@ -1,5 +1,745 @@
-----
 
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+# Hyrax-1.18.1 _November 12, 2026_
+
+2026-11-12  The-Robot-Travis  <npotter@opendap.org>
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.1-0
+2026-11-10T23:30:27+0000 bes-3.22.1-0 2026-11-12T22:37:09+0000
+	olfs-1.19.1--666 2026-11-12T23:27:15+0000
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.1-0 2026-11-10T23:30:27+0000 bes-3.22.1-0 
+2026-11-12T22:37:09+0000 olfs-1.19.0-140 2026-11-12T23:06:27+0000
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.1-0 
+2026-11-10T23:30:27+0000 bes-3.22.1-0 2026-11-12T22:37:09+0000 
+	olfs-1.19.0-139 2026-11-12T22:51:06+0000
+	
+2026-11-11  The-Robot-Travis  <npotter@opendap.org>
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.1-0 2026-11-10T23:30:27+0000 bes-3.22.0-199 
+2026-11-11T14:47:30+0000 olfs-1.19.0-138 2026-11-11T15:19:50+0000
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.1-0 
+2026-11-10T23:30:27+0000 bes-3.22.0-199 2026-11-11T14:47:30+0000 
+	olfs-1.19.0-137 2026-11-11T15:00:48+0000
+	
+2026-11-10  The-Robot-Travis  <npotter@opendap.org>
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.1-0 2026-11-10T23:30:27+0000 bes-3.22.0-197 
+2026-11-11T00:23:16+0000 olfs-1.19.0-136 2026-11-11T00:59:23+0000
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.1-0 
+2026-11-10T23:30:27+0000 bes-3.22.0-197 2026-11-11T00:23:16+0000 
+	olfs-1.19.0-135 2026-11-11T00:38:56+0000
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.0-32 2026-11-04T17:17:05+0000 bes-3.22.0-193 
+2026-11-10T22:37:40+0000 test-deploy olfs-1.19.0-134 
+2026-11-10T23:04:53+0000
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.0-32 
+2026-11-04T17:17:05+0000 bes-3.22.0-193 2026-11-10T22:37:40+0000 
+	test-deploy olfs-1.19.0-133 2026-11-10T22:48:18+0000
+	
+2026-11-09  The-Robot-Travis  <npotter@opendap.org>
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.0-32 2026-11-04T17:17:05+0000 bes-3.22.0-186 
+2026-11-09T22:13:44+0000 olfs-1.19.0-132 2026-11-09T22:39:44+0000
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.0-32 
+2026-11-04T17:17:05+0000 bes-3.22.0-186 2026-11-09T22:13:44+0000 
+	olfs-1.19.0-131 2026-11-09T22:24:32+0000
+	
+2026-11-05  The-Robot-Travis  <npotter@opendap.org>
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.0-32 2026-11-04T17:17:05+0000 bes-3.22.0-183 
+2026-11-05T20:53:19+0000 olfs-1.19.0-130 2026-11-05T21:24:11+0000
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.0-32 
+2026-11-04T17:17:05+0000 bes-3.22.0-183 2026-11-05T20:53:19+0000 
+	olfs-1.19.0-129 2026-11-05T21:03:50+0000
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.0-32 2026-11-04T17:17:05+0000 bes-3.22.0-181 
+2026-11-04T18:05:31+0000 olfs-1.19.0-128 2026-11-05T20:03:02+0000
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.0-32 
+2026-11-04T17:17:05+0000 bes-3.22.0-181 2026-11-04T18:05:31+0000 
+	olfs-1.19.0-126 2026-11-05T19:32:05+0000
+	
+2026-11-04  The-Robot-Travis  <npotter@opendap.org>
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.0-32 2026-11-04T17:17:05+0000 bes-3.22.0-181 
+2026-11-04T18:05:31+0000 olfs-1.19.0-118 2026-11-04T18:34:02+0000
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.0-32 
+2026-11-04T17:17:05+0000 bes-3.22.0-181 2026-11-04T18:05:31+0000 
+	olfs-1.19.0-117 2026-11-04T18:18:40+0000
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.0-31 2026-10-29T21:44:19+0000 bes-3.22.0-179 
+2026-11-04T13:00:45+0000 test-deploy olfs-1.19.0-116 
+2026-11-04T13:27:05+0000
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.0-31 
+2026-10-29T21:44:19+0000 bes-3.22.0-179 2026-11-04T13:00:45+0000 
+	test-deploy olfs-1.19.0-115 2026-11-04T13:11:35+0000
+	
+2026-11-02  The-Robot-Travis  <npotter@opendap.org>
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.0-31 2026-10-29T21:44:19+0000 bes-3.22.0-178 
+2026-11-03T06:14:08+0000 olfs-1.19.0-114 2026-11-03T06:40:18+0000
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.0-31 
+2026-10-29T21:44:19+0000 bes-3.22.0-178 2026-11-03T06:14:08+0000 
+	olfs-1.19.0-113 2026-11-03T06:25:21+0000
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.0-31 2026-10-29T21:44:19+0000 bes-3.22.0-173 
+2026-11-02T18:16:08+0000 olfs-1.19.0-112 2026-11-02T18:43:49+0000
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.0-31 
+2026-10-29T21:44:19+0000 bes-3.22.0-173 2026-11-02T18:16:08+0000 
+	olfs-1.19.0-111 2026-11-02T18:28:45+0000
+	
+2026-11-02  Nathan Potter  <ndp@opendap.org>
+	
+	Patch the check for failure of the beslog2json.py pipe   (#186)
+	* Make sure that testing for the presence of the beslog2json.py 
+	pipe doesn't break things
+	* Remove AWS creds support (aws cli is not installed)
+	* Added "--max-time 5" to all cURL invocations
+	* Fixed check_beslog2json() that if beslog2json changes PIDs 
+	nothing breaks.
+	* Switched to "tail -F" for the log tailing
+	* Fixed misspelled variable name NGAP_CERTIFICATE_CHAIN_FILE
+	* Stopped adding the Redisson config to the log output.
+	* Better tomcat startup and pid dection
+	
+2026-10-30  The-Robot-Travis  <npotter@opendap.org>
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.0-31 2026-10-29T21:44:19+0000 bes-3.22.0-172 
+2026-10-30T23:07:01+0000 olfs-1.19.0-110 2026-10-30T23:33:18+0000
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.0-31 
+2026-10-29T21:44:19+0000 bes-3.22.0-172 2026-10-30T23:07:01+0000 
+	olfs-1.19.0-109 2026-10-30T23:17:42+0000
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.0-31 2026-10-29T21:44:19+0000 bes-3.22.0-169 
+2026-10-30T16:50:31+0000 olfs-1.19.0-108 2026-10-30T17:17:38+0000
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.0-31 
+2026-10-29T21:44:19+0000 bes-3.22.0-169 2026-10-30T16:50:31+0000 
+	olfs-1.19.0-107 2026-10-30T17:02:04+0000
+	
+2026-10-29  The-Robot-Travis  <npotter@opendap.org>
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.0-31 2026-10-29T21:44:19+0000 bes-3.22.0-166 
+2026-10-29T22:28:32+0000 olfs-1.19.0-106 2026-10-29T23:00:07+0000
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.0-31 
+2026-10-29T21:44:19+0000 bes-3.22.0-166 2026-10-29T22:28:32+0000 
+	olfs-1.19.0-105 2026-10-29T22:43:12+0000
+	
+2026-10-28  The-Robot-Travis  <npotter@opendap.org>
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.0-30 
+2026-10-27T22:18:54+0000 bes-3.22.0-161 2026-10-28T21:53:34+0000 
+	olfs-1.19.0-103 2026-10-28T22:04:54+0000
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.0-30 2026-10-27T22:18:54+0000 bes-3.22.0-160 
+2026-10-28T20:38:57+0000 olfs-1.19.0-102 2026-10-28T21:14:52+0000
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.0-30 
+2026-10-27T22:18:54+0000 bes-3.22.0-160 2026-10-28T20:38:57+0000 
+	olfs-1.19.0-101 2026-10-28T20:53:19+0000
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.0-30 2026-10-27T22:18:54+0000 bes-3.22.0-159 
+2026-10-27T23:05:47+0000 olfs-1.19.0-100 2026-10-28T19:30:13+0000
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.0-30 
+2026-10-27T22:18:54+0000 bes-3.22.0-159 2026-10-27T23:05:47+0000 
+	olfs-1.19.0-99 2026-10-28T19:10:00+0000
+	
+2026-10-27  The-Robot-Travis  <npotter@opendap.org>
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.0-30 2026-10-27T22:18:54+0000 bes-3.22.0-159 
+2026-10-27T23:05:47+0000 olfs-1.19.0-93 2026-10-27T23:33:16+0000
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.0-30 
+2026-10-27T22:18:54+0000 bes-3.22.0-159 2026-10-27T23:05:47+0000 
+	olfs-1.19.0-92 2026-10-27T23:16:44+0000
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.0-16 2026-10-22T20:47:30+0000 bes-3.22.0-147 
+2026-10-23T12:45:54+0000 olfs-1.19.0-91 2026-10-27T15:09:09+0000
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.0-16 
+2026-10-22T20:47:30+0000 bes-3.22.0-147 2026-10-23T12:45:54+0000 
+	olfs-1.19.0-90 2026-10-27T14:50:54+0000
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.0-16 2026-10-22T20:47:30+0000 bes-3.22.0-147 
+2026-10-23T12:45:54+0000 olfs-1.19.0-89 2026-10-27T13:51:43+0000
+	
+2026-10-26  The-Robot-Travis  <npotter@opendap.org>
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.0-16 
+2026-10-22T20:47:30+0000 bes-3.22.0-147 2026-10-23T12:45:54+0000 
+	olfs-1.19.0-88 2026-10-26T20:06:53+0000
+	
+2026-10-23  The-Robot-Travis  <npotter@opendap.org>
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.0-7 
+2026-08-21T16:44:17+0000 bes-3.22.0-132 2026-10-13T18:36:13+0000 
+	olfs-1.19.0-85 2026-10-23T18:52:30+0000 test-deploy
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.0-16 2026-10-22T20:47:30+0000 bes-3.22.0-147 
+2026-10-23T12:45:54+0000 olfs-1.19.0-84 2026-10-23T13:11:59+0000
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.0-16 
+2026-10-22T20:47:30+0000 bes-3.22.0-147 2026-10-23T12:45:54+0000 
+	olfs-1.19.0-83 2026-10-23T12:56:54+0000
+	
+2026-10-22  The-Robot-Travis  <npotter@opendap.org>
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.0-16 2026-10-22T20:47:30+0000 bes-3.22.0-146 
+2026-10-22T21:42:33+0000 olfs-1.19.0-82 2026-10-22T22:16:37+0000
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.0-16 
+2026-10-22T20:47:30+0000 bes-3.22.0-146 2026-10-22T21:42:33+0000 
+	olfs-1.19.0-81 2026-10-22T22:02:47+0000
+	
+2026-10-20  The-Robot-Travis  <npotter@opendap.org>
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.0-7 2026-08-21T16:44:17+0000 bes-3.22.0-142 
+2026-10-20T22:35:43+0000 olfs-1.19.0-75 2026-10-20T23:02:25+0000
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.0-7 
+2026-08-21T16:44:17+0000 bes-3.22.0-142 2026-10-20T22:35:43+0000 
+	olfs-1.19.0-74 2026-10-20T22:46:41+0000
+	
+2026-10-15  The-Robot-Travis  <npotter@opendap.org>
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.0-7 2026-08-21T16:44:17+0000 bes-3.22.0-137 
+2026-10-14T21:32:22+0000 olfs-1.19.0-73 2026-10-15T16:30:11+0000
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.0-7 
+2026-08-21T16:44:17+0000 bes-3.22.0-137 2026-10-14T21:32:22+0000 
+	olfs-1.19.0-72 2026-10-15T16:11:26+0000
+	
+2026-10-14  Nathan Potter  <ndp@opendap.org>
+	    James Gallagher  <jgallagher@opendap.org>
+	
+	QC bes.log existence problems. (#183)
+	* Dropping ncWMS integration from el9 production rules. And a 
+	general ncWS purgative
+	* Checking for bes.log issues on container startup.
+	* Update tips
+	* Switched new code to use logging functions.
+	* Updated get_instance_id code for using the IMDSv2 way
+	* Add CloudWatch role definition (might not be needed)
+	* Refining the calls for IMDSv2
+	* Change the tail code to have the options.
+	* Refining check_beslog2json()
+	* Fixed two syntax issues in entrypoint.sh in el-builds/ngap
+	* Modified the el9/ngap/entrypoint.sh
+	---------
+	
+2026-10-14  The-Robot-Travis  <npotter@opendap.org>
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.0-7 2026-08-21T16:44:17+0000 bes-3.22.0-137 
+2026-10-14T21:32:22+0000 olfs-1.19.0-71 2026-10-14T22:00:59+0000
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.0-7 
+2026-08-21T16:44:17+0000 bes-3.22.0-137 2026-10-14T21:32:22+0000 
+	olfs-1.19.0-70 2026-10-14T21:43:34+0000
+	
+2026-10-13  The-Robot-Travis  <npotter@opendap.org>
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.0-7 2026-08-21T16:44:17+0000 bes-3.22.0-135 
+2026-10-13T21:23:48+0000 olfs-1.19.0-69 2026-10-13T21:51:06+0000
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.0-7 
+2026-08-21T16:44:17+0000 bes-3.22.0-135 2026-10-13T21:23:48+0000 
+	olfs-1.19.0-68 2026-10-13T21:35:59+0000
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.0-7 2026-08-21T16:44:17+0000 bes-3.22.0-132 
+2026-10-13T18:36:13+0000 olfs-1.19.0-65 2026-10-13T19:06:57+0000
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.0-7 
+2026-08-21T16:44:17+0000 bes-3.22.0-132 2026-10-13T18:36:13+0000 
+	olfs-1.19.0-64 2026-10-13T18:48:36+0000
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.0-7 2026-08-21T16:44:17+0000 bes-3.22.0-124 
+2026-10-07T20:53:50+0000 test-deploy olfs-1.19.0-63 
+2026-10-13T17:06:29+0000
+	
+2026-10-07  The-Robot-Travis  <npotter@opendap.org>
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.0-7 2026-08-21T16:44:17+0000 bes-3.22.0-124 
+2026-10-07T20:53:50+0000 test-deploy olfs-1.19.0-62 
+2026-10-07T21:29:10+0000
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.0-7 
+2026-08-21T16:44:17+0000 bes-3.22.0-124 2026-10-07T20:53:50+0000 
+	test-deploy olfs-1.19.0-61 2026-10-07T21:12:06+0000
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.0-7 2026-08-21T16:44:17+0000 bes-3.22.0-122 
+2026-10-07T13:57:30+0000 test-deploy olfs-1.19.0-60 
+2026-10-07T14:39:47+0000
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.0-7 
+2026-08-21T16:44:17+0000 bes-3.22.0-122 2026-10-07T13:57:30+0000 
+	test-deploy olfs-1.19.0-59 2026-10-07T14:09:12+0000
+	
+2026-10-06  The-Robot-Travis  <npotter@opendap.org>
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.0-7 2026-08-21T16:44:17+0000 bes-3.22.0-120 
+2026-10-06T23:07:42+0000 olfs-1.19.0-58 2026-10-06T23:33:28+0000
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.0-7 
+2026-08-21T16:44:17+0000 bes-3.22.0-120 2026-10-06T23:07:42+0000 
+	olfs-1.19.0-57 2026-10-06T23:18:25+0000
+	
+2026-09-28  The-Robot-Travis  <npotter@opendap.org>
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.0-7 2026-08-21T16:44:17+0000 bes-3.22.0-103 
+2026-09-28T19:53:02+0000 olfs-1.19.0-56 2026-09-28T20:18:41+0000
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.0-7 
+2026-08-21T16:44:17+0000 bes-3.22.0-103 2026-09-28T19:53:02+0000 
+	olfs-1.19.0-55 2026-09-28T20:04:11+0000
+	
+2026-09-09  The-Robot-Travis  <npotter@opendap.org>
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.0-7 2026-08-21T16:44:17+0000 bes-3.22.0-83 
+2026-09-09T18:03:39+0000 test-deploy olfs-1.19.0-54 
+2026-09-09T18:40:53+0000
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.0-7 
+2026-08-21T16:44:17+0000 bes-3.22.0-83 2026-09-09T18:03:39+0000 
+	test-deploy olfs-1.19.0-53 2026-09-09T18:17:44+0000
+	
+2026-09-08  The-Robot-Travis  <npotter@opendap.org>
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.0-7 2026-08-21T16:44:17+0000 bes-3.22.0-80 
+2026-09-08T23:03:01+0000 olfs-1.19.0-52 2026-09-08T23:28:49+0000
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.0-7 
+2026-08-21T16:44:17+0000 bes-3.22.0-80 2026-09-08T23:03:01+0000 
+	olfs-1.19.0-51 2026-09-08T23:13:56+0000
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.0-7 2026-08-21T16:44:17+0000 bes-3.22.0-78 
+2026-09-08T20:09:22+0000 test-deploy olfs-1.19.0-50 
+2026-09-08T20:34:10+0000
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.0-7 
+2026-08-21T16:44:17+0000 bes-3.22.0-78 2026-09-08T20:09:22+0000 
+	test-deploy olfs-1.19.0-49 2026-09-08T20:19:29+0000
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.0-7 2026-08-21T16:44:17+0000 bes-3.22.0-77 
+2026-09-08T15:04:13+0000 test-deploy olfs-1.19.0-48 
+2026-09-08T15:30:51+0000
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.0-7 
+2026-08-21T16:44:17+0000 bes-3.22.0-77 2026-09-08T15:04:13+0000 
+	test-deploy olfs-1.19.0-47 2026-09-08T15:15:02+0000
+	
+2026-09-04  The-Robot-Travis  <npotter@opendap.org>
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.0-7 2026-08-21T16:44:17+0000 bes-3.22.0-72 
+2026-09-04T22:56:04+0000 olfs-1.19.0-46 2026-09-04T23:21:33+0000
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.0-7 
+2026-08-21T16:44:17+0000 bes-3.22.0-72 2026-09-04T22:56:04+0000 
+	olfs-1.19.0-45 2026-09-04T23:06:42+0000
+	
+2026-09-03  The-Robot-Travis  <npotter@opendap.org>
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.0-7 2026-08-21T16:44:17+0000 bes-3.22.0-66 
+2026-09-03T19:05:16+0000 olfs-1.19.0-44 2026-09-03T19:31:37+0000
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.0-7 
+2026-08-21T16:44:17+0000 bes-3.22.0-66 2026-09-03T19:05:16+0000 
+	olfs-1.19.0-43 2026-09-03T19:16:15+0000
+	
+2026-09-02  The-Robot-Travis  <npotter@opendap.org>
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.0-5 2026-08-18T15:43:24+0000 bes-3.22.0-64 
+2026-09-02T21:06:37+0000 test-deploy olfs-1.19.0-42 
+2026-09-02T21:33:12+0000
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.0-5 
+2026-08-18T15:43:24+0000 bes-3.22.0-64 2026-09-02T21:06:37+0000 
+	test-deploy olfs-1.19.0-41 2026-09-02T21:17:59+0000
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.0-7 2026-08-21T16:44:17+0000 bes-3.22.0-63 
+2026-09-02T20:00:29+0000 olfs-1.19.0-40 2026-09-02T20:26:30+0000
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.0-7 
+2026-08-21T16:44:17+0000 bes-3.22.0-63 2026-09-02T20:00:29+0000 
+	olfs-1.19.0-39 2026-09-02T20:11:06+0000
+	
+2026-08-31  The-Robot-Travis  <npotter@opendap.org>
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.0-5 2026-08-18T15:43:24+0000 bes-3.22.0-52 
+2026-08-31T22:50:25+0000 test-deploy olfs-1.19.0-38 
+2026-08-31T23:16:54+0000
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.0-5 
+2026-08-18T15:43:24+0000 bes-3.22.0-52 2026-08-31T22:50:25+0000 
+	test-deploy olfs-1.19.0-37 2026-08-31T23:01:11+0000
+	
+2026-08-26  The-Robot-Travis  <npotter@opendap.org>
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.0-4 2026-07-30T21:12:20+0000 bes-3.22.0-29 
+2026-08-11T22:11:15+0000 olfs-1.19.0-36 2026-08-26T20:11:14+0000
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.0-4 
+2026-07-30T21:12:20+0000 bes-3.22.0-29 2026-08-11T22:11:15+0000 
+	olfs-1.19.0-35 2026-08-26T19:54:54+0000
+	
+2026-08-26  ndp-opendap  <ndp@opendap.org>
+	
+	Rerun travis el9 build to get tomcat update.
+	
+	Rerun travis el8 build to get tomcat update.
+	
+2026-08-24  The-Robot-Travis  <npotter@opendap.org>
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.0-5 2026-08-18T15:43:24+0000 bes-3.22.0-47 
+2026-08-24T20:39:09+0000 test-deploy olfs-1.19.0-34 
+2026-08-24T21:18:59+0000
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.0-5 
+2026-08-18T15:43:24+0000 bes-3.22.0-47 2026-08-24T20:39:09+0000 
+	test-deploy olfs-1.19.0-33 2026-08-24T20:52:26+0000
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.0-5 2026-08-18T15:43:24+0000 bes-3.22.0-41 
+2026-08-24T13:45:59+0000 test-deploy olfs-1.19.0-32 
+2026-08-24T14:17:31+0000
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.0-5 
+2026-08-18T15:43:24+0000 bes-3.22.0-41 2026-08-24T13:45:59+0000 
+	test-deploy olfs-1.19.0-31 2026-08-24T13:57:02+0000
+	
+2026-08-19  The-Robot-Travis  <npotter@opendap.org>
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.0-5 2026-08-18T15:43:24+0000 bes-3.22.0-38 
+2026-08-19T22:11:20+0000 test-deploy olfs-1.19.0-30 
+2026-08-20T00:07:51+0000
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.0-5 
+2026-08-18T15:43:24+0000 bes-3.22.0-38 2026-08-19T22:11:20+0000 
+	test-deploy olfs-1.19.0-29 2026-08-19T23:53:09+0000
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.0-5 2026-08-18T15:43:24+0000 bes-3.22.0-38 
+2026-08-19T22:11:20+0000 test-deploy olfs-1.19.0-28 
+2026-08-19T22:36:51+0000
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.0-5 
+2026-08-18T15:43:24+0000 bes-3.22.0-38 2026-08-19T22:11:20+0000 
+	test-deploy olfs-1.19.0-27 2026-08-19T22:22:02+0000
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.0-5 2026-08-18T15:43:24+0000 bes-3.22.0-37 
+2026-08-19T20:41:09+0000 test-deploy olfs-1.19.0-25 
+2026-08-19T21:16:59+0000
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.0-5 
+2026-08-18T15:43:24+0000 bes-3.22.0-37 2026-08-19T20:41:09+0000 
+	test-deploy olfs-1.19.0-24 2026-08-19T20:53:46+0000
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.0-4 2026-07-30T21:12:20+0000 bes-3.22.0-29 
+2026-08-11T22:11:15+0000 olfs-1.19.0-23 2026-08-19T10:44:14+0000
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.0-4 
+2026-07-30T21:12:20+0000 bes-3.22.0-29 2026-08-11T22:11:15+0000 
+	olfs-1.19.0-21 2026-08-19T09:42:38+0000
+	
+2026-08-18  Nathan Potter  <ndp@opendap.org>
+	
+	Retire ncWMS integration (#181)
+	* Remove TravisCI build of ncWMS
+	* Dropping ncWMS integration from el8 production rules.
+	* Dropping ncWMS integration from el9 production rules. And a 
+	general ncWS purgative
+	
+2026-08-11  The-Robot-Travis  <npotter@opendap.org>
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.0-4 2026-07-30T21:12:20+0000 bes-3.22.0-29 
+2026-08-11T22:11:15+0000 olfs-1.19.0-18 2026-08-11T22:38:52+0000
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.0-4 
+2026-07-30T21:12:20+0000 bes-3.22.0-29 2026-08-11T22:11:15+0000 
+	olfs-1.19.0-17 2026-08-11T22:22:40+0000
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.0-4 2026-07-30T21:12:20+0000 bes-3.22.0-27 
+2026-08-11T19:36:02+0000 olfs-1.19.0-16 2026-08-11T20:07:11+0000
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.0-4 
+2026-07-30T21:12:20+0000 bes-3.22.0-27 2026-08-11T19:36:02+0000 
+	olfs-1.19.0-15 2026-08-11T19:49:51+0000
+	
+2026-08-06  The-Robot-Travis  <npotter@opendap.org>
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.0-4 2026-07-30T21:12:20+0000 bes-3.22.0-23 
+2026-08-06T22:00:12+0000 olfs-1.19.0-13 2026-08-06T22:27:57+0000
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.0-4 
+2026-07-30T21:12:20+0000 bes-3.22.0-23 2026-08-06T22:00:12+0000 
+	olfs-1.19.0-12 2026-08-06T22:11:12+0000
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.0-4 2026-07-30T21:12:20+0000 bes-3.22.0-18 
+2026-08-06T19:49:12+0000 test-deploy olfs-1.19.0-11 
+2026-08-06T20:48:57+0000
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.0-4 
+2026-07-30T21:12:20+0000 bes-3.22.0-18 2026-08-06T19:49:12+0000 
+	test-deploy olfs-1.19.0-10 2026-08-06T20:19:24+0000
+	
+2026-08-04  The-Robot-Travis  <npotter@opendap.org>
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.0-4 2026-07-30T21:12:20+0000 bes-3.22.0-5 
+2026-07-30T22:20:19+0000 olfs-1.19.0-8 2026-08-04T12:37:32+0000
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.0-4 
+2026-07-30T21:12:20+0000 bes-3.22.0-5 2026-07-30T22:20:19+0000 
+	olfs-1.19.0-7 2026-08-04T12:09:57+0000
+	
+2026-08-04  Miguel Jimenez  <mjimenez@opendap.org>
+	    ndp-opendap  <ndp@opendap.org>
+	
+	Update versions, tags, and DOI badges on README (#178)
+	
+2026-07-30  The-Robot-Travis  <npotter@opendap.org>
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.0-4 2026-07-30T21:12:20+0000 bes-3.22.0-5 
+2026-07-30T22:20:19+0000 olfs-1.19.0-6 2026-07-30T22:48:38+0000
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.0-4 
+2026-07-30T21:12:20+0000 bes-3.22.0-5 2026-07-30T22:20:19+0000 
+	olfs-1.19.0-5 2026-07-30T22:31:23+0000
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.0-2 2026-07-29T21:20:36+0000 bes-3.22.0-2 
+2026-07-30T02:01:16+0000 olfs-1.19.0-3 2026-07-30T07:56:27+0000
+	
+2026-07-29  The-Robot-Travis  <npotter@opendap.org>
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.0-2 
+2026-07-29T21:20:36+0000 bes-3.22.0-2 2026-07-30T02:01:16+0000 
+	olfs-1.19.0-2 2026-07-30T05:14:10+0000
+	
+2026-07-24  ndp-opendap  <ndp@opendap.org>
+	
+	switch to el8
+	
+	Update ChangeLog and NEWS.md
+	
+	switching to el9 build for hyrax-1.18.0
+	
+2026-07-24  Nathan Potter  <ndp@opendap.org>
+	    Miguel Jimenez-Urias  <mjimenez@opendap.org>
+	
+	Hyrax-1.18.0 FTW (#177)
+	* Updating for hyrax-1.18.0
+	* update build offset numbers
+	---------
+	
+2026-07-24  The-Robot-Travis  <npotter@opendap.org>
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.0-0 2026-07-23T21:46:16+0000 bes-3.22.0-0 
+2026-07-24T17:57:41+0000 olfs-1.19.0-1 2026-07-24T19:29:33+0000
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.0-0 
+2026-07-23T21:46:16+0000 bes-3.22.0-0 2026-07-24T17:57:41+0000 
+	olfs-1.19.0-0 2026-07-24T19:13:00+0000
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.0-0 2026-07-23T21:46:16+0000 bes-3.22.0-0 
+2026-07-24T17:57:41+0000 olfs-1.18.15-1063 2026-07-24T18:26:33+0000
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.0-0 
+2026-07-23T21:46:16+0000 bes-3.22.0-0 2026-07-24T17:57:41+0000 
+	olfs-1.18.15-1062 2026-07-24T18:09:15+0000
+	
+2026-07-23  The-Robot-Travis  <npotter@opendap.org>
+	
+	OLFS: Triggering hyrax-docker image production for el9. Build 
+	Version Matrix: TARGET_OS: el9 TOMCAT_MAJOR_VERSION: 11 
+	libdap4-3.22.0-0 2026-07-23T21:46:16+0000 bes-3.21.1-1914 
+2026-07-23T22:45:42+0000 olfs-1.18.15-1061 2026-07-23T23:19:51+0000
+	
+	OLFS: Triggering hyrax-docker image production for el8. Build 
+	Version Matrix: TARGET_OS: el8 libdap4-3.22.0-0 
+2026-07-23T21:46:16+0000 bes-3.21.1-1914 2026-07-23T22:45:42+0000 
+	olfs-1.18.15-1060 2026-07-23T22:56:17+0000
+
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 # Hyrax-1.18.0
 
 2026-07-24  ndp-opendap  <ndp@opendap.org>
