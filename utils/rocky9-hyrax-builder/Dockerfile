@@ -25,6 +25,7 @@ ENV package_list="\
     diffutils sqlite sqlite-devel openssl-devel libuuid-devel \
     readline-devel zlib-devel bzip2 bzip2-devel libjpeg-devel libxml2-devel \
     libicu-devel rpmdevtools rpmlint zstd libzstd-devel \
+    hiredis hiredis-devel \
 "
 ENV dev_ui_packages="emacs vim bc valgrind gdb unzip which jq"
 
