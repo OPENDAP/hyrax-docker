@@ -10,7 +10,7 @@ _Current Hyrax Release Version: **Hyrax-1.18.0**_
 | **[BES](https://github.com/OPENDAP/bes/releases/latest)** | [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1013917.svg)](https://doi.org/10.5281/zenodo.1013917) |
 | **[libdap4](https://github.com/OPENDAP/libdap4/releases/latest)** | [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1013914.svg)](https://doi.org/10.5281/zenodo.1013914) |
 
-## <a name="contents"></a>Contents
+## <a name="contents" /> Contents
 * [Overview](#overview)
 * [Quick Start](#quickstart)
 * [Serving Your Data](#yerdata)
@@ -28,7 +28,7 @@ _Current Hyrax Release Version: **Hyrax-1.18.0**_
 * [Acknowledgements](#ack)
 
  
-## <a name="overview"></a>Overview
+## <a name="overview" /> Overview
 
 The hyrax-docker project can build the following Docker images:
 * **hyrax**- A complete Hyrax server in a single container.
@@ -54,7 +54,7 @@ serve data from the host machine
 > NOTE: This code is based on work started by Gareth Williams at CSIRO
 and contributed to OPeNDAP. We are grateful for their support.
 
-## <a name="quickstart"> Quick Start </a>
+## <a name="quickstart" /> Quick Start
 
 You can easily build your own Docker image of Hyrax using the material 
 in this project. Alternatively, you can download offical images from 
@@ -154,7 +154,7 @@ _removes_ the container and is needed only if you want to (re)start the
 container with different values for any of the `docker run`
 parameters.
 
-##  <a name="yerdata"> Using Hyrax docker to serve your data </a>
+##  <a name="yerdata" /> Using Hyrax docker to serve your data
 
 To serve data other than the default data included with Hyrax/BES, use the
 _volume_ option with `docker run` to map the path to data on your host
@@ -164,7 +164,7 @@ to `/usr/share/hyrax` in the Hyrax or BES container (`--volume <your path>:/usr/
 docker run --hostname hyrax --port 8080:8080 --volume /home/mydata:/usr/share/hyrax --name=hyrax_container hyrax_image
 ```
 
-## <a name="serverlogs"> Server Logs & Serving Your Data </a>
+## <a name="serverlogs" /> Server Logs & Serving Your Data
 
 ### docker run 
 
@@ -220,7 +220,7 @@ See the project YML for more:
  * hyrax.yml     
  * hyrax_wms.yml 
 
-## <a name="images"> Images </a>
+## <a name="images" /> Images
 
 **_Performance Note:_**_We performed a rudimentary speed check comparing the single container Hyrax with the two container version launched by using docker-compose and the hyrax.yml file. Our results (below) indicated that, for our test, there was no significant performance difference between the two. YMMV._
 
@@ -230,7 +230,7 @@ one_container_times:  n=100, min=  129.96,  mean=  131.41 +/-  0.54,  max=  133.
 two_container_times   n=100, min=   82.90,  mean=  126.42 +/- 13.23,  max=  133.03
 ````
 
-### <a name="hyrax-image"> hyrax </a>
+### <a name="hyrax-image" /> hyrax
 
 This image contains a complete Hyrax server. Currently based on
 **CentOS-7** and **Tomcat-7** installed using _yum_.
@@ -249,6 +249,7 @@ service start up.  There are many options that could be passed. Of
 particular note is –Xmx which sets the amount of memory available.  
 * JAVA_OPTS can be set by normal methods: on the docker run command line, 
 or in docker-compose configuration or in your own container layer if you 
+build on the provided containers.
 build on the provided containers.
 
 #### Command Line Examples:
@@ -381,7 +382,7 @@ _Annontation:_
 - ```--volume /home/roger/bes:/etc/bes```: Replaces the docker container's BES configuration with one held in the docker host file system directory ```/home/roger/bes```
 - ```--volume /home/roger/olfs:/var/lib/tomcat/webapps/opendap/WEB-INF/conf```: Replaces the docker container's OLFS configuration with one held in the docker host file system directory ```/home/roger/olfs```
 
-### <a name="besd-image"> besd </a>
+### <a name="besd-image" /> besd
 
 **_Note_**: The _besd_ and the _olfs_ containers are tested only minimally
 by us at this time (Nov 2018) and are really for specialized cases where fine-grained
@@ -420,7 +421,7 @@ docker run --name besd -p 10022:10022 -e FOLLOW_SYMLINKS=true -e SERVER_HELP_EMA
 > NOTE: The environment variables are set to the left of the image
 name. The command line switches occur AFTER the image name.
 
-### <a name="olfs-image"> olfs </a>
+### <a name="olfs-image" /> olfs
 
 This image, based on the UNIDATA security hardened Tomcat, contains just
 the OLFS web application.
@@ -431,7 +432,7 @@ the OLFS web application.
 _None_
 
 
-## <a name="dockercompose"> Docker-Compose  </a>
+## <a name="dockercompose" /> Docker-Compose 
 
 We provide several YAML files for docker-compose. All the files are
 written to load the file `./local.env` in order to set the environment
@@ -439,7 +440,7 @@ variables described above. A template for this file may be found in
 `./local.env.orig`, copy it to `./local.env` and edit that to
 configure your Hyrax instance.
 
-### <a name="hyrax-yml"> hyrax.yml </a>
+### <a name="hyrax-yml" /> hyrax.yml
 
 This builds and launches a composed Hyrax made up of a single **besd**
 and a single **olfs** container. Log directories for the OLFS, Tomcat,
@@ -449,7 +450,7 @@ and the BES are mapped to the `./logs` directory.
 
 **Stop:** `docker-compose -f hyrax.yml down --remove-orphans`
 
-### <a name="developer-yml"> developer.yml  </a>
+### <a name="developer-yml" /> developer.yml 
 
 This builds and launches a **hyrax_wms**, but in developer mode. Log
 directories the OLFS, Tomcat, and the BES are mapped to the `./logs`
@@ -459,13 +460,13 @@ directory.
 
 **Stop:** `docker-compose -f developer.yml down --remove-orphans`
 
-## <a name="ansible"> Ansible </a>
+## <a name="ansible" /> Ansible
 
 It's possible that the existing **playbook.yml** file will work, but
 it has not been tested.
 
 
-# <a name="license"> License </a>
+# <a name="license" /> License
 
 Copyright (c) 2017 OPeNDAP, Inc.
 
@@ -489,7 +490,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 You can contact OPeNDAP, Inc. at PO Box 112, Saunderstown, RI. 02874-0112.
 
-# <a name="ack"> Acknowledgements
+# <a name="ack" /> Acknowledgements
 
 Based on https://bitbucket.csiro.au/projects/ASC/repos/hyrax-docker/,
 Dec 19, 2016, by gareth.williams@csiro.au. That project was licensed
