@@ -41,7 +41,7 @@ jobs:
           fetch-depth: 1
       - name: Run builder script
         run: |
-          cd utils
+          cd "base-image-builders"
           ./mk_${{ matrix.os }}_hyrax_builder "" ""
         shell: bash
       - name: Tag image with os version
