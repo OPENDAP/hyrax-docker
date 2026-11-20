@@ -15,7 +15,7 @@ on:
   #     - /^(.*-test-deploy)$/
   pull_request:
     paths:
-      - 'utils/**'
+      - 'base-image-builders/**'
       - '.github/workflows/*.yml'
     types: [opened, synchronize, reopened, ready_for_review]
 concurrency:
