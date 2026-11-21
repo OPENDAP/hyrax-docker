@@ -14,12 +14,12 @@ function loggy() {
 loggy "BEGIN $HR"
 
 # This is the current Hyrax release version
-export HYRAX_RELEASE_VERSION=1.18.0
+export HYRAX_RELEASE_VERSION=1.18.1
 loggy "HYRAX_RELEASE_VERSION: $HYRAX_RELEASE_VERSION" >&2
 
 # This is the TravisCI build number when the
 # last formal hyrax release was built.
-export TRAVIS_HYRAX_BUILD_OFFSET=3886
+export TRAVIS_HYRAX_BUILD_OFFSET=4065
 
 if [ "$TRAVIS_PULL_REQUEST" != "false" ]
 then
