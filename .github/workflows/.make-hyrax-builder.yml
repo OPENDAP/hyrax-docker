@@ -32,7 +32,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [rocky8, rocky9]
+        os: [rocky9]
     steps:
       - name: Output Run Number
         run: echo "The current run number is ${{ github.run_number }}"
@@ -41,7 +41,7 @@ jobs:
           fetch-depth: 1
       - name: Run builder script
         run: |
-          cd utils
+          cd "base-image-builders"
           ./mk_${{ matrix.os }}_hyrax_builder "" ""
         shell: bash
       - name: Tag image with os version
