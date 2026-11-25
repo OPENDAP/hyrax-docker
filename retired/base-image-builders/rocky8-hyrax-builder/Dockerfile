@@ -78,10 +78,12 @@ RUN set -e \
     && echo "# Installing All The Packages.." \
     && yum install -y libtirpc  libtirpc-devel \
     && yum install -y procps git gcc-c++ flex bison cmake autoconf automake libtool emacs bzip2 vim bc \
-    && yum install -y valgrind gdb unzip which jq diffutils sqlite sqlite-devel \
+    && yum install -y valgrind gdb unzip which jq diffutils \
     && yum install -y openssl-devel libuuid-devel readline-devel zlib-devel bzip2-devel \
     && yum install -y libjpeg-devel libxml2-devel libicu-devel \
     && yum install -y rpmdevtools rpmlint \
+    && yum install -y hiredis hiredis-devel \
+#
 #    && yum clean all
 #
 # It's Java Time Witches!
